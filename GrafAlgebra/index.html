@@ -1,1 +1,1462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GrafÁlgebra – Generador de Gráficas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b27;
+    --border:    #252d40;
+    --grid-dim:  #1a2035;
+    --grid-mid:  #232c44;
+    --axis:      #3a4a70;
+    --curve:     #00d4aa;
+    --curve2:    #ff6b6b;
+    --accent:    #ff8c42;
+    --text:      #dde3f5;
+    --muted:     #6b7a9e;
+    --label:     #a0aece;
+    --panel:     #111827;
+    --highlight: rgba(0,212,170,0.08);
+  }
 
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── HEADER ── */
+  header {
+    width: 100%;
+    max-width: 960px;
+    padding: 28px 24px 0;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  header h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.5rem;
+    letter-spacing: -0.03em;
+    color: var(--curve);
+    white-space: nowrap;
+  }
+  header h1 span { color: var(--accent); }
+  header p {
+    font-size: .82rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* ── MAIN CARD ── */
+  .card {
+    width: 100%;
+    max-width: 960px;
+    margin: 20px 24px 40px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  /* ── INPUT ZONE ── */
+  .input-zone {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .eq-prefix {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    white-space: nowrap;
+  }
+  .eq-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--curve);
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    padding: 10px 16px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .eq-input:focus { border-color: var(--curve); }
+  .eq-input::placeholder { color: var(--muted); font-style: italic; }
+
+  .btn-plot {
+    background: var(--curve);
+    color: #04201a;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: .9rem;
+    border: none;
+    border-radius: 8px;
+    padding: 0 22px;
+    cursor: pointer;
+    letter-spacing: .03em;
+    transition: opacity .15s, transform .1s;
+  }
+  .btn-plot:hover { opacity: .88; transform: translateY(-1px); }
+  .btn-plot:active { transform: translateY(0); }
+
+  /* examples */
+  .examples {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    align-items: center;
+  }
+  .examples-label { font-size: .74rem; color: var(--muted); margin-right: 2px; }
+  .chip {
+    font-family: 'Space Mono', monospace;
+    font-size: .72rem;
+    background: var(--highlight);
+    border: 1px solid rgba(0,212,170,.25);
+    color: var(--curve);
+    border-radius: 20px;
+    padding: 3px 11px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .chip:hover { background: rgba(0,212,170,.18); }
+
+  /* ── ERROR BANNER ── */
+  .error-bar {
+    display: none;
+    padding: 8px 24px;
+    background: rgba(255,107,107,.08);
+    border-bottom: 1px solid rgba(255,107,107,.25);
+    font-size: .82rem;
+    color: var(--curve2);
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ── CANVAS WRAPPER ── */
+  .canvas-wrap {
+    position: relative;
+    background: #090d14;
+    cursor: crosshair;
+  }
+  canvas#plot {
+    display: block;
+    width: 100%;
+  }
+
+  /* overlay: equation label */
+  .eq-label {
+    position: absolute;
+    top: 14px; left: 18px;
+    font-family: 'Space Mono', monospace;
+    font-size: .82rem;
+    color: var(--curve);
+    opacity: .85;
+    pointer-events: none;
+    white-space: nowrap;
+    max-width: calc(100% - 120px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .eq-label .type-badge {
+    display: inline-block;
+    background: rgba(0,212,170,.12);
+    border: 1px solid rgba(0,212,170,.3);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-size: .68rem;
+    color: var(--muted);
+    margin-left: 8px;
+    vertical-align: middle;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  /* coord tooltip */
+  .coord-tip {
+    position: absolute;
+    bottom: 14px; right: 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: .72rem;
+    color: var(--muted);
+    pointer-events: none;
+    background: rgba(13,17,23,.7);
+    padding: 3px 8px;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+  }
+
+  /* ── CONTROLS BAR ── */
+  .controls-bar {
+    padding: 14px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    background: var(--panel);
+  }
+  .controls-group {
+    display: flex;
+    gap: 6px;
+  }
+  .sep {
+    width: 1px;
+    background: var(--border);
+    align-self: stretch;
+    margin: 0 4px;
+  }
+
+  .btn {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--label);
+    border-radius: 7px;
+    padding: 6px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .82rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .btn:hover {
+    border-color: var(--curve);
+    color: var(--curve);
+    background: var(--highlight);
+  }
+  .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  .btn-export-dark {
+    border-color: rgba(255,255,255,.15);
+    background: rgba(255,255,255,.04);
+  }
+  .btn-export-white {
+    border-color: rgba(255,255,255,.3);
+    background: rgba(255,255,255,.12);
+    color: #e8eaf0;
+  }
+  .btn-export-white:hover {
+    border-color: #ffffff;
+    color: #ffffff;
+    background: rgba(255,255,255,.2);
+  }
+  /* ── NUEVO: botón exportar HTML ── */
+  .btn-export-html {
+    border-color: rgba(255,140,66,.45);
+    background: rgba(255,140,66,.07);
+    color: var(--accent);
+  }
+  .btn-export-html:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(255,140,66,.18);
+  }
+
+  /* range controls */
+  .range-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-left: auto;
+  }
+  .range-group label {
+    font-size: .74rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .range-input {
+    width: 58px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--label);
+    font-family: 'Space Mono', monospace;
+    font-size: .75rem;
+    padding: 4px 7px;
+    outline: none;
+    text-align: center;
+  }
+  .range-input:focus { border-color: var(--curve); }
+  .btn-apply {
+    font-size: .76rem;
+    padding: 5px 12px;
+  }
+
+  /* ── INSTRUCTIONS ── */
+  .instructions {
+    padding: 0 24px 22px;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+  }
+  .instructions summary {
+    padding: 12px 0;
+    font-size: .8rem;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .instructions summary::before {
+    content: '▸';
+    font-size: .7rem;
+    transition: transform .2s;
+  }
+  .instructions[open] summary::before { transform: rotate(90deg); }
+  .instructions p, .instructions li {
+    font-size: .8rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .instructions ul { padding-left: 18px; margin-top: 6px; }
+  .instructions code {
+    font-family: 'Space Mono', monospace;
+    font-size: .75rem;
+    background: var(--highlight);
+    border: 1px solid rgba(0,212,170,.2);
+    color: var(--curve);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .instructions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 10px;
+  }
+  @media (max-width: 580px) {
+    .instructions-grid { grid-template-columns: 1fr; }
+    .range-group { margin-left: 0; }
+    header { flex-direction: column; gap: 6px; }
+  }
+  .instr-block h4 {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Graf<span>Álgebra</span></h1>
+  <p>Escribe tu ecuación y obtén la gráfica al instante. Rueda del ratón para zoom · Arrastrar para desplazar.</p>
+</header>
+
+<div class="card">
+
+  <!-- INPUT -->
+  <div class="input-zone">
+    <div class="input-row">
+      <span class="eq-prefix">y =</span>
+      <input class="eq-input" id="eqInput" type="text"
+             placeholder="2*x + 1  ·  x^2 - 4  ·  sin(x)  ·  1/(x-2)"
+             autocomplete="off" spellcheck="false">
+      <button class="btn-plot" id="btnPlot">GRAFICAR</button>
+    </div>
+    <div class="examples">
+      <span class="examples-label">Ejemplos:</span>
+      <span class="chip" data-eq="2*x + 1">2x + 1</span>
+      <span class="chip" data-eq="x^2 - 4">x² − 4</span>
+      <span class="chip" data-eq="-x^2 + 6*x - 5">−x² + 6x − 5</span>
+      <span class="chip" data-eq="(2*x + 1)/(x + 4)">(2x+1)/(x+4)</span>
+      <span class="chip" data-eq="sqrt(x)">√x</span>
+      <span class="chip" data-eq="abs(x) - 2">|x| − 2</span>
+      <span class="chip" data-eq="sin(x)">sin(x)</span>
+      <span class="chip" data-eq="2^x">2ˣ</span>
+      <span class="chip" data-eq="log(x)">log(x)</span>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-bar" id="errorBar"></div>
+
+  <!-- CANVAS -->
+  <div class="canvas-wrap" id="canvasWrap">
+    <canvas id="plot"></canvas>
+    <div class="eq-label" id="eqLabel"></div>
+    <div class="coord-tip" id="coordTip">x: – &nbsp; y: –</div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls-bar">
+    <div class="controls-group">
+      <button class="btn" id="btnZoomIn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          <line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+        </svg>
+        Zoom +
+      </button>
+      <button class="btn" id="btnZoomOut">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          <line x1="8" y1="11" x2="14" y2="11"/>
+        </svg>
+        Zoom −
+      </button>
+      <button class="btn" id="btnReset">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 1 0 .49-3.51"/>
+        </svg>
+        Restaurar
+      </button>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="controls-group">
+      <button class="btn btn-export-dark" id="btnExportDark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        PNG negro
+      </button>
+      <button class="btn btn-export-white" id="btnExportWhite">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        PNG blanco
+      </button>
+      <!-- ══ NUEVO BOTÓN ══ -->
+      <button class="btn btn-export-html" id="btnExportHTML">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="16 18 22 12 16 6"/>
+          <polyline points="8 6 2 12 8 18"/>
+        </svg>
+        HTML interactivo
+      </button>
+    </div>
+
+    <div class="range-group">
+      <label>x:</label>
+      <input class="range-input" id="xMin" type="number" value="-10" step="1">
+      <label>a</label>
+      <input class="range-input" id="xMax" type="number" value="10" step="1">
+      <label>y:</label>
+      <input class="range-input" id="yMin" type="number" value="-10" step="1">
+      <label>a</label>
+      <input class="range-input" id="yMax" type="number" value="10" step="1">
+      <button class="btn btn-apply" id="btnApplyRange">Aplicar</button>
+    </div>
+  </div>
+
+  <!-- INSTRUCTIONS -->
+  <details class="instructions">
+    <summary>Cómo escribir ecuaciones</summary>
+    <div class="instructions-grid">
+      <div class="instr-block">
+        <h4>Operadores básicos</h4>
+        <ul>
+          <li><code>+</code> <code>-</code> <code>*</code> <code>/</code> — suma, resta, multiplicación, división</li>
+          <li><code>^</code> o <code>**</code> — potencia: <code>x^2</code></li>
+          <li><code>()</code> — paréntesis para agrupar: <code>(x+1)/(x-2)</code></li>
+          <li>Multiplicación implícita: <code>2x</code> → escribe <code>2*x</code></li>
+        </ul>
+      </div>
+      <div class="instr-block">
+        <h4>Funciones disponibles</h4>
+        <ul>
+          <li><code>sqrt(x)</code> — raíz cuadrada</li>
+          <li><code>abs(x)</code> — valor absoluto</li>
+          <li><code>sin(x)</code> <code>cos(x)</code> <code>tan(x)</code> — trigonométricas (radianes)</li>
+          <li><code>log(x)</code> — logaritmo natural · <code>log(x,10)</code> — base 10</li>
+          <li><code>exp(x)</code> o <code>e^x</code> — exponencial</li>
+          <li><code>pi</code> <code>e</code> — constantes</li>
+        </ul>
+      </div>
+      <div class="instr-block">
+        <h4>Interacción</h4>
+        <ul>
+          <li>🖱️ <strong>Rueda del ratón</strong> — zoom centrado en el cursor</li>
+          <li>✋ <strong>Arrastrar</strong> — desplazar la vista</li>
+          <li>📐 Ajusta el rango x/y manualmente con los campos de la barra</li>
+        </ul>
+      </div>
+      <div class="instr-block">
+        <h4>Exportar</h4>
+        <ul>
+          <li>🖤 <strong>PNG negro</strong> — ideal para proyectores y presentaciones oscuras</li>
+          <li>🤍 <strong>PNG blanco</strong> — ideal para imprimir o documentos claros</li>
+          <li>🟠 <strong>HTML interactivo</strong> — archivo autocontenido con zoom, pan y anotaciones; listo para compartir o insertar en Brightspace</li>
+        </ul>
+      </div>
+    </div>
+  </details>
+
+</div><!-- .card -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  GRAFALGEBRA  –  Motor de graficación + Anotaciones
+// ═══════════════════════════════════════════════════════
+
+const canvas  = document.getElementById('plot');
+const ctx     = canvas.getContext('2d');
+const wrap    = document.getElementById('canvasWrap');
+const eqInput = document.getElementById('eqInput');
+const eqLabel = document.getElementById('eqLabel');
+const coordTip= document.getElementById('coordTip');
+const errorBar= document.getElementById('errorBar');
+
+// ── Estado ──
+let view = { xMin:-10, xMax:10, yMin:-10, yMax:10 };
+let compiledFn   = null;
+let currentEqStr = '';
+let currentType  = '';
+let annotations  = {};
+
+// ── Dimensiones del canvas ──
+function resizeCanvas() {
+  const w = wrap.clientWidth;
+  const h = Math.round(w * 0.58);
+  canvas.width  = w * devicePixelRatio;
+  canvas.height = h * devicePixelRatio;
+  canvas.style.height = h + 'px';
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  draw();
+}
+
+const W = () => wrap.clientWidth;
+const H = () => parseInt(canvas.style.height) || wrap.clientWidth * 0.58;
+
+// ── Coordenadas canvas ↔ math ──
+function toCanvasX(mx) { return (mx - view.xMin) / (view.xMax - view.xMin) * W(); }
+function toCanvasY(my) { return (1 - (my - view.yMin) / (view.yMax - view.yMin)) * H(); }
+function toMathX(cx)   { return view.xMin + (cx / W()) * (view.xMax - view.xMin); }
+function toMathY(cy)   { return view.yMin + (1 - cy / H()) * (view.yMax - view.yMin); }
+
+// ── Preprocesar expresión ──
+function preprocess(raw) {
+  let e = raw.trim();
+  e = e.replace(/^\s*[yY]\s*=\s*/, '');
+  e = e.replace(/^\s*f\s*\(\s*x\s*\)\s*=\s*/i, '');
+  e = e.replace(/(\d)(x\b)/gi, '$1*$2');
+  e = e.replace(/(\d)\(/g, '$1*(');
+  e = e.replace(/\)(x\b)/gi, ')*$2');
+  e = e.replace(/\)\s*\(/g, ')*(');
+  e = e.replace(/(x)\s*\(/gi, '$1*(');
+  return e;
+}
+
+// ── Detectar tipo de función ──
+function detectType(expr) {
+  const e = expr.toLowerCase();
+  if (/sin|cos|tan|csc|sec|cot/.test(e)) return 'TRIGONOMÉTRICA';
+  if (/log|ln/.test(e)) return 'LOGARÍTMICA';
+  if (/sqrt/.test(e)) return 'RADICAL';
+  if (/abs/.test(e)) return 'VALOR ABSOLUTO';
+  if (/2\s*\^|e\s*\^|exp/.test(e)) return 'EXPONENCIAL';
+  if (/\//.test(e)) return 'RACIONAL';
+  const deg = (e.match(/x\s*\^\s*(\d+)/g) || [])
+    .map(m => parseInt(m.replace(/[^0-9]/g,'')));
+  const maxDeg = deg.length ? Math.max(...deg) : (e.includes('x') ? 1 : 0);
+  if (maxDeg === 0) return 'CONSTANTE';
+  if (maxDeg === 1) return 'LINEAL';
+  if (maxDeg === 2) return 'CUADRÁTICA';
+  if (maxDeg === 3) return 'CÚBICA';
+  return 'POLINOMIAL';
+}
+
+// ── Compilar ──
+function compile(raw) {
+  const e = preprocess(raw);
+  try {
+    const fn = math.compile(e);
+    fn.evaluate({ x: 1 });
+    return fn;
+  } catch(err) {
+    throw new Error('No se pudo interpretar: ' + raw);
+  }
+}
+
+// ── Evaluar con protección ──
+function evalFn(fn, x) {
+  try {
+    const y = fn.evaluate({ x });
+    if (typeof y !== 'number' || !isFinite(y)) return null;
+    return y;
+  } catch { return null; }
+}
+
+// ── Dibujar rejilla y ejes ──
+function drawGrid(actx, toX, toY, w, h, dark) {
+  const bg    = dark ? '#090d14' : '#fafbff';
+  const grid  = dark ? '#1a2035' : '#e8ecf5';
+  const axCol = dark ? '#3a4a70' : '#b0bcd8';
+  const lblCol= dark ? '#6b7a9e' : '#8090b8';
+  const txtCol= dark ? '#dde3f5' : '#2a3560';
+
+  actx.fillStyle = bg;
+  actx.fillRect(0, 0, w, h);
+
+  const niceStep = v => {
+    const raw = v / 8;
+    const mag = Math.pow(10, Math.floor(Math.log10(Math.max(raw, 1e-10))));
+    const r = raw / mag;
+    if (r < 1.5) return mag;
+    if (r < 3.5) return 2 * mag;
+    if (r < 7.5) return 5 * mag;
+    return 10 * mag;
+  };
+  const stepX = niceStep(view.xMax - view.xMin);
+  const stepY = niceStep(view.yMax - view.yMin);
+
+  actx.lineWidth = 0.8; actx.strokeStyle = grid;
+  actx.beginPath();
+  for (let x = Math.ceil(view.xMin/stepX)*stepX; x <= view.xMax; x += stepX) {
+    const cx = toX(x); actx.moveTo(cx, 0); actx.lineTo(cx, h);
+  }
+  for (let y = Math.ceil(view.yMin/stepY)*stepY; y <= view.yMax; y += stepY) {
+    const cy = toY(y); actx.moveTo(0, cy); actx.lineTo(w, cy);
+  }
+  actx.stroke();
+
+  const ox = toX(0), oy = toY(0);
+  actx.lineWidth = 1.5; actx.strokeStyle = axCol;
+  actx.beginPath();
+  if (ox>=0&&ox<=w){actx.moveTo(ox,0);actx.lineTo(ox,h);}
+  if (oy>=0&&oy<=h){actx.moveTo(0,oy);actx.lineTo(w,oy);}
+  actx.stroke();
+
+  const arr=7;
+  actx.fillStyle = axCol;
+  const arrow=(px,py,dir)=>{
+    actx.beginPath();
+    if(dir==='r'){actx.moveTo(px,py);actx.lineTo(px-arr,py-4);actx.lineTo(px-arr,py+4);}
+    else{actx.moveTo(px,py);actx.lineTo(px-4,py+arr);actx.lineTo(px+4,py+arr);}
+    actx.closePath();actx.fill();
+  };
+  if(oy>=0&&oy<=h) arrow(w,oy,'r');
+  if(ox>=0&&ox<=w) arrow(ox,0,'u');
+
+  const fs = Math.max(10, Math.round(w*0.013));
+  actx.font = `${fs}px Space Mono, monospace`;
+  actx.fillStyle = lblCol;
+  const fmt0 = n => Number.isInteger(n) ? String(n) : n.toFixed(1);
+  actx.textAlign='center'; actx.textBaseline='top';
+  for (let x = Math.ceil(view.xMin/stepX)*stepX; x<=view.xMax; x+=stepX) {
+    if(Math.abs(x)<stepX*0.01)continue;
+    const cx=toX(x), bY=Math.min(Math.max(oy,2),h-16);
+    actx.fillText(fmt0(x),cx,bY+3);
+  }
+  actx.textAlign='right'; actx.textBaseline='middle';
+  for (let y = Math.ceil(view.yMin/stepY)*stepY; y<=view.yMax; y+=stepY) {
+    if(Math.abs(y)<stepY*0.01)continue;
+    const cy=toY(y), bX=Math.min(Math.max(ox,26),w-4);
+    actx.fillText(fmt0(y),bX-4,cy);
+  }
+
+  actx.font = `bold ${Math.max(11,Math.round(w*0.014))}px DM Sans, sans-serif`;
+  actx.fillStyle = txtCol;
+  actx.textAlign='left'; actx.textBaseline='middle';
+  actx.fillText('x', w-16, Math.min(Math.max(oy+14,16),h-6));
+  actx.textAlign='center'; actx.textBaseline='top';
+  actx.fillText('y', Math.min(Math.max(ox+8,8),w-16), 6);
+}
+
+// ── Dibujar curva ──
+function drawCurveCtx(actx, toX, toY, w, h, dark) {
+  if (!compiledFn) return;
+  const samples   = Math.min(w * 3, 4000);
+  const threshold = (view.yMax - view.yMin) * 12;
+  const curveColor = dark ? '#00d4aa' : '#0066cc';
+
+  actx.save();
+  actx.shadowColor = dark?'rgba(0,212,170,0.25)':'rgba(0,102,204,0.15)';
+  actx.shadowBlur  = dark?10:5;
+  actx.lineWidth   = dark?2.5:2.2;
+  actx.strokeStyle = curveColor;
+  actx.lineJoin='round'; actx.lineCap='round';
+  actx.beginPath();
+
+  let penDown=false, lastY=null;
+  for (let i = 0; i <= samples; i++) {
+    const mx = view.xMin + (i/samples)*(view.xMax-view.xMin);
+    const my = evalFn(compiledFn, mx);
+    if (my===null||my<view.yMin-threshold||my>view.yMax+threshold) {
+      penDown=false; lastY=null; continue;
+    }
+    if (lastY!==null && Math.abs(my-lastY)>threshold) penDown=false;
+    const cx=toX(mx), cy=toY(my);
+    if(!penDown){actx.moveTo(cx,cy);penDown=true;}else{actx.lineTo(cx,cy);}
+    lastY=my;
+  }
+  actx.stroke();
+  actx.restore();
+}
+
+// ═══════════════════════════════════════════════════════
+//  ANÁLISIS MATEMÁTICO
+// ═══════════════════════════════════════════════════════
+
+function bisect(fn, a, b, tol=1e-9, maxIter=60) {
+  let fa = evalFn(fn, a);
+  if (fa === null) return null;
+  for (let i=0; i<maxIter; i++) {
+    const mid=(a+b)/2, fm=evalFn(fn,mid);
+    if (fm===null) return null;
+    if (Math.abs(fm)<tol||(b-a)<tol) return mid;
+    if (fa*fm<0){b=mid;}else{a=mid;fa=fm;}
+  }
+  return (a+b)/2;
+}
+
+function findRoots(fn, xMin, xMax, nSamples=3000) {
+  const roots=[], dx=(xMax-xMin)/nSamples;
+  const thresh=(view.yMax-view.yMin)*8;
+  let prevX=xMin, prevY=evalFn(fn,xMin);
+  for (let i=1; i<=nSamples; i++) {
+    const x=xMin+i*dx, y=evalFn(fn,x);
+    if (prevY!==null&&y!==null&&Math.abs(prevY)<thresh&&Math.abs(y)<thresh) {
+      if (prevY*y<0) {
+        const r=bisect(fn,prevX,x);
+        if (r!==null&&!roots.some(e=>Math.abs(e-r)<0.05)) roots.push(r);
+      } else if (Math.abs(y)<1e-7) {
+        if (!roots.some(e=>Math.abs(e-x)<0.05)) roots.push(x);
+      }
+    }
+    prevX=x; prevY=y;
+  }
+  return roots;
+}
+
+function goldenSection(fn, a, b, findMax, tol=1e-9) {
+  const phi=(Math.sqrt(5)-1)/2;
+  let x1=b-phi*(b-a), x2=a+phi*(b-a);
+  let f1=evalFn(fn,x1), f2=evalFn(fn,x2);
+  if (f1===null||f2===null) return null;
+  for (let i=0; i<120&&(b-a)>tol; i++) {
+    if (findMax?f1<f2:f1>f2) {
+      a=x1;x1=x2;f1=f2;x2=a+phi*(b-a);f2=evalFn(fn,x2);if(f2===null)break;
+    } else {
+      b=x2;x2=x1;f2=f1;x1=b-phi*(b-a);f1=evalFn(fn,x1);if(f1===null)break;
+    }
+  }
+  const xm=(a+b)/2, ym=evalFn(fn,xm);
+  return ym!==null?{x:xm,y:ym}:null;
+}
+
+function findVertex(fn, xMin, xMax) {
+  const nSamples=600, dx=(xMax-xMin)/nSamples;
+  const edgeBuf=(xMax-xMin)*0.04;
+  const pts=[];
+  for (let i=0; i<=nSamples; i++) {
+    const x=xMin+i*dx, y=evalFn(fn,x);
+    if (y!==null) pts.push({x,y});
+  }
+  if (pts.length<3) return null;
+  const minPt=pts.reduce((a,b)=>b.y<a.y?b:a);
+  const maxPt=pts.reduce((a,b)=>b.y>a.y?b:a);
+  const interior=p=>p.x>xMin+edgeBuf&&p.x<xMax-edgeBuf;
+  let candidate=null, isMax=false;
+  if (interior(minPt)&&interior(maxPt)) {
+    const dMin=Math.min(minPt.x-xMin,xMax-minPt.x);
+    const dMax=Math.min(maxPt.x-xMin,xMax-maxPt.x);
+    if(dMin>dMax){candidate=minPt;isMax=false;}else{candidate=maxPt;isMax=true;}
+  } else if(interior(minPt)){candidate=minPt;isMax=false;}
+    else if(interior(maxPt)){candidate=maxPt;isMax=true;}
+  if (!candidate) return null;
+  const span=dx*10;
+  const refined=goldenSection(fn,Math.max(xMin,candidate.x-span),Math.min(xMax,candidate.x+span),isMax);
+  return refined?{x:refined.x,y:refined.y,type:isMax?'max':'min'}:{...candidate,type:isMax?'max':'min'};
+}
+
+function findVerticalAsymptotes(fn, xMin, xMax) {
+  const asymptotes=[], nSamples=8000, dx=(xMax-xMin)/nSamples;
+  const bigThresh=(view.yMax-view.yMin)*20;
+  let prevY=evalFn(fn, xMin+dx*0.1);
+  for (let i=1; i<=nSamples; i++) {
+    const x=xMin+i*dx, y=evalFn(fn,x);
+    const pNull=prevY===null, cNull=y===null;
+    if (pNull!==cNull) {
+      const xa=x-dx/2;
+      if (!asymptotes.some(a=>Math.abs(a-xa)<(xMax-xMin)*0.02))
+        asymptotes.push(Math.round(xa*100)/100);
+    } else if (!pNull&&!cNull&&Math.abs(prevY)>bigThresh&&Math.abs(y)>bigThresh&&prevY*y<0) {
+      const xa=x-dx/2;
+      if (!asymptotes.some(a=>Math.abs(a-xa)<(xMax-xMin)*0.02))
+        asymptotes.push(Math.round(xa*100)/100);
+    }
+    prevY=y;
+  }
+  return asymptotes;
+}
+
+function findHorizontalAsymptote(fn) {
+  const yR=evalFn(fn,1e7), yL=evalFn(fn,-1e7);
+  if (yR!==null&&Math.abs(yR)<1e5) {
+    const val=Math.round(yR*1e4)/1e4;
+    return val;
+  }
+  return null;
+}
+
+function analyzeFunction(type) {
+  if (!compiledFn) return {};
+  const ann={};
+
+  if (['LINEAL','CUADRÁTICA','CÚBICA','POLINOMIAL','RACIONAL','RADICAL','VALOR ABSOLUTO'].includes(type)) {
+    const roots=findRoots(compiledFn, view.xMin, view.xMax);
+    if (roots.length>0&&roots.length<=8) ann.roots=roots;
+  }
+
+  if (['LINEAL','CUADRÁTICA','CÚBICA','POLINOMIAL'].includes(type)) {
+    const y0=evalFn(compiledFn,0);
+    if (y0!==null) {
+      const isRoot=ann.roots&&ann.roots.some(r=>Math.abs(r)<0.05);
+      if (!isRoot) ann.yIntercept={x:0,y:y0};
+    }
+  }
+
+  if (type==='CUADRÁTICA') {
+    const v=findVertex(compiledFn, view.xMin, view.xMax);
+    if (v) { ann.vertex=v; ann.axisOfSymmetry=v.x; }
+  }
+
+  if (type==='RACIONAL') {
+    ann.verticalAsymptotes=findVerticalAsymptotes(compiledFn, view.xMin, view.xMax);
+    const ha=findHorizontalAsymptote(compiledFn);
+    if (ha!==null) ann.horizontalAsymptote=ha;
+  }
+
+  return ann;
+}
+
+// ═══════════════════════════════════════════════════════
+//  ANOTACIONES
+// ═══════════════════════════════════════════════════════
+
+function drawAnnotations(actx, toX, toY, w, h, dark) {
+  const ann=annotations;
+  if (!ann||Object.keys(ann).length===0) return;
+
+  const curveColor  = dark?'#00d4aa':'#0066cc';
+  const asymColor   = dark?'#ff6b6b':'#cc1111';
+  const vertexColor = dark?'#ff8c42':'#d45a00';
+  const axisAlpha   = dark?'rgba(200,100,255,0.9)':'rgba(150,0,220,0.85)';
+  const dotR        = Math.max(5, w*0.007);
+  const fs          = Math.max(11, Math.round(w*0.016));
+
+  const fmtN = n => {
+    if (Math.abs(n)<1e-6) return '0';
+    const v=Math.round(n*1000)/1000;
+    return Number.isInteger(v)?String(v):parseFloat(v.toFixed(2)).toString();
+  };
+
+  const dashLine = (x1,y1,x2,y2,color,lw=1.8)=>{
+    actx.save();
+    actx.setLineDash([7,5]); actx.strokeStyle=color;
+    actx.lineWidth=lw; actx.globalAlpha=0.85;
+    actx.beginPath(); actx.moveTo(x1,y1); actx.lineTo(x2,y2); actx.stroke();
+    actx.restore();
+  };
+
+  const dot = (mx,my,color)=>{
+    const cx=toX(mx), cy=toY(my);
+    if (cx<-dotR*2||cx>w+dotR*2||cy<-dotR*2||cy>h+dotR*2) return {cx,cy,ok:false};
+    actx.save();
+    actx.fillStyle=color; actx.strokeStyle=dark?'#090d14':'#ffffff';
+    actx.lineWidth=2.5; actx.shadowColor=color; actx.shadowBlur=8;
+    actx.beginPath(); actx.arc(cx,cy,dotR,0,Math.PI*2);
+    actx.fill(); actx.stroke();
+    actx.restore();
+    return {cx,cy,ok:true};
+  };
+
+  const lbl = (cx,cy,text,color,align,baseline,oy=0)=>{
+    actx.save();
+    actx.font=`bold ${fs}px Space Mono, monospace`;
+    actx.fillStyle=color; actx.textAlign=align; actx.textBaseline=baseline;
+    actx.shadowColor=dark?'rgba(0,0,0,0.95)':'rgba(255,255,255,0.95)';
+    actx.shadowBlur=5;
+    actx.fillText(text, cx, cy+oy);
+    actx.restore();
+  };
+
+  if (ann.verticalAsymptotes) {
+    ann.verticalAsymptotes.forEach(xa=>{
+      const cx=toX(xa);
+      if (cx<0||cx>w) return;
+      dashLine(cx,0,cx,h,asymColor,2);
+      lbl(cx+6, 14, `x = ${fmtN(xa)}`, asymColor, 'left','top');
+    });
+  }
+
+  if (ann.horizontalAsymptote!=null) {
+    const cy=toY(ann.horizontalAsymptote);
+    if (cy>=0&&cy<=h) {
+      dashLine(0,cy,w,cy,asymColor,2);
+      lbl(w-8, cy, `y = ${fmtN(ann.horizontalAsymptote)}`, asymColor, 'right','bottom',-5);
+    }
+  }
+
+  if (ann.axisOfSymmetry!=null) {
+    const cx=toX(ann.axisOfSymmetry);
+    if (cx>=0&&cx<=w) {
+      dashLine(cx,0,cx,h,axisAlpha,2);
+      lbl(cx+6, h-12, `eje: x=${fmtN(ann.axisOfSymmetry)}`,
+          dark?'rgba(200,100,255,1)':'rgba(150,0,220,1)', 'left','bottom');
+    }
+  }
+
+  if (ann.roots) {
+    ann.roots.forEach(rx=>{
+      const {cx,cy,ok}=dot(rx,0,curveColor);
+      if (!ok) return;
+      const above=cy>h*0.55;
+      lbl(cx, cy, `(${fmtN(rx)}, 0)`, curveColor, 'center',
+          above?'bottom':'top', above?-dotR-3:dotR+3);
+    });
+  }
+
+  if (ann.yIntercept) {
+    const {x,y}=ann.yIntercept;
+    const {cx,cy,ok}=dot(x,y,curveColor);
+    if (ok) {
+      const above=y>=0;
+      lbl(cx+dotR+4, cy, `(0, ${fmtN(y)})`, curveColor, 'left',
+          above?'bottom':'top', above?2:-2);
+    }
+  }
+
+  if (ann.vertex) {
+    const {x,y,type}=ann.vertex;
+    const {cx,cy,ok}=dot(x,y,vertexColor);
+    if (ok) {
+      const isMin=type==='min';
+      lbl(cx, cy, `${isMin?'▼mín':'▲máx'}(${fmtN(x)}, ${fmtN(y)})`,
+          vertexColor, 'center', isMin?'top':'bottom', isMin?dotR+3:-dotR-2);
+    }
+  }
+}
+
+// ── Dibujar completo ──
+function draw(dark=true) {
+  ctx.clearRect(0,0,W(),H());
+  drawGrid(ctx, toCanvasX, toCanvasY, W(), H(), dark);
+  drawCurveCtx(ctx, toCanvasX, toCanvasY, W(), H(), dark);
+  drawAnnotations(ctx, toCanvasX, toCanvasY, W(), H(), dark);
+}
+
+// ── PLOTEAR ──
+function plot() {
+  const raw = eqInput.value.trim();
+  if (!raw) return;
+  errorBar.style.display = 'none';
+  try {
+    compiledFn    = compile(raw);
+    currentEqStr  = raw;
+    const processed = preprocess(raw);
+    currentType   = detectType(processed);
+    eqLabel.innerHTML = `y = ${escapeHtml(raw)} <span class="type-badge">${currentType}</span>`;
+    autoAdjustY();
+    annotations = analyzeFunction(currentType);
+    draw();
+    syncRangeInputs();
+  } catch (err) {
+    errorBar.textContent = '⚠ ' + err.message;
+    errorBar.style.display = 'block';
+  }
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function autoAdjustY() {
+  if (!compiledFn) return;
+  const samples=800; let yVals=[];
+  for (let i=0; i<=samples; i++) {
+    const x=view.xMin+(i/samples)*(view.xMax-view.xMin);
+    const y=evalFn(compiledFn,x);
+    if (y!==null) yVals.push(y);
+  }
+  if (!yVals.length) return;
+  yVals.sort((a,b)=>a-b);
+  const p5 =yVals[Math.floor(yVals.length*0.03)];
+  const p95=yVals[Math.floor(yVals.length*0.97)];
+  view.yMin=Math.floor(p5  - (p95-p5)*0.15) - 1;
+  view.yMax=Math.ceil (p95 + (p95-p5)*0.15) + 1;
+}
+
+// ── Exportar PNG ──
+function exportPNG(dark) {
+  const scale=2, ow=W(), oh=H();
+  const off=document.createElement('canvas');
+  off.width=ow*scale; off.height=oh*scale;
+  const octx=off.getContext('2d');
+  octx.scale(scale,scale);
+
+  const toX=mx=>(mx-view.xMin)/(view.xMax-view.xMin)*ow;
+  const toY=my=>(1-(my-view.yMin)/(view.yMax-view.yMin))*oh;
+
+  drawGrid(octx,toX,toY,ow,oh,dark);
+  drawCurveCtx(octx,toX,toY,ow,oh,dark);
+  drawAnnotations(octx,toX,toY,ow,oh,dark);
+
+  const curveColor=dark?'#00d4aa':'#0066cc';
+  const eqText='y = '+(currentEqStr||'');
+  const fontSize=Math.round(ow*0.026);
+  octx.font=`bold ${fontSize}px Space Mono, monospace`;
+  octx.textAlign='left'; octx.textBaseline='top';
+  const textW=octx.measureText(eqText).width;
+  const padH=fontSize*0.5, padV=fontSize*0.35;
+  const rx=10, ry=10, rw=textW+padH*2, rh=fontSize+padV*2;
+  octx.save();
+  octx.globalAlpha=dark?0.72:0.82;
+  octx.fillStyle=dark?'#0d1117':'#ffffff';
+  if(octx.roundRect){octx.beginPath();octx.roundRect(rx,ry,rw,rh,6);octx.fill();}
+  else octx.fillRect(rx,ry,rw,rh);
+  octx.globalAlpha=1;
+  octx.strokeStyle=curveColor; octx.lineWidth=2;
+  if(octx.roundRect){octx.beginPath();octx.roundRect(rx,ry,rw,rh,6);octx.stroke();}
+  else octx.strokeRect(rx,ry,rw,rh);
+  octx.fillStyle=curveColor;
+  octx.fillText(eqText,rx+padH,ry+padV);
+  octx.restore();
+
+  const link=document.createElement('a');
+  const eqSafe=(currentEqStr||'grafica').replace(/[^a-zA-Z0-9._+-]/g,'_').slice(0,40);
+  link.download=`grafica_${eqSafe}_${dark?'negro':'blanco'}.png`;
+  link.href=off.toDataURL('image/png');
+  link.click();
+}
+
+// ═══════════════════════════════════════════════════════
+//  EXPORTAR HTML – VISOR INTERACTIVO (sin editor)
+// ═══════════════════════════════════════════════════════
+function exportHTML() {
+  if (!currentEqStr) {
+    alert('Primero grafica una ecuación para poder exportarla.');
+    return;
+  }
+
+  const eq   = currentEqStr;
+  const type = currentType;
+  const ann  = JSON.stringify(annotations);
+  const V    = view;
+
+  // ── Serializar la ecuación para mostrarla en el título HTML ──
+  const eqDisplay = 'y = ' + eq;
+  const eqSafe    = eq.replace(/[^a-zA-Z0-9._+\-*/^]/g,'_').slice(0, 40);
+
+  // ══════════════════════════════════════════════════════════════
+  //  PLANTILLA DEL VISOR  – HTML autocontenido, solo gráfica
+  // ══════════════════════════════════════════════════════════════
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GrafÁlgebra · ${eqDisplay}</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"><\/script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0d1117;--surface:#161b27;--border:#252d40;--curve:#00d4aa;--accent:#ff8c42;--text:#dde3f5;--muted:#6b7a9e;--label:#a0aece;--panel:#111827;--highlight:rgba(0,212,170,0.08);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+  header{width:100%;max-width:960px;padding:22px 24px 0;display:flex;align-items:baseline;gap:14px;}
+  header h1{font-family:'Space Mono',monospace;font-size:1.4rem;letter-spacing:-.03em;color:var(--curve);white-space:nowrap;}
+  header h1 span{color:var(--accent);}
+  header p{font-size:.82rem;color:var(--muted);line-height:1.4;}
+  .card{width:100%;max-width:960px;margin:16px 24px 40px;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+  /* etiqueta ecuación */
+  .eq-bar{padding:12px 20px;background:var(--panel);border-bottom:1px solid var(--border);font-family:'Space Mono',monospace;font-size:1rem;color:var(--curve);display:flex;align-items:center;gap:12px;}
+  .type-badge{display:inline-block;background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);border-radius:4px;padding:2px 9px;font-size:.68rem;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;}
+  /* canvas */
+  .canvas-wrap{position:relative;background:#090d14;cursor:crosshair;}
+  canvas#plot{display:block;width:100%;}
+  .coord-tip{position:absolute;bottom:14px;right:14px;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--muted);pointer-events:none;background:rgba(13,17,23,.7);padding:3px 8px;border-radius:4px;backdrop-filter:blur(4px);}
+  /* controles */
+  .controls-bar{padding:14px 24px;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--panel);}
+  .sep{width:1px;background:var(--border);align-self:stretch;margin:0 4px;}
+  .btn{background:transparent;border:1.5px solid var(--border);color:var(--label);border-radius:7px;padding:6px 14px;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;transition:border-color .15s,color .15s,background .15s;}
+  .btn:hover{border-color:var(--curve);color:var(--curve);background:var(--highlight);}
+  .btn svg{width:14px;height:14px;flex-shrink:0;}
+  .range-group{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto;}
+  .range-group label{font-size:.74rem;color:var(--muted);white-space:nowrap;}
+  .range-input{width:58px;background:var(--bg);border:1px solid var(--border);border-radius:5px;color:var(--label);font-family:'Space Mono',monospace;font-size:.75rem;padding:4px 7px;outline:none;text-align:center;}
+  .range-input:focus{border-color:var(--curve);}
+  @media(max-width:580px){.range-group{margin-left:0;}header{flex-direction:column;gap:6px;}}
+<\/style>
+</head>
+<body>
+<header>
+  <h1>Graf<span>Álgebra</span></h1>
+  <p>Rueda del ratón o pellizco para zoom · Arrastra para desplazarte · Ajusta el rango x/y con los campos inferiores.</p>
+</header>
+<div class="card">
+  <div class="eq-bar">
+    ${eqDisplay} <span class="type-badge">${type}</span>
+  </div>
+  <div class="canvas-wrap" id="canvasWrap">
+    <canvas id="plot"></canvas>
+    <div class="coord-tip" id="coordTip">x: – &nbsp; y: –</div>
+  </div>
+  <div class="controls-bar">
+    <button class="btn" id="btnZoomIn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      Zoom +
+    </button>
+    <button class="btn" id="btnZoomOut">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      Zoom −
+    </button>
+    <button class="btn" id="btnReset">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+      Restaurar
+    </button>
+    <div class="sep"></div>
+    <div class="range-group">
+      <label>x:</label>
+      <input class="range-input" id="xMin" type="number" step="1">
+      <label>a</label>
+      <input class="range-input" id="xMax" type="number" step="1">
+      <label>y:</label>
+      <input class="range-input" id="yMin" type="number" step="1">
+      <label>a</label>
+      <input class="range-input" id="yMax" type="number" step="1">
+      <button class="btn" id="btnApplyRange">Aplicar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Estado inicial ──
+const INIT_EQ   = ${JSON.stringify(eq)};
+const INIT_TYPE = ${JSON.stringify(type)};
+const INIT_ANN  = ${ann};
+let view = { xMin:${V.xMin}, xMax:${V.xMax}, yMin:${V.yMin}, yMax:${V.yMax} };
+
+const canvas   = document.getElementById('plot');
+const ctx      = canvas.getContext('2d');
+const wrap     = document.getElementById('canvasWrap');
+const coordTip = document.getElementById('coordTip');
+
+let compiledFn  = null;
+let annotations = INIT_ANN;
+
+function resizeCanvas(){
+  const w=wrap.clientWidth, h=Math.round(w*0.58);
+  canvas.width=w*devicePixelRatio; canvas.height=h*devicePixelRatio;
+  canvas.style.height=h+'px';
+  ctx.scale(devicePixelRatio,devicePixelRatio);
+  draw();
+}
+const W=()=>wrap.clientWidth;
+const H=()=>parseInt(canvas.style.height)||wrap.clientWidth*0.58;
+
+function toCanvasX(mx){return(mx-view.xMin)/(view.xMax-view.xMin)*W();}
+function toCanvasY(my){return(1-(my-view.yMin)/(view.yMax-view.yMin))*H();}
+function toMathX(cx){return view.xMin+(cx/W())*(view.xMax-view.xMin);}
+function toMathY(cy){return view.yMin+(1-cy/H())*(view.yMax-view.yMin);}
+
+function evalFn(fn,x){
+  try{const y=fn.evaluate({x});if(typeof y!=='number'||!isFinite(y))return null;return y;}
+  catch{return null;}
+}
+
+function drawGrid(actx,toX,toY,w,h){
+  const dark=true;
+  const bg='#090d14',grid='#1a2035',axCol='#3a4a70',lblCol='#6b7a9e',txtCol='#dde3f5';
+  actx.fillStyle=bg; actx.fillRect(0,0,w,h);
+  const niceStep=v=>{const raw=v/8,mag=Math.pow(10,Math.floor(Math.log10(Math.max(raw,1e-10)))),r=raw/mag;if(r<1.5)return mag;if(r<3.5)return 2*mag;if(r<7.5)return 5*mag;return 10*mag;};
+  const stepX=niceStep(view.xMax-view.xMin),stepY=niceStep(view.yMax-view.yMin);
+  actx.lineWidth=0.8; actx.strokeStyle=grid; actx.beginPath();
+  for(let x=Math.ceil(view.xMin/stepX)*stepX;x<=view.xMax;x+=stepX){const cx=toX(x);actx.moveTo(cx,0);actx.lineTo(cx,h);}
+  for(let y=Math.ceil(view.yMin/stepY)*stepY;y<=view.yMax;y+=stepY){const cy=toY(y);actx.moveTo(0,cy);actx.lineTo(w,cy);}
+  actx.stroke();
+  const ox=toX(0),oy=toY(0);
+  actx.lineWidth=1.5; actx.strokeStyle=axCol; actx.beginPath();
+  if(ox>=0&&ox<=w){actx.moveTo(ox,0);actx.lineTo(ox,h);}
+  if(oy>=0&&oy<=h){actx.moveTo(0,oy);actx.lineTo(w,oy);}
+  actx.stroke();
+  actx.fillStyle=axCol;
+  const arr=7,arrow=(px,py,dir)=>{actx.beginPath();if(dir==='r'){actx.moveTo(px,py);actx.lineTo(px-arr,py-4);actx.lineTo(px-arr,py+4);}else{actx.moveTo(px,py);actx.lineTo(px-4,py+arr);actx.lineTo(px+4,py+arr);}actx.closePath();actx.fill();};
+  if(oy>=0&&oy<=h)arrow(w,oy,'r');
+  if(ox>=0&&ox<=w)arrow(ox,0,'u');
+  const fs=Math.max(10,Math.round(w*0.013));
+  actx.font=fs+'px Space Mono,monospace'; actx.fillStyle=lblCol;
+  const fmt0=n=>Number.isInteger(n)?String(n):n.toFixed(1);
+  actx.textAlign='center'; actx.textBaseline='top';
+  for(let x=Math.ceil(view.xMin/stepX)*stepX;x<=view.xMax;x+=stepX){if(Math.abs(x)<stepX*0.01)continue;const cx=toX(x),bY=Math.min(Math.max(oy,2),h-16);actx.fillText(fmt0(x),cx,bY+3);}
+  actx.textAlign='right'; actx.textBaseline='middle';
+  for(let y=Math.ceil(view.yMin/stepY)*stepY;y<=view.yMax;y+=stepY){if(Math.abs(y)<stepY*0.01)continue;const cy=toY(y),bX=Math.min(Math.max(ox,26),w-4);actx.fillText(fmt0(y),bX-4,cy);}
+  actx.font='bold '+Math.max(11,Math.round(w*0.014))+'px DM Sans,sans-serif'; actx.fillStyle=txtCol;
+  actx.textAlign='left'; actx.textBaseline='middle';
+  actx.fillText('x',w-16,Math.min(Math.max(oy+14,16),h-6));
+  actx.textAlign='center'; actx.textBaseline='top';
+  actx.fillText('y',Math.min(Math.max(ox+8,8),w-16),6);
+}
+
+function drawCurve(actx,toX,toY,w,h){
+  if(!compiledFn)return;
+  const samples=Math.min(w*3,4000),threshold=(view.yMax-view.yMin)*12;
+  actx.save();
+  actx.shadowColor='rgba(0,212,170,0.25)'; actx.shadowBlur=10;
+  actx.lineWidth=2.5; actx.strokeStyle='#00d4aa';
+  actx.lineJoin='round'; actx.lineCap='round'; actx.beginPath();
+  let penDown=false,lastY=null;
+  for(let i=0;i<=samples;i++){
+    const mx=view.xMin+(i/samples)*(view.xMax-view.xMin),my=evalFn(compiledFn,mx);
+    if(my===null||my<view.yMin-threshold||my>view.yMax+threshold){penDown=false;lastY=null;continue;}
+    if(lastY!==null&&Math.abs(my-lastY)>threshold)penDown=false;
+    const cx=toX(mx),cy=toY(my);
+    if(!penDown){actx.moveTo(cx,cy);penDown=true;}else{actx.lineTo(cx,cy);}
+    lastY=my;
+  }
+  actx.stroke(); actx.restore();
+}
+
+function drawAnnotations(actx,toX,toY,w,h){
+  const ann=annotations;
+  if(!ann||Object.keys(ann).length===0)return;
+  const curveColor='#00d4aa',asymColor='#ff6b6b',vertexColor='#ff8c42';
+  const dotR=Math.max(5,w*0.007),fs=Math.max(11,Math.round(w*0.016));
+  const fmtN=n=>{if(Math.abs(n)<1e-6)return'0';const v=Math.round(n*1000)/1000;return Number.isInteger(v)?String(v):parseFloat(v.toFixed(2)).toString();};
+  const dashLine=(x1,y1,x2,y2,color,lw=1.8)=>{actx.save();actx.setLineDash([7,5]);actx.strokeStyle=color;actx.lineWidth=lw;actx.globalAlpha=0.85;actx.beginPath();actx.moveTo(x1,y1);actx.lineTo(x2,y2);actx.stroke();actx.restore();};
+  const dot=(mx,my,color)=>{const cx=toX(mx),cy=toY(my);if(cx<-dotR*2||cx>w+dotR*2||cy<-dotR*2||cy>h+dotR*2)return{cx,cy,ok:false};actx.save();actx.fillStyle=color;actx.strokeStyle='#090d14';actx.lineWidth=2.5;actx.shadowColor=color;actx.shadowBlur=8;actx.beginPath();actx.arc(cx,cy,dotR,0,Math.PI*2);actx.fill();actx.stroke();actx.restore();return{cx,cy,ok:true};};
+  const lbl=(cx,cy,text,color,align,baseline,oy=0)=>{actx.save();actx.font='bold '+fs+'px Space Mono,monospace';actx.fillStyle=color;actx.textAlign=align;actx.textBaseline=baseline;actx.shadowColor='rgba(0,0,0,0.95)';actx.shadowBlur=5;actx.fillText(text,cx,cy+oy);actx.restore();};
+  if(ann.verticalAsymptotes)ann.verticalAsymptotes.forEach(xa=>{const cx=toX(xa);if(cx<0||cx>w)return;dashLine(cx,0,cx,h,asymColor,2);lbl(cx+6,14,'x = '+fmtN(xa),asymColor,'left','top');});
+  if(ann.horizontalAsymptote!=null){const cy=toY(ann.horizontalAsymptote);if(cy>=0&&cy<=h){dashLine(0,cy,w,cy,asymColor,2);lbl(w-8,cy,'y = '+fmtN(ann.horizontalAsymptote),asymColor,'right','bottom',-5);}}
+  if(ann.axisOfSymmetry!=null){const cx=toX(ann.axisOfSymmetry);if(cx>=0&&cx<=w){dashLine(cx,0,cx,h,'rgba(200,100,255,0.9)',2);lbl(cx+6,h-12,'eje: x='+fmtN(ann.axisOfSymmetry),'rgba(200,100,255,1)','left','bottom');}}
+  if(ann.roots)ann.roots.forEach(rx=>{const{cx,cy,ok}=dot(rx,0,curveColor);if(!ok)return;const above=cy>h*0.55;lbl(cx,cy,'('+fmtN(rx)+', 0)',curveColor,'center',above?'bottom':'top',above?-dotR-3:dotR+3);});
+  if(ann.yIntercept){const{x,y}=ann.yIntercept;const{cx,cy,ok}=dot(x,y,curveColor);if(ok){const above=y>=0;lbl(cx+dotR+4,cy,'(0, '+fmtN(y)+')',curveColor,'left',above?'bottom':'top',above?2:-2);}}
+  if(ann.vertex){const{x,y,type}=ann.vertex;const{cx,cy,ok}=dot(x,y,vertexColor);if(ok){const isMin=type==='min';lbl(cx,cy,(isMin?'▼mín':'▲máx')+'('+fmtN(x)+', '+fmtN(y)+')',vertexColor,'center',isMin?'top':'bottom',isMin?dotR+3:-dotR-2);}}
+}
+
+function draw(){
+  ctx.clearRect(0,0,W(),H());
+  drawGrid(ctx,toCanvasX,toCanvasY,W(),H());
+  drawCurve(ctx,toCanvasX,toCanvasY,W(),H());
+  drawAnnotations(ctx,toCanvasX,toCanvasY,W(),H());
+}
+
+function zoom(factor,cx,cy){
+  const mx=toMathX(cx!==undefined?cx:W()/2),my=toMathY(cy!==undefined?cy:H()/2);
+  const xR=(view.xMax-view.xMin)*factor,yR=(view.yMax-view.yMin)*factor;
+  const rx=(mx-view.xMin)/(view.xMax-view.xMin),ry=(my-view.yMin)/(view.yMax-view.yMin);
+  view.xMin=mx-rx*xR;view.xMax=view.xMin+xR;
+  view.yMin=my-ry*yR;view.yMax=view.yMin+yR;
+  draw();syncRangeInputs();
+}
+
+// Pan
+let dragging=false,dragStart={x:0,y:0},viewStart={};
+canvas.addEventListener('mousedown',e=>{dragging=true;const r=canvas.getBoundingClientRect();dragStart={x:e.clientX-r.left,y:e.clientY-r.top};viewStart={...view};canvas.style.cursor='grabbing';});
+document.addEventListener('mouseup',()=>{dragging=false;canvas.style.cursor='crosshair';});
+canvas.addEventListener('mousemove',e=>{
+  const r=canvas.getBoundingClientRect(),cx=e.clientX-r.left,cy=e.clientY-r.top;
+  coordTip.innerHTML='x: '+toMathX(cx).toFixed(3)+' &nbsp; y: '+toMathY(cy).toFixed(3);
+  if(!dragging)return;
+  const dx=cx-dragStart.x,dy=cy-dragStart.y;
+  const xR=viewStart.xMax-viewStart.xMin,yR=viewStart.yMax-viewStart.yMin;
+  view.xMin=viewStart.xMin-dx/W()*xR;view.xMax=view.xMin+xR;
+  view.yMin=viewStart.yMin+dy/H()*yR;view.yMax=view.yMin+yR;
+  draw();syncRangeInputs();
+});
+canvas.addEventListener('mouseleave',()=>{coordTip.innerHTML='x: – &nbsp; y: –';});
+canvas.addEventListener('wheel',e=>{e.preventDefault();const r=canvas.getBoundingClientRect();zoom(e.deltaY>0?1.15:0.87,e.clientX-r.left,e.clientY-r.top);},{passive:false});
+
+// Touch
+let touches2={};
+canvas.addEventListener('touchstart',e=>{e.preventDefault();if(e.touches.length===1){dragging=true;const r=canvas.getBoundingClientRect(),t=e.touches[0];dragStart={x:t.clientX-r.left,y:t.clientY-r.top};viewStart={...view};}else if(e.touches.length===2){dragging=false;touches2.d0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);touches2.viewStart={...view};}},{passive:false});
+canvas.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches.length===1&&dragging){const r=canvas.getBoundingClientRect(),t=e.touches[0],cx=t.clientX-r.left,cy=t.clientY-r.top,dx=cx-dragStart.x,dy=cy-dragStart.y,xR=viewStart.xMax-viewStart.xMin,yR=viewStart.yMax-viewStart.yMin;view.xMin=viewStart.xMin-dx/W()*xR;view.xMax=view.xMin+xR;view.yMin=viewStart.yMin+dy/H()*yR;view.yMax=view.yMin+yR;draw();syncRangeInputs();}else if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY),factor=touches2.d0/d,r=canvas.getBoundingClientRect(),cx=(e.touches[0].clientX+e.touches[1].clientX)/2-r.left,cy=(e.touches[0].clientY+e.touches[1].clientY)/2-r.top,vw=touches2.viewStart,mx=vw.xMin+(cx/W())*(vw.xMax-vw.xMin),my=vw.yMin+(1-cy/H())*(vw.yMax-vw.yMin),xR=(vw.xMax-vw.xMin)*factor,yR=(vw.yMax-vw.yMin)*factor,rx=(mx-vw.xMin)/(vw.xMax-vw.xMin),ry=(my-vw.yMin)/(vw.yMax-vw.yMin);view.xMin=mx-rx*xR;view.xMax=view.xMin+xR;view.yMin=my-ry*yR;view.yMax=view.yMin+yR;draw();syncRangeInputs();}},{passive:false});
+canvas.addEventListener('touchend',()=>{dragging=false;});
+
+// Botones
+const ORIG_VIEW={xMin:${V.xMin},xMax:${V.xMax},yMin:${V.yMin},yMax:${V.yMax}};
+document.getElementById('btnZoomIn').addEventListener('click',()=>zoom(0.7));
+document.getElementById('btnZoomOut').addEventListener('click',()=>zoom(1.43));
+document.getElementById('btnReset').addEventListener('click',()=>{view={...ORIG_VIEW};draw();syncRangeInputs();});
+document.getElementById('btnApplyRange').addEventListener('click',()=>{
+  const xmn=parseFloat(document.getElementById('xMin').value),xmx=parseFloat(document.getElementById('xMax').value);
+  const ymn=parseFloat(document.getElementById('yMin').value),ymx=parseFloat(document.getElementById('yMax').value);
+  if(isNaN(xmn)||isNaN(xmx)||isNaN(ymn)||isNaN(ymx)||xmn>=xmx||ymn>=ymx){alert('Rango inválido.');return;}
+  view={xMin:xmn,xMax:xmx,yMin:ymn,yMax:ymx};draw();
+});
+
+function syncRangeInputs(){
+  document.getElementById('xMin').value=Math.round(view.xMin*100)/100;
+  document.getElementById('xMax').value=Math.round(view.xMax*100)/100;
+  document.getElementById('yMin').value=Math.round(view.yMin*100)/100;
+  document.getElementById('yMax').value=Math.round(view.yMax*100)/100;
+}
+
+// Compilar ecuación e iniciar
+window.addEventListener('resize',resizeCanvas);
+try { compiledFn = math.compile(${JSON.stringify(eq)}); } catch(e){}
+resizeCanvas();   // también llama a draw() internamente
+syncRangeInputs();
+<\/script>
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.download = `GrafAlgebra_y=${eqSafe}.html`;
+  link.href = url;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+// ── Zoom ──
+function zoom(factor,cx,cy) {
+  const mx=toMathX(cx!==undefined?cx:W()/2);
+  const my=toMathY(cy!==undefined?cy:H()/2);
+  const xR=(view.xMax-view.xMin)*factor, yR=(view.yMax-view.yMin)*factor;
+  const rx=(mx-view.xMin)/(view.xMax-view.xMin);
+  const ry=(my-view.yMin)/(view.yMax-view.yMin);
+  view.xMin=mx-rx*xR; view.xMax=view.xMin+xR;
+  view.yMin=my-ry*yR; view.yMax=view.yMin+yR;
+  draw(); syncRangeInputs();
+}
+
+// ── Pan / Drag ──
+let dragging=false, dragStart={x:0,y:0}, viewStart={};
+canvas.addEventListener('mousedown',e=>{
+  dragging=true;
+  const r=canvas.getBoundingClientRect();
+  dragStart={x:e.clientX-r.left,y:e.clientY-r.top};
+  viewStart={...view}; canvas.style.cursor='grabbing';
+});
+document.addEventListener('mouseup',()=>{dragging=false;canvas.style.cursor='crosshair';});
+canvas.addEventListener('mousemove',e=>{
+  const r=canvas.getBoundingClientRect();
+  const cx=e.clientX-r.left, cy=e.clientY-r.top;
+  coordTip.innerHTML=`x: ${toMathX(cx).toFixed(3)} &nbsp; y: ${toMathY(cy).toFixed(3)}`;
+  if (!dragging) return;
+  const dx=cx-dragStart.x, dy=cy-dragStart.y;
+  const xR=viewStart.xMax-viewStart.xMin, yR=viewStart.yMax-viewStart.yMin;
+  view.xMin=viewStart.xMin-dx/W()*xR; view.xMax=view.xMin+xR;
+  view.yMin=viewStart.yMin+dy/H()*yR; view.yMax=view.yMin+yR;
+  draw(); syncRangeInputs();
+});
+canvas.addEventListener('mouseleave',()=>{coordTip.innerHTML='x: – &nbsp; y: –';});
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=canvas.getBoundingClientRect();
+  zoom(e.deltaY>0?1.15:0.87,e.clientX-r.left,e.clientY-r.top);
+},{passive:false});
+
+// ── Touch ──
+let touches2={};
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  if (e.touches.length===1) {
+    dragging=true;
+    const r=canvas.getBoundingClientRect(),t=e.touches[0];
+    dragStart={x:t.clientX-r.left,y:t.clientY-r.top}; viewStart={...view};
+  } else if (e.touches.length===2) {
+    dragging=false;
+    touches2.d0=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    touches2.viewStart={...view};
+  }
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if (e.touches.length===1&&dragging) {
+    const r=canvas.getBoundingClientRect(),t=e.touches[0];
+    const cx=t.clientX-r.left,cy=t.clientY-r.top;
+    const dx=cx-dragStart.x,dy=cy-dragStart.y;
+    const xR=viewStart.xMax-viewStart.xMin,yR=viewStart.yMax-viewStart.yMin;
+    view.xMin=viewStart.xMin-dx/W()*xR;view.xMax=view.xMin+xR;
+    view.yMin=viewStart.yMin+dy/H()*yR;view.yMax=view.yMin+yR;
+    draw();syncRangeInputs();
+  } else if (e.touches.length===2) {
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    const factor=touches2.d0/d;
+    const r=canvas.getBoundingClientRect();
+    const cx=(e.touches[0].clientX+e.touches[1].clientX)/2-r.left;
+    const cy=(e.touches[0].clientY+e.touches[1].clientY)/2-r.top;
+    const vw=touches2.viewStart;
+    const mx=vw.xMin+(cx/W())*(vw.xMax-vw.xMin);
+    const my=vw.yMin+(1-cy/H())*(vw.yMax-vw.yMin);
+    const xR=(vw.xMax-vw.xMin)*factor,yR=(vw.yMax-vw.yMin)*factor;
+    const rx=(mx-vw.xMin)/(vw.xMax-vw.xMin),ry=(my-vw.yMin)/(vw.yMax-vw.yMin);
+    view.xMin=mx-rx*xR;view.xMax=view.xMin+xR;
+    view.yMin=my-ry*yR;view.yMax=view.yMin+yR;
+    draw();syncRangeInputs();
+  }
+},{passive:false});
+canvas.addEventListener('touchend',()=>{dragging=false;});
+
+// ── Botones ──
+document.getElementById('btnPlot').addEventListener('click',plot);
+eqInput.addEventListener('keydown',e=>{if(e.key==='Enter')plot();});
+document.getElementById('btnZoomIn').addEventListener('click',()=>zoom(0.7));
+document.getElementById('btnZoomOut').addEventListener('click',()=>zoom(1.43));
+document.getElementById('btnReset').addEventListener('click',()=>{
+  view={xMin:-10,xMax:10,yMin:-10,yMax:10};
+  if (compiledFn){autoAdjustY();annotations=analyzeFunction(currentType);}
+  draw();syncRangeInputs();
+});
+document.getElementById('btnExportDark').addEventListener('click',()=>exportPNG(true));
+document.getElementById('btnExportWhite').addEventListener('click',()=>exportPNG(false));
+document.getElementById('btnExportHTML').addEventListener('click', exportHTML);  // ← NUEVO
+document.getElementById('btnApplyRange').addEventListener('click',()=>{
+  const xmn=parseFloat(document.getElementById('xMin').value);
+  const xmx=parseFloat(document.getElementById('xMax').value);
+  const ymn=parseFloat(document.getElementById('yMin').value);
+  const ymx=parseFloat(document.getElementById('yMax').value);
+  if (isNaN(xmn)||isNaN(xmx)||isNaN(ymn)||isNaN(ymx)||xmn>=xmx||ymn>=ymx) {
+    alert('Rango inválido. Asegúrate que mín < máx.'); return;
+  }
+  view={xMin:xmn,xMax:xmx,yMin:ymn,yMax:ymx};
+  if (compiledFn) annotations=analyzeFunction(currentType);
+  draw();
+});
+
+function syncRangeInputs(){
+  document.getElementById('xMin').value=Math.round(view.xMin*100)/100;
+  document.getElementById('xMax').value=Math.round(view.xMax*100)/100;
+  document.getElementById('yMin').value=Math.round(view.yMin*100)/100;
+  document.getElementById('yMax').value=Math.round(view.yMax*100)/100;
+}
+
+document.querySelectorAll('.chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{eqInput.value=chip.dataset.eq;plot();});
+});
+
+// ── Inicio ──
+window.addEventListener('resize',resizeCanvas);
+resizeCanvas();
+eqInput.value='x^2 - 4';
+plot();
+</script>
+</body>
+</html>
