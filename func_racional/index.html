@@ -1,1 +1,1494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Funciones Racionales para el GED | GEDparaHispanos.com</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0d4f7c;
+      --primary-lt: #1a6fa0;
+      --accent: #00a896;
+      --highlight: #f4a261;
+      --danger: #d62839;
+      --success: #2a9d8f;
+      --violet: #6c5ce7;
+      --bg: #eef4fa;
+      --card: #ffffff;
+      --text: #1a2733;
+      --muted: #5a7385;
+      --border: #c5d9e8;
+      --math-bg: #e6f1fa;
+      --math-border: #b3cfE3;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      font-size: 1rem;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(150deg, #0b3d60 0%, #0d6a9e 60%, #0ea5a0 100%);
+      color: #fff;
+      padding: 3rem 1.5rem 2.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .site-tag {
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.65;
+      margin-bottom: 0.6rem;
+    }
+    header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.9rem, 5vw, 3rem);
+      margin-bottom: 0.75rem;
+      line-height: 1.2;
+    }
+    header p.subtitulo {
+      font-size: 1.05rem;
+      opacity: 0.88;
+      max-width: 580px;
+      margin: 0 auto 1.5rem;
+    }
+    .badge-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+    .badge {
+      display: inline-block;
+      padding: 0.3rem 0.9rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+    .badge-gold { background: var(--highlight); color: #3d1f00; }
+    .badge-teal { background: var(--accent); color: #fff; }
+    .badge-white { background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.35); }
+
+    /* ── MAIN ── */
+    main { max-width: 900px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+
+    /* Quick reference card */
+    .ref-card {
+      background: var(--card);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: 0 3px 18px rgba(13,79,124,0.09);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .ref-card h2 {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+    .ref-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+    .ref-item {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 0.8rem 1rem;
+      border-left: 4px solid var(--primary);
+    }
+    .ref-item h3 { font-size: 0.85rem; font-weight: 800; color: var(--primary); margin-bottom: 0.3rem; }
+    .ref-item p { font-size: 0.82rem; color: var(--muted); margin: 0; }
+    .ref-item code { font-size: 0.95rem; font-weight: 800; color: var(--text); display: block; margin-top: 0.2rem; }
+
+    /* Navigation chips */
+    .nav-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    .nav-chips a {
+      background: var(--card);
+      border: 2px solid var(--border);
+      color: var(--primary);
+      padding: 0.3rem 0.8rem;
+      border-radius: 18px;
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .nav-chips a:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    /* ── ACCORDION ── */
+    .seccion {
+      background: var(--card);
+      border-radius: 14px;
+      margin-bottom: 1.1rem;
+      box-shadow: 0 2px 14px rgba(13,79,124,0.07);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: box-shadow 0.2s;
+    }
+    .seccion[open] { box-shadow: 0 4px 24px rgba(13,79,124,0.13); }
+
+    .seccion > summary {
+      cursor: pointer;
+      padding: 1.1rem 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      list-style: none;
+      user-select: none;
+      transition: background 0.2s;
+    }
+    .seccion > summary::-webkit-details-marker { display: none; }
+    .seccion[open] > summary { background: #deeef8; }
+
+    .sum-ico {
+      width: 2.5rem; height: 2.5rem;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+      color: #fff;
+    }
+    .sum-txt { flex: 1; }
+    .sum-txt h2 { font-size: 1.05rem; font-weight: 800; color: var(--primary); margin: 0; }
+    .sum-txt span { font-size: 0.78rem; color: var(--muted); }
+    .chevron { color: var(--muted); transition: transform 0.3s; font-size: 1rem; margin-left: auto; }
+    .seccion[open] .chevron { transform: rotate(180deg); }
+
+    .contenido {
+      padding: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── CONTENT BOXES (DUA) ── */
+    .caja {
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0;
+    }
+    .caja h3, .caja h4 { font-weight: 800; margin-bottom: 0.4rem; }
+    .caja-def { background: #e6f1fa; border-left: 5px solid var(--primary); }
+    .caja-def h3, .caja-def h4 { color: var(--primary); }
+    .caja-ej { background: #e5f7f4; border-left: 5px solid var(--success); }
+    .caja-ej h3, .caja-ej h4 { color: var(--success); }
+    .caja-alerta { background: #fef3e5; border-left: 5px solid var(--highlight); }
+    .caja-alerta h3, .caja-alerta h4 { color: #b85c00; }
+    .caja-error { background: #fde8ea; border-left: 5px solid var(--danger); }
+    .caja-error h3, .caja-error h4 { color: var(--danger); }
+    .caja-tip { background: #efedff; border-left: 5px solid var(--violet); }
+    .caja-tip h3, .caja-tip h4 { color: var(--violet); }
+
+    /* Formula display */
+    .formula {
+      background: var(--math-bg);
+      border: 1.5px solid var(--math-border);
+      border-radius: 9px;
+      padding: 0.7rem 1.2rem;
+      margin: 0.75rem 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      text-align: center;
+      color: var(--primary);
+      letter-spacing: 0.02em;
+    }
+    .formula .coment { font-size: 0.78rem; font-weight: 600; color: var(--muted); display: block; margin-top: 0.25rem; }
+
+    /* Fraction rendering */
+    .fr {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      line-height: 1.25;
+      font-size: 1em;
+    }
+    .fr .fn { border-bottom: 2.5px solid currentColor; padding: 1px 5px 2px; }
+    .fr .fd { padding: 2px 5px 1px; }
+
+    /* ── TABLES ── */
+    .tabla-wrap { overflow-x: auto; margin: 1rem 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th { background: var(--primary); color: #fff; padding: 0.6rem 0.9rem; text-align: left; font-weight: 700; }
+    td { padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--border); }
+    tr:nth-child(even) td { background: #f4f9fd; }
+    td strong { color: var(--primary); }
+
+    /* ── STEPS ── */
+    .paso { display: flex; gap: 1rem; margin: 0.9rem 0; align-items: flex-start; }
+    .paso .num {
+      background: var(--primary); color: #fff; border-radius: 50%;
+      width: 2rem; height: 2rem; min-width: 2rem;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.9rem;
+    }
+    .paso .txt { flex: 1; padding-top: 0.1rem; }
+
+    /* ── INTERACTIVE CANVAS ── */
+    .interactivo {
+      background: #f4f9fd;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin: 1.25rem 0;
+    }
+    .interactivo h4 {
+      font-size: 0.82rem; font-weight: 800;
+      color: var(--primary); margin-bottom: 1rem;
+      text-align: center; text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .fn-live {
+      text-align: center;
+      font-size: 1.2rem; font-weight: 800;
+      color: var(--primary);
+      background: var(--math-bg);
+      border: 1.5px solid var(--math-border);
+      border-radius: 8px;
+      padding: 0.45rem 1rem;
+      margin-bottom: 0.9rem;
+      min-height: 2.4rem;
+    }
+    .canvas-wrap { display: flex; justify-content: center; margin-bottom: 1rem; }
+    canvas { border-radius: 8px; border: 1.5px solid var(--border); background: #fff; max-width: 100%; }
+
+    .controles {
+      display: flex; flex-wrap: wrap;
+      gap: 0.8rem; align-items: flex-end; justify-content: center;
+      margin-bottom: 0.75rem;
+    }
+    .ctrl {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 0.2rem; min-width: 110px;
+    }
+    .ctrl label { font-size: 0.8rem; font-weight: 700; color: var(--primary); }
+    .ctrl input[type=range] { width: 110px; accent-color: var(--accent); cursor: pointer; }
+    .ctrl .val {
+      font-size: 0.9rem; font-weight: 800; color: var(--accent);
+      background: #fff; border: 1.5px solid var(--border);
+      border-radius: 6px; padding: 0 0.4rem;
+      min-width: 2.4rem; text-align: center;
+    }
+    .check-row {
+      display: flex; gap: 1.2rem; justify-content: center;
+      flex-wrap: wrap; margin-top: 0.5rem;
+    }
+    .check-row label {
+      font-size: 0.85rem; font-weight: 700;
+      display: flex; align-items: center; gap: 0.4rem; cursor: pointer;
+    }
+    .check-row input[type=checkbox] { accent-color: var(--accent); width: 1rem; height: 1rem; }
+
+    .info-asint {
+      display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center;
+      margin-top: 0.6rem;
+    }
+    .chip {
+      display: inline-block; padding: 0.2rem 0.65rem;
+      border-radius: 12px; font-size: 0.78rem; font-weight: 800;
+    }
+    .chip-r { background: #fde8ea; color: #991b1b; }
+    .chip-b { background: #dbeafe; color: #1d4ed8; }
+    .chip-g { background: #dcfce7; color: #166534; }
+    .chip-o { background: #fed7aa; color: #9a3412; }
+
+    /* TI-30XS visual */
+    .calc-visual {
+      background: #2c2c2c;
+      border-radius: 14px;
+      padding: 1.2rem 1rem;
+      max-width: 340px;
+      margin: 1rem auto;
+      font-family: 'Nunito', monospace;
+    }
+    .calc-screen {
+      background: #c5d8a4;
+      border-radius: 6px;
+      padding: 0.6rem 0.8rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #1a2a00;
+      min-height: 3rem;
+      border: 2px inset #8aa87a;
+    }
+    .calc-screen .screen-line { margin-bottom: 0.1rem; }
+    .calc-screen .error { color: #cc0000; font-weight: 900; }
+    .key-row { display: flex; gap: 0.4rem; justify-content: center; margin-bottom: 0.4rem; }
+    .key {
+      background: #444; color: #fff; border-radius: 5px;
+      padding: 0.3rem 0.5rem; font-size: 0.72rem; font-weight: 700;
+      text-align: center; min-width: 2.4rem; cursor: default;
+      border: 1px solid #666;
+    }
+    .key.highlight-key { background: #1a6fa0; border-color: #0d4f7c; }
+    .key.yellow-key { background: #c89a00; border-color: #8a6a00; color: #fff; }
+
+    /* Highlight text */
+    mark { background: #fff3b0; border-radius: 3px; padding: 0 3px; }
+    strong { color: var(--primary); }
+    em { color: var(--muted); font-style: italic; }
+
+    /* Two-column on larger screens */
+    .dos-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+    @media(max-width: 600px) { .dos-col { grid-template-columns: 1fr; } }
+
+    /* Cost canvas special */
+    #canvasCosto { border-radius: 8px; }
+
+    /* Footer */
+    footer {
+      text-align: center; padding: 2.5rem 1rem;
+      color: var(--muted); font-size: 0.85rem;
+      border-top: 2px solid var(--border);
+      background: var(--card);
+    }
+    footer a { color: var(--primary); text-decoration: none; font-weight: 700; }
+
+    /* Misc */
+    ul { padding-left: 1.4rem; margin: 0.5rem 0; }
+    ul li { margin-bottom: 0.3rem; }
+    p { margin: 0.5rem 0; }
+    h3 { font-size: 1rem; font-weight: 800; color: var(--primary); margin: 1rem 0 0.4rem; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     HEADER
+══════════════════════════════════════ -->
+<header>
+  <p class="site-tag">GEDparaHispanos.com · Matemáticas Nivel NRS 6</p>
+  <h1>Funciones Racionales<br>para el GED</h1>
+  <p class="subtitulo">Dominio, gráficas, operaciones, ecuaciones y modelado del mundo real — todo lo que necesitas para el examen de Razonamiento Matemático.<br>Creado por José M. Fernández con Claude Sonnet 4.6</p>
+  <div class="badge-row">
+    <span class="badge badge-gold">NRS 6 · ASE</span>
+    <span class="badge badge-teal">Estándar 6.A.APR.6 / 6.F.IF.8c</span>
+    <span class="badge badge-white">🎯 Interactivo y DUA</span>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════
+     MAIN
+══════════════════════════════════════ -->
+<main>
+
+  <!-- Quick reference -->
+  <div class="ref-card">
+    <h2>📋 Las tres formas que necesitas dominar</h2>
+    <div class="ref-grid">
+      <div class="ref-item" style="border-color:#0d4f7c">
+        <h3>1 · Hipérbola básica</h3>
+        <code>f(x) = a / x</code>
+        <p>Punto de partida. Asíntotas en los ejes.</p>
+      </div>
+      <div class="ref-item" style="border-color:#00a896">
+        <h3>2 · Hipérbola desplazada</h3>
+        <code>f(x) = a/(x−h) + k</code>
+        <p>Asíntotas en x=h e y=k.</p>
+      </div>
+      <div class="ref-item" style="border-color:#f4a261">
+        <h3>3 · Forma general</h3>
+        <code>f(x) = (ax+b)/(cx+d)</code>
+        <p>Equivalente a la forma 2; se convierte con división.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav chips -->
+  <nav class="nav-chips" aria-label="Secciones">
+    <a href="#sec1">¿Qué son?</a>
+    <a href="#sec2">Hipérbola básica</a>
+    <a href="#sec3">Desplazada</a>
+    <a href="#sec4">Forma general</a>
+    <a href="#sec5">Operaciones</a>
+    <a href="#sec6">Ecuaciones</a>
+    <a href="#sec7">Calculadora TI-30XS</a>
+    <a href="#sec8">Modelado</a>
+  </nav>
+
+  <!-- ══════════ SECCIÓN 1: ¿Qué son? ══════════ -->
+  <details class="seccion" id="sec1">
+    <summary>
+      <span class="sum-ico" style="background:#0d4f7c">📐</span>
+      <div class="sum-txt">
+        <h2>¿Qué es una función racional?</h2>
+        <span>Definición · Dominio · Vocabulario clave</span>
+      </div>
+      <span class="chevron">▼</span>
+    </summary>
+    <div class="contenido">
+
+      <div class="caja caja-def">
+        <h3>📖 Definición formal</h3>
+        <p>Una <strong>función racional</strong> es cualquier función de la forma:</p>
+        <div class="formula">
+          f(x) = <span class="fr"><span class="fn">P(x)</span><span class="fd">Q(x)</span></span>
+          <span class="coment">donde P(x) y Q(x) son polinomios y Q(x) ≠ 0</span>
+        </div>
+        <p>La palabra <em>racional</em> viene de <em>razón</em> (cociente). Al igual que con las fracciones numéricas, el denominador <strong>nunca puede ser cero</strong>.</p>
+      </div>
+
+      <h3>Dominio y valores excluidos</h3>
+      <p>El <strong>dominio</strong> es el conjunto de todos los valores de x que tienen imagen válida. Para encontrarlo:</p>
+      <div class="paso">
+        <span class="num">1</span>
+        <div class="txt">Iguala el denominador Q(x) = 0 y resuelve para x.</div>
+      </div>
+      <div class="paso">
+        <span class="num">2</span>
+        <div class="txt">Esos valores de x son los <strong>valores excluidos</strong> — no están en el dominio.</div>
+      </div>
+      <div class="paso">
+        <span class="num">3</span>
+        <div class="txt">El dominio es "todos los números reales excepto los valores excluidos".</div>
+      </div>
+
+      <div class="caja caja-ej">
+        <h4>✏️ Ejemplo</h4>
+        <p>f(x) = <span class="fr"><span class="fn">3</span><span class="fd">x − 5</span></span></p>
+        <p>Denominador = 0 → x − 5 = 0 → <strong>x = 5 es excluido</strong></p>
+        <p>Dominio: todos los reales excepto x = 5</p>
+      </div>
+
+      <h3>Vocabulario clave del GED</h3>
+      <div class="tabla-wrap">
+        <table>
+          <tr><th>Término</th><th>Significado</th><th>Ejemplo</th></tr>
+          <tr><td><strong>Valor excluido</strong></td><td>x que hace Q(x)=0</td><td>x=2 en 1/(x−2)</td></tr>
+          <tr><td><strong>Asíntota vertical</strong></td><td>Línea x=a donde la gráfica "escapa" hacia ±∞</td><td>x=0 en f(x)=1/x</td></tr>
+          <tr><td><strong>Asíntota horizontal</strong></td><td>Línea y=b que la gráfica se aproxima cuando |x|→∞</td><td>y=0 en f(x)=1/x</td></tr>
+          <tr><td><strong>Solución extraña</strong></td><td>Valor que parece solución pero hace el denominador cero</td><td>Ver sección 6</td></tr>
+        </table>
+      </div>
+
+      <div class="caja caja-alerta">
+        <h4>⚠️ Idea esencial para el GED</h4>
+        <p>En el examen siempre debes <mark>identificar los valores excluidos antes de resolver</mark>. Son los mismos valores donde aparecerán las asíntotas verticales en la gráfica.</p>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- ══════════ SECCIÓN 2: Hipérbola básica ══════════ -->
+  <details class="seccion" id="sec2" data-canvas="canvasBasica">
+    <summary>
+      <span class="sum-ico" style="background:#0d6e6e">📈</span>
+      <div class="sum-txt">
+        <h2>Hipérbola básica: f(x) = a/x</h2>
+        <span>La forma más simple · Cuadrantes · Interactivo</span>
+      </div>
+      <span class="chevron">▼</span>
+    </summary>
+    <div class="contenido">
+
+      <p>La hipérbola básica es la función racional más fundamental. Toda hipérbola es, en esencia, una transformación de <strong>f(x) = 1/x</strong>.</p>
+
+      <div class="dos-col">
+        <div class="caja caja-def">
+          <h4>Propiedades (a &gt; 0)</h4>
+          <ul>
+            <li>Asíntota vertical: <strong>x = 0</strong></li>
+            <li>Asíntota horizontal: <strong>y = 0</strong></li>
+            <li>Curva en Q1 y Q3</li>
+            <li>Dominio: x ≠ 0</li>
+            <li>Rango: y ≠ 0</li>
+          </ul>
+        </div>
+        <div class="caja caja-tip">
+          <h4>Cuando a &lt; 0</h4>
+          <ul>
+            <li>Mismas asíntotas</li>
+            <li>Curva en Q2 y Q4</li>
+            <li>La gráfica se "voltea" respecto al eje x</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- INTERACTIVO 1 -->
+      <div class="interactivo">
+        <h4>🔬 Interactivo — Explora f(x) = a/x</h4>
+        <div class="fn-live" id="fnBasica">f(x) = 1/x</div>
+        <div class="canvas-wrap">
+          <canvas id="canvasBasica" width="400" height="340"></canvas>
+        </div>
+        <div class="controles">
+          <div class="ctrl">
+            <label for="aBasica">Valor de <em>a</em></label>
+            <input type="range" id="aBasica" min="-4" max="4" step="0.5" value="1">
+            <span class="val" id="aBasicaVal">1</span>
+          </div>
+        </div>
+        <div class="check-row">
+          <label><input type="checkbox" id="chkAsintBasica" checked> Mostrar asíntotas</label>
+          <label><input type="checkbox" id="chkPtosBasica" checked> Mostrar puntos especiales</label>
+        </div>
+        <div class="info-asint" id="infoBasica">
+          <span class="chip chip-r">AV: x = 0</span>
+          <span class="chip chip-b">AH: y = 0</span>
+        </div>
+      </div>
+
+      <div class="caja caja-ej">
+        <h4>✏️ Puntos especiales de f(x) = a/x</h4>
+        <p>Para cualquier valor de <em>a</em>, la hipérbola pasa siempre por los puntos <strong>(1, a)</strong> y <strong>(−1, −a)</strong>. Estos son los puntos de referencia clave.</p>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- ══════════ SECCIÓN 3: Hipérbola desplazada ══════════ -->
+  <details class="seccion" id="sec3" data-canvas="canvasDesplazada">
+    <summary>
+      <span class="sum-ico" style="background:#00a896">🔀</span>
+      <div class="sum-txt">
+        <h2>Hipérbola desplazada: f(x) = a/(x−h) + k</h2>
+        <span>Transformaciones · Asíntotas desplazadas · Interactivo</span>
+      </div>
+      <span class="chevron">▼</span>
+    </summary>
+    <div class="contenido">
+
+      <p>Cuando desplazamos la hipérbola básica, las asíntotas ya no están en los ejes. Entender este desplazamiento es esencial para el GED.</p>
+
+      <div class="formula">
+        f(x) = <span class="fr"><span class="fn">a</span><span class="fd">x − h</span></span> + k
+        <span class="coment">AV: x = h  ·  AH: y = k  ·  Centro: (h, k)</span>
+      </div>
+
+      <div class="tabla-wrap">
+        <table>
+          <tr><th>Parámetro</th><th>Efecto sobre la gráfica</th></tr>
+          <tr><td><strong>a</strong> (positivo)</td><td>Ramas en Q1 y Q3 del centro (h,k)</td></tr>
+          <tr><td><strong>a</strong> (negativo)</td><td>Ramas en Q2 y Q4 del centro (h,k)</td></tr>
+          <tr><td><strong>h</strong> (desplazamiento horizontal)</td><td>Mueve la asíntota vertical a x=h</td></tr>
+          <tr><td><strong>k</strong> (desplazamiento vertical)</td><td>Mueve la asíntota horizontal a y=k</td></tr>
+        </table>
+      </div>
+
+      <!-- INTERACTIVO 2 -->
+      <div class="interactivo">
+        <h4>🔬 Interactivo — Explora f(x) = a/(x−h) + k</h4>
+        <div class="fn-live" id="fnDesplazada">f(x) = 1/(x − 0) + 0</div>
+        <div class="canvas-wrap">
+          <canvas id="canvasDesplazada" width="400" height="340"></canvas>
+        </div>
+        <div class="controles">
+          <div class="ctrl">
+            <label for="aDesp">a</label>
+            <input type="range" id="aDesp" min="-4" max="4" step="0.5" value="1">
+            <span class="val" id="aDespVal">1</span>
+          </div>
+          <div class="ctrl">
+            <label for="hDesp">h (AV: x=h)</label>
+            <input type="range" id="hDesp" min="-4" max="4" step="1" value="0">
+            <span class="val" id="hDespVal">0</span>
+          </div>
+          <div class="ctrl">
+            <label for="kDesp">k (AH: y=k)</label>
+            <input type="range" id="kDesp" min="-4" max="4" step="1" value="0">
+            <span class="val" id="kDespVal">0</span>
+          </div>
+        </div>
+        <div class="check-row">
+          <label><input type="checkbox" id="chkAsintDesp" checked> Mostrar asíntotas</label>
+          <label><input type="checkbox" id="chkPtosDesp" checked> Mostrar puntos especiales</label>
+        </div>
+        <div class="info-asint" id="infoDespazada">
+          <span class="chip chip-r">AV: x = 0</span>
+          <span class="chip chip-b">AH: y = 0</span>
+          <span class="chip chip-g">Centro: (0, 0)</span>
+        </div>
+      </div>
+
+      <div class="caja caja-alerta">
+        <h4>🎯 Estrategia GED</h4>
+        <p>Si el examen te da una ecuación como <strong>f(x) = 3/(x+4) − 2</strong>, identifica inmediatamente: el <em>+4</em> dentro del denominador significa h = <strong>−4</strong> (la asíntota vertical es x = −4) y el <em>−2</em> afuera significa k = <strong>−2</strong> (asíntota horizontal y = −2).</p>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- ══════════ SECCIÓN 4: Forma general ══════════ -->
+  <details class="seccion" id="sec4" data-canvas="canvasGeneral">
+    <summary>
+      <span class="sum-ico" style="background:#f4a261">🧮</span>
+      <div class="sum-txt">
+        <h2>Forma general: f(x) = (ax+b)/(cx+d)</h2>
+        <span>Asíntotas algebraicas · Interceptos · Interactivo</span>
+      </div>
+      <span class="chevron">▼</span>
+    </summary>
+    <div class="contenido">
+
+      <p>La forma general es la más común en el GED. Nos permite encontrar <strong>todas las características clave mediante álgebra</strong> antes de graficar.</p>
+
+      <div class="formula">
+        f(x) = <span class="fr"><span class="fn">ax + b</span><span class="fd">cx + d</span></span>
+      </div>
+
+      <h3>Cómo encontrar cada característica</h3>
+
+      <div class="tabla-wrap">
+        <table>
+          <tr><th>Característica</th><th>Método</th><th>Fórmula</th></tr>
+          <tr><td><strong>Asíntota vertical (AV)</strong></td><td>Denominador = 0</td><td>cx + d = 0 → x = −d/c</td></tr>
+          <tr><td><strong>Asíntota horizontal (AH)</strong></td><td>Coeficientes líderes</td><td>y = a/c</td></tr>
+          <tr><td><strong>Intercepto en x</strong></td><td>Numerador = 0</td><td>ax + b = 0 → x = −b/a</td></tr>
+          <tr><td><strong>Intercepto en y</strong></td><td>Evaluar f(0)</td><td>y = b/d</td></tr>
+        </table>
+      </div>
+
+      <div class="caja caja-ej">
+        <h4>✏️ Ejemplo completo: f(x) = (2x + 6)/(x − 1)</h4>
+        <p>AV: x − 1 = 0 → <strong>x = 1</strong></p>
+        <p>AH: coeficientes líderes 2/1 → <strong>y = 2</strong></p>
+        <p>Intercepto x: 2x + 6 = 0 → 2x = −6 → <strong>x = −3</strong>, punto (−3, 0)</p>
+        <p>Intercepto y: f(0) = 6/(−1) = <strong>−6</strong>, punto (0, −6)</p>
+      </div>
+
+      <h3>Conexión con la forma desplazada</h3>
+      <p>Toda fracción de la forma general se puede reescribir como hipérbola desplazada usando <strong>división larga de polinomios</strong>:</p>
+      <div class="formula">
+        <span class="fr"><span class="fn">2x + 6</span><span class="fd">x − 1</span></span> = 2 + <span class="fr"><span class="fn">8</span><span class="fd">x − 1</span></span>
+        <span class="coment">Confirma: AH = 2, AV = 1 ✓</span>
+      </div>
+
+      <!-- INTERACTIVO 3 -->
+      <div class="interactivo">
+        <h4>🔬 Interactivo — Explora f(x) = (ax+b)/(cx+d)</h4>
+        <div class="fn-live" id="fnGeneral">f(x) = (1x + 0) / (1x + 0)</div>
+        <div class="canvas-wrap">
+          <canvas id="canvasGeneral" width="400" height="340"></canvas>
+        </div>
+        <div class="controles">
+          <div class="ctrl">
+            <label for="aGen">a (num)</label>
+            <input type="range" id="aGen" min="-4" max="4" step="1" value="1">
+            <span class="val" id="aGenVal">1</span>
+          </div>
+          <div class="ctrl">
+            <label for="bGen">b (num)</label>
+            <input type="range" id="bGen" min="-4" max="4" step="1" value="0">
+            <span class="val" id="bGenVal">0</span>
+          </div>
+          <div class="ctrl">
+            <label for="cGen">c (den)</label>
+            <input type="range" id="cGen" min="-4" max="4" step="1" value="1">
+            <span class="val" id="cGenVal">1</span>
+          </div>
+          <div class="ctrl">
+            <label for="dGen">d (den)</label>
+            <input type="range" id="dGen" min="-4" max="4" step="1" value="0">
+            <span class="val" id="dGenVal">0</span>
+          </div>
+        </div>
+        <div class="check-row">
+          <label><input type="checkbox" id="chkAsintGen" checked> Mostrar asíntotas</label>
+          <label><input type="checkbox" id="chkPtosGen" checked> Mostrar interceptos</label>
+        </div>
+        <div class="info-asint" id="infoGeneral">
+          <span class="chip chip-r" id="chipAV">AV: —</span>
+          <span class="chip chip-b" id="chipAH">AH: —</span>
+          <span class="chip chip-g" id="chipXI">x-int: —</span>
+          <span class="chip chip-o" id="chipYI">y-int: —</span>
+        </div>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- ══════════ SECCIÓN 5: Operaciones ══════════ -->
+  <details class="seccion" id="sec5">
+    <summary>
+      <span class="sum-ico" style="background:#6c5ce7">⚙️</span>
+      <div class="sum-txt">
+        <h2>Operaciones con expresiones racionales</h2>
+        <span>Simplificar · Multiplicar · Sumar · Errores comunes</span>
+      </div>
+      <span class="chevron">▼</span>
+    </summary>
+    <div class="contenido">
+
+      <h3>1 · Simplificación (reducción)</h3>
+      <p>Solo puedes cancelar <strong>factores</strong> (que se multiplican), nunca términos que se suman o restan.</p>
+
+      <div class="caja caja-ej">
+        <h4>✏️ Simplificación correcta</h4>
+        <p>
+          <span class="fr"><span class="fn">x² − 4</span><span class="fd">x + 2</span></span>
+          =
+          <span class="fr"><span class="fn">(x+2)(x−2)</span><span class="fd">(x+2)</span></span>
+          = x − 2 &nbsp;&nbsp;<em>(x ≠ −2)</em>
+        </p>
+        <p>Primero factoriza, luego cancela el factor común (x+2).</p>
+      </div>
+
+      <div class="caja caja-error">
+        <h4>❌ ERROR clásico del GED</h4>
+        <p>
+          <span class="fr"><span class="fn">x + 4</span><span class="fd">x + 2</span></span>
+          ≠ 2 &nbsp;&nbsp;← <strong>¡INCORRECTO!</strong>
+        </p>
+        <p>No puedes cancelar x+4 con x+2. Los x se están <em>sumando</em>, no multiplicando. Solo puedes cancelar cuando el mismo factor aparece en el <strong>numerador Y denominador</strong> multiplicando todo.</p>
+      </div>
+
+      <h3>2 · Multiplicación y división</h3>
+      <div class="caja caja-ej">
+        <h4>Multiplicación: multiplica y simplifica</h4>
+        <p>
+          <span class="fr"><span class="fn">3x</span><span class="fd">x+1</span></span>
+          ·
+          <span class="fr"><span class="fn">x+1</span><span class="fd">6</span></span>
+          =
+          <span class="fr"><span class="fn">3x(x+1)</span><span class="fd">6(x+1)</span></span>
+          =
+          <span class="fr"><span class="fn">3x</span><span class="fd">6</span></span>
+          =
+          <span class="fr"><span class="fn">x</span><span class="fd">2</span></span>
+        </p>
+      </div>
+      <div class="caja caja-ej">
+        <h4>División: multiplica por el recíproco</h4>
+        <p>
+          <span class="fr"><span class="fn">2x</span><span class="fd">5</span></span>
+          ÷
+          <span class="fr"><span class="fn">4</span><span class="fd">x</span></span>
+          =
+          <span class="fr"><span class="fn">2x</span><span class="fd">5</span></span>
+          ·
+          <span class="fr"><span class="fn">x</span><span class="fd">4</span></span>
+          =
+          <span class="fr"><span class="fn">2x²</span><span class="fd">20</span></span>
+          =
+          <span class="fr"><span class="fn">x²</span><span class="fd">10</span></span>
+        </p>
+      </div>
+
+      <h3>3 · Suma y resta (necesitas MCM)</h3>
+      <div class="paso"><span class="num">1</span><div class="txt">Factoriza cada denominador.</div></div>
+      <div class="paso"><span class="num">2</span><div class="txt">Encuentra el <strong>MCM</strong> (Mínimo Común Múltiplo) de los denominadores.</div></div>
+      <div class="paso"><span class="num">3</span><div class="txt">Reescribe cada fracción con el denominador MCM.</div></div>
+      <div class="paso"><span class="num">4</span><div class="txt">Suma o resta los numeradores. <mark>El denominador NO cambia.</mark></div></div>
+      <div class="paso"><span class="num">5</span><div class="txt">Simplifica el resultado si es posible.</div></div>
+
+      <div class="caja caja-ej">
+        <h4>✏️ Ejemplo: suma con denominadores distintos</h4>
+        <p>
+          <span class="fr"><span class="fn">1</span><span class="fd">x</span></span>
+          +
+          <span class="fr"><span class="fn">2</span><span class="fd">x+3</span></span>
+          = 
+          <span class="fr"><span class="fn">1(x+3) + 2(x)</span><span class="fd">x(x+3)</span></span>
+          =
+          <span class="fr"><span class="fn">x + 3 + 2x</span><span class="fd">x(x+3)</span></span>
+          =
+          <span class="fr"><span class="fn">3x + 3</span><span class="fd">x(x+3)</span></span>
+        </p>
+        <p>MCM = x(x+3)</p>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- ══════════ SECCIÓN 6: Ecuaciones ══════════ -->
+  <details class="seccion" id="sec6">
+    <summary>
+      <span class="sum-ico" style="background:#d62839">🔍</span>
+      <div class="sum-txt">
+        <h2>Ecuaciones racionales y soluciones extrañas</h2>
+        <span>Resolver con MCM · Verificar siempre · Soluciones extrañas</span>
+      </div>
+      <span class="chevron">▼</span>
+    </summary>
+    <div class="contenido">
+
+      <h3>Método para resolver ecuaciones racionales</h3>
+
+      <div class="paso"><span class="num">1</span><div class="txt"><strong>Identifica los valores excluidos</strong> antes de resolver. (Los candidatos a soluciones extrañas.)</div></div>
+      <div class="paso"><span class="num">2</span><div class="txt">Encuentra el MCM de todos los denominadores.</div></div>
+      <div class="paso"><span class="num">3</span><div class="txt"><strong>Multiplica ambos lados</strong> de la ecuación por el MCM. Los denominadores desaparecen.</div></div>
+      <div class="paso"><span class="num">4</span><div class="txt">Resuelve la ecuación resultante (lineal o cuadrática).</div></div>
+      <div class="paso"><span class="num">5</span><div class="txt"><mark>¡SIEMPRE verifica!</mark> Sustituye cada solución en la ecuación original. Descarta las que hacen un denominador = 0.</div></div>
+
+      <div class="caja caja-ej">
+        <h4>✏️ Ejemplo completo: resolver con comprobación</h4>
+        <p>Resolver: <span class="fr"><span class="fn">3</span><span class="fd">x − 2</span></span> = <span class="fr"><span class="fn">6</span><span class="fd">x² − 4</span></span></p>
+        <p><strong>Valores excluidos:</strong> x² − 4 = (x+2)(x−2) = 0 → x = 2 y x = −2</p>
+        <p><strong>MCM</strong> = (x+2)(x−2)</p>
+        <p>Multiplicando: 3(x+2) = 6 → 3x + 6 = 6 → 3x = 0 → <strong>x = 0</strong></p>
+        <p><strong>Verificación:</strong> x = 0 no es valor excluido ✓ → Solución válida.</p>
+      </div>
+
+      <div class="caja caja-error">
+        <h4>🚨 ¿Qué es una solución extraña (espuria)?</h4>
+        <p>Es un valor de x que parece satisfacer la ecuación algebraicamente, pero que en realidad hace que algún denominador original sea cero. <strong>No es una solución válida.</strong></p>
+        <p style="margin-top:0.5rem"><em>Ejemplo:</em> Si al resolver obtienes x = 3, pero el denominador original incluye (x − 3), entonces x = 3 es una <strong>solución extraña — debes descartarla</strong>.</p>
+      </div>
+
+      <div class="caja caja-tip">
+        <h4>💡 Tip GED — Trabajo compartido</h4>
+        <p>Un tipo frecuente de problema de ecuaciones racionales es el de <strong>trabajo compartido</strong>:</p>
+        <div class="formula">
+          <span class="fr"><span class="fn">1</span><span class="fd">Tiempo de A</span></span>
+          +
+          <span class="fr"><span class="fn">1</span><span class="fd">Tiempo de B</span></span>
+          =
+          <span class="fr"><span class="fn">1</span><span class="fd">Tiempo juntos</span></span>
+        </div>
+        <p><em>Ejemplo:</em> Ana pinta una pared en 4 h, Carlos en 6 h. Juntos: <span class="fr"><span class="fn">1</span><span class="fd">4</span></span> + <span class="fr"><span class="fn">1</span><span class="fd">6</span></span> = <span class="fr"><span class="fn">1</span><span class="fd">t</span></span> → MCM=12 → 3 + 2 = <span class="fr"><span class="fn">12</span><span class="fd">t</span></span> → 5t = 12 → <strong>t = 2.4 horas</strong></p>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- ══════════ SECCIÓN 7: Calculadora TI-30XS ══════════ -->
+  <details class="seccion" id="sec7">
+    <summary>
+      <span class="sum-ico" style="background:#2a9d8f">🖩</span>
+      <div class="sum-txt">
+        <h2>Calculadora TI-30XS y el mensaje ERROR</h2>
+        <span>Función TABLE · Qué significa ERROR · Estrategias para el examen</span>
+      </div>
+      <span class="chevron">▼</span>
+    </summary>
+    <div class="contenido">
+
+      <div class="caja caja-def">
+        <h3>🔑 La clave: qué significa ERROR en la tabla</h3>
+        <p>Cuando usas la función TABLE de la TI-30XS y aparece <strong>ERROR</strong> en la columna Y1 para un valor de x, eso significa exactamente que el denominador es cero en ese punto. En otras palabras: <mark>ERROR = asíntota vertical = valor excluido del dominio.</mark></p>
+      </div>
+
+      <!-- Calc visual -->
+      <div class="calc-visual">
+        <div class="calc-screen">
+          <div class="screen-line">X &nbsp;&nbsp;&nbsp; | &nbsp; Y1</div>
+          <div class="screen-line">─────────────</div>
+          <div class="screen-line">-2 &nbsp;&nbsp; | &nbsp; -0.5</div>
+          <div class="screen-line">-1 &nbsp;&nbsp; | &nbsp; -1</div>
+          <div class="screen-line" style="font-weight:900">0 &nbsp;&nbsp;&nbsp; | &nbsp; <span class="error">ERROR ◄</span></div>
+          <div class="screen-line">1 &nbsp;&nbsp;&nbsp; | &nbsp; 1</div>
+          <div class="screen-line">2 &nbsp;&nbsp;&nbsp; | &nbsp; 0.5</div>
+        </div>
+        <div style="text-align:center;color:#aaa;font-size:0.75rem">TI-30XS Multiview — Tabla para f(x) = 1/x</div>
+        <div class="key-row" style="margin-top:1rem">
+          <div class="key yellow-key">2nd</div>
+          <div class="key highlight-key">TABLE</div>
+          <div class="key">→ escribe función</div>
+        </div>
+      </div>
+
+      <h3>Pasos para usar TABLE y encontrar asíntotas</h3>
+
+      <div class="paso"><span class="num">1</span><div class="txt">Presiona <strong>2nd</strong> seguido de la tecla que tiene <strong>TABLE</strong> encima (normalmente es la tecla de la gráfica).</div></div>
+      <div class="paso"><span class="num">2</span><div class="txt">Ingresa tu función usando la tecla <strong>n/d</strong> para escribir fracciones exactas: escribe el numerador, presiona n/d, escribe el denominador.</div></div>
+      <div class="paso"><span class="num">3</span><div class="txt">La tabla muestra valores de Y1 para cada X. <mark>Busca dónde aparece ERROR</mark> → esa X es tu asíntota vertical.</div></div>
+      <div class="paso"><span class="num">4</span><div class="txt">Observa el comportamiento lejos del ERROR (x muy grande o muy negativa): el valor de Y1 se acerca a un número → esa es tu <strong>asíntota horizontal</strong>.</div></div>
+
+      <h3>Estrategias adicionales con la TI-30XS</h3>
+
+      <div class="dos-col">
+        <div class="caja caja-tip">
+          <h4>Verificar simplificaciones</h4>
+          <p>¿Simplificaste bien? Guarda un valor con <strong>STO→ x</strong>, luego evalúa la fracción original y la simplificada. Si coinciden, simplificaste correctamente.</p>
+        </div>
+        <div class="caja caja-tip">
+          <h4>Opción múltiple</h4>
+          <p>Ante respuestas de opción múltiple sobre dominios, sustituye cada valor de respuesta en el denominador. El que dé 0 es el valor excluido.</p>
+        </div>
+      </div>
+
+      <div class="caja caja-alerta">
+        <h4>⚠️ Recuerda la regla de oro</h4>
+        <p>La calculadora confirma tus respuestas, pero <strong>no reemplaza el entendimiento algebraico</strong>. El GED puede pedirte que <em>expliques</em> o <em>demuestres</em> pasos algebraicos. Siempre trabaja el problema a mano primero y usa la calculadora para verificar.</p>
+      </div>
+
+      <div class="caja caja-def">
+        <h4>📋 Teclas importantes de la TI-30XS para funciones racionales</h4>
+        <div class="tabla-wrap">
+          <table>
+            <tr><th>Tecla</th><th>Uso</th></tr>
+            <tr><td><strong>n/d</strong></td><td>Escribe fracciones exactas como aparecen en el papel</td></tr>
+            <tr><td><strong>2nd + TABLE</strong></td><td>Genera tabla de valores — ¡para ver ERRORs y asíntotas!</td></tr>
+            <tr><td><strong>STO→ x</strong></td><td>Almacena un valor para verificar simplificaciones</td></tr>
+            <tr><td><strong>(  )</strong></td><td>Siempre agrupa numeradores y denominadores completos</td></tr>
+            <tr><td><strong>x²</strong> / <strong>^</strong></td><td>Para potencias en numeradores o denominadores</td></tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- ══════════ SECCIÓN 8: Modelado ══════════ -->
+  <details class="seccion" id="sec8" data-canvas="canvasCosto">
+    <summary>
+      <span class="sum-ico" style="background:#e67e22">🏭</span>
+      <div class="sum-txt">
+        <h2>Modelado del mundo real: Optimización de costos</h2>
+        <span>Fábrica de zapatos · Función de costo promedio · Problema GED</span>
+      </div>
+      <span class="chevron">▼</span>
+    </summary>
+    <div class="contenido">
+
+      <div class="caja caja-alerta">
+        <h4>🎯 El problema</h4>
+        <p>Una fábrica invierte <strong>$1,200</strong> en maquinaria (costo fijo) y produce cada par de zapatos a un costo variable de <strong>$15</strong> por par. ¿Cuántos pares deben fabricarse para que el <strong>costo promedio por par baje a exactamente $20</strong>?</p>
+      </div>
+
+      <!-- Step by step -->
+      <h3>Paso 1 — Comprender los costos</h3>
+      <div class="dos-col">
+        <div class="caja caja-def">
+          <h4>Costo fijo</h4>
+          <p><strong>$1,200</strong> — Se paga una vez, sin importar cuántos pares se fabriquen. (La maquinaria.)</p>
+        </div>
+        <div class="caja caja-def">
+          <h4>Costo variable</h4>
+          <p><strong>$15 × x</strong> — Cambia con la producción. Si produces x pares, pagas $15x en materiales.</p>
+        </div>
+      </div>
+      <p><strong>Costo total:</strong> &nbsp; 1200 + 15x</p>
+
+      <h3>Paso 2 — Crear la función de costo promedio</h3>
+      <p>El costo promedio = Costo total ÷ Cantidad producida:</p>
+      <div class="formula">
+        C(x) = <span class="fr"><span class="fn">1200 + 15x</span><span class="fd">x</span></span>
+        <span class="coment">Esta es nuestra función racional · Dominio: x &gt; 0 (enteros positivos)</span>
+      </div>
+      <p>Podemos reescribirla como: C(x) = <span class="fr"><span class="fn">1200</span><span class="fd">x</span></span> + 15 &nbsp;&nbsp; → &nbsp;&nbsp; AH: <strong>y = 15</strong> &nbsp;|&nbsp; AV: <strong>x = 0</strong></p>
+
+      <div class="caja caja-tip">
+        <h4>💡 Interpretación económica de la asíntota horizontal</h4>
+        <p>¿Por qué la asíntota horizontal es y = 15? Porque al producir muchísimos pares, el costo fijo de $1,200 se "diluye" entre tantos pares que se vuelve insignificante. El costo promedio se acerca, pero <strong>nunca llega a ser exactamente $15</strong>.</p>
+      </div>
+
+      <h3>Paso 3 — Plantear la ecuación</h3>
+      <p>Queremos C(x) = 20:</p>
+      <div class="formula">
+        <span class="fr"><span class="fn">1200 + 15x</span><span class="fd">x</span></span> = 20
+      </div>
+
+      <h3>Paso 4 — Resolver (eliminar el denominador)</h3>
+
+      <div class="paso"><span class="num">1</span><div class="txt">Multiplica ambos lados por x: &nbsp; <strong>1200 + 15x = 20x</strong></div></div>
+      <div class="paso"><span class="num">2</span><div class="txt">Resta 15x en ambos lados: &nbsp; <strong>1200 = 20x − 15x</strong></div></div>
+      <div class="paso"><span class="num">3</span><div class="txt">Simplifica: &nbsp; <strong>1200 = 5x</strong></div></div>
+      <div class="paso"><span class="num">4</span><div class="txt">Divide entre 5: &nbsp; <strong>x = 240</strong></div></div>
+
+      <div class="caja caja-ej">
+        <h4>✅ Verificación</h4>
+        <p>C(240) = (1200 + 15·240) / 240 = (1200 + 3600) / 240 = 4800 / 240 = <strong>$20 ✓</strong></p>
+        <p>x = 240 no hace el denominador cero (240 ≠ 0). <strong>No es solución extraña.</strong></p>
+      </div>
+
+      <h3>Visualización gráfica</h3>
+      <p>Observa cómo la curva desciende desde arriba, se aproxima a la asíntota horizontal y=15, y corta la línea y=20 exactamente en x=240.</p>
+
+      <!-- Canvas costo -->
+      <div class="interactivo">
+        <h4>📊 Gráfica de C(x) = (1200 + 15x)/x</h4>
+        <div class="canvas-wrap">
+          <canvas id="canvasCosto" width="420" height="320"></canvas>
+        </div>
+        <div class="info-asint">
+          <span class="chip chip-r">AV: x = 0 (dominio x &gt; 0)</span>
+          <span class="chip chip-b">AH: y = 15 (costo variable)</span>
+          <span class="chip chip-g">Solución: (240, 20)</span>
+        </div>
+      </div>
+
+      <div class="caja caja-def">
+        <h4>📌 Conclusión</h4>
+        <p>La fábrica necesita producir exactamente <strong>240 pares</strong> de zapatos para que el costo promedio sea de $20 por par. Al producir menos, el costo de la maquinaria encarece demasiado cada par. Al producir más, el costo promedio baja más, pero nunca llegará a ser menos de $15 (el costo puramente variable).</p>
+      </div>
+
+      <div class="caja caja-alerta">
+        <h4>🎯 Estilo de pregunta GED</h4>
+        <p>El GED puede presentar esta situación de varias formas:</p>
+        <ul>
+          <li>"¿Cuántos artículos deben producirse para que el costo promedio sea $X?" → <em>Igualar C(x) = X y resolver.</em></li>
+          <li>"¿A qué valor se aproxima el costo promedio al crecer la producción?" → <em>La asíntota horizontal.</em></li>
+          <li>"¿Qué representa el denominador x?" → <em>La cantidad producida; no puede ser cero.</em></li>
+        </ul>
+      </div>
+
+    </div>
+  </details>
+
+</main>
+
+<!-- ══════════════════════════════════════
+     FOOTER
+══════════════════════════════════════ -->
+<footer>
+  <p>📚 <strong>GEDparaHispanos.com</strong> · Recursos gratuitos de preparación para el GED en español</p>
+  <p style="margin-top:0.5rem">Alineado con los Estándares de Contenido Matemático IL ABE/ASE 2021 · Nivel NRS 6</p>
+  <p style="margin-top:0.3rem">Diseño DUA · Accesibilidad WCAG 2.1</p>
+</footer>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT — CANVAS INTERACTIVOS
+══════════════════════════════════════ -->
+<script>
+  // ── UTILIDADES DE CANVAS ──────────────────────────────
+
+  const SCALE = 30;   // píxeles por unidad
+
+  function initCtx(id) {
+    const canvas = document.getElementById(id);
+    if (!canvas) return null;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const cx = W / 2, cy = H / 2;
+    return { canvas, ctx, W, H, cx, cy };
+  }
+
+  function drawGrid(ctx, W, H, cx, cy) {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+
+    // Grid lines
+    const maxX = Math.ceil(cx / SCALE) + 1;
+    const maxY = Math.ceil(cy / SCALE) + 1;
+
+    ctx.strokeStyle = '#eaf0f6';
+    ctx.lineWidth = 1;
+    for (let i = -maxX; i <= maxX; i++) {
+      const px = cx + i * SCALE;
+      ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke();
+    }
+    for (let j = -maxY; j <= maxY; j++) {
+      const py = cy + j * SCALE;
+      ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(W, py); ctx.stroke();
+    }
+
+    // Axes
+    ctx.strokeStyle = '#9ab3c8';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, H); ctx.stroke();
+
+    // Tick labels
+    ctx.fillStyle = '#7a8f9e';
+    ctx.font = '10px Nunito, sans-serif';
+    const visMax = 5;
+
+    ctx.textAlign = 'center';
+    for (let i = -visMax; i <= visMax; i++) {
+      if (i === 0) continue;
+      const px = cx + i * SCALE;
+      if (px < 5 || px > W - 5) continue;
+      ctx.beginPath(); ctx.strokeStyle = '#9ab3c8'; ctx.lineWidth = 1;
+      ctx.moveTo(px, cy - 3); ctx.lineTo(px, cy + 3); ctx.stroke();
+      ctx.fillText(i, px, cy + 13);
+    }
+
+    ctx.textAlign = 'right';
+    for (let j = -visMax; j <= visMax; j++) {
+      if (j === 0) continue;
+      const py = cy - j * SCALE;
+      if (py < 5 || py > H - 5) continue;
+      ctx.beginPath(); ctx.strokeStyle = '#9ab3c8'; ctx.lineWidth = 1;
+      ctx.moveTo(cx - 3, py); ctx.lineTo(cx + 3, py); ctx.stroke();
+      ctx.fillText(j, cx - 6, py + 4);
+    }
+
+    // Axis labels
+    ctx.fillStyle = '#5a7385'; ctx.font = 'bold 11px Nunito, sans-serif';
+    ctx.textAlign = 'center'; ctx.fillText('x', W - 8, cy - 6);
+    ctx.textAlign = 'left';   ctx.fillText('y', cx + 6, 11);
+  }
+
+  function plotCurve(ctx, W, H, cx, cy, fn, color, lw) {
+    ctx.strokeStyle = color || '#0d4f7c';
+    ctx.lineWidth = lw || 2.5;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+
+    const JUMP = SCALE * 2.5;
+    let penDown = false, lastPy = null;
+
+    for (let px = 0; px <= W; px++) {
+      const x = (px - cx) / SCALE;
+      let y;
+      try { y = fn(x); } catch(e) { penDown = false; lastPy = null; continue; }
+
+      if (!isFinite(y) || isNaN(y) || Math.abs(y) > (cy / SCALE) + 1) {
+        penDown = false; lastPy = null; continue;
+      }
+
+      const py = cy - y * SCALE;
+
+      if (!penDown || (lastPy !== null && Math.abs(py - lastPy) > JUMP)) {
+        ctx.moveTo(px, py);
+      } else {
+        ctx.lineTo(px, py);
+      }
+      penDown = true; lastPy = py;
+    }
+    ctx.stroke();
+  }
+
+  function drawAsint(ctx, W, H, cx, cy, type, val, color) {
+    if (!isFinite(val)) return;
+    ctx.save();
+    ctx.strokeStyle = color || '#d62839';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([7, 5]);
+    ctx.beginPath();
+    if (type === 'v') {
+      const px = cx + val * SCALE;
+      if (px < 0 || px > W) { ctx.restore(); return; }
+      ctx.moveTo(px, 0); ctx.lineTo(px, H);
+    } else {
+      const py = cy - val * SCALE;
+      if (py < 0 || py > H) { ctx.restore(); return; }
+      ctx.moveTo(0, py); ctx.lineTo(W, py);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function markPt(ctx, cx, cy, x, y, color, label) {
+    const px = cx + x * SCALE;
+    const py = cy - y * SCALE;
+    if (px < 4 || px > ctx.canvas.width - 4 || py < 4 || py > ctx.canvas.height - 4) return;
+    ctx.fillStyle = color || '#f4a261';
+    ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.stroke();
+    if (label) {
+      ctx.fillStyle = '#1a2733'; ctx.font = 'bold 9px Nunito, sans-serif';
+      ctx.textAlign = 'left'; ctx.fillText(label, px + 7, py - 4);
+    }
+  }
+
+  // ── INTERACTIVO 1: Hipérbola básica ──────────────────
+
+  function drawBasica() {
+    const g = initCtx('canvasBasica'); if (!g) return;
+    const { ctx, W, H, cx, cy } = g;
+    const a = parseFloat(document.getElementById('aBasica').value);
+    const showAsint = document.getElementById('chkAsintBasica').checked;
+    const showPts  = document.getElementById('chkPtosBasica').checked;
+
+    drawGrid(ctx, W, H, cx, cy);
+
+    if (showAsint) {
+      drawAsint(ctx, W, H, cx, cy, 'v', 0, '#d62839');
+      drawAsint(ctx, W, H, cx, cy, 'h', 0, '#1d4ed8');
+    }
+
+    if (a !== 0) {
+      plotCurve(ctx, W, H, cx, cy, x => a / x, '#0d4f7c', 2.5);
+    }
+
+    if (showPts && a !== 0) {
+      markPt(ctx, cx, cy,  1,  a, '#f4a261', `(1, ${a})`);
+      markPt(ctx, cx, cy, -1, -a, '#f4a261', `(-1, ${-a})`);
+      if (Math.abs(a) <= 5) {
+        markPt(ctx, cx, cy,  a,  1, '#2a9d8f', `(${a}, 1)`);
+        markPt(ctx, cx, cy, -a, -1, '#2a9d8f', `(${-a}, -1)`);
+      }
+    }
+
+    // Update display
+    const sign = a >= 0 ? '' : '';
+    document.getElementById('fnBasica').textContent = `f(x) = ${a} / x`;
+    document.getElementById('aBasicaVal').textContent = a;
+  }
+
+  // ── INTERACTIVO 2: Hipérbola desplazada ──────────────
+
+  function drawDesplazada() {
+    const g = initCtx('canvasDesplazada'); if (!g) return;
+    const { ctx, W, H, cx, cy } = g;
+    const a = parseFloat(document.getElementById('aDesp').value);
+    const h = parseFloat(document.getElementById('hDesp').value);
+    const k = parseFloat(document.getElementById('kDesp').value);
+    const showAsint = document.getElementById('chkAsintDesp').checked;
+    const showPts  = document.getElementById('chkPtosDesp').checked;
+
+    drawGrid(ctx, W, H, cx, cy);
+
+    if (showAsint) {
+      drawAsint(ctx, W, H, cx, cy, 'v', h, '#d62839');
+      drawAsint(ctx, W, H, cx, cy, 'h', k, '#1d4ed8');
+    }
+
+    if (a !== 0) {
+      plotCurve(ctx, W, H, cx, cy, x => a / (x - h) + k, '#0d4f7c', 2.5);
+    }
+
+    if (showPts && a !== 0) {
+      // x-intercept: a/(x-h)+k=0 → x = h - a/k (only if k≠0)
+      if (k !== 0) {
+        const xi = h - a / k;
+        if (Math.abs(xi) <= 7) markPt(ctx, cx, cy, xi, 0, '#2a9d8f', `(${xi.toFixed(1)}, 0)`);
+      }
+      // y-intercept: x=0 → a/(0-h)+k = -a/h + k (if h≠0)
+      if (h !== 0) {
+        const yi = a / (0 - h) + k;
+        if (Math.abs(yi) <= 7) markPt(ctx, cx, cy, 0, yi, '#f4a261', `(0, ${yi.toFixed(1)})`);
+      }
+      // Center reference point
+      markPt(ctx, cx, cy, h + 1, a + k, '#6c5ce7', `(${h+1}, ${(a+k).toFixed(1)})`);
+    }
+
+    // Update display
+    const kStr = k >= 0 ? `+ ${k}` : `- ${Math.abs(k)}`;
+    const hStr = h >= 0 ? `x − ${h}` : `x + ${Math.abs(h)}`;
+    document.getElementById('fnDesplazada').textContent = `f(x) = ${a} / (${hStr}) ${kStr}`;
+    document.getElementById('aDespVal').textContent = a;
+    document.getElementById('hDespVal').textContent = h;
+    document.getElementById('kDespVal').textContent = k;
+    document.getElementById('infoDespazada').innerHTML =
+      `<span class="chip chip-r">AV: x = ${h}</span>
+       <span class="chip chip-b">AH: y = ${k}</span>
+       <span class="chip chip-g">Centro: (${h}, ${k})</span>`;
+  }
+
+  // ── INTERACTIVO 3: Forma general ─────────────────────
+
+  function drawGeneral() {
+    const g = initCtx('canvasGeneral'); if (!g) return;
+    const { ctx, W, H, cx, cy } = g;
+    const a = parseFloat(document.getElementById('aGen').value);
+    const b = parseFloat(document.getElementById('bGen').value);
+    const c = parseFloat(document.getElementById('cGen').value);
+    const d = parseFloat(document.getElementById('dGen').value);
+    const showAsint = document.getElementById('chkAsintGen').checked;
+    const showPts  = document.getElementById('chkPtosGen').checked;
+
+    drawGrid(ctx, W, H, cx, cy);
+
+    if (c === 0) {
+      ctx.fillStyle = '#d62839'; ctx.font = 'bold 13px Nunito, sans-serif';
+      ctx.textAlign = 'center'; ctx.fillText('c = 0 → no es función racional (denominador constante)', W/2, H/2);
+      document.getElementById('fnGeneral').textContent = `c = 0: el denominador es constante`;
+      return;
+    }
+
+    const VA = -d / c;
+    const HA = a / c;
+    const fn = x => (a * x + b) / (c * x + d);
+
+    if (showAsint) {
+      drawAsint(ctx, W, H, cx, cy, 'v', VA, '#d62839');
+      drawAsint(ctx, W, H, cx, cy, 'h', HA, '#1d4ed8');
+    }
+
+    plotCurve(ctx, W, H, cx, cy, fn, '#0d4f7c', 2.5);
+
+    if (showPts) {
+      // x-intercept (a≠0)
+      if (a !== 0) {
+        const xi = -b / a;
+        if (Math.abs(xi) <= 7 && Math.abs(xi - VA) > 0.1)
+          markPt(ctx, cx, cy, xi, 0, '#2a9d8f', `(${xi.toFixed(1)}, 0)`);
+      }
+      // y-intercept (d≠0)
+      if (d !== 0) {
+        const yi = b / d;
+        if (Math.abs(yi) <= 7)
+          markPt(ctx, cx, cy, 0, yi, '#f4a261', `(0, ${yi.toFixed(1)})`);
+      }
+    }
+
+    // Display
+    const fmtCoef = (v, varStr) => {
+      if (v === 0) return '0';
+      if (v === 1) return varStr;
+      if (v === -1) return '-' + varStr;
+      return `${v}${varStr}`;
+    };
+    const numStr = `${fmtCoef(a,'x')} + ${b}`;
+    const denStr = `${fmtCoef(c,'x')} + ${d}`;
+    document.getElementById('fnGeneral').textContent = `f(x) = (${numStr}) / (${denStr})`;
+    document.getElementById('aGenVal').textContent = a;
+    document.getElementById('bGenVal').textContent = b;
+    document.getElementById('cGenVal').textContent = c;
+    document.getElementById('dGenVal').textContent = d;
+
+    document.getElementById('chipAV').textContent = `AV: x = ${VA.toFixed(2)}`;
+    document.getElementById('chipAH').textContent = `AH: y = ${HA.toFixed(2)}`;
+    document.getElementById('chipXI').textContent = a !== 0 ? `x-int: ${(-b/a).toFixed(2)}` : 'x-int: ninguno';
+    document.getElementById('chipYI').textContent = d !== 0 ? `y-int: ${(b/d).toFixed(2)}` : 'y-int: ninguno';
+  }
+
+  // ── CANVAS DE COSTO ──────────────────────────────────
+
+  function drawCosto() {
+    const canvas = document.getElementById('canvasCosto');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, W, H);
+
+    // Domain x in [1, 500], range y in [0, 80]
+    const xMin = 0, xMax = 500;
+    const yMin = 0, yMax = 80;
+    const PAD = { left: 55, right: 20, top: 20, bottom: 40 };
+    const plotW = W - PAD.left - PAD.right;
+    const plotH = H - PAD.top - PAD.bottom;
+
+    const toCanvasX = x => PAD.left + (x - xMin) / (xMax - xMin) * plotW;
+    const toCanvasY = y => PAD.top + plotH - (y - yMin) / (yMax - yMin) * plotH;
+
+    // Grid lines
+    ctx.strokeStyle = '#eaf0f6'; ctx.lineWidth = 1;
+    for (let y = 0; y <= yMax; y += 10) {
+      const py = toCanvasY(y);
+      ctx.beginPath(); ctx.moveTo(PAD.left, py); ctx.lineTo(PAD.left + plotW, py); ctx.stroke();
+    }
+    for (let x = 0; x <= xMax; x += 100) {
+      const px = toCanvasX(x);
+      ctx.beginPath(); ctx.moveTo(px, PAD.top); ctx.lineTo(px, PAD.top + plotH); ctx.stroke();
+    }
+
+    // Axes
+    ctx.strokeStyle = '#9ab3c8'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(PAD.left, PAD.top); ctx.lineTo(PAD.left, PAD.top + plotH); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(PAD.left, PAD.top + plotH); ctx.lineTo(PAD.left + plotW, PAD.top + plotH); ctx.stroke();
+
+    // Axis labels
+    ctx.fillStyle = '#5a7385'; ctx.font = '11px Nunito, sans-serif';
+    ctx.textAlign = 'center'; ctx.fillText('Pares producidos (x)', PAD.left + plotW / 2, H - 5);
+    ctx.save(); ctx.translate(14, PAD.top + plotH / 2); ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center'; ctx.fillText('Costo promedio C(x) $', 0, 0); ctx.restore();
+
+    // X axis ticks
+    ctx.fillStyle = '#7a8f9e'; ctx.font = '10px Nunito, sans-serif'; ctx.textAlign = 'center';
+    for (let x = 0; x <= xMax; x += 100) {
+      const px = toCanvasX(x);
+      ctx.beginPath(); ctx.strokeStyle = '#9ab3c8'; ctx.lineWidth = 1;
+      ctx.moveTo(px, PAD.top + plotH); ctx.lineTo(px, PAD.top + plotH + 4); ctx.stroke();
+      ctx.fillText(x, px, PAD.top + plotH + 14);
+    }
+
+    // Y axis ticks
+    ctx.textAlign = 'right';
+    for (let y = 0; y <= yMax; y += 10) {
+      const py = toCanvasY(y);
+      ctx.beginPath(); ctx.strokeStyle = '#9ab3c8'; ctx.lineWidth = 1;
+      ctx.moveTo(PAD.left - 4, py); ctx.lineTo(PAD.left, py); ctx.stroke();
+      ctx.fillText(y, PAD.left - 7, py + 3);
+    }
+
+    // Asymptote y = 15
+    ctx.save(); ctx.strokeStyle = '#1d4ed8'; ctx.lineWidth = 1.5; ctx.setLineDash([8, 5]);
+    const pyAH = toCanvasY(15);
+    ctx.beginPath(); ctx.moveTo(PAD.left, pyAH); ctx.lineTo(PAD.left + plotW, pyAH); ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = '#1d4ed8'; ctx.font = 'bold 10px Nunito, sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('y = 15 (AH)', PAD.left + 4, pyAH - 4);
+
+    // Target line y = 20
+    ctx.save(); ctx.strokeStyle = '#2a9d8f'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
+    const pyTarget = toCanvasY(20);
+    ctx.beginPath(); ctx.moveTo(PAD.left, pyTarget); ctx.lineTo(PAD.left + plotW, pyTarget); ctx.stroke();
+    ctx.restore();
+    ctx.fillStyle = '#2a9d8f'; ctx.font = 'bold 10px Nunito, sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('y = 20 (objetivo)', PAD.left + 4, pyTarget - 4);
+
+    // Plot C(x)
+    ctx.strokeStyle = '#0d4f7c'; ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    let first = true;
+    for (let x = 2; x <= xMax; x += 2) {
+      const y = (1200 + 15 * x) / x;
+      if (y > yMax + 5 || y < yMin - 5) { first = true; continue; }
+      const px = toCanvasX(x), py = toCanvasY(y);
+      if (first) { ctx.moveTo(px, py); first = false; }
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+
+    // Mark solution (240, 20)
+    const px240 = toCanvasX(240), py20 = toCanvasY(20);
+    ctx.fillStyle = '#f4a261';
+    ctx.beginPath(); ctx.arc(px240, py20, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(px240, py20, 6, 0, Math.PI * 2); ctx.stroke();
+
+    // Vertical dashed to solution
+    ctx.save(); ctx.strokeStyle = '#f4a261'; ctx.lineWidth = 1; ctx.setLineDash([4, 3]);
+    ctx.beginPath(); ctx.moveTo(px240, py20); ctx.lineTo(px240, PAD.top + plotH); ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle = '#b85c00'; ctx.font = 'bold 10px Nunito, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('x = 240', px240, PAD.top + plotH + 14);
+
+    // Solution label
+    ctx.fillStyle = '#f4a261'; ctx.font = 'bold 11px Nunito, sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('(240, $20) ★', px240 + 8, py20 - 6);
+  }
+
+  // ── INICIALIZACIÓN: toggle de details ────────────────
+
+  function setupToggle(detailsId, drawFn) {
+    const el = document.getElementById(detailsId);
+    if (!el) return;
+    let drawn = false;
+    el.addEventListener('toggle', function() {
+      if (this.open && !drawn) {
+        drawn = true;
+        setTimeout(drawFn, 50);
+      } else if (this.open) {
+        setTimeout(drawFn, 50);
+      }
+    });
+  }
+
+  // ── CONTROLES: sliders y checkboxes ──────────────────
+
+  // Básica
+  ['aBasica', 'chkAsintBasica', 'chkPtosBasica'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', drawBasica);
+  });
+
+  // Desplazada
+  ['aDesp', 'hDesp', 'kDesp', 'chkAsintDesp', 'chkPtosDesp'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', drawDesplazada);
+  });
+
+  // General
+  ['aGen', 'bGen', 'cGen', 'dGen', 'chkAsintGen', 'chkPtosGen'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', drawGeneral);
+  });
+
+  // ── SETUP TOGGLES ─────────────────────────────────────
+  setupToggle('sec2', drawBasica);
+  setupToggle('sec3', drawDesplazada);
+  setupToggle('sec4', drawGeneral);
+  setupToggle('sec8', drawCosto);
+
+</script>
+</body>
+</html>
 
