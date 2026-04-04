@@ -1,1 +1,3383 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Funciones GED: Evaluación y Representaciones</title>
+    <style>
+      /* ══════════════════════════════════════════
+   VARIABLES Y RESET
+══════════════════════════════════════════ */
+      :root {
+        --inicio: #475569;
+        --sust: #1d4ed8;
+        --sust-lt: #eff6ff;
+        --tablas: #047857;
+        --tablas-lt: #ecfdf5;
+        --comp: #b91c1c;
+        --comp-lt: #fff1f2;
+        --ectab: #6d28d9;
+        --ectab-lt: #f5f3ff;
+        --ecgraf: #b45309;
+        --ecgraf-lt: #fffbeb;
+        --tabgraf: #0e7490;
+        --tabgraf-lt: #ecfeff;
+
+        --bg: #f1f5f9;
+        --surface: #ffffff;
+        --surface2: #f8fafc;
+        --text: #1e293b;
+        --text-2: #475569;
+        --text-3: #94a3b8;
+        --border: #e2e8f0;
+        --radius: 12px;
+        --radius-sm: 8px;
+        --shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+        --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.11);
+        --active-color: var(--sust);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          'Segoe UI',
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.65;
+        min-height: 100vh;
+      }
+
+      /* ══════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════ */
+      .app-header {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 60%, #1e3a5f 100%);
+        color: #fff;
+        padding: 36px 24px 28px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .app-header::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(45deg, transparent, transparent 30px, rgba(255, 255, 255, 0.02) 30px, rgba(255, 255, 255, 0.02) 31px);
+      }
+      .app-header h1 {
+        font-size: clamp(1.5rem, 4vw, 2.4rem);
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        position: relative;
+      }
+      .app-header h1 span {
+        color: #60a5fa;
+      }
+      .app-header p {
+        margin-top: 8px;
+        color: #94a3b8;
+        font-size: 1rem;
+        position: relative;
+      }
+      .header-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 14px;
+        position: relative;
+      }
+      .badge {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #cbd5e1;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+
+      /* ══════════════════════════════════════════
+   OBJECTIVES PANEL
+══════════════════════════════════════════ */
+      .objectives-panel {
+        margin: 18px auto;
+        max-width: 1100px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .objectives-panel > summary {
+        padding: 14px 20px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.95rem;
+        background: #f8fafc;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        list-style: none;
+        border-bottom: 1px solid transparent;
+        transition: background 0.2s;
+      }
+      .objectives-panel > summary:hover {
+        background: #f1f5f9;
+      }
+      .objectives-panel[open] > summary {
+        border-bottom-color: var(--border);
+      }
+      .objectives-panel > summary::after {
+        content: '▶';
+        margin-left: auto;
+        font-size: 0.75rem;
+        color: var(--text-3);
+        transition: transform 0.3s;
+      }
+      .objectives-panel[open] > summary::after {
+        transform: rotate(90deg);
+      }
+      .objectives-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+        padding: 18px;
+      }
+      .obj-item {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        font-size: 0.875rem;
+        color: var(--text-2);
+      }
+      .obj-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+        font-weight: 700;
+      }
+
+      /* ══════════════════════════════════════════
+   TAB NAVIGATION
+══════════════════════════════════════════ */
+      .tab-nav-wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 12px;
+      }
+      .tab-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        background: var(--surface);
+        padding: 10px;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+      }
+      .tab-btn {
+        flex: 1 1 auto;
+        padding: 9px 14px;
+        border: none;
+        border-radius: var(--radius-sm);
+        background: transparent;
+        color: var(--text-2);
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        font-family: inherit;
+      }
+      .tab-btn:hover {
+        background: var(--bg);
+      }
+      .tab-btn.active {
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+      .tab-btn[data-tab='inicio'].active {
+        background: var(--inicio);
+      }
+      .tab-btn[data-tab='sustitucion'].active {
+        background: var(--sust);
+      }
+      .tab-btn[data-tab='tablas'].active {
+        background: var(--tablas);
+      }
+      .tab-btn[data-tab='compuestas'].active {
+        background: var(--comp);
+      }
+      .tab-btn[data-tab='ectab'].active {
+        background: var(--ectab);
+      }
+      .tab-btn[data-tab='ecgraf'].active {
+        background: var(--ecgraf);
+      }
+      .tab-btn[data-tab='tabgraf'].active {
+        background: var(--tabgraf);
+      }
+
+      /* ══════════════════════════════════════════
+   TAB CONTENT AREA
+══════════════════════════════════════════ */
+      .tab-content-area {
+        max-width: 1100px;
+        margin: 14px auto 40px;
+        padding: 0 12px;
+      }
+      .tab-pane {
+        display: none;
+      }
+      .tab-pane.active {
+        display: block;
+        animation: fadeIn 0.25s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      /* ══════════════════════════════════════════
+   CARDS
+══════════════════════════════════════════ */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        margin-bottom: 14px;
+        overflow: hidden;
+      }
+      .card-header {
+        padding: 16px 20px 14px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface2);
+      }
+      .card-header h2 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .card-header h2 .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .card-body {
+        padding: 20px;
+      }
+
+      /* ══════════════════════════════════════════
+   DETAILS / ACCORDIONS (native HTML5)
+══════════════════════════════════════════ */
+      .accordion {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        margin-bottom: 10px;
+        overflow: hidden;
+        background: var(--surface);
+      }
+      .accordion > summary {
+        padding: 13px 18px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        list-style: none;
+        transition: background 0.2s;
+        background: var(--surface2);
+        border-bottom: 2px solid transparent;
+      }
+      .accordion > summary:hover {
+        background: #f1f5f9;
+      }
+      .accordion[open] > summary {
+        border-bottom-color: var(--border);
+      }
+      .accordion > summary::after {
+        content: '▶';
+        margin-left: auto;
+        font-size: 0.7rem;
+        color: var(--text-3);
+        transition: transform 0.3s;
+        flex-shrink: 0;
+      }
+      .accordion[open] > summary::after {
+        transform: rotate(90deg);
+      }
+      .accordion-body {
+        padding: 18px;
+      }
+
+      /* Color-coded accordions */
+      .accordion.blue > summary {
+        border-left: 4px solid var(--sust);
+        background: var(--sust-lt);
+      }
+      .accordion.green > summary {
+        border-left: 4px solid var(--tablas);
+        background: var(--tablas-lt);
+      }
+      .accordion.red > summary {
+        border-left: 4px solid var(--comp);
+        background: var(--comp-lt);
+      }
+      .accordion.purple > summary {
+        border-left: 4px solid var(--ectab);
+        background: var(--ectab-lt);
+      }
+      .accordion.amber > summary {
+        border-left: 4px solid var(--ecgraf);
+        background: var(--ecgraf-lt);
+      }
+      .accordion.cyan > summary {
+        border-left: 4px solid var(--tabgraf);
+        background: var(--tabgraf-lt);
+      }
+
+      /* Practice problems */
+      .accordion.practice > summary {
+        border-left: 4px solid #7c3aed;
+        background: #f5f3ff;
+        font-style: italic;
+      }
+      .accordion.practice > summary::before {
+        content: '📝 ';
+      }
+      .practice-reveal {
+        padding: 16px 18px;
+        background: #fefce8;
+        border-top: 1px solid #fde68a;
+      }
+
+      /* ══════════════════════════════════════════
+   STEP BOXES
+══════════════════════════════════════════ */
+      .steps-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .step-box {
+        padding: 14px 16px;
+        border-radius: var(--radius-sm);
+        border-left: 4px solid transparent;
+        position: relative;
+      }
+      .step-box .step-num {
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.65;
+        margin-bottom: 4px;
+      }
+      .step-box .step-content {
+        font-size: 0.95rem;
+      }
+      .step-box.s1 {
+        background: #eff6ff;
+        border-color: #2563eb;
+      }
+      .step-box.s2 {
+        background: #f0fdf4;
+        border-color: #16a34a;
+      }
+      .step-box.s3 {
+        background: #faf5ff;
+        border-color: #7c3aed;
+      }
+      .step-box.s4 {
+        background: #fff7ed;
+        border-color: #ea580c;
+      }
+      .step-box.result {
+        background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+        border-color: #059669;
+        border-width: 2px;
+      }
+      .step-box.result .step-num {
+        color: #059669;
+      }
+      .math-expr {
+        font-family: 'Courier New', monospace;
+        background: rgba(0, 0, 0, 0.06);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.95em;
+      }
+      .big-result {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #059669;
+      }
+
+      /* ══════════════════════════════════════════
+   ALERT BOXES
+══════════════════════════════════════════ */
+      .alert {
+        padding: 13px 16px;
+        border-radius: var(--radius-sm);
+        margin: 12px 0;
+        font-size: 0.9rem;
+        display: flex;
+        gap: 10px;
+      }
+      .alert-icon {
+        flex-shrink: 0;
+        font-size: 1.1rem;
+      }
+      .alert.tip {
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        color: #78350f;
+      }
+      .alert.warn {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+      }
+      .alert.info {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1e40af;
+      }
+      .alert.success {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #14532d;
+      }
+
+      /* ══════════════════════════════════════════
+   FORMULA DISPLAY
+══════════════════════════════════════════ */
+      .formula-chip {
+        display: inline-block;
+        background: #1e293b;
+        color: #f0f9ff;
+        padding: 8px 18px;
+        border-radius: 30px;
+        font-family: 'Courier New', monospace;
+        font-size: 1.05rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+      .formula-block {
+        text-align: center;
+        margin: 16px 0;
+      }
+      .formula-block p {
+        font-size: 0.8rem;
+        color: var(--text-3);
+        margin-top: 6px;
+      }
+
+      /* ══════════════════════════════════════════
+   MATH TABLE
+══════════════════════════════════════════ */
+      .math-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+        margin: 12px 0;
+      }
+      .math-table th {
+        background: var(--text);
+        color: #fff;
+        padding: 10px 14px;
+        font-weight: 600;
+        text-align: center;
+      }
+      .math-table td {
+        border: 1px solid var(--border);
+        padding: 9px 14px;
+        text-align: center;
+      }
+      .math-table tbody tr:nth-child(even) {
+        background: #f8fafc;
+      }
+      .math-table tbody tr:hover {
+        background: #eff6ff;
+      }
+      .math-table td.highlight {
+        background: #fef9c3;
+        font-weight: 700;
+      }
+
+      /* ══════════════════════════════════════════
+   COMPARISON GRID
+══════════════════════════════════════════ */
+      .compare-grid {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 12px;
+        align-items: center;
+        margin: 16px 0;
+      }
+      .compare-panel {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 14px;
+      }
+      .compare-panel-title {
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 10px;
+        color: var(--text-2);
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--border);
+      }
+      .compare-arrow {
+        text-align: center;
+        color: var(--text-3);
+        font-size: 1.5rem;
+      }
+      @media (max-width: 600px) {
+        .compare-grid {
+          grid-template-columns: 1fr;
+        }
+        .compare-arrow {
+          transform: rotate(90deg);
+        }
+      }
+
+      /* ══════════════════════════════════════════
+   KEY POINTS GRID
+══════════════════════════════════════════ */
+      .key-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 12px;
+        margin-top: 14px;
+      }
+      .key-item {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 14px;
+      }
+      .key-item-title {
+        font-weight: 700;
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+      }
+      .key-item p {
+        font-size: 0.85rem;
+        color: var(--text-2);
+      }
+
+      /* ══════════════════════════════════════════
+   PROCESS VISUALIZATION (flow)
+══════════════════════════════════════════ */
+      .flow-viz {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 20px;
+        background: var(--bg);
+        border-radius: var(--radius-sm);
+        margin: 14px 0;
+      }
+      .flow-node {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+      }
+      .flow-node.input {
+        background: #dbeafe;
+        border: 2px solid #3b82f6;
+        color: #1e40af;
+      }
+      .flow-node.output {
+        background: #d1fae5;
+        border: 2px solid #10b981;
+        color: #065f46;
+      }
+      .flow-box {
+        padding: 10px 14px;
+        border-radius: var(--radius-sm);
+        text-align: center;
+        min-width: 110px;
+        font-size: 0.85rem;
+      }
+      .flow-box .box-func {
+        font-weight: 700;
+        font-family: monospace;
+      }
+      .flow-box .box-calc {
+        color: var(--text-2);
+        font-size: 0.8rem;
+        margin-top: 2px;
+      }
+      .flow-box.fbox-g {
+        background: #dbeafe;
+        border: 1px solid #93c5fd;
+      }
+      .flow-box.fbox-f {
+        background: #d1fae5;
+        border: 1px solid #6ee7b7;
+      }
+      .flow-box.fbox-h {
+        background: #fef3c7;
+        border: 1px solid #fcd34d;
+      }
+      .flow-arrow {
+        color: var(--text-3);
+        font-size: 1.3rem;
+      }
+
+      /* ══════════════════════════════════════════
+   INTERACTIVE PANELS
+══════════════════════════════════════════ */
+      .interactive-panel {
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        border-radius: var(--radius);
+        padding: 22px;
+        color: #fff;
+        margin-bottom: 14px;
+        box-shadow: var(--shadow-md);
+      }
+      .interactive-panel h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+        color: #f1f5f9;
+      }
+      .interactive-panel p.subtitle {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        margin-bottom: 18px;
+      }
+
+      .ctrl-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: flex-end;
+        margin-bottom: 16px;
+      }
+      .ctrl-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .ctrl-group label {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        font-weight: 500;
+      }
+      .ctrl-group select,
+      .ctrl-group input[type='number'] {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 0.9rem;
+        font-family: inherit;
+        min-width: 140px;
+      }
+      .ctrl-group select option {
+        background: #1e293b;
+      }
+      .ctrl-group input[type='number']::-webkit-inner-spin-button {
+        opacity: 0.5;
+      }
+
+      .eval-btn {
+        padding: 10px 22px;
+        background: #3b82f6;
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: inherit;
+      }
+      .eval-btn:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+      }
+      .eval-btn:active {
+        transform: none;
+      }
+      .eval-btn.green {
+        background: #10b981;
+      }
+      .eval-btn.green:hover {
+        background: #059669;
+      }
+      .eval-btn.red {
+        background: #ef4444;
+      }
+      .eval-btn.red:hover {
+        background: #dc2626;
+      }
+
+      .output-area {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-sm);
+        padding: 16px;
+        min-height: 60px;
+      }
+      .output-area.light {
+        background: var(--surface);
+        border-color: var(--border);
+        color: var(--text);
+      }
+
+      .step-animated {
+        padding: 12px 14px;
+        border-radius: var(--radius-sm);
+        margin-bottom: 8px;
+        border-left: 4px solid transparent;
+        animation: slideIn 0.3s ease;
+        font-size: 0.9rem;
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .step-animated.s1 {
+        background: rgba(59, 130, 246, 0.15);
+        border-color: #60a5fa;
+      }
+      .step-animated.s2 {
+        background: rgba(16, 185, 129, 0.15);
+        border-color: #34d399;
+      }
+      .step-animated.s3 {
+        background: rgba(167, 139, 250, 0.15);
+        border-color: #a78bfa;
+      }
+      .step-animated.s4 {
+        background: rgba(251, 191, 36, 0.15);
+        border-color: #fbbf24;
+      }
+      .step-animated.result-step {
+        background: rgba(16, 185, 129, 0.2);
+        border-color: #10b981;
+        border-width: 2px;
+      }
+      .step-animated .s-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.7;
+        margin-bottom: 3px;
+      }
+      .step-animated .s-expr {
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+      }
+      .big-answer {
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: #4ade80;
+      }
+
+      /* Sliders for triple representation */
+      .slider-group {
+        margin-bottom: 12px;
+      }
+      .slider-group label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.82rem;
+        color: #94a3b8;
+        margin-bottom: 5px;
+      }
+      .slider-group label span {
+        font-weight: 700;
+        color: #f1f5f9;
+        font-size: 0.95rem;
+      }
+      .slider-group input[type='range'] {
+        width: 100%;
+        appearance: none;
+        height: 5px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        outline: none;
+        cursor: pointer;
+      }
+      .slider-group input[type='range']::-webkit-slider-thumb {
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #3b82f6;
+        border: 2px solid #fff;
+        cursor: pointer;
+        box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+      }
+
+      .triple-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 14px;
+        margin-top: 16px;
+      }
+      .triple-panel {
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: var(--radius-sm);
+        padding: 14px;
+      }
+      .triple-panel-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #64748b;
+        margin-bottom: 10px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .eq-display {
+        text-align: center;
+        font-family: 'Courier New', monospace;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #60a5fa;
+        padding: 16px 0;
+      }
+      .mini-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+      }
+      .mini-table th {
+        background: rgba(255, 255, 255, 0.15);
+        color: #f1f5f9;
+        padding: 6px 10px;
+      }
+      .mini-table td {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 5px 10px;
+        text-align: center;
+        color: #e2e8f0;
+      }
+      .mini-table tr.hl td {
+        background: rgba(251, 191, 36, 0.2);
+        color: #fbbf24;
+        font-weight: 700;
+      }
+
+      /* Composite machine visual */
+      .machine-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 18px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: var(--radius-sm);
+        margin-top: 14px;
+      }
+      .machine-input,
+      .machine-output {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 1rem;
+        transition: all 0.4s;
+      }
+      .machine-input {
+        background: #1d4ed8;
+        border: 3px solid #60a5fa;
+        color: #fff;
+      }
+      .machine-output {
+        background: #065f46;
+        border: 3px solid #34d399;
+        color: #fff;
+      }
+      .machine-box {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 10px 16px;
+        text-align: center;
+        min-width: 120px;
+        transition: all 0.4s;
+      }
+      .machine-box .mb-func {
+        font-family: monospace;
+        font-weight: 700;
+        color: #f1f5f9;
+        font-size: 0.9rem;
+      }
+      .machine-box .mb-val {
+        color: #94a3b8;
+        font-size: 0.8rem;
+        margin-top: 3px;
+        min-height: 18px;
+      }
+      .machine-arrow {
+        color: #475569;
+        font-size: 1.4rem;
+      }
+      .machine-box.active {
+        border-color: #fbbf24;
+        background: rgba(251, 191, 36, 0.15);
+        box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+      }
+      .machine-input.lit {
+        background: #fbbf24;
+        border-color: #f59e0b;
+        color: #1e293b;
+        box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+      }
+      .machine-output.lit {
+        background: #10b981;
+        border-color: #34d399;
+        color: #fff;
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+      }
+
+      /* Graph containers */
+      .graph-container {
+        width: 100%;
+        height: 280px;
+        margin: 12px 0;
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+      }
+      .graph-container-sm {
+        height: 220px;
+      }
+
+      /* Pros/cons table */
+      .pros-cons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin: 12px 0;
+      }
+      .pros-col,
+      .cons-col {
+        padding: 14px;
+        border-radius: var(--radius-sm);
+      }
+      .pros-col {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+      }
+      .cons-col {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+      }
+      .pros-col h4 {
+        color: #166534;
+        margin-bottom: 8px;
+      }
+      .cons-col h4 {
+        color: #991b1b;
+        margin-bottom: 8px;
+      }
+      .pros-col ul,
+      .cons-col ul {
+        padding-left: 18px;
+      }
+      .pros-col li,
+      .cons-col li {
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+        color: var(--text-2);
+      }
+      @media (max-width: 500px) {
+        .pros-cons {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Intro "Inicio" tab */
+      .welcome-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .welcome-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px;
+        border-top: 4px solid transparent;
+        transition: box-shadow 0.2s;
+        cursor: pointer;
+      }
+      .welcome-card:hover {
+        box-shadow: var(--shadow-md);
+      }
+      .welcome-card .wc-icon {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+      }
+      .welcome-card h3 {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .welcome-card p {
+        font-size: 0.82rem;
+        color: var(--text-2);
+      }
+
+      /* Real-world badges */
+      .rw-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        color: #9a3412;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      /* Misc */
+      p {
+        margin-bottom: 10px;
+      }
+      p:last-child {
+        margin-bottom: 0;
+      }
+      ul,
+      ol {
+        padding-left: 22px;
+      }
+      li {
+        margin-bottom: 4px;
+        font-size: 0.92rem;
+      }
+      strong {
+        font-weight: 700;
+      }
+      em {
+        font-style: italic;
+        color: var(--text-2);
+      }
+      hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 16px 0;
+      }
+
+      .section-intro {
+        font-size: 0.95rem;
+        color: var(--text-2);
+        margin-bottom: 16px;
+        padding: 14px;
+        background: var(--surface2);
+        border-radius: var(--radius-sm);
+        border-left: 3px solid var(--border);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
+    <header class="app-header">
+      <h1>
+        Funciones:
+        <span>Evaluación y Representaciones</span>
+      </h1>
+      <p>Domina los tres métodos de evaluación y las tres formas de representar funciones</p>
+      <div class="header-badges">
+        <span class="badge">📚 GED Nivel NRS 5–6</span>
+        <span class="badge">🔢 ASE Matemáticas</span>
+        <span class="badge">✏️ Prof. José M. Fernández</span>
+        <span class="badge">🤖 GEDparaHispanos.com</span>
+      </div>
+    </header>
+
+    <!-- Objectives -->
+    <details class="objectives-panel">
+      <summary>🎯 Objetivos de aprendizaje — haz clic para ver</summary>
+      <div class="objectives-grid">
+        <div class="obj-item">
+          <div class="obj-icon" style="background: #dbeafe; color: #1d4ed8">1</div>
+          <span>Evaluar funciones por sustitución directa respetando PEMDAS</span>
+        </div>
+        <div class="obj-item">
+          <div class="obj-icon" style="background: #d1fae5; color: #065f46">2</div>
+          <span>Construir e interpretar tablas de valores de funciones</span>
+        </div>
+        <div class="obj-item">
+          <div class="obj-icon" style="background: #fee2e2; color: #991b1b">3</div>
+          <span>Evaluar funciones compuestas de adentro hacia afuera</span>
+        </div>
+        <div class="obj-item">
+          <div class="obj-icon" style="background: #ede9fe; color: #5b21b6">4</div>
+          <span>Convertir entre ecuación y tabla de valores</span>
+        </div>
+        <div class="obj-item">
+          <div class="obj-icon" style="background: #fef3c7; color: #92400e">5</div>
+          <span>Convertir entre ecuación y gráfica e identificar características</span>
+        </div>
+        <div class="obj-item">
+          <div class="obj-icon" style="background: #cffafe; color: #164e63">6</div>
+          <span>Leer tablas desde gráficas y graficar desde tablas</span>
+        </div>
+      </div>
+    </details>
+
+    <!-- ══════════════════════════════════════════
+     TAB NAVIGATION
+══════════════════════════════════════════ -->
+    <div class="tab-nav-wrap">
+      <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="inicio">🏠 Inicio</button>
+        <button class="tab-btn" data-tab="sustitucion">📐 Evaluación</button>
+        <button class="tab-btn" data-tab="tablas">📊 Tablas</button>
+        <button class="tab-btn" data-tab="compuestas">🔗 Compuestas</button>
+        <button class="tab-btn" data-tab="ectab">⚡ Ec.↔Tabla</button>
+        <button class="tab-btn" data-tab="ecgraf">📈 Ec.↔Gráfica</button>
+        <button class="tab-btn" data-tab="tabgraf">🔄 Tabla↔Gráfica</button>
+      </nav>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+     TAB CONTENT AREA
+══════════════════════════════════════════ -->
+    <main class="tab-content-area">
+      <!-- ╔══════════════════════════════════════════
+     TAB 0: INICIO
+══════════════════════════════════════════╗ -->
+      <section id="tab-inicio" class="tab-pane active">
+        <div class="card">
+          <div class="card-body">
+            <p class="section-intro">
+              Una función es como una
+              <strong>máquina de transformar números</strong>
+              : le metes un valor (x), la máquina hace su operación, y te da un resultado (y). Hay tres grandes preguntas sobre funciones, y en esta lección vas a dominar las tres:
+            </p>
+
+            <div class="welcome-grid">
+              <div class="welcome-card" style="border-top-color: var(--sust)" onclick="switchTab('sustitucion')">
+                <div class="wc-icon">📐</div>
+                <h3>¿Cómo evalúo?</h3>
+                <p>Sustitución directa: reemplaza x por un número y calcula.</p>
+              </div>
+              <div class="welcome-card" style="border-top-color: var(--tablas)" onclick="switchTab('tablas')">
+                <div class="wc-icon">📊</div>
+                <h3>¿Puedo ver varios valores?</h3>
+                <p>Tablas de valores: lista de "entradas" y sus "salidas".</p>
+              </div>
+              <div class="welcome-card" style="border-top-color: var(--comp)" onclick="switchTab('compuestas')">
+                <div class="wc-icon">🔗</div>
+                <h3>¿Puedo combinar funciones?</h3>
+                <p>Funciones compuestas: la salida de una es la entrada de otra.</p>
+              </div>
+              <div class="welcome-card" style="border-top-color: var(--ectab)" onclick="switchTab('ectab')">
+                <div class="wc-icon">⚡</div>
+                <h3>¿Ecuación vs Tabla?</h3>
+                <p>Son lo mismo — solo diferentes idiomas para la misma relación.</p>
+              </div>
+              <div class="welcome-card" style="border-top-color: var(--ecgraf)" onclick="switchTab('ecgraf')">
+                <div class="wc-icon">📈</div>
+                <h3>¿Ecuación vs Gráfica?</h3>
+                <p>La gráfica es la imagen visual de la ecuación.</p>
+              </div>
+              <div class="welcome-card" style="border-top-color: var(--tabgraf)" onclick="switchTab('tabgraf')">
+                <div class="wc-icon">🔄</div>
+                <h3>¿Tabla vs Gráfica?</h3>
+                <p>Los puntos de la tabla son puntos exactos en la gráfica.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRIPLE REPRESENTATION INTERACTIVE -->
+        <div class="interactive-panel">
+          <h3>🎯 El Gran Secreto: Ecuación, Tabla y Gráfica son lo mismo</h3>
+          <p class="subtitle">Mueve los deslizadores y observa cómo la ecuación, la tabla y la gráfica cambian al mismo tiempo — ¡son tres caras de la misma función!</p>
+
+          <div class="ctrl-row">
+            <div class="ctrl-group" style="flex: 1">
+              <label>Tipo de función:</label>
+              <select id="triple-type">
+                <option value="linear">Lineal: f(x) = mx + b</option>
+                <option value="quadratic">Cuadrática: f(x) = ax² + bx + c</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="triple-linear-controls">
+            <div class="slider-group">
+              <label>
+                Pendiente (m):
+                <span id="m-val">2</span>
+              </label>
+              <input type="range" id="sl-m" min="-5" max="5" step="0.5" value="2" />
+            </div>
+            <div class="slider-group">
+              <label>
+                Intercepto (b):
+                <span id="b-val">1</span>
+              </label>
+              <input type="range" id="sl-b" min="-6" max="6" step="1" value="1" />
+            </div>
+          </div>
+          <div id="triple-quad-controls" style="display: none">
+            <div class="slider-group">
+              <label>
+                Coef. a:
+                <span id="a-val">1</span>
+              </label>
+              <input type="range" id="sl-a" min="-2" max="2" step="0.5" value="1" />
+            </div>
+            <div class="slider-group">
+              <label>
+                Coef. b:
+                <span id="sl-bq-val">0</span>
+              </label>
+              <input type="range" id="sl-bq" min="-4" max="4" step="1" value="0" />
+            </div>
+            <div class="slider-group">
+              <label>
+                Coef. c:
+                <span id="sl-c-val">0</span>
+              </label>
+              <input type="range" id="sl-c" min="-6" max="6" step="1" value="0" />
+            </div>
+          </div>
+
+          <div class="triple-grid">
+            <div class="triple-panel">
+              <div class="triple-panel-title">📝 Ecuación</div>
+              <div class="eq-display" id="triple-eq">f(x) = 2x + 1</div>
+            </div>
+            <div class="triple-panel">
+              <div class="triple-panel-title">📊 Tabla de valores</div>
+              <table class="mini-table" id="triple-table">
+                <thead>
+                  <tr>
+                    <th>x</th>
+                    <th>f(x)</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="triple-panel" style="grid-column: 1 / -1">
+              <div class="triple-panel-title">📈 Gráfica</div>
+              <div class="graph-container" id="triple-graph"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ╔══════════════════════════════════════════
+     TAB 1: SUSTITUCIÓN DIRECTA
+══════════════════════════════════════════╗ -->
+      <section id="tab-sustitucion" class="tab-pane">
+        <details class="accordion blue" open>
+          <summary>📌 ¿Qué es la evaluación?</summary>
+          <div class="accordion-body">
+            <div class="rw-badge">🌎 Ejemplo real: plan de telefonía</div>
+            <p>
+              Una compañía de teléfono cobra $20 fijos más $0.10 por minuto. Si
+              <em>x</em>
+              son los minutos, el costo es
+              <strong>C(x) = 0.10x + 20</strong>
+              . ¿Cuánto pagas por 150 minutos? Sustituye x = 150: C(150) = 0.10(150) + 20 = $35.00
+            </p>
+            <hr />
+            <p>
+              La evaluación es una 
+              <strong>sustitución directa</strong>
+              es decir, reemplazar la variable x por un número específico y calcular el resultado siguiendo el <strong>orden de operaciones</strong>.
+            </p>
+            <div class="formula-block">
+              <span class="formula-chip">f(a) = [reemplaza x por a] y calcula</span>
+            </div>
+            <div class="alert info">
+              <span class="alert-icon">💡</span>
+              <div>
+                <strong>Orden de Operaciones:</strong>
+                Paréntesis → Exponentes → Multiplicación/División → Adición/Sustracción. <strong>¡Nunca lo olvides!</strong>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion blue">
+          <summary>📐 Ejemplo 1 — Función lineal: f(x) = 3x − 5, evaluar en x = 2</summary>
+          <div class="accordion-body">
+            <div class="steps-list">
+              <div class="step-box s1">
+                <div class="step-num">Paso 1 — Identifica</div>
+                <div class="step-content">
+                  La función es
+                  <span class="math-expr">f(x) = 3x − 5</span>
+                </div>
+              </div>
+              <div class="step-box s2">
+                <div class="step-num">Paso 2 — Sustituye x = 2</div>
+                <div class="step-content">
+                  <span class="math-expr">f(2) = 3(2) − 5</span>
+                  &nbsp;← Pon paréntesis alrededor del 2
+                </div>
+              </div>
+              <div class="step-box s3">
+                <div class="step-num">Paso 3 — Multiplica primero (PEMDAS)</div>
+                <div class="step-content"><span class="math-expr">= 6 − 5</span></div>
+              </div>
+              <div class="step-box result">
+                <div class="step-num">✅ Resultado</div>
+                <div class="step-content">
+                  <span class="big-result">f(2) = 1</span>
+                  &nbsp; → El punto (2, 1) está en la gráfica
+                </div>
+              </div>
+            </div>
+            <div class="graph-container" id="graph-lineal-sust" data-plotly-id="graph_lineal_sust"></div>
+          </div>
+        </details>
+
+        <details class="accordion blue">
+          <summary>📐 Ejemplo 2 — Función cuadrática: g(x) = x² − 4x + 3, evaluar en x = 3</summary>
+          <div class="accordion-body">
+            <div class="steps-list">
+              <div class="step-box s1">
+                <div class="step-num">Paso 1 — Identifica</div>
+                <div class="step-content"><span class="math-expr">g(x) = x² − 4x + 3</span></div>
+              </div>
+              <div class="step-box s2">
+                <div class="step-num">Paso 2 — Sustituye x = 3</div>
+                <div class="step-content"><span class="math-expr">g(3) = (3)² − 4(3) + 3</span></div>
+              </div>
+              <div class="step-box s3">
+                <div class="step-num">Paso 3 — Potencia primero: (3)² = 9</div>
+                <div class="step-content"><span class="math-expr">= 9 − 4(3) + 3</span></div>
+              </div>
+              <div class="step-box s4">
+                <div class="step-num">Paso 4 — Multiplica: 4(3) = 12</div>
+                <div class="step-content"><span class="math-expr">= 9 − 12 + 3</span></div>
+              </div>
+              <div class="step-box result">
+                <div class="step-num">✅ Resultado</div>
+                <div class="step-content">
+                  <span class="big-result">g(3) = 0</span>
+                  &nbsp; → La función cruza el eje X en x = 3 (es una raíz)
+                </div>
+              </div>
+            </div>
+            <div class="graph-container" id="graph-cuad-sust" data-plotly-id="graph_cuad_sust"></div>
+          </div>
+        </details>
+
+        <details class="accordion blue">
+          <summary>📐 Ejemplo 3 — Función racional: h(x) = (2x + 1)/(x − 3), evaluar en x = 5</summary>
+          <div class="accordion-body">
+            <div class="alert warn">
+              <span class="alert-icon">⚠️</span>
+              <div>
+                <strong>¡Primero verifica el dominio!</strong>
+                En funciones racionales, el denominador no puede ser cero. Aquí x ≠ 3. Como x = 5 ≠ 3, podemos continuar.
+              </div>
+            </div>
+            <div class="steps-list">
+              <div class="step-box s1">
+                <div class="step-num">Paso 1 — Identifica</div>
+                <div class="step-content"><span class="math-expr">h(x) = (2x + 1) / (x − 3)</span></div>
+              </div>
+              <div class="step-box s2">
+                <div class="step-num">Paso 2 — Sustituye x = 5</div>
+                <div class="step-content"><span class="math-expr">h(5) = (2(5) + 1) / (5 − 3)</span></div>
+              </div>
+              <div class="step-box s3">
+                <div class="step-num">Paso 3 — Numerador y denominador por separado</div>
+                <div class="step-content"><span class="math-expr">= (10 + 1) / 2 = 11 / 2</span></div>
+              </div>
+              <div class="step-box result">
+                <div class="step-num">✅ Resultado</div>
+                <div class="step-content">
+                  <span class="big-result">h(5) = 5.5</span>
+                  &nbsp; → Punto (5, 5.5) en la gráfica
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion blue">
+          <summary>⚠️ Errores comunes — ¡No caigas en estas trampas!</summary>
+          <div class="accordion-body">
+            <table class="math-table">
+              <thead>
+                <tr>
+                  <th>❌ Error</th>
+                  <th>✅ Correcto</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>f(3) = 3 × 3 - 5 = 9 - 5 = 4 &nbsp; (f(x) = 3x − 5)</td>
+                  <td>f(3) = 3(3) − 5 = 9 − 5 = 4 &nbsp; ✓ (este sí da igual, pero...)</td>
+                </tr>
+                <tr>
+                  <td>g(-2) = -2² = -4 &nbsp; ← ¡Trampa!</td>
+                  <td>g(-2) = (-2)² = 4 &nbsp; ✓ (el exponente aplica al número negativo)</td>
+                </tr>
+                <tr>
+                  <td>f(-3) = 3-3 + 1 = 1 &nbsp; (olvidó el paréntesis)</td>
+                  <td>f(-3) = 3(-3) + 1 = -9 + 1 = -8 &nbsp; ✓</td>
+                </tr>
+                <tr>
+                  <td>No verificar denominador ≠ 0 en funciones racionales</td>
+                  <td>Siempre comprueba que x no haga cero el denominador</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <!-- INTERACTIVE EVALUATOR -->
+        <div class="interactive-panel">
+          <h3>🧮 Evaluador interactivo paso a paso</h3>
+          <p class="subtitle">Selecciona una función, escribe el valor de x y observa cada paso del proceso.</p>
+          <div class="ctrl-row">
+            <div class="ctrl-group" style="flex: 1">
+              <label>Función:</label>
+              <select id="eval-func">
+                <option value="lineal">f(x) = 3x − 5</option>
+                <option value="cuadratica">g(x) = x² − 4x + 3</option>
+                <option value="racional">h(x) = (2x + 1) / (x − 3)</option>
+                <option value="cuadratica2">p(x) = 2x² + x − 6</option>
+              </select>
+            </div>
+            <div class="ctrl-group">
+              <label>Valor de x:</label>
+              <input type="number" id="eval-x" value="2" step="1" min="-20" max="20" />
+            </div>
+            <button class="eval-btn" onclick="runEvaluator()">▶ Evaluar paso a paso</button>
+          </div>
+          <div class="output-area" id="eval-output">
+            <span style="color: #475569; font-size: 0.85rem">← Selecciona una función y presiona "Evaluar"</span>
+          </div>
+          <div class="graph-container graph-container-sm" id="eval-graph" style="margin-top: 12px; background: rgba(255, 255, 255, 0.05); border-radius: 8px"></div>
+        </div>
+
+        <!-- Practice -->
+        <details class="accordion practice">
+          <summary>Práctica GED: Si f(x) = 4x² − 3, ¿cuál es f(−2)?</summary>
+          <div class="practice-reveal">
+            <div class="steps-list">
+              <div class="step-box s1">
+                <div class="step-num">Sustituye x = −2</div>
+                <div class="step-content"><span class="math-expr">f(−2) = 4(−2)² − 3</span></div>
+              </div>
+              <div class="step-box s2">
+                <div class="step-num">Potencia: (−2)² = 4</div>
+                <div class="step-content"><span class="math-expr">= 4(4) − 3</span></div>
+              </div>
+              <div class="step-box s3">
+                <div class="step-num">Multiplica: 4 × 4 = 16</div>
+                <div class="step-content"><span class="math-expr">= 16 − 3</span></div>
+              </div>
+              <div class="step-box result">
+                <div class="step-num">✅ Respuesta</div>
+                <div class="step-content"><strong>f(−2) = 13</strong></div>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion practice">
+          <summary>Práctica GED: Si g(x) = −2x + 7, ¿para qué valor de x es g(x) = 1?</summary>
+          <div class="practice-reveal">
+            <p>
+              Plantea la ecuación:
+              <span class="math-expr">−2x + 7 = 1</span>
+            </p>
+            <p>
+              →
+              <span class="math-expr">−2x = 1 − 7 = −6</span>
+            </p>
+            <p>
+              →
+              <span class="math-expr">x = −6 / −2</span>
+            </p>
+            <p>
+              <strong>✅ x = 3</strong>
+              &nbsp; Verifica: g(3) = −2(3) + 7 = −6 + 7 = 1 ✓
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <!-- ╔══════════════════════════════════════════
+     TAB 2: EVALUACIÓN CON TABLAS
+══════════════════════════════════════════╗ -->
+      <section id="tab-tablas" class="tab-pane">
+        <details class="accordion green" open>
+          <summary>📌 ¿Por qué usar tablas?</summary>
+          <div class="accordion-body">
+            <div class="rw-badge">🌎 Ejemplo real: tabla de precio de gasolina</div>
+            <p>Una tabla de la gasolinera muestra: 1 galón = $3.50, 2 galones = $7.00, 5 galones = $17.50... Eso es exactamente una tabla de una función: f(x) = 3.50x.</p>
+            <hr />
+            <p>
+              Una
+              <strong>tabla de valores</strong>
+              es una colección organizada de pares (x, f(x)). Sirve para:
+            </p>
+            <ul>
+              <li>Ver cómo cambia la función en varios puntos</li>
+              <li>Identificar interceptos, máximos y mínimos</li>
+              <li>Detectar si la función es lineal (cambio constante) o cuadrática</li>
+              <li>Trazar la gráfica a mano</li>
+            </ul>
+            <div class="alert tip">
+              <span class="alert-icon">💡</span>
+              <div>
+                <strong>Truco de detección:</strong>
+                Si los cambios en f(x) son constantes cuando x sube de 1 en 1 → la función es
+                <em>lineal</em>
+                . Si los cambios de los cambios son constantes → es
+                <em>cuadrática</em>
+                .
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion green">
+          <summary>📊 Ejemplo 1 — Función lineal: f(x) = 2x − 1</summary>
+          <div class="accordion-body">
+            <table class="math-table">
+              <thead>
+                <tr>
+                  <th>x</th>
+                  <th>Cálculo</th>
+                  <th>f(x)</th>
+                  <th>Cambio en f(x)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>−2</td>
+                  <td>2(−2) − 1</td>
+                  <td>−5</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>−1</td>
+                  <td>2(−1) − 1</td>
+                  <td>−3</td>
+                  <td>+2</td>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>2(0) − 1</td>
+                  <td>−1</td>
+                  <td>+2</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>2(1) − 1</td>
+                  <td>1</td>
+                  <td>+2</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>2(2) − 1</td>
+                  <td>3</td>
+                  <td>+2</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="alert success">
+              <span class="alert-icon">✅</span>
+              <div>
+                El cambio en f(x) es siempre +2 → es una función
+                <strong>lineal con pendiente 2</strong>
+                . El intercepto con y es (0, −1). El intercepto con x está entre 0 y 1: exactamente en x = 0.5.
+              </div>
+            </div>
+            <div class="graph-container" id="graph-tabla-lineal" data-plotly-id="graph_tabla_lineal"></div>
+          </div>
+        </details>
+
+        <details class="accordion green">
+          <summary>📊 Ejemplo 2 — Función cuadrática: g(x) = x² − 2x − 3</summary>
+          <div class="accordion-body">
+            <table class="math-table">
+              <thead>
+                <tr>
+                  <th>x</th>
+                  <th>Cálculo</th>
+                  <th>g(x)</th>
+                  <th>Δg</th>
+                  <th>ΔΔg</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>−2</td>
+                  <td>(−2)²−2(−2)−3</td>
+                  <td>5</td>
+                  <td>—</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>−1</td>
+                  <td>1+2−3</td>
+                  <td>0</td>
+                  <td>−5</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>0−0−3</td>
+                  <td>−3</td>
+                  <td>−3</td>
+                  <td>+2</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>1−2−3</td>
+                  <td>−4</td>
+                  <td>−1</td>
+                  <td>+2</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>4−4−3</td>
+                  <td>−3</td>
+                  <td>+1</td>
+                  <td>+2</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>9−6−3</td>
+                  <td>0</td>
+                  <td>+3</td>
+                  <td>+2</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>16−8−3</td>
+                  <td>5</td>
+                  <td>+5</td>
+                  <td>+2</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="alert success">
+              <span class="alert-icon">✅</span>
+              <div>
+                Los "segundos cambios" (ΔΔg) son siempre +2 → ¡es
+                <strong>cuadrática</strong>
+                ! Las raíces (g=0) están en x = −1 y x = 3. El mínimo está en x = 1: g(1) = −4.
+              </div>
+            </div>
+            <div class="graph-container" id="graph-tabla-cuad" data-plotly-id="graph_tabla_cuad"></div>
+          </div>
+        </details>
+
+        <details class="accordion green">
+          <summary>📊 Cómo identificar el tipo de función desde una tabla</summary>
+          <div class="accordion-body">
+            <table class="math-table">
+              <thead>
+                <tr>
+                  <th>Lo que ves en la tabla</th>
+                  <th>Tipo de función</th>
+                  <th>Ejemplo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Cambios en f(x) constantes</td>
+                  <td>Lineal f(x)=mx+b</td>
+                  <td>+3, +3, +3…</td>
+                </tr>
+                <tr>
+                  <td>Segundas diferencias constantes</td>
+                  <td>Cuadrática f(x)=ax²+…</td>
+                  <td>dif: +2, +4, +6 → seg.dif: +2, +2…</td>
+                </tr>
+                <tr>
+                  <td>f(x) se multiplica por constante</td>
+                  <td>Exponencial f(x)=abˣ</td>
+                  <td>×2, ×2, ×2…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <!-- TABLE GENERATOR INTERACTIVE -->
+        <div class="interactive-panel">
+          <h3>📊 Generador interactivo de tablas</h3>
+          <p class="subtitle">Ajusta los parámetros y genera automáticamente la tabla y la gráfica.</p>
+          <div class="ctrl-row">
+            <div class="ctrl-group" style="flex: 1">
+              <label>Función:</label>
+              <select id="tbl-func">
+                <option value="linear">f(x) = mx + b</option>
+                <option value="quadratic">f(x) = ax² + bx + c</option>
+              </select>
+            </div>
+          </div>
+          <div id="tbl-linear-ctrl">
+            <div class="ctrl-row">
+              <div class="ctrl-group">
+                <label>m (pendiente):</label>
+                <input type="number" id="tbl-m" value="2" step="1" />
+              </div>
+              <div class="ctrl-group">
+                <label>b (intercepto):</label>
+                <input type="number" id="tbl-b" value="-3" step="1" />
+              </div>
+            </div>
+          </div>
+          <div id="tbl-quad-ctrl" style="display: none">
+            <div class="ctrl-row">
+              <div class="ctrl-group">
+                <label>a:</label>
+                <input type="number" id="tbl-a" value="1" step="0.5" />
+              </div>
+              <div class="ctrl-group">
+                <label>b:</label>
+                <input type="number" id="tbl-bq" value="-2" step="1" />
+              </div>
+              <div class="ctrl-group">
+                <label>c:</label>
+                <input type="number" id="tbl-c" value="-3" step="1" />
+              </div>
+            </div>
+          </div>
+          <button class="eval-btn green" onclick="generateTable()">📊 Generar tabla y gráfica</button>
+          <div style="display: grid; grid-template-columns: auto 1fr; gap: 14px; margin-top: 14px; align-items: start">
+            <div class="output-area light" id="tbl-output" style="min-width: 200px; padding: 10px"></div>
+            <div class="graph-container" id="tbl-graph" style="height: 260px"></div>
+          </div>
+        </div>
+
+        <details class="accordion practice">
+          <summary>Práctica GED: Dada la tabla, ¿qué tipo de función es?</summary>
+          <div class="practice-reveal">
+            <table class="math-table">
+              <thead>
+                <tr>
+                  <th>x</th>
+                  <th>0</th>
+                  <th>1</th>
+                  <th>2</th>
+                  <th>3</th>
+                  <th>4</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>f(x)</td>
+                  <td>5</td>
+                  <td>2</td>
+                  <td>−1</td>
+                  <td>−4</td>
+                  <td>−7</td>
+                </tr>
+              </tbody>
+            </table>
+            <p>
+              <strong>Análisis:</strong>
+              Cambios: 2−5=−3, −1−2=−3, −4−(−1)=−3, −7−(−4)=−3
+            </p>
+            <p>
+              <strong>✅ Es lineal</strong>
+              (cambio constante de −3). La pendiente es m = −3, y como f(0) = 5, la ecuación es
+              <strong>f(x) = −3x + 5</strong>
+              .
+            </p>
+          </div>
+        </details>
+      </section>
+
+      <!-- ╔══════════════════════════════════════════
+     TAB 3: FUNCIONES COMPUESTAS
+══════════════════════════════════════════╗ -->
+      <section id="tab-compuestas" class="tab-pane">
+        <details class="accordion red" open>
+          <summary>🔗 ¿Qué son las funciones compuestas?</summary>
+          <div class="accordion-body">
+            <div class="rw-badge">🌎 Ejemplo real: conversión de temperatura</div>
+            <p>
+              Para convertir °F a Kelvin necesitas
+              <em>dos pasos</em>
+              : primero conviertes a Celsius con g(F) = (F−32)×5/9, luego conviertes a Kelvin con f(C) = C + 273.15. Juntas: h(F) = f(g(F)) — ¡eso es composición!
+            </p>
+            <hr />
+            <p>
+              Una
+              <strong>función compuesta</strong>
+              aplica una función sobre el resultado de otra. Se escribe:
+            </p>
+            <div class="formula-block">
+              <span class="formula-chip">(f ∘ g)(x) = f(g(x))</span>
+              <p>Lee: "f compuesta con g de x" — primero g, luego f</p>
+            </div>
+            <div class="alert warn">
+              <span class="alert-icon">🎯</span>
+              <div>
+                <strong>La regla de oro:</strong>
+                Siempre evalúa de
+                <em>adentro hacia afuera</em>
+                . En f(g(x)), primero calculas g(x), luego aplicas f al resultado.
+              </div>
+            </div>
+            <div class="alert tip">
+              <span class="alert-icon">💡</span>
+              <div>
+                <strong>Analogía:</strong>
+                Imagina dos máquinas en serie: metes x en la primera (g), y su salida entra directamente en la segunda (f). La salida final es f(g(x)).
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion red">
+          <summary>🔗 Ejemplo 1 — Paso a paso: f(x)=3x, g(x)=x+2 → h(1) = f(g(1))</summary>
+          <div class="accordion-body">
+            <div class="steps-list">
+              <div class="step-box s1">
+                <div class="step-num">Paso 1 — Evalúa la función INTERNA g(1)</div>
+                <div class="step-content">
+                  <span class="math-expr">g(x) = x + 2</span>
+                  →
+                  <span class="math-expr">g(1) = 1 + 2 = 3</span>
+                </div>
+              </div>
+              <div class="step-box s2">
+                <div class="step-num">Paso 2 — Usa ese resultado como entrada para f</div>
+                <div class="step-content"><span class="math-expr">h(1) = f(g(1)) = f(3)</span></div>
+              </div>
+              <div class="step-box s3">
+                <div class="step-num">Paso 3 — Evalúa la función EXTERNA f(3)</div>
+                <div class="step-content">
+                  <span class="math-expr">f(x) = 3x</span>
+                  →
+                  <span class="math-expr">f(3) = 3(3) = 9</span>
+                </div>
+              </div>
+              <div class="step-box result">
+                <div class="step-num">✅ Resultado</div>
+                <div class="step-content"><span class="big-result">h(1) = f(g(1)) = 9</span></div>
+              </div>
+            </div>
+            <p style="margin-top: 12px; font-size: 0.85rem; color: var(--text-2)"><strong>Visualización del flujo:</strong></p>
+            <div class="flow-viz">
+              <div class="flow-node input">1</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-box fbox-g">
+                <div class="box-func">g(x) = x + 2</div>
+                <div class="box-calc">g(1) = 3</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-box fbox-f">
+                <div class="box-func">f(x) = 3x</div>
+                <div class="box-calc">f(3) = 9</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node output">9</div>
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion red">
+          <summary>🔗 Ejemplo 2 — f(x)=√x, g(x)=x²+3 → h(2) = f(g(2))</summary>
+          <div class="accordion-body">
+            <div class="steps-list">
+              <div class="step-box s1">
+                <div class="step-num">Paso 1 — Evalúa g(2)</div>
+                <div class="step-content"><span class="math-expr">g(2) = (2)² + 3 = 4 + 3 = 7</span></div>
+              </div>
+              <div class="step-box s2">
+                <div class="step-num">Paso 2 — h(2) = f(g(2)) = f(7)</div>
+                <div class="step-content">El resultado de g se convierte en la entrada de f</div>
+              </div>
+              <div class="step-box s3">
+                <div class="step-num">Paso 3 — Evalúa f(7)</div>
+                <div class="step-content"><span class="math-expr">f(7) = √7 ≈ 2.646</span></div>
+              </div>
+              <div class="step-box result">
+                <div class="step-num">✅ Resultado</div>
+                <div class="step-content"><span class="big-result">h(2) = √7 ≈ 2.646</span></div>
+              </div>
+            </div>
+            <div class="alert info">
+              <span class="alert-icon">🔍</span>
+              <div>
+                Verifica siempre que el resultado de g esté en el
+                <strong>dominio</strong>
+                de f. Aquí f(x)=√x requiere x ≥ 0. g(2)=7 ≥ 0 ✓
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion red">
+          <summary>🔗 Ejemplo 3 — Tres funciones: j(x) = f(g(h(x))) → j(0)</summary>
+          <div class="accordion-body">
+            <p>f(x) = 2x − 1, &nbsp; g(x) = x², &nbsp; h(x) = x + 3</p>
+            <div class="steps-list">
+              <div class="step-box s1">
+                <div class="step-num">Paso 1 — La más interna: h(0)</div>
+                <div class="step-content"><span class="math-expr">h(0) = 0 + 3 = 3</span></div>
+              </div>
+              <div class="step-box s2">
+                <div class="step-num">Paso 2 — g(h(0)) = g(3)</div>
+                <div class="step-content"><span class="math-expr">g(3) = (3)² = 9</span></div>
+              </div>
+              <div class="step-box s3">
+                <div class="step-num">Paso 3 — f(g(h(0))) = f(9)</div>
+                <div class="step-content"><span class="math-expr">f(9) = 2(9) − 1 = 18 − 1 = 17</span></div>
+              </div>
+              <div class="step-box result">
+                <div class="step-num">✅ Resultado</div>
+                <div class="step-content"><span class="big-result">j(0) = 17</span></div>
+              </div>
+            </div>
+            <div class="flow-viz">
+              <div class="flow-node input">0</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-box fbox-h">
+                <div class="box-func">h(x)=x+3</div>
+                <div class="box-calc">→ 3</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-box fbox-g">
+                <div class="box-func">g(x)=x²</div>
+                <div class="box-calc">→ 9</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-box fbox-f">
+                <div class="box-func">f(x)=2x−1</div>
+                <div class="box-calc">→ 17</div>
+              </div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-node output">17</div>
+            </div>
+          </div>
+        </details>
+
+        <!-- COMPOSITE MACHINE INTERACTIVE -->
+        <div class="interactive-panel">
+          <h3>🔗 Compositor visual de funciones</h3>
+          <p class="subtitle">Selecciona g(x) y f(x), escribe x, y observa cómo los valores fluyen de máquina en máquina.</p>
+          <div class="ctrl-row">
+            <div class="ctrl-group" style="flex: 1">
+              <label>Función interna g(x):</label>
+              <select id="comp-g">
+                <option value="g1">g(x) = x + 2</option>
+                <option value="g2">g(x) = x²</option>
+                <option value="g3">g(x) = 2x − 1</option>
+                <option value="g4">g(x) = x + 5</option>
+              </select>
+            </div>
+            <div class="ctrl-group" style="flex: 1">
+              <label>Función externa f(x):</label>
+              <select id="comp-f">
+                <option value="f1">f(x) = 3x</option>
+                <option value="f2">f(x) = x − 4</option>
+                <option value="f3">f(x) = x²</option>
+                <option value="f4">f(x) = 2x + 1</option>
+              </select>
+            </div>
+            <div class="ctrl-group">
+              <label>Valor de x:</label>
+              <input type="number" id="comp-x" value="1" step="1" />
+            </div>
+            <button class="eval-btn red" onclick="runComposition()">🔗 Componer</button>
+          </div>
+          <div class="machine-container" id="machine-viz">
+            <div class="machine-input" id="m-in">?</div>
+            <div class="machine-arrow">→</div>
+            <div class="machine-box" id="m-gbox">
+              <div class="mb-func" id="m-glabel">g(x)</div>
+              <div class="mb-val" id="m-gval"></div>
+            </div>
+            <div class="machine-arrow">→</div>
+            <div class="machine-box" id="m-fbox">
+              <div class="mb-func" id="m-flabel">f(x)</div>
+              <div class="mb-val" id="m-fval"></div>
+            </div>
+            <div class="machine-arrow">→</div>
+            <div class="machine-output" id="m-out">?</div>
+          </div>
+          <div class="output-area" id="comp-output" style="margin-top: 12px">
+            <span style="color: #475569; font-size: 0.85rem">← Presiona "Componer" para ver el proceso</span>
+          </div>
+        </div>
+
+        <details class="accordion practice">
+          <summary>Práctica GED: f(x) = x + 3 y g(x) = 2x. ¿Cuánto es f(g(4))?</summary>
+          <div class="practice-reveal">
+            <p>
+              Paso 1 — g(4) = 2(4) =
+              <strong>8</strong>
+            </p>
+            <p>
+              Paso 2 — f(g(4)) = f(8) = 8 + 3 =
+              <strong>11</strong>
+            </p>
+            <p><strong>✅ f(g(4)) = 11</strong></p>
+            <hr />
+            <p><em>Ojo: g(f(4)) = g(4+3) = g(7) = 2(7) = 14 ≠ 11. ¡El orden importa!</em></p>
+          </div>
+        </details>
+      </section>
+
+      <!-- ╔══════════════════════════════════════════
+     TAB 4: ECUACIÓN ↔ TABLA
+══════════════════════════════════════════╗ -->
+      <section id="tab-ectab" class="tab-pane">
+        <details class="accordion purple" open>
+          <summary>⚡ La relación entre ecuación y tabla</summary>
+          <div class="accordion-body">
+            <p class="section-intro">
+              La ecuación y la tabla son
+              <strong>la misma función en distintos idiomas</strong>
+              . La ecuación es compacta y general; la tabla muestra valores específicos. Puedes convertir libremente entre las dos.
+            </p>
+            <div class="compare-grid">
+              <div class="compare-panel">
+                <div class="compare-panel-title">📝 Ecuación</div>
+                <div style="text-align: center; margin: 10px 0"><span class="formula-chip">f(x) = 2x + 3</span></div>
+                <p style="font-size: 0.85rem; color: var(--text-2)">
+                  General y compacta. Permite calcular f(x) para
+                  <em>cualquier</em>
+                  valor de x.
+                </p>
+              </div>
+              <div class="compare-arrow">↔</div>
+              <div class="compare-panel">
+                <div class="compare-panel-title">📊 Tabla</div>
+                <table class="math-table" style="font-size: 0.82rem">
+                  <thead>
+                    <tr>
+                      <th>x</th>
+                      <th>f(x)=2x+3</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>−2</td>
+                      <td>−1</td>
+                    </tr>
+                    <tr>
+                      <td>0</td>
+                      <td>3</td>
+                    </tr>
+                    <tr>
+                      <td>2</td>
+                      <td>7</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion purple">
+          <summary>⚡ De ecuación → tabla: Ejemplo con f(x) = x² − 2x</summary>
+          <div class="accordion-body">
+            <div class="steps-list">
+              <div class="step-box s1">
+                <div class="step-num">Paso 1</div>
+                <div class="step-content">
+                  Identifica la función:
+                  <span class="math-expr">f(x) = x² − 2x</span>
+                </div>
+              </div>
+              <div class="step-box s2">
+                <div class="step-num">Paso 2</div>
+                <div class="step-content">Elige valores de x: usaremos x = −2, −1, 0, 1, 2, 3</div>
+              </div>
+              <div class="step-box s3">
+                <div class="step-num">Paso 3</div>
+                <div class="step-content">Evalúa cada uno por sustitución directa</div>
+              </div>
+            </div>
+            <table class="math-table">
+              <thead>
+                <tr>
+                  <th>x</th>
+                  <th>Cálculo</th>
+                  <th>f(x)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>−2</td>
+                  <td>(−2)² − 2(−2) = 4 + 4</td>
+                  <td>8</td>
+                </tr>
+                <tr>
+                  <td>−1</td>
+                  <td>(−1)² − 2(−1) = 1 + 2</td>
+                  <td>3</td>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>0 − 0</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>1 − 2</td>
+                  <td>−1</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>4 − 4</td>
+                  <td>0</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>9 − 6</td>
+                  <td>3</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <details class="accordion purple">
+          <summary>⚡ De tabla → ecuación: Detecta el patrón</summary>
+          <div class="accordion-body">
+            <table class="math-table">
+              <thead>
+                <tr>
+                  <th>x</th>
+                  <th>−2</th>
+                  <th>−1</th>
+                  <th>0</th>
+                  <th>1</th>
+                  <th>2</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>f(x)</td>
+                  <td>−5</td>
+                  <td>−2</td>
+                  <td>1</td>
+                  <td>4</td>
+                  <td>7</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="steps-list" style="margin-top: 12px">
+              <div class="step-box s1">
+                <div class="step-num">Paso 1 — Calcula cambios</div>
+                <div class="step-content">
+                  −2−(−5)=+3, 1−(−2)=+3, 4−1=+3, 7−4=+3 → cambio constante →
+                  <strong>lineal</strong>
+                </div>
+              </div>
+              <div class="step-box s2">
+                <div class="step-num">Paso 2 — Pendiente m = 3</div>
+                <div class="step-content">f(x) = 3x + b</div>
+              </div>
+              <div class="step-box s3">
+                <div class="step-num">Paso 3 — Encuentra b con f(0) = 1</div>
+                <div class="step-content">3(0) + b = 1 → b = 1</div>
+              </div>
+              <div class="step-box result">
+                <div class="step-num">✅ Ecuación</div>
+                <div class="step-content">
+                  <strong>f(x) = 3x + 1</strong>
+                  &nbsp; Verifica: f(−2)=3(−2)+1=−5 ✓
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion purple">
+          <summary>⚡ Ventajas y limitaciones de cada formato</summary>
+          <div class="accordion-body">
+            <div class="pros-cons">
+              <div class="pros-col">
+                <h4>📝 Ecuación — Ventajas</h4>
+                <ul>
+                  <li>Representa toda la función en pocas letras</li>
+                  <li>Calcula cualquier valor</li>
+                  <li>Permite álgebra (despejar, combinar)</li>
+                </ul>
+              </div>
+              <div class="cons-col">
+                <h4>📝 Ecuación — Limitaciones</h4>
+                <ul>
+                  <li>Abstracta, requiere habilidad algebraica</li>
+                  <li>No muestra valores específicos de un vistazo</li>
+                </ul>
+              </div>
+            </div>
+            <div class="pros-cons">
+              <div class="pros-col">
+                <h4>📊 Tabla — Ventajas</h4>
+                <ul>
+                  <li>Valores concretos y directos</li>
+                  <li>Fácil de leer</li>
+                  <li>Útil para datos experimentales</li>
+                </ul>
+              </div>
+              <div class="cons-col">
+                <h4>📊 Tabla — Limitaciones</h4>
+                <ul>
+                  <li>Solo muestra puntos seleccionados</li>
+                  <li>No describe el comportamiento entre puntos</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion practice">
+          <summary>Práctica GED: ¿Cuál ecuación corresponde a esta tabla?</summary>
+          <div class="practice-reveal">
+            <table class="math-table">
+              <thead>
+                <tr>
+                  <th>x</th>
+                  <th>0</th>
+                  <th>1</th>
+                  <th>2</th>
+                  <th>3</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>f(x)</td>
+                  <td>4</td>
+                  <td>7</td>
+                  <td>10</td>
+                  <td>13</td>
+                </tr>
+              </tbody>
+            </table>
+            <p>Cambio constante: +3 → lineal. m = 3, f(0) = 4 → b = 4.</p>
+            <p><strong>✅ f(x) = 3x + 4</strong></p>
+          </div>
+        </details>
+      </section>
+
+      <!-- ╔══════════════════════════════════════════
+     TAB 5: ECUACIÓN ↔ GRÁFICA
+══════════════════════════════════════════╗ -->
+      <section id="tab-ecgraf" class="tab-pane">
+        <details class="accordion amber" open>
+          <summary>📈 La relación entre ecuación y gráfica</summary>
+          <div class="accordion-body">
+            <p class="section-intro">
+              La gráfica es la
+              <strong>imagen visual</strong>
+              de la ecuación. Cada punto (x, f(x)) de la tabla es un punto en la gráfica. Las características algebraicas de la ecuación tienen un aspecto visual claro en la gráfica.
+            </p>
+            <table class="math-table">
+              <thead>
+                <tr>
+                  <th>En la ecuación</th>
+                  <th>En la gráfica</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>m positiva en f(x)=mx+b</td>
+                  <td>Línea que sube de izq. a der.</td>
+                </tr>
+                <tr>
+                  <td>m negativa en f(x)=mx+b</td>
+                  <td>Línea que baja de izq. a der.</td>
+                </tr>
+                <tr>
+                  <td>b en f(x)=mx+b</td>
+                  <td>Punto donde la línea cruza el eje Y</td>
+                </tr>
+                <tr>
+                  <td>a > 0 en f(x)=ax²+bx+c</td>
+                  <td>Parábola abre hacia arriba ∪</td>
+                </tr>
+                <tr>
+                  <td>a &lt; 0 en f(x)=ax²+bx+c</td>
+                  <td>Parábola abre hacia abajo ∩</td>
+                </tr>
+                <tr>
+                  <td>f(x) = 0 (las raíces)</td>
+                  <td>Puntos donde la gráfica cruza el eje X</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <details class="accordion amber">
+          <summary>📈 De ecuación → gráfica: f(x) = 2x − 3</summary>
+          <div class="accordion-body">
+            <div class="steps-list">
+              <div class="step-box s1">
+                <div class="step-num">Paso 1</div>
+                <div class="step-content">Crea tabla mínima con 2–3 puntos</div>
+              </div>
+              <div class="step-box s2">
+                <div class="step-num">Paso 2</div>
+                <div class="step-content">Ubica interceptos: y-intercepto en (0, −3); x-intercepto donde 2x−3=0 → x=1.5</div>
+              </div>
+              <div class="step-box s3">
+                <div class="step-num">Paso 3</div>
+                <div class="step-content">Traza la línea a través de los puntos</div>
+              </div>
+            </div>
+            <div class="graph-container" id="graph-ec-lineal" data-plotly-id="graph_ec_lineal"></div>
+          </div>
+        </details>
+
+        <details class="accordion amber">
+          <summary>📈 De gráfica → ecuación: Identifica puntos clave</summary>
+          <div class="accordion-body">
+            <p><strong>Para funciones lineales:</strong></p>
+            <ol>
+              <li>
+                Lee el
+                <em>y-intercepto</em>
+                (donde cruza el eje Y) → ese es b
+              </li>
+              <li>
+                Elige dos puntos y calcula la pendiente:
+                <span class="math-expr">m = (y₂ − y₁) / (x₂ − x₁)</span>
+              </li>
+              <li>Escribe f(x) = mx + b</li>
+            </ol>
+            <p style="margin-top: 12px"><strong>Para funciones cuadráticas:</strong></p>
+            <ol>
+              <li>Identifica el vértice (h, k) → usa f(x) = a(x−h)² + k</li>
+              <li>Usa otro punto conocido para encontrar a</li>
+              <li>Verifica con otro punto</li>
+            </ol>
+            <div class="graph-container" id="graph-graf-ec" data-plotly-id="graph_graf_ec"></div>
+          </div>
+        </details>
+
+        <!-- PARAMETER EXPLORER -->
+        <div class="interactive-panel">
+          <h3>📈 Explorador de parámetros — Ecuación y Gráfica</h3>
+          <p class="subtitle">Ajusta los parámetros con los deslizadores y observa cómo cambia la gráfica en tiempo real.</p>
+          <div class="ctrl-row">
+            <div class="ctrl-group" style="flex: 1">
+              <label>Tipo:</label>
+              <select id="param-type" onchange="updateParamControls()">
+                <option value="linear">Lineal: f(x) = mx + b</option>
+                <option value="quadratic">Cuadrática: f(x) = ax² + bx + c</option>
+              </select>
+            </div>
+          </div>
+          <div id="param-lin-ctrl">
+            <div class="slider-group">
+              <label>
+                Pendiente m:
+                <span id="pm-val">2</span>
+              </label>
+              <input type="range" id="pm" min="-5" max="5" step="0.5" value="2" oninput="updateParamGraph()" />
+            </div>
+            <div class="slider-group">
+              <label>
+                Intercepto b:
+                <span id="pb-val">1</span>
+              </label>
+              <input type="range" id="pb" min="-6" max="6" step="1" value="1" oninput="updateParamGraph()" />
+            </div>
+          </div>
+          <div id="param-quad-ctrl" style="display: none">
+            <div class="slider-group">
+              <label>
+                Coef. a:
+                <span id="pa-val">1</span>
+              </label>
+              <input type="range" id="pa" min="-2" max="2" step="0.25" value="1" oninput="updateParamGraph()" />
+            </div>
+            <div class="slider-group">
+              <label>
+                Coef. b:
+                <span id="pbq-val">0</span>
+              </label>
+              <input type="range" id="pbq" min="-5" max="5" step="0.5" value="0" oninput="updateParamGraph()" />
+            </div>
+            <div class="slider-group">
+              <label>
+                Coef. c:
+                <span id="pc-val">0</span>
+              </label>
+              <input type="range" id="pc" min="-6" max="6" step="1" value="0" oninput="updateParamGraph()" />
+            </div>
+          </div>
+          <div style="text-align: center; margin: 10px 0">
+            <span class="formula-chip" id="param-eq-display">f(x) = 2x + 1</span>
+          </div>
+          <div class="graph-container" id="param-graph" style="height: 300px; background: rgba(255, 255, 255, 0.05); border-radius: 8px"></div>
+          <div id="param-info" style="margin-top: 10px; font-size: 0.82rem; color: #94a3b8"></div>
+        </div>
+
+        <details class="accordion practice">
+          <summary>Práctica GED: ¿Cuál es la pendiente de la línea que pasa por (2, 5) y (4, 11)?</summary>
+          <div class="practice-reveal">
+            <p><span class="math-expr">m = (11 − 5) / (4 − 2) = 6 / 2 = 3</span></p>
+            <p>Ecuación: f(x) = 3x + b. Con punto (2, 5): 5 = 3(2) + b → b = −1</p>
+            <p><strong>✅ f(x) = 3x − 1</strong></p>
+          </div>
+        </details>
+      </section>
+
+      <!-- ╔══════════════════════════════════════════
+     TAB 6: TABLA ↔ GRÁFICA
+══════════════════════════════════════════╗ -->
+      <section id="tab-tabgraf" class="tab-pane">
+        <details class="accordion cyan" open>
+          <summary>🔄 La relación entre tabla y gráfica</summary>
+          <div class="accordion-body">
+            <p class="section-intro">
+              Cada fila de la tabla
+              <strong>(x, f(x))</strong>
+              es exactamente un punto en la gráfica. La tabla te da precisión numérica; la gráfica te da la imagen completa. Juntas son perfectas.
+            </p>
+            <div class="compare-grid">
+              <div class="compare-panel">
+                <div class="compare-panel-title">📊 Tabla</div>
+                <table class="math-table" style="font-size: 0.82rem">
+                  <thead>
+                    <tr>
+                      <th>x</th>
+                      <th>f(x)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>−2</td>
+                      <td>6</td>
+                    </tr>
+                    <tr>
+                      <td>0</td>
+                      <td>2</td>
+                    </tr>
+                    <tr>
+                      <td>2</td>
+                      <td>6</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p style="font-size: 0.8rem; color: var(--text-2); margin-top: 8px">Valores exactos en puntos específicos</p>
+              </div>
+              <div class="compare-arrow">↔</div>
+              <div class="compare-panel">
+                <div class="compare-panel-title">📈 Gráfica</div>
+                <div class="graph-container graph-container-sm" id="graph-tab-graf-intro" data-plotly-id="graph_tab_graf_intro"></div>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion cyan">
+          <summary>🔄 De tabla → gráfica: Pasos y ejemplo</summary>
+          <div class="accordion-body">
+            <div class="steps-list">
+              <div class="step-box s1">
+                <div class="step-num">Paso 1</div>
+                <div class="step-content">Identifica los pares ordenados de la tabla: (x, f(x))</div>
+              </div>
+              <div class="step-box s2">
+                <div class="step-num">Paso 2</div>
+                <div class="step-content">Ubica cada punto en el plano cartesiano</div>
+              </div>
+              <div class="step-box s3">
+                <div class="step-num">Paso 3</div>
+                <div class="step-content">Si la función es continua, conecta los puntos con una curva suave</div>
+              </div>
+              <div class="step-box s4">
+                <div class="step-num">Paso 4</div>
+                <div class="step-content">Etiqueta los puntos especiales (interceptos, máximos, mínimos)</div>
+              </div>
+            </div>
+            <table class="math-table" style="margin-top: 12px">
+              <thead>
+                <tr>
+                  <th>x</th>
+                  <th>f(x)</th>
+                  <th>Par ordenado</th>
+                  <th>Característica</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>−3</td>
+                  <td>1</td>
+                  <td>(−3, 1)</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>−2</td>
+                  <td>−2</td>
+                  <td>(−2, −2)</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>−1</td>
+                  <td>−3</td>
+                  <td>(−1, −3)</td>
+                  <td>Mínimo</td>
+                </tr>
+                <tr>
+                  <td>0</td>
+                  <td>−2</td>
+                  <td>(0, −2)</td>
+                  <td>Intercepto Y</td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>(1, 1)</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>6</td>
+                  <td>(2, 6)</td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="graph-container" id="graph-tg-tabla" data-plotly-id="graph_tg_tabla"></div>
+          </div>
+        </details>
+
+        <details class="accordion cyan">
+          <summary>🔄 De gráfica → tabla: Leer valores de una gráfica</summary>
+          <div class="accordion-body">
+            <div class="steps-list">
+              <div class="step-box s1">
+                <div class="step-num">Paso 1</div>
+                <div class="step-content">Elige puntos significativos (interceptos, máximos/mínimos, enteros)</div>
+              </div>
+              <div class="step-box s2">
+                <div class="step-num">Paso 2</div>
+                <div class="step-content">Para cada punto: proyecta al eje X para obtener x, al eje Y para obtener f(x)</div>
+              </div>
+              <div class="step-box s3">
+                <div class="step-num">Paso 3</div>
+                <div class="step-content">Registra los pares (x, f(x)) en orden creciente de x</div>
+              </div>
+            </div>
+            <div class="graph-container" id="graph-tg-graf" data-plotly-id="graph_tg_graf"></div>
+            <div class="alert tip" style="margin-top: 12px">
+              <span class="alert-icon">💡</span>
+              <div>En el examen GED, normalmente te dan gráficas con valores enteros fáciles de leer. Presta atención a la escala de los ejes.</div>
+            </div>
+          </div>
+        </details>
+
+        <details class="accordion cyan">
+          <summary>🔄 Las tres representaciones se complementan</summary>
+          <div class="accordion-body">
+            <table class="math-table">
+              <thead>
+                <tr>
+                  <th>¿Qué necesitas?</th>
+                  <th>Mejor representación</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Valor exacto de f(x) para un x dado</td>
+                  <td>Ecuación (sustitución) o tabla</td>
+                </tr>
+                <tr>
+                  <td>Ver tendencias generales, crecimiento, forma</td>
+                  <td>Gráfica</td>
+                </tr>
+                <tr>
+                  <td>Comparar dos funciones en puntos específicos</td>
+                  <td>Tabla de ambas juntas</td>
+                </tr>
+                <tr>
+                  <td>Encontrar dónde f(x) = g(x) (intersección)</td>
+                  <td>Gráfica (punto de cruce)</td>
+                </tr>
+                <tr>
+                  <td>Comunicar a alguien sin conocimientos de álgebra</td>
+                  <td>Gráfica o tabla</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <details class="accordion practice">
+          <summary>Práctica GED: De la gráfica a la tabla — Identifica los valores</summary>
+          <div class="practice-reveal">
+            <p>La gráfica de una función lineal pasa por los puntos (0, 4) y (3, 1).</p>
+            <table class="math-table">
+              <thead>
+                <tr>
+                  <th>x</th>
+                  <th>0</th>
+                  <th>1</th>
+                  <th>2</th>
+                  <th>3</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>f(x)</td>
+                  <td>4</td>
+                  <td>3</td>
+                  <td>2</td>
+                  <td>1</td>
+                </tr>
+              </tbody>
+            </table>
+            <p>
+              Pendiente: (1−4)/(3−0) = −3/3 = −1.
+              <strong>✅ f(x) = −x + 4</strong>
+            </p>
+          </div>
+        </details>
+      </section>
+    </main>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.26.0/plotly.min.js"></script>
+    <script>
+      /* ══════════════════════════════════════════════════════════════
+   TAB SWITCHING
+══════════════════════════════════════════════════════════════ */
+      function switchTab(tabId) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        const btn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+        const pane = document.getElementById(`tab-${tabId}`);
+        if (btn) btn.classList.add('active');
+        if (pane) pane.classList.add('active');
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 100);
+      }
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+          switchTab(this.dataset.tab);
+        });
+      });
+
+      /* ══════════════════════════════════════════════════════════════
+   PLOTLY LAZY INIT ON <details> TOGGLE
+══════════════════════════════════════════════════════════════ */
+      const plotlyInited = {};
+
+      document.querySelectorAll('details.accordion').forEach(det => {
+        det.addEventListener('toggle', function () {
+          if (this.open) {
+            this.querySelectorAll('[data-plotly-id]').forEach(el => {
+              const pid = el.dataset.plotlyId;
+              if (!plotlyInited[pid] && typeof window['init_' + pid] === 'function') {
+                window['init_' + pid]();
+                plotlyInited[pid] = true;
+              }
+            });
+          }
+        });
+      });
+
+      const PLOTLY_LAYOUT_BASE = {
+        margin: {l: 45, r: 20, b: 45, t: 35, pad: 4},
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: '#f8fafc',
+        font: {family: 'Segoe UI, system-ui, sans-serif', size: 12},
+        xaxis: {zeroline: true, zerolinecolor: '#94a3b8', gridcolor: '#e2e8f0'},
+        yaxis: {zeroline: true, zerolinecolor: '#94a3b8', gridcolor: '#e2e8f0'},
+        showlegend: true,
+        legend: {x: 0, y: 1, bgcolor: 'rgba(255,255,255,0.8)', bordercolor: '#e2e8f0', borderwidth: 1},
+        height: 265
+      };
+      const CFG = {responsive: true, displayModeBar: false};
+
+      function linspace(a, b, n) {
+        const arr = [];
+        for (let i = 0; i < n; i++) arr.push(a + ((b - a) * i) / (n - 1));
+        return arr;
+      }
+
+      /* ── Graph: Linear substitution ── */
+      window.init_graph_lineal_sust = function () {
+        const x = linspace(-4, 6, 100),
+          y = x.map(v => 3 * v - 5);
+        Plotly.newPlot(
+          'graph-lineal-sust',
+          [
+            {x, y, mode: 'lines', line: {color: '#2563eb', width: 3}, name: 'f(x) = 3x − 5'},
+            {x: [2], y: [1], mode: 'markers+text', marker: {color: '#dc2626', size: 12, symbol: 'star'}, text: ['f(2)=1'], textposition: 'top right', name: 'f(2) = 1'}
+          ],
+          {...PLOTLY_LAYOUT_BASE, title: {text: 'f(x) = 3x − 5', font: {size: 13}}},
+          CFG
+        );
+      };
+
+      /* ── Graph: Quadratic substitution ── */
+      window.init_graph_cuad_sust = function () {
+        const x = linspace(-1, 6, 100),
+          y = x.map(v => v * v - 4 * v + 3);
+        Plotly.newPlot(
+          'graph-cuad-sust',
+          [
+            {x, y, mode: 'lines', line: {color: '#059669', width: 3}, name: 'g(x) = x² − 4x + 3'},
+            {x: [3], y: [0], mode: 'markers+text', marker: {color: '#dc2626', size: 12, symbol: 'star'}, text: ['g(3)=0'], textposition: 'top right', name: 'g(3) = 0'}
+          ],
+          {...PLOTLY_LAYOUT_BASE, title: {text: 'g(x) = x² − 4x + 3', font: {size: 13}}},
+          CFG
+        );
+      };
+
+      /* ── Graph: Table linear ── */
+      window.init_graph_tabla_lineal = function () {
+        const xPts = [-2, -1, 0, 1, 2],
+          yPts = xPts.map(v => 2 * v - 1);
+        const xL = linspace(-3, 3, 80),
+          yL = xL.map(v => 2 * v - 1);
+        Plotly.newPlot(
+          'graph-tabla-lineal',
+          [
+            {x: xL, y: yL, mode: 'lines', line: {color: '#059669', width: 2}, name: 'f(x) = 2x − 1'},
+            {x: xPts, y: yPts, mode: 'markers', marker: {color: '#dc2626', size: 10}, name: 'Puntos de tabla'}
+          ],
+          {...PLOTLY_LAYOUT_BASE, title: {text: 'f(x) = 2x − 1', font: {size: 13}}},
+          CFG
+        );
+      };
+
+      /* ── Graph: Table quadratic ── */
+      window.init_graph_tabla_cuad = function () {
+        const xPts = [-2, -1, 0, 1, 2, 3, 4],
+          yPts = xPts.map(v => v * v - 2 * v - 3);
+        const xL = linspace(-2.5, 4.5, 100),
+          yL = xL.map(v => v * v - 2 * v - 3);
+        Plotly.newPlot(
+          'graph-tabla-cuad',
+          [
+            {x: xL, y: yL, mode: 'lines', line: {color: '#059669', width: 2}, name: 'g(x) = x² − 2x − 3'},
+            {x: xPts, y: yPts, mode: 'markers', marker: {color: '#dc2626', size: 10}, name: 'Puntos de tabla'}
+          ],
+          {...PLOTLY_LAYOUT_BASE, title: {text: 'g(x) = x² − 2x − 3', font: {size: 13}}},
+          CFG
+        );
+      };
+
+      /* ── Graph: Ecuación → lineal ── */
+      window.init_graph_ec_lineal = function () {
+        const x = linspace(-2, 5, 80),
+          y = x.map(v => 2 * v - 3);
+        Plotly.newPlot(
+          'graph-ec-lineal',
+          [
+            {x, y, mode: 'lines', line: {color: '#b45309', width: 3}, name: 'f(x) = 2x − 3'},
+            {x: [0, 1.5], y: [-3, 0], mode: 'markers+text', marker: {color: '#dc2626', size: 11}, text: ['(0,−3)', '(1.5,0)'], textposition: ['right', 'top right'], name: 'Interceptos'}
+          ],
+          {...PLOTLY_LAYOUT_BASE, title: {text: 'f(x) = 2x − 3', font: {size: 13}}},
+          CFG
+        );
+      };
+
+      /* ── Graph: Gráfica → ecuación (parábola de referencia) ── */
+      window.init_graph_graf_ec = function () {
+        const x = linspace(-1.5, 4.5, 100),
+          y = x.map(v => -(v - 1.5) * (v - 1.5) + 4);
+        Plotly.newPlot(
+          'graph-graf-ec',
+          [
+            {x, y, mode: 'lines', line: {color: '#b45309', width: 3}, name: 'f(x) = −(x−1.5)² + 4'},
+            {x: [1.5], y: [4], mode: 'markers+text', marker: {color: '#7c3aed', size: 12, symbol: 'diamond'}, text: ['Vértice (1.5, 4)'], textposition: 'top right', name: 'Vértice'},
+            {x: [-0.5, 3.5], y: [0, 0], mode: 'markers+text', marker: {color: '#dc2626', size: 10}, text: ['(−0.5,0)', '(3.5,0)'], textposition: ['left', 'right'], name: 'Raíces'}
+          ],
+          {...PLOTLY_LAYOUT_BASE, title: {text: 'Ejemplo: identificar vértice y raíces', font: {size: 13}}},
+          CFG
+        );
+      };
+
+      /* ── Tab↔Graf: Intro ── */
+      window.init_graph_tab_graf_intro = function () {
+        const xPts = [-2, -1, 0, 1, 2],
+          yPts = [6, 3, 2, 3, 6];
+        const xL = linspace(-2.5, 2.5, 80),
+          yL = xL.map(v => v * v + 2);
+        Plotly.newPlot(
+          'graph-tab-graf-intro',
+          [
+            {x: xL, y: yL, mode: 'lines', line: {color: '#0e7490', width: 2, dash: 'dot'}, name: 'f(x) = x² + 2'},
+            {x: xPts, y: yPts, mode: 'markers', marker: {color: '#dc2626', size: 10}, name: 'Tabla'}
+          ],
+          {...PLOTLY_LAYOUT_BASE, height: 210, title: {text: 'Puntos de tabla en la gráfica', font: {size: 12}}},
+          CFG
+        );
+      };
+
+      /* ── Tab↔Graf: tabla → gráfica ── */
+      window.init_graph_tg_tabla = function () {
+        const xPts = [-3, -2, -1, 0, 1, 2],
+          yPts = [1, -2, -3, -2, 1, 6];
+        const xL = linspace(-3.5, 2.5, 80),
+          yL = xL.map(v => v * v + 2 * v - 2);
+        Plotly.newPlot(
+          'graph-tg-tabla',
+          [
+            {x: xL, y: yL, mode: 'lines', line: {color: '#0e7490', width: 2, dash: 'dot'}, name: 'Curva suave'},
+            {
+              x: xPts,
+              y: yPts,
+              mode: 'markers+text',
+              marker: {color: '#dc2626', size: 10},
+              text: yPts.map((y, i) => `(${xPts[i]},${y})`),
+              textposition: 'top center',
+              textfont: {size: 9},
+              name: 'Puntos'
+            }
+          ],
+          {...PLOTLY_LAYOUT_BASE, title: {text: 'De tabla a gráfica', font: {size: 13}}},
+          CFG
+        );
+      };
+
+      /* ── Tab↔Graf: gráfica → tabla ── */
+      window.init_graph_tg_graf = function () {
+        const xL = linspace(-3, 3, 100),
+          yL = xL.map(v => v * v + v);
+        const xPts = [-2, -1, 0, 1, 2],
+          yPts = xPts.map(v => v * v + v);
+        Plotly.newPlot(
+          'graph-tg-graf',
+          [
+            {x: xL, y: yL, mode: 'lines', line: {color: '#0e7490', width: 3}, name: 'f(x) = x² + x'},
+            {x: xPts, y: yPts, mode: 'markers', marker: {color: '#fbbf24', size: 12, symbol: 'star'}, name: 'Leer estos puntos'}
+          ],
+          {...PLOTLY_LAYOUT_BASE, title: {text: 'f(x) = x² + x — Lee los valores amarillos', font: {size: 13}}},
+          CFG
+        );
+      };
+
+      /* ══════════════════════════════════════════════════════════════
+   EVALUADOR INTERACTIVO PASO A PASO
+══════════════════════════════════════════════════════════════ */
+      const EVAL_FUNCS = {
+        lineal: {
+          label: 'f(x) = 3x − 5',
+          compute: x => 3 * x - 5,
+          steps: x => {
+            const a = 3 * x,
+              r = a - 5;
+            return [
+              {cls: 's1', label: 'Función original', expr: `f(x) = 3x − 5`},
+              {cls: 's2', label: `Sustituye x = ${x}`, expr: `f(${x}) = 3·(${x}) − 5`},
+              {cls: 's3', label: 'Multiplica (PEMDAS)', expr: `= ${a} − 5`},
+              {cls: 'result-step', label: '✅ Resultado', expr: `<span class="big-answer">f(${x}) = ${r}</span>`}
+            ];
+          },
+          color: '#2563eb',
+          plotY: x => 3 * x - 5
+        },
+        cuadratica: {
+          label: 'g(x) = x² − 4x + 3',
+          compute: x => x * x - 4 * x + 3,
+          steps: x => {
+            const sq = x * x,
+              mul = 4 * x,
+              r = sq - mul + 3;
+            return [
+              {cls: 's1', label: 'Función original', expr: `g(x) = x² − 4x + 3`},
+              {cls: 's2', label: `Sustituye x = ${x}`, expr: `g(${x}) = (${x})² − 4·(${x}) + 3`},
+              {cls: 's3', label: `Potencia: (${x})² = ${sq}`, expr: `= ${sq} − 4·(${x}) + 3`},
+              {cls: 's4', label: `Multiplica: 4·${x} = ${mul}`, expr: `= ${sq} − ${mul} + 3`},
+              {cls: 'result-step', label: '✅ Resultado', expr: `<span class="big-answer">g(${x}) = ${r}</span>`}
+            ];
+          },
+          color: '#059669',
+          plotY: x => x * x - 4 * x + 3
+        },
+        racional: {
+          label: 'h(x) = (2x+1)/(x−3)',
+          compute: x => (x === 3 ? NaN : (2 * x + 1) / (x - 3)),
+          steps: x => {
+            if (x === 3) return [{cls: 's1', label: '¡Error de dominio!', expr: 'x = 3 hace cero el denominador. h(3) no existe.'}];
+            const num = 2 * x + 1,
+              den = x - 3;
+            const r = num / den;
+            const rStr = Number.isInteger(r) ? r.toString() : r.toFixed(3).replace(/\.?0+$/, '');
+            return [
+              {cls: 's1', label: 'Función original', expr: `h(x) = (2x + 1) / (x − 3)`},
+              {cls: 's2', label: `Verifica dominio: x ≠ 3. x=${x} ✓`, expr: ``},
+              {cls: 's3', label: `Sustituye x = ${x}`, expr: `h(${x}) = (2·${x} + 1) / (${x} − 3)`},
+              {cls: 's4', label: 'Calcula num y den por separado', expr: `= (${num}) / (${den})`},
+              {cls: 'result-step', label: '✅ Resultado', expr: `<span class="big-answer">h(${x}) = ${rStr}</span>`}
+            ];
+          },
+          color: '#7c3aed',
+          plotY: x => (x === 3 ? NaN : (2 * x + 1) / (x - 3))
+        },
+        cuadratica2: {
+          label: 'p(x) = 2x² + x − 6',
+          compute: x => 2 * x * x + x - 6,
+          steps: x => {
+            const sq = x * x,
+              t1 = 2 * sq,
+              r = t1 + x - 6;
+            return [
+              {cls: 's1', label: 'Función original', expr: `p(x) = 2x² + x − 6`},
+              {cls: 's2', label: `Sustituye x = ${x}`, expr: `p(${x}) = 2(${x})² + (${x}) − 6`},
+              {cls: 's3', label: `Potencia: (${x})² = ${sq}`, expr: `= 2·${sq} + ${x} − 6`},
+              {cls: 's4', label: `Multiplica: 2·${sq} = ${t1}`, expr: `= ${t1} + ${x} − 6`},
+              {cls: 'result-step', label: '✅ Resultado', expr: `<span class="big-answer">p(${x}) = ${r}</span>`}
+            ];
+          },
+          color: '#b45309',
+          plotY: x => 2 * x * x + x - 6
+        }
+      };
+
+      let evalGraphInited = false;
+
+      function runEvaluator() {
+        const funcKey = document.getElementById('eval-func').value;
+        const xVal = parseFloat(document.getElementById('eval-x').value);
+        if (isNaN(xVal)) {
+          alert('Por favor ingresa un número válido para x.');
+          return;
+        }
+
+        const fn = EVAL_FUNCS[funcKey];
+        const steps = fn.steps(xVal);
+        const out = document.getElementById('eval-output');
+        out.innerHTML = '';
+
+        steps.forEach((s, i) => {
+          setTimeout(() => {
+            const div = document.createElement('div');
+            div.className = `step-animated ${s.cls}`;
+            div.innerHTML = `<div class="s-label">${s.label}</div>${s.expr ? `<div class="s-expr">${s.expr}</div>` : ''}`;
+            out.appendChild(div);
+            div.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+          }, i * 380);
+        });
+
+        // Update eval graph
+        setTimeout(
+          () => {
+            const result = fn.compute(xVal);
+            updateEvalGraph(funcKey, xVal, result, fn);
+          },
+          steps.length * 380 + 100
+        );
+      }
+
+      function updateEvalGraph(funcKey, xVal, result, fn) {
+        const xArr = linspace(-6, 8, 120);
+        const yArr = xArr.map(v => fn.plotY(v));
+        const traces = [{x: xArr, y: yArr, mode: 'lines', line: {color: fn.color, width: 3}, name: fn.label}];
+        if (!isNaN(result)) {
+          traces.push({
+            x: [xVal],
+            y: [result],
+            mode: 'markers+text',
+            marker: {color: '#ef4444', size: 14, symbol: 'star'},
+            text: [`(${xVal}, ${result})`],
+            textposition: 'top right',
+            name: `Punto evaluado`
+          });
+        }
+        const layout = {
+          ...PLOTLY_LAYOUT_BASE,
+          height: 215,
+          title: {text: fn.label, font: {size: 12}},
+          yaxis: {...PLOTLY_LAYOUT_BASE.yaxis, range: [-10, 15]}
+        };
+        if (!evalGraphInited) {
+          Plotly.newPlot('eval-graph', traces, layout, CFG);
+          evalGraphInited = true;
+        } else {
+          Plotly.react('eval-graph', traces, layout, CFG);
+        }
+      }
+
+      /* ══════════════════════════════════════════════════════════════
+   TRIPLE REPRESENTATION INTERACTIVE
+══════════════════════════════════════════════════════════════ */
+      let tripleGraphInited = false;
+
+      function updateTriple() {
+        const type = document.getElementById('triple-type').value;
+        const m = parseFloat(document.getElementById('sl-m').value);
+        const b = parseFloat(document.getElementById('sl-b').value);
+        const a = parseFloat(document.getElementById('sl-a').value);
+        const bq = parseFloat(document.getElementById('sl-bq').value);
+        const c = parseFloat(document.getElementById('sl-c').value);
+
+        document.getElementById('m-val').textContent = m;
+        document.getElementById('b-val').textContent = b;
+        document.getElementById('a-val').textContent = a;
+        document.getElementById('sl-bq-val').textContent = bq;
+        document.getElementById('sl-c-val').textContent = c;
+
+        let eqText, fn, color;
+        if (type === 'linear') {
+          const mStr = m === 1 ? '' : m === -1 ? '−' : m;
+          const bStr = b >= 0 ? ` + ${b}` : ` − ${Math.abs(b)}`;
+          eqText = `f(x) = ${mStr}x${b !== 0 ? bStr : ''}`;
+          fn = x => m * x + b;
+          color = '#60a5fa';
+        } else {
+          eqText = `f(x) = ${a}x² ${bq >= 0 ? '+' : '−'} ${Math.abs(bq)}x ${c >= 0 ? '+' : '−'} ${Math.abs(c)}`;
+          fn = x => a * x * x + bq * x + c;
+          color = '#34d399';
+        }
+
+        document.getElementById('triple-eq').textContent = eqText;
+
+        // Update table
+        const xVals = [-3, -2, -1, 0, 1, 2, 3];
+        const tbody = document.querySelector('#triple-table tbody');
+        tbody.innerHTML = '';
+        xVals.forEach(xv => {
+          const yv = fn(xv);
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${xv}</td><td>${Number.isInteger(yv) ? yv : yv.toFixed(2)}</td>`;
+          tbody.appendChild(tr);
+        });
+
+        // Update graph
+        const xArr = linspace(-5, 5, 120);
+        const yArr = xArr.map(fn);
+        const traces = [{x: xArr, y: yArr, mode: 'lines', line: {color, width: 3}, name: eqText}];
+        const layout = {
+          paper_bgcolor: 'transparent',
+          plot_bgcolor: 'rgba(255,255,255,0.08)',
+          margin: {l: 40, r: 15, b: 40, t: 15},
+          font: {color: '#e2e8f0', size: 11},
+          xaxis: {zeroline: true, zerolinecolor: '#475569', gridcolor: 'rgba(255,255,255,0.1)', color: '#94a3b8'},
+          yaxis: {zeroline: true, zerolinecolor: '#475569', gridcolor: 'rgba(255,255,255,0.1)', color: '#94a3b8', range: [-10, 12]},
+          showlegend: false,
+          height: 240
+        };
+        if (!tripleGraphInited) {
+          Plotly.newPlot('triple-graph', traces, layout, CFG);
+          tripleGraphInited = true;
+        } else {
+          Plotly.react('triple-graph', traces, layout, CFG);
+        }
+      }
+
+      document.getElementById('triple-type').addEventListener('change', function () {
+        const isLin = this.value === 'linear';
+        document.getElementById('triple-linear-controls').style.display = isLin ? '' : 'none';
+        document.getElementById('triple-quad-controls').style.display = isLin ? 'none' : '';
+        updateTriple();
+      });
+
+      ['sl-m', 'sl-b', 'sl-a', 'sl-bq', 'sl-c'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateTriple);
+      });
+
+      /* ══════════════════════════════════════════════════════════════
+   TABLE GENERATOR
+══════════════════════════════════════════════════════════════ */
+      let tblGraphInited = false;
+
+      document.getElementById('tbl-func').addEventListener('change', function () {
+        const isLin = this.value === 'linear';
+        document.getElementById('tbl-linear-ctrl').style.display = isLin ? '' : 'none';
+        document.getElementById('tbl-quad-ctrl').style.display = isLin ? 'none' : '';
+      });
+
+      function generateTable() {
+        const type = document.getElementById('tbl-func').value;
+        let fn, label;
+        if (type === 'linear') {
+          const m = parseFloat(document.getElementById('tbl-m').value) || 0;
+          const b = parseFloat(document.getElementById('tbl-b').value) || 0;
+          fn = x => m * x + b;
+          label = `f(x) = ${m}x ${b >= 0 ? '+' : '−'} ${Math.abs(b)}`;
+        } else {
+          const a = parseFloat(document.getElementById('tbl-a').value) || 0;
+          const bq = parseFloat(document.getElementById('tbl-bq').value) || 0;
+          const c = parseFloat(document.getElementById('tbl-c').value) || 0;
+          fn = x => a * x * x + bq * x + c;
+          label = `f(x) = ${a}x² ${bq >= 0 ? '+' : '−'} ${Math.abs(bq)}x ${c >= 0 ? '+' : '−'} ${Math.abs(c)}`;
+        }
+
+        const xVals = [-3, -2, -1, 0, 1, 2, 3];
+        let html = `<table style="border-collapse:collapse;font-size:0.82rem;width:100%">
+    <thead><tr><th style="background:#1e293b;color:#fff;padding:7px 12px">x</th>
+    <th style="background:#1e293b;color:#fff;padding:7px 12px">f(x)</th></tr></thead><tbody>`;
+        xVals.forEach(xv => {
+          const yv = fn(xv);
+          const yvStr = Number.isInteger(yv) ? yv : yv.toFixed(2);
+          html += `<tr><td style="border:1px solid #e2e8f0;padding:6px 12px;text-align:center">${xv}</td>
+             <td style="border:1px solid #e2e8f0;padding:6px 12px;text-align:center">${yvStr}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        document.getElementById('tbl-output').innerHTML = html;
+
+        const xArr = linspace(-4, 4, 100);
+        const yArr = xArr.map(fn);
+        const traces = [
+          {x: xArr, y: yArr, mode: 'lines', line: {color: '#059669', width: 3}, name: label},
+          {x: xVals, y: xVals.map(fn), mode: 'markers', marker: {color: '#dc2626', size: 10}, name: 'Tabla'}
+        ];
+        const layout = {...PLOTLY_LAYOUT_BASE, height: 255, title: {text: label, font: {size: 12}}};
+        if (!tblGraphInited) {
+          Plotly.newPlot('tbl-graph', traces, layout, CFG);
+          tblGraphInited = true;
+        } else {
+          Plotly.react('tbl-graph', traces, layout, CFG);
+        }
+      }
+
+      /* ══════════════════════════════════════════════════════════════
+   COMPOSITE FUNCTION VISUALIZER
+══════════════════════════════════════════════════════════════ */
+      const G_FUNCS = {
+        g1: {label: 'g(x) = x + 2', f: x => x + 2},
+        g2: {label: 'g(x) = x²', f: x => x * x},
+        g3: {label: 'g(x) = 2x − 1', f: x => 2 * x - 1},
+        g4: {label: 'g(x) = x + 5', f: x => x + 5}
+      };
+      const F_FUNCS = {
+        f1: {label: 'f(x) = 3x', f: x => 3 * x},
+        f2: {label: 'f(x) = x − 4', f: x => x - 4},
+        f3: {label: 'f(x) = x²', f: x => x * x},
+        f4: {label: 'f(x) = 2x + 1', f: x => 2 * x + 1}
+      };
+
+      function runComposition() {
+        const gKey = document.getElementById('comp-g').value;
+        const fKey = document.getElementById('comp-f').value;
+        const xVal = parseFloat(document.getElementById('comp-x').value);
+        if (isNaN(xVal)) return;
+
+        const gFn = G_FUNCS[gKey],
+          fFn = F_FUNCS[fKey];
+        const gResult = gFn.f(xVal);
+        const fResult = fFn.f(gResult);
+
+        // Update labels
+        document.getElementById('m-glabel').textContent = gFn.label;
+        document.getElementById('m-flabel').textContent = fFn.label;
+
+        // Animate
+        const mIn = document.getElementById('m-in');
+        const mOut = document.getElementById('m-out');
+        const mGbox = document.getElementById('m-gbox');
+        const mFbox = document.getElementById('m-fbox');
+        const mGval = document.getElementById('m-gval');
+        const mFval = document.getElementById('m-fval');
+
+        mIn.textContent = xVal;
+        mOut.textContent = '?';
+        mGval.textContent = '';
+        mFval.textContent = '';
+        mIn.classList.remove('lit');
+        mOut.classList.remove('lit');
+        mGbox.classList.remove('active');
+        mFbox.classList.remove('active');
+
+        setTimeout(() => {
+          mIn.classList.add('lit');
+        }, 200);
+        setTimeout(() => {
+          mIn.classList.remove('lit');
+          mGbox.classList.add('active');
+          mGval.textContent = `g(${xVal}) = ${gResult}`;
+        }, 800);
+        setTimeout(() => {
+          mGbox.classList.remove('active');
+          mFbox.classList.add('active');
+          mFval.textContent = `f(${gResult}) = ${fResult}`;
+        }, 1600);
+        setTimeout(() => {
+          mFbox.classList.remove('active');
+          mOut.textContent = fResult;
+          mOut.classList.add('lit');
+        }, 2400);
+
+        // Text output
+        const fStr = Number.isInteger(fResult) ? fResult : fResult.toFixed(4).replace(/\.?0+$/, '');
+        const gStr = Number.isInteger(gResult) ? gResult : gResult.toFixed(4).replace(/\.?0+$/, '');
+        document.getElementById('comp-output').innerHTML = `
+    <div style="font-size:0.85rem;color:#94a3b8;margin-bottom:8px">Proceso paso a paso:</div>
+    <div class="step-animated s1"><div class="s-label">Paso 1 — Función interna</div>
+      <div class="s-expr">${gFn.label} → g(${xVal}) = ${gStr}</div></div>
+    <div class="step-animated s2" style="margin-top:6px"><div class="s-label">Paso 2 — Entrada para f</div>
+      <div class="s-expr">h(${xVal}) = f(g(${xVal})) = f(${gStr})</div></div>
+    <div class="step-animated s3" style="margin-top:6px"><div class="s-label">Paso 3 — Función externa</div>
+      <div class="s-expr">${fFn.label} → f(${gStr}) = ${fStr}</div></div>
+    <div class="step-animated result-step" style="margin-top:6px"><div class="s-label">✅ Resultado final</div>
+      <div class="s-expr"><span class="big-answer">h(${xVal}) = f(g(${xVal})) = ${fStr}</span></div></div>
+  `;
+      }
+
+      /* ══════════════════════════════════════════════════════════════
+   PARAMETER EXPLORER (Ec↔Graf)
+══════════════════════════════════════════════════════════════ */
+      let paramGraphInited = false;
+
+      function updateParamControls() {
+        const isLin = document.getElementById('param-type').value === 'linear';
+        document.getElementById('param-lin-ctrl').style.display = isLin ? '' : 'none';
+        document.getElementById('param-quad-ctrl').style.display = isLin ? 'none' : '';
+        updateParamGraph();
+      }
+
+      function updateParamGraph() {
+        const type = document.getElementById('param-type').value;
+        let fn, eqText, info, color;
+
+        if (type === 'linear') {
+          const m = parseFloat(document.getElementById('pm').value);
+          const b = parseFloat(document.getElementById('pb').value);
+          document.getElementById('pm-val').textContent = m;
+          document.getElementById('pb-val').textContent = b;
+          fn = x => m * x + b;
+          eqText = `f(x) = ${m}x ${b >= 0 ? '+' : '−'} ${Math.abs(b)}`;
+          const xint = b !== 0 ? (-b / m).toFixed(2) : '0';
+          info = `Pendiente: ${m} | Intercepto-Y: (0, ${b}) | Intercepto-X: (${xint}, 0)`;
+          color = '#fbbf24';
+        } else {
+          const a = parseFloat(document.getElementById('pa').value);
+          const bq = parseFloat(document.getElementById('pbq').value);
+          const c = parseFloat(document.getElementById('pc').value);
+          document.getElementById('pa-val').textContent = a;
+          document.getElementById('pbq-val').textContent = bq;
+          document.getElementById('pc-val').textContent = c;
+          fn = x => a * x * x + bq * x + c;
+          eqText = `f(x) = ${a}x² ${bq >= 0 ? '+' : '−'} ${Math.abs(bq)}x ${c >= 0 ? '+' : '−'} ${Math.abs(c)}`;
+          const h = a !== 0 ? (-bq / (2 * a)).toFixed(2) : '0';
+          const k = fn(parseFloat(h)).toFixed(2);
+          info = `Vértice: (${h}, ${k}) | Abre: ${a > 0 ? '↑ hacia arriba' : '↓ hacia abajo'} | Intercepto-Y: (0, ${c})`;
+          color = '#34d399';
+        }
+
+        document.getElementById('param-eq-display').textContent = eqText;
+        document.getElementById('param-info').textContent = info;
+
+        const xArr = linspace(-6, 6, 120);
+        const yArr = xArr.map(fn);
+        const traces = [{x: xArr, y: yArr, mode: 'lines', line: {color, width: 3}, name: eqText}];
+        const layout = {
+          paper_bgcolor: 'transparent',
+          plot_bgcolor: 'rgba(255,255,255,0.05)',
+          margin: {l: 40, r: 15, b: 40, t: 15},
+          font: {color: '#e2e8f0', size: 11},
+          xaxis: {zeroline: true, zerolinecolor: '#475569', gridcolor: 'rgba(255,255,255,0.1)', color: '#94a3b8', range: [-6, 6]},
+          yaxis: {zeroline: true, zerolinecolor: '#475569', gridcolor: 'rgba(255,255,255,0.1)', color: '#94a3b8', range: [-10, 12]},
+          showlegend: false,
+          height: 295
+        };
+        if (!paramGraphInited) {
+          Plotly.newPlot('param-graph', traces, layout, CFG);
+          paramGraphInited = true;
+        } else {
+          Plotly.react('param-graph', traces, layout, CFG);
+        }
+      }
+
+      /* ══════════════════════════════════════════════════════════════
+   INIT ON LOAD
+══════════════════════════════════════════════════════════════ */
+      document.addEventListener('DOMContentLoaded', function () {
+        updateTriple();
+        generateTable();
+        updateParamGraph();
+        // Initialize visible graphs (Tab 0 is active)
+      });
+
+      // Initialize graphs inside already-open details on tab switch
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+          setTimeout(() => {
+            const pane = document.querySelector('.tab-pane.active');
+            if (!pane) return;
+            pane.querySelectorAll('details[open] [data-plotly-id]').forEach(el => {
+              const pid = el.dataset.plotlyId;
+              if (!plotlyInited[pid] && typeof window['init_' + pid] === 'function') {
+                window['init_' + pid]();
+                plotlyInited[pid] = true;
+              }
+            });
+          }, 150);
+        });
+      });
+    </script>
+  </body>
+</html>
 
