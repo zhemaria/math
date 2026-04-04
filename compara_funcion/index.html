@@ -1,1 +1,1660 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparación de funciones lineales y cuadráticas</title>
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.8;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+}
+
+h1 {
+  color: #2c3e50;
+  text-align: center;
+  font-size: 1.9em;
+  margin-bottom: 6px;
+}
+.subtitulo {
+  text-align: center;
+  color: #777;
+  font-size: 0.95em;
+  margin-bottom: 28px;
+}
+
+/* ── ACORDEONES ── */
+details {
+  margin-bottom: 14px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+summary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 17px 22px;
+  font-size: 1.12em;
+  font-weight: bold;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+summary::-webkit-details-marker { display: none; }
+summary::after { content: '▶'; font-size: 0.85em; transition: transform 0.3s; }
+details[open] > summary::after { transform: rotate(90deg); }
+
+.cw { padding: 22px 25px; background: #f8f9fa; }
+
+/* Acordeón anidado — pasos */
+details.paso {
+  margin: 10px 0;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+}
+details.paso > summary {
+  background: linear-gradient(135deg, #1976d2, #0d47a1);
+  font-size: 1em;
+  padding: 13px 18px;
+}
+details.paso > .cw {
+  background: #e3f2fd;
+  padding: 16px 20px;
+}
+
+/* ── CAJAS DE CONTENIDO ── */
+.def  { background:#e8f5e9; border-left:5px solid #4caf50; padding:14px; margin:12px 0; border-radius:8px; }
+.ej   { background:#fff3e0; border-left:5px solid #ff9800; padding:14px; margin:12px 0; border-radius:8px; }
+.prac { background:#e3f2fd; border-left:5px solid #2196f3; padding:14px; margin:12px 0; border-radius:8px; }
+.imp  { background:#fce4ec; border-left:5px solid #e91e63; padding:14px; margin:12px 0; border-radius:8px; }
+.form { background:#f5f5f5; border:2px dashed #9c27b0; padding:13px; margin:12px 0; border-radius:8px; text-align:center; }
+
+h2 { color:#673ab7; margin:14px 0 7px; font-size:1.1em; }
+h3 { color:#455a64; margin:10px 0 5px; font-size:1.02em; }
+p  { margin:7px 0; }
+ul,ol { padding-left:24px; margin:8px 0; }
+li { margin-bottom:5px; }
+
+/* ── TABLAS ── */
+table { width:100%; border-collapse:collapse; margin:12px 0; }
+th,td { border:1px solid #ddd; padding:9px 10px; text-align:center; }
+th { background:#673ab7; color:#fff; }
+tr:nth-child(even) { background:#f5f5f5; }
+
+.dos-tablas { display:flex; gap:18px; flex-wrap:wrap; }
+.dos-tablas > * { flex:1; min-width:220px; }
+
+/* ── CANVAS ── */
+canvas {
+  display:block; margin:14px auto;
+  border-radius:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.15);
+  max-width:100%;
+}
+.leyenda { display:flex; gap:22px; justify-content:center; flex-wrap:wrap; margin:6px 0 12px; }
+.leyenda-item { display:flex; align-items:center; gap:8px; font-size:0.9em; }
+.lcolor { width:32px; height:4px; border-radius:2px; }
+
+/* ── EJERCICIOS ── */
+.preg {
+  background:#fff; padding:14px; border-radius:8px;
+  border:2px solid #e0e0e0; margin:10px 0; transition:border-color .3s;
+}
+.preg.ok  { border-color:#4caf50; background:#f1f8e9; }
+.preg.mal { border-color:#f44336; background:#ffebee; }
+
+input[type="number"] {
+  padding:8px 10px; border:2px solid #bbb; border-radius:5px;
+  font-size:1em; width:90px; margin:0 5px; text-align:center;
+}
+input:focus { outline:none; border-color:#667eea; }
+input.ok  { border-color:#4caf50; }
+input.mal { border-color:#f44336; }
+
+select {
+  padding:8px 10px; border:2px solid #bbb; border-radius:5px;
+  font-size:0.95em; margin:0 5px; cursor:pointer;
+}
+
+/* Opciones tipo radio (sin <label>) */
+.op {
+  display:flex; align-items:center; gap:10px; padding:10px 13px;
+  background:#f5f5f5; border-radius:6px; margin:6px 0;
+  cursor:pointer; transition:background .2s;
+  border:2px solid transparent;
+}
+.op:hover  { background:#e8e8e8; }
+.op.sel    { background:#e3f2fd; border-color:#2196f3; }
+.op.ok     { background:#e8f5e9; border-color:#4caf50; }
+.op.mal    { background:#ffebee; border-color:#f44336; }
+
+/* Botones */
+.btn-v { background:#4caf50; color:#fff; border:none; padding:10px 22px; border-radius:6px; cursor:pointer; font-size:.95em; margin:7px 4px; }
+.btn-v:hover { background:#388e3c; }
+.btn-p { background:#ff9800; color:#fff; border:none; padding:10px 22px; border-radius:6px; cursor:pointer; font-size:.95em; margin:7px 4px; }
+.btn-p:hover { background:#e65100; }
+.btn-r { background:#9c27b0; color:#fff; border:none; padding:10px 22px; border-radius:6px; cursor:pointer; font-size:.95em; margin:7px 4px; }
+.btn-r:hover { background:#6a1b9a; }
+
+/* Feedback */
+.fb { margin-top:12px; padding:12px 15px; border-radius:8px; display:none; }
+.fb.show { display:block; }
+.fb.ok  { background:#c8e6c9; color:#1b5e20; border:2px solid #4caf50; }
+.fb.mal { background:#ffcdd2; color:#b71c1c; border:2px solid #f44336; }
+.fb.pista { background:#ffe0b2; color:#e65100; border:2px solid #ff9800; }
+
+.marca { display:inline-block; margin-left:8px; font-size:1.1em; }
+
+/* Barra de progreso */
+.barra { width:100%; height:24px; background:#f0f0f0; border-radius:12px; margin:14px 0; overflow:hidden; }
+.relleno {
+  height:100%; background:linear-gradient(90deg,#4caf50,#8bc34a);
+  border-radius:12px; transition:width .5s ease;
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:bold; font-size:.88em;
+}
+
+hr.div { border:none; border-top:2px dashed #ce93d8; margin:18px 0; }
+
+@media(max-width:620px){
+  h1 { font-size:1.4em; }
+  .dos-tablas { flex-direction:column; }
+  input[type="number"] { width:75px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>📊 Comparación de funciones lineales y cuadráticas</h1>
+<p class="subtitulo">Preparación GED · Matemáticas · Nivel ASE · NRS 5–6<br>Creado por José M. Fernández con  Claude Sonnet 4.6</p>
+
+<!-- ══════════════════════════════════════════════════════
+     SECCIÓN 1 — ¿Qué es una función? (repaso)
+     ══════════════════════════════════════════════════════ -->
+<details id="s1">
+<summary>1. ¿Qué es una función? — repaso rápido</summary>
+<div class="cw">
+
+  <div class="def">
+    <h2>📖 Definición</h2>
+    <p>Una <strong>función</strong> es una regla que asigna a cada valor de <em>entrada</em> ($x$) exactamente <strong>un</strong> valor de <em>salida</em> ($y$).</p>
+    <div class="form">
+      <p>Notación: &nbsp; $f(x) = y$ &nbsp;&nbsp; (se lee "f de x")</p>
+      <p>$x$ = variable independiente (la entrada) &nbsp;|&nbsp; $y$ = variable dependiente (la salida)</p>
+    </div>
+    <ul>
+      <li><strong>Evaluar</strong> $f(3)$ significa sustituir $x = 3$ en la fórmula.</li>
+      <li><strong>Prueba de la línea vertical:</strong> si una línea vertical toca la gráfica en más de un punto, la relación NO es función.</li>
+    </ul>
+  </div>
+
+  <div class="ej">
+    <h2>💡 Las dos funciones que vamos a comparar</h2>
+    <div class="dos-tablas">
+      <div>
+        <h3>📈 Función lineal</h3>
+        <div class="form">$f(x) = mx + b$</div>
+        <ul>
+          <li>Gráfica: <strong>línea recta</strong></li>
+          <li>$m$ = pendiente (tasa de cambio <em>constante</em>)</li>
+          <li>$b$ = intercepto en $y$</li>
+          <li>Cambio en $y$ igual para cada unidad de $x$</li>
+        </ul>
+      </div>
+      <div>
+        <h3>📉 Función cuadrática</h3>
+        <div class="form">$f(x) = ax^2 + bx + c$</div>
+        <ul>
+          <li>Gráfica: <strong>parábola</strong></li>
+          <li>$a \neq 0$ &nbsp;|&nbsp; $a>0$ abre ↑ &nbsp;|&nbsp; $a<0$ abre ↓</li>
+          <li>Tiene <strong>vértice</strong> (máximo o mínimo)</li>
+          <li>Cambio en $y$ <em>no es constante</em></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="imp">
+    <h3>⚠️ Clave para reconocerlas</h3>
+    <ul>
+      <li>¿La variable $x$ tiene exponente <strong>1</strong> como máximo? → <strong>Lineal</strong></li>
+      <li>¿La variable $x$ aparece con exponente <strong>2</strong>? → <strong>Cuadrática</strong></li>
+    </ul>
+    <p>Ejemplos rápidos: &nbsp; $3x-7$ → lineal &nbsp;|&nbsp; $x^2+2x-1$ → cuadrática &nbsp;|&nbsp; $-5x^2$ → cuadrática</p>
+  </div>
+
+</div>
+</details>
+
+<!-- ══════════════════════════════════════════════════════
+     SECCIÓN 2 — Comparación de funciones LINEALES
+     ══════════════════════════════════════════════════════ -->
+<details id="s2">
+<summary>2. Comparación de funciones lineales</summary>
+<div class="cw">
+
+  <div class="def">
+    <h2>🔍 ¿Por qué comparar dos funciones lineales?</h2>
+    <p>Comparar dos líneas rectas nos permite responder preguntas como:</p>
+    <ul>
+      <li>¿Cuál crece más rápido? (mayor pendiente $m$)</li>
+      <li>¿Cuál empieza más alto? (mayor intercepto $b$)</li>
+      <li>¿En qué punto son exactamente iguales? (intersección)</li>
+      <li>¿Cuál conviene más según la situación?</li>
+    </ul>
+  </div>
+
+  <hr class="div">
+
+  <!-- 2.1 Ecuación ↔ Tabla -->
+  <details id="s2-1">
+  <summary>2.1 Ecuación ↔ Tabla</summary>
+  <div class="cw">
+
+    <div class="ej">
+      <h2>📋 Ejemplo: dos planes de internet</h2>
+      <p><strong>Plan A:</strong> $f(x) = 3x + 10$ &nbsp;&nbsp; <strong>Plan B:</strong> $g(x) = 5x + 2$ &nbsp;&nbsp; ($x$ = meses)</p>
+      <p>Sustituimos $x = 0, 1, 2, 3, 4$ en cada ecuación:</p>
+      <div class="dos-tablas">
+        <table>
+          <tr><th colspan="2">Plan A: $f(x)=3x+10$</th></tr>
+          <tr><th>$x$ (meses)</th><th>$f(x)$ ($)</th></tr>
+          <tr><td>0</td><td>$3(0)+10=\mathbf{10}$</td></tr>
+          <tr><td>1</td><td>$3(1)+10=\mathbf{13}$</td></tr>
+          <tr><td>2</td><td>$3(2)+10=\mathbf{16}$</td></tr>
+          <tr><td>3</td><td>$3(3)+10=\mathbf{19}$</td></tr>
+          <tr><td>4</td><td>$3(4)+10=\mathbf{22}$</td></tr>
+        </table>
+        <table>
+          <tr><th colspan="2">Plan B: $g(x)=5x+2$</th></tr>
+          <tr><th>$x$ (meses)</th><th>$g(x)$ ($)</th></tr>
+          <tr><td>0</td><td>$5(0)+2=\mathbf{2}$</td></tr>
+          <tr><td>1</td><td>$5(1)+2=\mathbf{7}$</td></tr>
+          <tr><td>2</td><td>$5(2)+2=\mathbf{12}$</td></tr>
+          <tr><td>3</td><td>$5(3)+2=\mathbf{17}$</td></tr>
+          <tr><td>4</td><td>$5(4)+2=\mathbf{22}$</td></tr>
+        </table>
+      </div>
+      <div class="imp">
+        <h3>📊 ¿Qué dice la tabla?</h3>
+        <ul>
+          <li><strong>Al inicio ($x=0$):</strong> Plan A = $10 &gt; Plan B = $2 → Plan B más barato al principio</li>
+          <li><strong>Tasa de cambio:</strong> Plan A sube $3/mes · Plan B sube $5/mes → Plan B sube más rápido</li>
+          <li><strong>Punto de igualdad ($x=4$):</strong> ambos valen $22 → ahí se cruzan</li>
+          <li><strong>Después de $x=4$:</strong> Plan A es más barato porque su pendiente es menor</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="prac">
+      <h2>✏️ Ejercicio: completa la tabla de comparación</h2>
+      <p>Dos planes de gimnasio: &nbsp; <strong>Básico:</strong> $B(x)=20x+50$ &nbsp; <strong>Premium:</strong> $P(x)=15x+80$</p>
+      <div class="dos-tablas">
+        <table>
+          <tr><th>$x$</th><th>$B(x)$</th><th>Tu respuesta</th><th></th></tr>
+          <tr><td>0</td><td>50</td><td><input type="number" id="b0" placeholder="?"></td><td><span id="mb0" class="marca"></span></td></tr>
+          <tr><td>2</td><td>90</td><td><input type="number" id="b2" placeholder="?"></td><td><span id="mb2" class="marca"></span></td></tr>
+          <tr><td>4</td><td>130</td><td><input type="number" id="b4" placeholder="?"></td><td><span id="mb4" class="marca"></span></td></tr>
+          <tr><td>6</td><td>170</td><td><input type="number" id="b6" placeholder="?"></td><td><span id="mb6" class="marca"></span></td></tr>
+        </table>
+        <table>
+          <tr><th>$x$</th><th>$P(x)$</th><th>Tu respuesta</th><th></th></tr>
+          <tr><td>0</td><td>80</td><td><input type="number" id="p0" placeholder="?"></td><td><span id="mp0" class="marca"></span></td></tr>
+          <tr><td>2</td><td>110</td><td><input type="number" id="p2" placeholder="?"></td><td><span id="mp2" class="marca"></span></td></tr>
+          <tr><td>4</td><td>140</td><td><input type="number" id="p4" placeholder="?"></td><td><span id="mp4" class="marca"></span></td></tr>
+          <tr><td>6</td><td>170</td><td><input type="number" id="p6" placeholder="?"></td><td><span id="mp6" class="marca"></span></td></tr>
+        </table>
+      </div>
+      <button class="btn-v" onclick="verTablaLineal()">Verificar</button>
+      <button class="btn-p" onclick="mostrarFb('pista-tl')">Pista</button>
+      <button class="btn-r" onclick="resetTablaLineal()">Reiniciar</button>
+      <div id="pista-tl" class="fb pista">💡 Para $B(2)$: sustituye $x=2$ → $20(2)+50=40+50=90$<br>Para $P(4)$: $15(4)+80=60+80=140$. Solo escribe el número.</div>
+      <div id="fb-tl" class="fb"></div>
+    </div>
+
+  </div>
+  </details>
+
+  <!-- 2.2 Ecuación ↔ Gráfico -->
+  <details id="s2-2">
+  <summary>2.2 Ecuación ↔ Gráfico</summary>
+  <div class="cw">
+
+    <div class="ej">
+      <h2>📈 Las mismas dos funciones en la gráfica</h2>
+      <p><strong>Plan A:</strong> $f(x)=3x+10$ &nbsp;<span style="color:#1565c0">●</span> azul &nbsp;&nbsp; <strong>Plan B:</strong> $g(x)=5x+2$ &nbsp;<span style="color:#c62828">●</span> rojo</p>
+    </div>
+
+    <canvas id="g-lineal" width="620" height="400"></canvas>
+    <div class="leyenda">
+      <div class="leyenda-item"><div class="lcolor" style="background:#1565c0"></div>Plan A: $f(x)=3x+10$</div>
+      <div class="leyenda-item"><div class="lcolor" style="background:#c62828"></div>Plan B: $g(x)=5x+2$</div>
+    </div>
+
+    <div class="imp">
+      <h3>📌 Lo que muestra la gráfica</h3>
+      <ul>
+        <li>El <strong>intercepto en y</strong> es donde la línea cruza el eje vertical → indica el valor inicial</li>
+        <li>La línea más <strong>inclinada</strong> tiene mayor pendiente → crece más rápido</li>
+        <li>El <strong>punto de intersección</strong> $(4,\,22)$ es donde ambas funciones son iguales</li>
+        <li><strong>Izquierda</strong> de la intersección → Plan B es menor &nbsp;|&nbsp; <strong>Derecha</strong> → Plan A es menor</li>
+      </ul>
+    </div>
+
+    <div class="prac">
+      <h2>✏️ Ejercicio: interpreta la gráfica</h2>
+
+      <div class="preg" id="pq-gl1">
+        <p>1. ¿Qué plan tiene el intercepto en $y$ más alto (valor inicial mayor)?</p>
+        <div class="op" id="ogl1a" onclick="sel('gl1','a')">Plan A — intercepto en $y=10$</div>
+        <div class="op" id="ogl1b" onclick="sel('gl1','b')">Plan B — intercepto en $y=2$</div>
+        <span class="marca" id="mgl1"></span>
+      </div>
+
+      <div class="preg" id="pq-gl2">
+        <p>2. ¿En qué mes los planes cuestan exactamente lo mismo?</p>
+        <input type="number" id="gl2" placeholder="?"> meses
+        <span class="marca" id="mgl2"></span>
+      </div>
+
+      <div class="preg" id="pq-gl3">
+        <p>3. Para 6 meses, ¿cuál plan es más económico?</p>
+        <div class="op" id="ogl3a" onclick="sel('gl3','a')">Plan A &nbsp;($f(6)=28$)</div>
+        <div class="op" id="ogl3b" onclick="sel('gl3','b')">Plan B &nbsp;($g(6)=32$)</div>
+        <span class="marca" id="mgl3"></span>
+      </div>
+
+      <div class="preg" id="pq-gl4">
+        <p>4. ¿Cuál función tiene mayor pendiente (crece más rápido)?</p>
+        <div class="op" id="ogl4a" onclick="sel('gl4','a')">Plan A ($m=3$)</div>
+        <div class="op" id="ogl4b" onclick="sel('gl4','b')">Plan B ($m=5$)</div>
+        <span class="marca" id="mgl4"></span>
+      </div>
+
+      <button class="btn-v" onclick="verGrafLineal()">Verificar</button>
+      <button class="btn-r" onclick="resetGrafLineal()">Reiniciar</button>
+      <div id="fb-gl" class="fb"></div>
+    </div>
+
+  </div>
+  </details>
+
+  <!-- 2.3 Tabla ↔ Gráfico -->
+  <details id="s2-3">
+  <summary>2.3 Tabla ↔ Gráfico</summary>
+  <div class="cw">
+
+    <div class="def">
+      <h2>🔄 De la tabla a la gráfica y viceversa</h2>
+      <p>Cada fila de la tabla es un punto $(x,\,y)$ en la gráfica. Uniendo los puntos formas la línea.</p>
+      <div class="form">
+        <p><strong>Pendiente desde la tabla:</strong> &nbsp; $m = \dfrac{\Delta y}{\Delta x} = \dfrac{y_2 - y_1}{x_2 - x_1}$</p>
+        <p><strong>Intercepto en y:</strong> &nbsp; el valor de $y$ cuando $x = 0$</p>
+      </div>
+      <p><strong>Clave:</strong> si la diferencia entre valores consecutivos de $y$ es <em>constante</em>, la función es lineal.</p>
+    </div>
+
+    <div class="ej">
+      <h2>📋 Identifica la función desde la tabla</h2>
+      <div class="dos-tablas">
+        <table>
+          <tr><th colspan="3">Tabla X</th></tr>
+          <tr><th>$x$</th><th>$y$</th><th>$\Delta y$</th></tr>
+          <tr><td>0</td><td>5</td><td>—</td></tr>
+          <tr><td>1</td><td>8</td><td>+3</td></tr>
+          <tr><td>2</td><td>11</td><td>+3</td></tr>
+          <tr><td>3</td><td>14</td><td>+3</td></tr>
+        </table>
+        <table>
+          <tr><th colspan="3">Tabla Y</th></tr>
+          <tr><th>$x$</th><th>$y$</th><th>$\Delta y$</th></tr>
+          <tr><td>0</td><td>10</td><td>—</td></tr>
+          <tr><td>1</td><td>13</td><td>+3</td></tr>
+          <tr><td>2</td><td>16</td><td>+3</td></tr>
+          <tr><td>3</td><td>19</td><td>+3</td></tr>
+        </table>
+      </div>
+      <p>Tabla X: $b=5$, $m=3$ → $f(x)=3x+5$ &nbsp;&nbsp;|&nbsp;&nbsp; Tabla Y: $b=10$, $m=3$ → $g(x)=3x+10$</p>
+      <p>Ambas tienen la <strong>misma pendiente</strong> ($m=3$) pero diferente intercepto → líneas <strong>paralelas</strong>.</p>
+    </div>
+
+    <canvas id="g-tabla-lin" width="620" height="380"></canvas>
+    <div class="leyenda">
+      <div class="leyenda-item"><div class="lcolor" style="background:#1b5e20"></div>Tabla X → $y=3x+5$</div>
+      <div class="leyenda-item"><div class="lcolor" style="background:#e65100"></div>Tabla Y → $y=3x+10$</div>
+    </div>
+
+    <div class="prac">
+      <h2>✏️ Ejercicio: de la tabla a la ecuación</h2>
+      <table style="max-width:320px;margin:10px auto;">
+        <tr><th>$x$</th><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+        <tr><th>$y$</th><td>−3</td><td>1</td><td>5</td><td>9</td></tr>
+      </table>
+
+      <div class="preg">
+        <p>1. ¿Cuál es la pendiente $m$? (Δy ÷ Δx)</p>
+        <input type="number" id="tm1" placeholder="?"> <span class="marca" id="mtm1"></span>
+      </div>
+      <div class="preg">
+        <p>2. ¿Cuál es el intercepto en $y$ (valor de $y$ cuando $x=0$)?</p>
+        <input type="number" id="tm2" placeholder="?"> <span class="marca" id="mtm2"></span>
+      </div>
+      <div class="preg">
+        <p>3. ¿Cuál es la ecuación?</p>
+        <select id="tm3">
+          <option value="">Selecciona...</option>
+          <option value="a">$f(x)=4x-3$</option>
+          <option value="b">$f(x)=3x-4$</option>
+          <option value="c">$f(x)=-4x+3$</option>
+        </select>
+        <span class="marca" id="mtm3"></span>
+      </div>
+
+      <button class="btn-v" onclick="verTablaGraf()">Verificar</button>
+      <button class="btn-p" onclick="mostrarFb('pista-tg')">Pista</button>
+      <button class="btn-r" onclick="resetTablaGraf()">Reiniciar</button>
+      <div id="pista-tg" class="fb pista">💡 De $x=0$ a $x=1$: $\Delta y = 1-(-3)=4$ y $\Delta x=1$ → $m=4$<br>Cuando $x=0$, $y=-3$ → $b=-3$ → $f(x)=4x-3$</div>
+      <div id="fb-tg" class="fb"></div>
+    </div>
+
+  </div>
+  </details>
+
+</div>
+</details>
+
+<!-- ══════════════════════════════════════════════════════
+     SECCIÓN 3 — Comparación de funciones CUADRÁTICAS
+     ══════════════════════════════════════════════════════ -->
+<details id="s3">
+<summary>3. Comparación de funciones cuadráticas</summary>
+<div class="cw">
+
+  <div class="def">
+    <h2>🔍 ¿Por qué comparar dos parábolas?</h2>
+    <p>Al comparar dos funciones cuadráticas podemos determinar:</p>
+    <ul>
+      <li>¿Cuál tiene el vértice más alto o más bajo?</li>
+      <li>¿Cuál es más ancha o más estrecha? (depende de $|a|$)</li>
+      <li>¿En qué puntos se cruzan?</li>
+      <li>¿Cuál tiene el máximo o mínimo mayor?</li>
+    </ul>
+  </div>
+
+  <hr class="div">
+
+  <!-- 3.1 Ecuación ↔ Tabla -->
+  <details id="s3-1">
+  <summary>3.1 Ecuación ↔ Tabla</summary>
+  <div class="cw">
+
+    <div class="ej">
+      <h2>📋 Ejemplo: comparar dos parábolas</h2>
+      <p><strong>Función F:</strong> $f(x)=x^2$ &nbsp;&nbsp; <strong>Función G:</strong> $g(x)=2x^2-4$</p>
+      <div class="dos-tablas">
+        <table>
+          <tr><th colspan="2">$f(x)=x^2$</th></tr>
+          <tr><th>$x$</th><th>$f(x)$</th></tr>
+          <tr><td>−2</td><td>$(-2)^2=4$</td></tr>
+          <tr><td>−1</td><td>$(-1)^2=1$</td></tr>
+          <tr><td>0</td><td>$0^2=0$</td></tr>
+          <tr><td>1</td><td>$1^2=1$</td></tr>
+          <tr><td>2</td><td>$2^2=4$</td></tr>
+        </table>
+        <table>
+          <tr><th colspan="2">$g(x)=2x^2-4$</th></tr>
+          <tr><th>$x$</th><th>$g(x)$</th></tr>
+          <tr><td>−2</td><td>$2(4)-4=4$</td></tr>
+          <tr><td>−1</td><td>$2(1)-4=-2$</td></tr>
+          <tr><td>0</td><td>$2(0)-4=-4$</td></tr>
+          <tr><td>1</td><td>$2(1)-4=-2$</td></tr>
+          <tr><td>2</td><td>$2(4)-4=4$</td></tr>
+        </table>
+      </div>
+      <div class="imp">
+        <h3>📊 ¿Qué observamos?</h3>
+        <ul>
+          <li><strong>Vértice de $f$:</strong> $(0,0)$ &nbsp; <strong>Vértice de $g$:</strong> $(0,-4)$ → $g$ está desplazada 4 unidades hacia abajo</li>
+          <li><strong>$g$ crece más rápido</strong> porque $|a|=2 > 1$ → parábola más estrecha</li>
+          <li><strong>Se cruzan</strong> en $x=\pm2$ (ambas dan $y=4$)</li>
+          <li>Para $-2 < x < 2$: $f(x) > g(x)$ &nbsp;|&nbsp; Para $|x|>2$: $g(x) > f(x)$</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="def">
+      <h2>🔑 Reconocer la cuadrática desde la tabla</h2>
+      <p>En una función cuadrática las <strong>primeras diferencias no son constantes</strong>, pero las <strong>segundas diferencias sí lo son</strong>.</p>
+      <table style="max-width:480px;margin:10px auto;">
+        <tr><th>$x$</th><th>$f(x)=x^2$</th><th>1ª diferencia</th><th>2ª diferencia</th></tr>
+        <tr><td>0</td><td>0</td><td>—</td><td>—</td></tr>
+        <tr><td>1</td><td>1</td><td>1</td><td>—</td></tr>
+        <tr><td>2</td><td>4</td><td>3</td><td style="color:#c62828"><strong>2</strong></td></tr>
+        <tr><td>3</td><td>9</td><td>5</td><td style="color:#c62828"><strong>2</strong></td></tr>
+        <tr><td>4</td><td>16</td><td>7</td><td style="color:#c62828"><strong>2</strong></td></tr>
+      </table>
+      <p>→ 2ª diferencias iguales a 2 ✔ → es cuadrática</p>
+    </div>
+
+    <div class="prac">
+      <h2>✏️ Ejercicio: completa la tabla cuadrática</h2>
+      <p>Completa para $h(x) = -x^2 + 4$</p>
+      <table style="max-width:420px;margin:10px auto;">
+        <tr><th>$x$</th><th>Proceso</th><th>Tu respuesta</th><th></th></tr>
+        <tr><td>−2</td><td>$-(-2)^2+4$</td><td><input type="number" id="hq1" placeholder="?"></td><td><span id="mhq1" class="marca"></span></td></tr>
+        <tr><td>−1</td><td>$-(-1)^2+4$</td><td><input type="number" id="hq2" placeholder="?"></td><td><span id="mhq2" class="marca"></span></td></tr>
+        <tr><td>0</td><td>$-(0)^2+4$</td><td><input type="number" id="hq3" placeholder="?"></td><td><span id="mhq3" class="marca"></span></td></tr>
+        <tr><td>1</td><td>$-(1)^2+4$</td><td><input type="number" id="hq4" placeholder="?"></td><td><span id="mhq4" class="marca"></span></td></tr>
+        <tr><td>2</td><td>$-(2)^2+4$</td><td><input type="number" id="hq5" placeholder="?"></td><td><span id="mhq5" class="marca"></span></td></tr>
+      </table>
+      <button class="btn-v" onclick="verTablaQ()">Verificar</button>
+      <button class="btn-p" onclick="mostrarFb('pista-tq')">Pista</button>
+      <button class="btn-r" onclick="resetTablaQ()">Reiniciar</button>
+      <div id="pista-tq" class="fb pista">💡 Para $x=-2$: $h(-2)=-(-2)^2+4=-(4)+4=0$<br>¡Ojo! Primero eleva al cuadrado $(-2)^2=4$, luego aplica el negativo externo: $-(4)=-4$, finalmente suma $4$.</div>
+      <div id="fb-tq" class="fb"></div>
+    </div>
+
+  </div>
+  </details>
+
+  <!-- 3.2 Ecuación ↔ Gráfico -->
+  <details id="s3-2">
+  <summary>3.2 Ecuación ↔ Gráfico</summary>
+  <div class="cw">
+
+    <div class="ej">
+      <h2>📈 Las dos parábolas en la gráfica</h2>
+      <p><strong>F:</strong> $f(x)=x^2$ &nbsp;<span style="color:#1565c0">●</span> azul &nbsp;&nbsp; <strong>G:</strong> $g(x)=2x^2-4$ &nbsp;<span style="color:#c62828">●</span> rojo</p>
+    </div>
+
+    <canvas id="g-cuad" width="620" height="440"></canvas>
+    <div class="leyenda">
+      <div class="leyenda-item"><div class="lcolor" style="background:#1565c0"></div>$f(x)=x^2$ — vértice $(0,0)$</div>
+      <div class="leyenda-item"><div class="lcolor" style="background:#c62828"></div>$g(x)=2x^2-4$ — vértice $(0,-4)$</div>
+    </div>
+
+    <div class="imp">
+      <h3>📌 Elementos clave de la parábola</h3>
+      <ul>
+        <li><strong>Vértice:</strong> punto más alto (si $a<0$) o más bajo (si $a>0$)</li>
+        <li><strong>Eje de simetría:</strong> $x = -\dfrac{b}{2a}$ &nbsp; (línea vertical que divide la parábola en dos partes iguales)</li>
+        <li><strong>Mayor $|a|$</strong> → parábola más <em>estrecha</em> &nbsp;|&nbsp; <strong>Menor $|a|$</strong> → parábola más <em>ancha</em></li>
+        <li><strong>$a>0$</strong> → abre ↑ (vértice es mínimo) &nbsp;|&nbsp; <strong>$a<0$</strong> → abre ↓ (vértice es máximo)</li>
+      </ul>
+    </div>
+
+    <div class="prac">
+      <h2>✏️ Ejercicio: interpreta la gráfica de parábolas</h2>
+
+      <div class="preg">
+        <p>1. ¿Cuál función tiene el vértice más alto?</p>
+        <div class="op" id="oqg1a" onclick="sel('qg1','a')">$f(x)=x^2$ &nbsp; — vértice $(0,0)$</div>
+        <div class="op" id="oqg1b" onclick="sel('qg1','b')">$g(x)=2x^2-4$ — vértice $(0,-4)$</div>
+        <span class="marca" id="mqg1"></span>
+      </div>
+
+      <div class="preg">
+        <p>2. ¿Cuál parábola es más estrecha?</p>
+        <div class="op" id="oqg2a" onclick="sel('qg2','a')">$f(x)=x^2$ &nbsp; ($a=1$)</div>
+        <div class="op" id="oqg2b" onclick="sel('qg2','b')">$g(x)=2x^2-4$ ($a=2$)</div>
+        <span class="marca" id="mqg2"></span>
+      </div>
+
+      <div class="preg">
+        <p>3. ¿En qué valores de $x$ se cruzan las dos parábolas?</p>
+        <div class="op" id="oqg3a" onclick="sel('qg3','a')">$x=0$ y $x=4$</div>
+        <div class="op" id="oqg3b" onclick="sel('qg3','b')">$x=-2$ y $x=2$</div>
+        <div class="op" id="oqg3c" onclick="sel('qg3','c')">No se cruzan</div>
+        <span class="marca" id="mqg3"></span>
+      </div>
+
+      <div class="preg">
+        <p>4. Para $x=1$, ¿cuál función tiene mayor valor?</p>
+        <div class="op" id="oqg4a" onclick="sel('qg4','a')">$f(1)=1$</div>
+        <div class="op" id="oqg4b" onclick="sel('qg4','b')">$g(1)=-2$</div>
+        <span class="marca" id="mqg4"></span>
+      </div>
+
+      <button class="btn-v" onclick="verGrafQ()">Verificar</button>
+      <button class="btn-r" onclick="resetGrafQ()">Reiniciar</button>
+      <div id="fb-gq" class="fb"></div>
+    </div>
+
+  </div>
+  </details>
+
+  <!-- 3.3 Tabla ↔ Gráfico -->
+  <details id="s3-3">
+  <summary>3.3 Tabla ↔ Gráfico</summary>
+  <div class="cw">
+
+    <div class="def">
+      <h2>🔄 Identificar el tipo de función desde la tabla</h2>
+      <table>
+        <tr><th>Criterio</th><th>Función lineal</th><th>Función cuadrática</th></tr>
+        <tr><td>1ª diferencia ($\Delta y$)</td><td>Constante ✔</td><td>No constante ✖</td></tr>
+        <tr><td>2ª diferencia ($\Delta^2 y$)</td><td>Cero</td><td>Constante ✔</td></tr>
+        <tr><td>Gráfica</td><td>Línea recta</td><td>Parábola</td></tr>
+        <tr><td>Exponente de $x$</td><td>1</td><td>2</td></tr>
+      </table>
+    </div>
+
+    <div class="prac">
+      <h2>✏️ Ejercicio: ¿lineal o cuadrática?</h2>
+      <p>Analiza las diferencias de cada tabla y determina el tipo de función:</p>
+      <div class="dos-tablas">
+        <div>
+          <table>
+            <tr><th colspan="3">Tabla A</th></tr>
+            <tr><th>$x$</th><th>$y$</th><th>$\Delta y$</th></tr>
+            <tr><td>0</td><td>1</td><td>—</td></tr>
+            <tr><td>1</td><td>4</td><td>3</td></tr>
+            <tr><td>2</td><td>9</td><td>5</td></tr>
+            <tr><td>3</td><td>16</td><td>7</td></tr>
+          </table>
+          <div class="preg" style="margin-top:10px;">
+            <p>Tabla A es:</p>
+            <select id="tipoA">
+              <option value="">Selecciona...</option>
+              <option value="L">Lineal</option>
+              <option value="C">Cuadrática</option>
+            </select>
+            <span class="marca" id="mtipoA"></span>
+          </div>
+        </div>
+        <div>
+          <table>
+            <tr><th colspan="3">Tabla B</th></tr>
+            <tr><th>$x$</th><th>$y$</th><th>$\Delta y$</th></tr>
+            <tr><td>0</td><td>2</td><td>—</td></tr>
+            <tr><td>1</td><td>5</td><td>3</td></tr>
+            <tr><td>2</td><td>8</td><td>3</td></tr>
+            <tr><td>3</td><td>11</td><td>3</td></tr>
+          </table>
+          <div class="preg" style="margin-top:10px;">
+            <p>Tabla B es:</p>
+            <select id="tipoB">
+              <option value="">Selecciona...</option>
+              <option value="L">Lineal</option>
+              <option value="C">Cuadrática</option>
+            </select>
+            <span class="marca" id="mtipoB"></span>
+          </div>
+        </div>
+      </div>
+      <button class="btn-v" onclick="verTipoTab()">Verificar</button>
+      <button class="btn-p" onclick="mostrarFb('pista-tipo')">Pista</button>
+      <button class="btn-r" onclick="resetTipoTab()">Reiniciar</button>
+      <div id="pista-tipo" class="fb pista">
+        💡 <strong>Tabla A:</strong> $\Delta y$ = 3, 5, 7 → diferencias NO son iguales → cuadrática<br>
+        <strong>Tabla B:</strong> $\Delta y$ = 3, 3, 3 → diferencias SÍ son iguales → lineal
+      </div>
+      <div id="fb-tipo" class="fb"></div>
+    </div>
+
+  </div>
+  </details>
+
+</div>
+</details>
+
+<!-- ══════════════════════════════════════════════════════
+     SECCIÓN 4 — Comparación en la vida diaria
+     ══════════════════════════════════════════════════════ -->
+<details id="s4">
+<summary>4. Comparación en la vida diaria</summary>
+<div class="cw">
+
+  <!-- Ejemplo 1: lineal vs lineal -->
+  <div class="ej">
+    <h2>🚗 Ejemplo 1: renta de carros (lineal vs lineal)</h2>
+    <p><strong>Empresa Rápida:</strong> $R(d)=25d+40$ &nbsp;&nbsp; <strong>Empresa Segura:</strong> $S(d)=30d+10$ &nbsp;&nbsp; ($d$ = días)</p>
+  </div>
+  <canvas id="g-carros" width="620" height="360"></canvas>
+  <div class="leyenda">
+    <div class="leyenda-item"><div class="lcolor" style="background:#1b5e20"></div>Empresa Rápida: $R(d)=25d+40$</div>
+    <div class="leyenda-item"><div class="lcolor" style="background:#880e4f"></div>Empresa Segura: $S(d)=30d+10$</div>
+  </div>
+  <div class="imp">
+    <h3>📊 Análisis</h3>
+    <ul>
+      <li>Rápida: cargo inicial $40, tarifa $25/día (pendiente menor → más barata a largo plazo)</li>
+      <li>Segura: cargo inicial $10, tarifa $30/día (pendiente mayor → se encarece más rápido)</li>
+      <li><strong>Punto de equilibrio:</strong> $25d+40=30d+10$ → $30=5d$ → $d=6$ días</li>
+      <li>Menos de 6 días → Segura más barata &nbsp;|&nbsp; Más de 6 días → Rápida más barata</li>
+    </ul>
+  </div>
+
+  <hr class="div">
+
+  <!-- Ejemplo 2: cuadrática vs lineal -->
+  <div class="ej">
+    <h2>⚽ Ejemplo 2: pelota lanzada vs drone (cuadrática vs lineal)</h2>
+    <p><strong>Altura de la pelota:</strong> $h(t)=-16t^2+80t$ &nbsp; (cuadrática)</p>
+    <p><strong>Altura del drone:</strong> $d(t)=30t$ &nbsp; (lineal, sube constante)</p>
+    <p>$t$ = tiempo en segundos</p>
+  </div>
+  <canvas id="g-pelota" width="620" height="380"></canvas>
+  <div class="leyenda">
+    <div class="leyenda-item"><div class="lcolor" style="background:#1565c0"></div>Pelota: $h(t)=-16t^2+80t$</div>
+    <div class="leyenda-item"><div class="lcolor" style="background:#e65100"></div>Drone: $d(t)=30t$</div>
+  </div>
+  <div class="imp">
+    <h3>📊 Análisis</h3>
+    <ul>
+      <li><strong>Altura máxima de la pelota:</strong> en $t=-\dfrac{80}{2(-16)}=2.5$ s → $h(2.5)=100$ pies</li>
+      <li>La pelota sube y baja → el drone sube indefinidamente a ritmo constante</li>
+      <li>La pelota supera al drone entre $t\approx 0$ y $t\approx 4.3$ segundos</li>
+      <li>Después de $t=5$ s la pelota aterriza y el drone sigue subiendo</li>
+    </ul>
+  </div>
+
+  <hr class="div">
+
+  <!-- Ejemplo 3: ingresos vs costo -->
+  <div class="ej">
+    <h2>💰 Ejemplo 3: ingresos y costos de una fábrica (lineal vs cuadrática)</h2>
+    <p><strong>Ingresos:</strong> $I(x)=12x$ (lineal) &nbsp;&nbsp; <strong>Costo:</strong> $C(x)=x^2-2x+20$ (cuadrática)</p>
+    <p>$x$ = unidades producidas</p>
+  </div>
+  <canvas id="g-negocio" width="620" height="360"></canvas>
+  <div class="leyenda">
+    <div class="leyenda-item"><div class="lcolor" style="background:#2e7d32"></div>Ingresos: $I(x)=12x$</div>
+    <div class="leyenda-item"><div class="lcolor" style="background:#b71c1c"></div>Costo: $C(x)=x^2-2x+20$</div>
+  </div>
+  <div class="imp">
+    <h3>📊 Análisis</h3>
+    <ul>
+      <li><strong>Ganancia</strong> cuando $I(x) > C(x)$: la línea está por encima de la parábola</li>
+      <li><strong>Pérdida</strong> cuando $C(x) > I(x)$: la parábola está por encima de la línea</li>
+      <li>La zona rentable está aproximadamente entre $x=2.5$ y $x=9.5$ unidades</li>
+    </ul>
+  </div>
+
+</div>
+</details>
+
+<!-- ══════════════════════════════════════════════════════
+     SECCIÓN 5 — Problemas a resolver paso a paso
+     ══════════════════════════════════════════════════════ -->
+<details id="s5">
+<summary>5. Problemas a resolver paso a paso</summary>
+<div class="cw">
+
+  <!-- ── PROBLEMA 1 ── -->
+  <div class="prac">
+    <h2>🏠 Problema 1: servicios de electricidad (lineal vs lineal)</h2>
+    <p>Dos compañías eléctricas cobran según el consumo de kilovatios-hora (kWh):</p>
+    <ul>
+      <li><strong>Compañía Verde:</strong> $V(k)=0.10k+15$</li>
+      <li><strong>Compañía Sol:&nbsp;&nbsp;&nbsp;</strong> $S(k)=0.08k+25$</li>
+    </ul>
+
+    <details class="paso">
+      <summary>Paso 1 — Calcular el costo para 100 kWh</summary>
+      <div class="cw">
+        <p>$V(100)=0.10(100)+15=10+15=\$25$</p>
+        <p>$S(100)=0.08(100)+25=8+25=\$33$</p>
+        <p>→ Para 100 kWh, <strong>Verde es más barata</strong> ($25 &lt; $33).</p>
+      </div>
+    </details>
+
+    <details class="paso">
+      <summary>Paso 2 — Encontrar el punto de equilibrio</summary>
+      <div class="cw">
+        <p>Igualamos las dos funciones:</p>
+        <p>$0.10k+15=0.08k+25$</p>
+        <p>$0.02k=10$ &nbsp;→&nbsp; $k=500$ kWh</p>
+        <p>Verificación: $V(500)=0.10(500)+15=\$65$ &nbsp;&nbsp; $S(500)=0.08(500)+25=\$65$ ✔</p>
+        <p>→ Para <strong>500 kWh</strong> ambas cobran igual ($65).</p>
+      </div>
+    </details>
+
+    <details class="paso">
+      <summary>Paso 3 — ¿Cuándo conviene cada compañía?</summary>
+      <div class="cw">
+        <ul>
+          <li><strong>Menos de 500 kWh:</strong> Verde es más cara (cargo fijo mayor), Sol conviene</li>
+          <li><strong>Más de 500 kWh:</strong> la tarifa menor de Verde compensa → Verde conviene</li>
+        </ul>
+      </div>
+    </details>
+
+    <h3 style="margin-top:18px;">✏️ Ahora responde tú:</h3>
+    <div class="preg">
+      <p>a) ¿Cuánto cobra Compañía Verde por 200 kWh? &nbsp; $V(200)=$</p>
+      $<input type="number" id="e1a" placeholder="?"> <span class="marca" id="me1a"></span>
+    </div>
+    <div class="preg">
+      <p>b) ¿Cuánto cobra Compañía Sol por 200 kWh? &nbsp; $S(200)=$</p>
+      $<input type="number" id="e1b" placeholder="?"> <span class="marca" id="me1b"></span>
+    </div>
+    <div class="preg">
+      <p>c) Para 200 kWh, ¿cuál compañía es más económica?</p>
+      <select id="e1c">
+        <option value="">Selecciona...</option>
+        <option value="V">Compañía Verde</option>
+        <option value="S">Compañía Sol</option>
+      </select>
+      <span class="marca" id="me1c"></span>
+    </div>
+    <div class="preg">
+      <p>d) ¿En cuántos kWh cobran lo mismo? &nbsp; $k=$</p>
+      <input type="number" id="e1d" placeholder="?"> kWh <span class="marca" id="me1d"></span>
+    </div>
+
+    <button class="btn-v" onclick="verProb1()">Verificar</button>
+    <button class="btn-r" onclick="resetProb1()">Reiniciar</button>
+    <div id="fb-p1" class="fb"></div>
+  </div>
+
+  <!-- ── PROBLEMA 2 ── -->
+  <div class="prac">
+    <h2>🏀 Problema 2: altura de un balón (cuadrática)</h2>
+    <p>Se lanza un balón desde el suelo. Su altura (en pies) es:</p>
+    <div class="form">$h(t)=-16t^2+48t$ &nbsp;&nbsp; ($t$ = segundos)</div>
+
+    <details class="paso">
+      <summary>Paso 1 — Tipo de función y apertura</summary>
+      <div class="cw">
+        <p>$a=-16$, $b=48$, $c=0$. Como $a<0$ → parábola que <strong>abre hacia abajo</strong> → tiene máximo.</p>
+      </div>
+    </details>
+
+    <details class="paso">
+      <summary>Paso 2 — Tiempo del vértice (altura máxima)</summary>
+      <div class="cw">
+        <p>$t_{max}=-\dfrac{b}{2a}=-\dfrac{48}{2(-16)}=\dfrac{48}{32}=1.5$ segundos</p>
+      </div>
+    </details>
+
+    <details class="paso">
+      <summary>Paso 3 — Altura máxima</summary>
+      <div class="cw">
+        <p>$h(1.5)=-16(1.5)^2+48(1.5)=-16(2.25)+72=-36+72=\mathbf{36}$ pies</p>
+      </div>
+    </details>
+
+    <details class="paso">
+      <summary>Paso 4 — ¿Cuándo aterriza?</summary>
+      <div class="cw">
+        <p>El balón aterriza cuando $h(t)=0$:</p>
+        <p>$-16t^2+48t=0$ &nbsp;→&nbsp; $t(-16t+48)=0$</p>
+        <p>$t=0$ (al inicio) &nbsp; o &nbsp; $-16t+48=0$ → $t=3$ segundos</p>
+        <p>→ El balón está en el aire durante <strong>3 segundos</strong>.</p>
+      </div>
+    </details>
+
+    <h3 style="margin-top:18px;">✏️ Ahora responde tú:</h3>
+    <div class="preg">
+      <p>a) ¿A qué altura está el balón a $t=1$ segundo? &nbsp; $h(1)=$</p>
+      <input type="number" id="e2a" placeholder="?"> pies <span class="marca" id="me2a"></span>
+    </div>
+    <div class="preg">
+      <p>b) ¿En qué segundo alcanza la altura máxima? &nbsp; $t=$</p>
+      <input type="number" step="0.1" id="e2b" placeholder="?"> s <span class="marca" id="me2b"></span>
+    </div>
+    <div class="preg">
+      <p>c) ¿Cuál es la altura máxima? &nbsp; $h(t_{max})=$</p>
+      <input type="number" id="e2c" placeholder="?"> pies <span class="marca" id="me2c"></span>
+    </div>
+    <div class="preg">
+      <p>d) ¿Cuándo aterriza el balón? &nbsp; $t=$</p>
+      <input type="number" id="e2d" placeholder="?"> s <span class="marca" id="me2d"></span>
+    </div>
+    <div class="preg">
+      <p>e) ¿La parábola abre hacia arriba o hacia abajo?</p>
+      <select id="e2e">
+        <option value="">Selecciona...</option>
+        <option value="A">Hacia arriba ↑</option>
+        <option value="B">Hacia abajo ↓</option>
+      </select>
+      <span class="marca" id="me2e"></span>
+    </div>
+
+    <button class="btn-v" onclick="verProb2()">Verificar</button>
+    <button class="btn-r" onclick="resetProb2()">Reiniciar</button>
+    <div class="barra"><div id="bar2" class="relleno" style="width:0%">0%</div></div>
+    <div id="fb-p2" class="fb"></div>
+  </div>
+
+  <!-- ── PROBLEMA 3 ── -->
+  <div class="prac">
+    <h2>🏭 Problema 3: producción en una fábrica (lineal vs cuadrática)</h2>
+    <p>Una fábrica calcula:</p>
+    <ul>
+      <li><strong>Ingresos por ventas:</strong> $I(x)=4x$ &nbsp; (lineal)</li>
+      <li><strong>Costo de producción:</strong> $C(x)=x^2-6x+20$ &nbsp; (cuadrática)</li>
+    </ul>
+    <p>$x$ = unidades producidas</p>
+
+    <details class="paso">
+      <summary>Paso 1 — Tabla comparativa de valores</summary>
+      <div class="cw">
+        <table>
+          <tr><th>$x$</th><th>$I(x)=4x$</th><th>$C(x)=x^2-6x+20$</th><th>Ganancia $I-C$</th></tr>
+          <tr><td>0</td><td>0</td><td>20</td><td style="color:#b71c1c">−20 (pérdida)</td></tr>
+          <tr><td>2</td><td>8</td><td>12</td><td style="color:#b71c1c">−4 (pérdida)</td></tr>
+          <tr><td>4</td><td>16</td><td>12</td><td style="color:#1b5e20">+4 (ganancia)</td></tr>
+          <tr><td>5</td><td>20</td><td>15</td><td style="color:#1b5e20">+5 (ganancia)</td></tr>
+          <tr><td>6</td><td>24</td><td>20</td><td style="color:#1b5e20">+4 (ganancia)</td></tr>
+          <tr><td>8</td><td>32</td><td>36</td><td style="color:#b71c1c">−4 (pérdida)</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details class="paso">
+      <summary>Paso 2 — ¿Cuándo hay ganancia?</summary>
+      <div class="cw">
+        <p>Hay ganancia cuando $I(x) > C(x)$, es decir $4x > x^2-6x+20$.</p>
+        <p>Reorganizando: $0 > x^2-10x+20$</p>
+        <p>La fábrica es rentable aproximadamente entre $x\approx 2.8$ y $x\approx 7.2$ unidades.</p>
+      </div>
+    </details>
+
+    <h3 style="margin-top:18px;">✏️ Ahora responde tú:</h3>
+    <div class="preg">
+      <p>a) ¿Cuál es el costo de producir 5 unidades? &nbsp; $C(5)=$</p>
+      <input type="number" id="e3a" placeholder="?"> <span class="marca" id="me3a"></span>
+    </div>
+    <div class="preg">
+      <p>b) ¿Cuál es el ingreso por vender 5 unidades? &nbsp; $I(5)=$</p>
+      <input type="number" id="e3b" placeholder="?"> <span class="marca" id="me3b"></span>
+    </div>
+    <div class="preg">
+      <p>c) ¿Hay ganancia o pérdida al producir 5 unidades?</p>
+      <select id="e3c">
+        <option value="">Selecciona...</option>
+        <option value="G">Ganancia (I > C)</option>
+        <option value="P">Pérdida (C > I)</option>
+      </select>
+      <span class="marca" id="me3c"></span>
+    </div>
+    <div class="preg">
+      <p>d) ¿Cuánto vale esa ganancia o pérdida? &nbsp; $|I-C|=$</p>
+      <input type="number" id="e3d" placeholder="?"> <span class="marca" id="me3d"></span>
+    </div>
+
+    <button class="btn-v" onclick="verProb3()">Verificar</button>
+    <button class="btn-r" onclick="resetProb3()">Reiniciar</button>
+    <div class="barra"><div id="bar3" class="relleno" style="width:0%">0%</div></div>
+    <div id="fb-p3" class="fb"></div>
+  </div>
+
+  <!-- ── PROBLEMA 4 (GED estilo) ── -->
+  <div class="prac">
+    <h2>📝 Problema 4: estilo GED — análisis múltiple</h2>
+    <p>Las funciones $f(x)=x^2-4x+3$ y $g(x)=2x-1$ se representan en el plano cartesiano.</p>
+
+    <details class="paso">
+      <summary>Paso 1 — Evaluar ambas funciones en puntos clave</summary>
+      <div class="cw">
+        <table>
+          <tr><th>$x$</th><th>$f(x)=x^2-4x+3$</th><th>$g(x)=2x-1$</th></tr>
+          <tr><td>0</td><td>$0-0+3=3$</td><td>$-1$</td></tr>
+          <tr><td>1</td><td>$1-4+3=0$</td><td>$1$</td></tr>
+          <tr><td>2</td><td>$4-8+3=-1$</td><td>$3$</td></tr>
+          <tr><td>3</td><td>$9-12+3=0$</td><td>$5$</td></tr>
+          <tr><td>4</td><td>$16-16+3=3$</td><td>$7$</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details class="paso">
+      <summary>Paso 2 — Vértice y tipo de parábola</summary>
+      <div class="cw">
+        <p>$a=1>0$ → parábola abre ↑ (tiene mínimo)</p>
+        <p>Eje de simetría: $x=-\dfrac{-4}{2(1)}=2$</p>
+        <p>Vértice: $f(2)=-1$ → punto mínimo $(2,-1)$</p>
+        <p>Interceptos en x de $f$: cuando $f(x)=0$ → $x=1$ y $x=3$ (ver tabla)</p>
+      </div>
+    </details>
+
+    <h3 style="margin-top:18px;">✏️ Responde:</h3>
+    <div class="preg">
+      <p>1. ¿Cuál es el valor mínimo de $f(x)=x^2-4x+3$?</p>
+      <input type="number" id="e4a" placeholder="?"> <span class="marca" id="me4a"></span>
+    </div>
+    <div class="preg">
+      <p>2. ¿En qué valor de $x$ ocurre ese mínimo?</p>
+      <input type="number" id="e4b" placeholder="?"> <span class="marca" id="me4b"></span>
+    </div>
+    <div class="preg">
+      <p>3. Para $x=3$, ¿cuál función tiene mayor valor?</p>
+      <div class="op" id="oe4ca" onclick="sel('e4c','a')">$f(3)=0$</div>
+      <div class="op" id="oe4cb" onclick="sel('e4c','b')">$g(3)=5$</div>
+      <span class="marca" id="me4c"></span>
+    </div>
+    <div class="preg">
+      <p>4. $g(x)=2x-1$ es una función:</p>
+      <div class="op" id="oe4da" onclick="sel('e4d','a')">Lineal — su gráfica es una línea recta</div>
+      <div class="op" id="oe4db" onclick="sel('e4d','b')">Cuadrática — su gráfica es una parábola</div>
+      <span class="marca" id="me4d"></span>
+    </div>
+    <div class="preg">
+      <p>5. ¿En qué punto $g(x) > f(x)$?</p>
+      <div class="op" id="oe4ea" onclick="sel('e4e','a')">Cuando $x=0$ ($f=3$, $g=-1$)</div>
+      <div class="op" id="oe4eb" onclick="sel('e4e','b')">Cuando $x=2$ ($f=-1$, $g=3$)</div>
+      <span class="marca" id="me4e"></span>
+    </div>
+
+    <button class="btn-v" onclick="verProb4()">Verificar</button>
+    <button class="btn-r" onclick="resetProb4()">Reiniciar</button>
+    <div class="barra"><div id="bar4" class="relleno" style="width:0%">0%</div></div>
+    <div id="fb-p4" class="fb"></div>
+  </div>
+
+  <!-- Resumen global -->
+  <div class="def" style="text-align:center;padding:22px;">
+    <h2>🏆 Tu progreso general</h2>
+    <div id="resumen" style="font-size:1.05em;margin:10px 0;">Completa los ejercicios para ver tu resumen.</div>
+    <p style="margin-top:14px;font-size:1.15em;"><strong>¡Tú puedes lograrlo! 🎓</strong></p>
+  </div>
+
+</div>
+</details>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════ -->
+<script>
+// ─── UTILIDADES CANVAS ───────────────────────────────────────
+function initCanvas(id, xMin, xMax, yMin, yMax) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return null;
+  const ctx = canvas.getContext('2d');
+  const pad = { t: 28, r: 28, b: 48, l: 55 };
+  const W = canvas.width - pad.l - pad.r;
+  const H = canvas.height - pad.t - pad.b;
+
+  function toP(x, y) {
+    return {
+      px: pad.l + (x - xMin) / (xMax - xMin) * W,
+      py: pad.t + H - (y - yMin) / (yMax - yMin) * H
+    };
+  }
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#fafafa';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // intervalo de etiquetas
+  const rangoX = xMax - xMin, rangoY = yMax - yMin;
+  const stepX = rangoX <= 10 ? 1 : rangoX <= 25 ? 5 : 10;
+  const stepY = rangoY <= 10 ? 1 : rangoY <= 50 ? 5 : 10;
+
+  // cuadrícula
+  ctx.strokeStyle = '#e0e0e0'; ctx.lineWidth = 1;
+  for (let x = Math.ceil(xMin / stepX) * stepX; x <= xMax; x += stepX) {
+    const { px } = toP(x, yMin); const { py } = toP(x, yMax);
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, toP(x, yMin).py); ctx.stroke();
+  }
+  for (let y = Math.ceil(yMin / stepY) * stepY; y <= yMax; y += stepY) {
+    const { px: px1 } = toP(xMin, y); const { px: px2 } = toP(xMax, y); const { py } = toP(xMin, y);
+    ctx.beginPath(); ctx.moveTo(px1, py); ctx.lineTo(px2, py); ctx.stroke();
+  }
+
+  // ejes
+  ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
+  const { px: axL, py: axY } = toP(xMin, 0); const { px: axR } = toP(xMax, 0);
+  ctx.beginPath(); ctx.moveTo(axL, axY); ctx.lineTo(axR, axY); ctx.stroke();
+  const { px: ayX, py: ayT } = toP(0, yMax); const { py: ayB } = toP(0, yMin);
+  ctx.beginPath(); ctx.moveTo(ayX, ayT); ctx.lineTo(ayX, ayB); ctx.stroke();
+
+  // etiquetas
+  ctx.fillStyle = '#555'; ctx.font = '12px Segoe UI';
+  ctx.textAlign = 'center';
+  for (let x = Math.ceil(xMin / stepX) * stepX; x <= xMax; x += stepX) {
+    if (x === 0) continue;
+    const { px, py } = toP(x, 0);
+    ctx.fillText(x, px, py + 18);
+    ctx.beginPath(); ctx.moveTo(px, py - 4); ctx.lineTo(px, py + 4); ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.stroke();
+  }
+  ctx.textAlign = 'right';
+  for (let y = Math.ceil(yMin / stepY) * stepY; y <= yMax; y += stepY) {
+    if (y === 0) continue;
+    const { px, py } = toP(0, y);
+    ctx.fillText(y, px - 7, py + 4);
+    ctx.beginPath(); ctx.moveTo(px - 4, py); ctx.lineTo(px + 4, py); ctx.stroke();
+  }
+  const orig = toP(0, 0);
+  ctx.textAlign = 'right';
+  ctx.fillText('0', orig.px - 6, orig.py + 16);
+  ctx.fillStyle = '#333'; ctx.font = 'bold 13px Segoe UI';
+  ctx.textAlign = 'center';
+  ctx.fillText('x', axR + 14, axY + 5);
+  ctx.fillText('y', ayX, ayT - 10);
+
+  return { ctx, toP };
+}
+
+function trazar(g, fn, color, xMin, xMax, pasos = 300) {
+  const { ctx, toP } = g;
+  ctx.strokeStyle = color; ctx.lineWidth = 2.6; ctx.lineJoin = 'round';
+  ctx.beginPath(); let first = true;
+  for (let i = 0; i <= pasos; i++) {
+    const x = xMin + i * (xMax - xMin) / pasos;
+    const y = fn(x);
+    const { px, py } = toP(x, y);
+    if (first) { ctx.moveTo(px, py); first = false; } else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+}
+
+function punto(g, x, y, label, color, dx = 10, dy = -10) {
+  const { ctx, toP } = g;
+  const { px, py } = toP(x, y);
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.arc(px, py, 6, 0, 2 * Math.PI); ctx.fill();
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = '#222'; ctx.font = 'bold 11px Segoe UI'; ctx.textAlign = 'left';
+  ctx.fillText(label, px + dx, py + dy);
+}
+
+// ─── DIBUJADO DE GRÁFICAS ────────────────────────────────────
+const dibujado = {};
+
+function dibGLineal() {
+  if (dibujado['g-lineal']) return;
+  const g = initCanvas('g-lineal', -0.5, 7, -3, 45);
+  if (!g) return;
+  trazar(g, x => 3*x+10, '#1565c0', -0.5, 7);
+  trazar(g, x => 5*x+2,  '#c62828', -0.5, 7);
+  punto(g, 0, 10, '(0,10)', '#1565c0');
+  punto(g, 0, 2,  '(0,2)',  '#c62828', 10, 10);
+  punto(g, 4, 22, '(4,22) intersección', '#6a1b9a');
+  dibujado['g-lineal'] = true;
+}
+
+function dibGTablaLin() {
+  if (dibujado['g-tabla-lin']) return;
+  const g = initCanvas('g-tabla-lin', -0.5, 4.5, -1, 22);
+  if (!g) return;
+  trazar(g, x => 3*x+5,  '#1b5e20', -0.5, 4.5);
+  trazar(g, x => 3*x+10, '#e65100', -0.5, 4.5);
+  [[0,5],[1,8],[2,11],[3,14]].forEach(([x,y]) => punto(g,x,y,`(${x},${y})`,'#1b5e20'));
+  [[0,10],[1,13],[2,16],[3,19]].forEach(([x,y]) => punto(g,x,y,`(${x},${y})`,'#e65100'));
+  dibujado['g-tabla-lin'] = true;
+}
+
+function dibGCuad() {
+  if (dibujado['g-cuad']) return;
+  const g = initCanvas('g-cuad', -3.2, 3.2, -6, 12);
+  if (!g) return;
+  trazar(g, x => x*x,      '#1565c0', -3.2, 3.2);
+  trazar(g, x => 2*x*x-4,  '#c62828', -3.2, 3.2);
+  punto(g, 0, 0,  'V(0,0)',  '#1565c0', 8, -14);
+  punto(g, 0, -4, 'V(0,−4)', '#c62828', 8, 14);
+  punto(g,  2, 4, '(2,4)',   '#6a1b9a');
+  punto(g, -2, 4, '(−2,4)',  '#6a1b9a', -50, -12);
+  dibujado['g-cuad'] = true;
+}
+
+function dibGCarros() {
+  if (dibujado['g-carros']) return;
+  const g = initCanvas('g-carros', 0, 10, 0, 200);
+  if (!g) return;
+  trazar(g, d => 25*d+40, '#1b5e20', 0, 10);
+  trazar(g, d => 30*d+10, '#880e4f', 0, 10);
+  punto(g, 0, 40, '(0, $40)',  '#1b5e20', 8, -12);
+  punto(g, 0, 10, '(0, $10)',  '#880e4f', 8,  14);
+  punto(g, 6, 190, '(6, $190) equilibrio', '#37474f');
+  dibujado['g-carros'] = true;
+}
+
+function dibGPelota() {
+  if (dibujado['g-pelota']) return;
+  const g = initCanvas('g-pelota', 0, 5.5, -5, 115);
+  if (!g) return;
+  trazar(g, t => -16*t*t+80*t, '#1565c0', 0, 5);
+  trazar(g, t => 30*t,          '#e65100', 0, 5.5);
+  punto(g, 2.5, 100, 'Máx (2.5, 100 pies)', '#1565c0');
+  dibujado['g-pelota'] = true;
+}
+
+function dibGNegocio() {
+  if (dibujado['g-negocio']) return;
+  const g = initCanvas('g-negocio', 0, 13, 0, 160);
+  if (!g) return;
+  trazar(g, x => 12*x,         '#2e7d32', 0, 13);
+  trazar(g, x => x*x-2*x+20,   '#b71c1c', 0, 13);
+  dibujado['g-negocio'] = true;
+}
+
+// ─── TOGGLE EVENTS ───────────────────────────────────────────
+document.getElementById('s2-2').addEventListener('toggle', function() {
+  if (this.open) { setTimeout(dibGLineal, 60); retypesMJ(); }
+});
+document.getElementById('s2-3').addEventListener('toggle', function() {
+  if (this.open) { setTimeout(dibGTablaLin, 60); retypesMJ(); }
+});
+document.getElementById('s3-2').addEventListener('toggle', function() {
+  if (this.open) { setTimeout(dibGCuad, 60); retypesMJ(); }
+});
+document.getElementById('s4').addEventListener('toggle', function() {
+  if (this.open) {
+    setTimeout(() => { dibGCarros(); dibGPelota(); dibGNegocio(); }, 80);
+    retypesMJ();
+  }
+});
+['s1','s2','s2-1','s3','s3-1','s3-3','s5'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('toggle', function() {
+    if (this.open) retypesMJ();
+  });
+});
+
+function retypesMJ() {
+  setTimeout(() => { if (typeof MathJax !== 'undefined') MathJax.typesetPromise(); }, 120);
+}
+
+// ─── SELECCIÓN TIPO RADIO ────────────────────────────────────
+const sels = {};
+function sel(grupo, opc) {
+  sels[grupo] = opc;
+  document.querySelectorAll(`[id^="o${grupo}"]`).forEach(el => {
+    el.classList.remove('sel','ok','mal');
+  });
+  const el = document.getElementById(`o${grupo}${opc}`);
+  if (el) el.classList.add('sel');
+}
+
+// ─── FEEDBACK ────────────────────────────────────────────────
+function mostrarFb(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('show');
+}
+function setFb(id, tipo, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = `fb ${tipo} show`;
+  el.innerHTML = msg;
+}
+function clearFb(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'fb';
+  el.innerHTML = '';
+}
+
+// ─── TABLA LINEAL (s2-1) ─────────────────────────────────────
+const dataTL = {b0:50,b2:90,b4:130,b6:170,p0:80,p2:110,p4:140,p6:170};
+function verTablaLineal() {
+  let c = 0, t = Object.keys(dataTL).length;
+  for (const [id,v] of Object.entries(dataTL)) {
+    const inp = document.getElementById(id);
+    const m   = document.getElementById('m'+id);
+    if (!inp || !m) continue;
+    const ok = parseFloat(inp.value) === v;
+    if (inp.value !== '') {
+      m.textContent = ok ? '✅' : '❌';
+      inp.className = ok ? 'ok' : 'mal';
+      if (ok) c++;
+    }
+  }
+  setFb('fb-tl', c===t?'ok':'mal',
+    c===t ? '🎉 ¡Excelente! Completaste correctamente ambas tablas.'
+          : `${c} de ${t} correctas. Sustituye cada valor de x en la ecuación.`);
+}
+function resetTablaLineal() {
+  for (const id of Object.keys(dataTL)) {
+    const inp = document.getElementById(id);
+    if (inp) { inp.value=''; inp.className=''; }
+    const m = document.getElementById('m'+id);
+    if (m) m.textContent='';
+  }
+  clearFb('fb-tl');
+  const p = document.getElementById('pista-tl');
+  if (p) p.classList.remove('show');
+}
+
+// ─── GRÁFICA LINEAL (s2-2) ───────────────────────────────────
+function verGrafLineal() {
+  let c = 0;
+  const checks = [
+    ['gl1','a'],   // Plan A tiene intercepto mayor
+    [null, null],  // numérico
+    ['gl3','a'],   // Plan A para 6 meses
+    ['gl4','b']    // Plan B mayor pendiente
+  ];
+
+  // 1 — radio
+  const r1 = sels['gl1'] === 'a';
+  aplicarRadio('gl1', r1); if (r1) c++;
+  const m1 = document.getElementById('mgl1');
+  if (m1 && sels['gl1']) m1.textContent = r1?'✅':'❌';
+
+  // 2 — numérico
+  const inp2 = document.getElementById('gl2');
+  const m2   = document.getElementById('mgl2');
+  const r2 = parseFloat(inp2?.value) === 4;
+  if (inp2?.value !== '') { if(m2) m2.textContent = r2?'✅':'❌'; if(r2) c++; }
+
+  // 3 — radio
+  const r3 = sels['gl3'] === 'a';
+  aplicarRadio('gl3', r3); if (r3) c++;
+  const m3 = document.getElementById('mgl3');
+  if (m3 && sels['gl3']) m3.textContent = r3?'✅':'❌';
+
+  // 4 — radio
+  const r4 = sels['gl4'] === 'b';
+  aplicarRadio('gl4', r4); if (r4) c++;
+  const m4 = document.getElementById('mgl4');
+  if (m4 && sels['gl4']) m4.textContent = r4?'✅':'❌';
+
+  setFb('fb-gl', c===4?'ok':'mal',
+    c===4 ? '🎉 ¡Perfecto! Lees correctamente la gráfica de comparación.'
+          : `${c} de 4. El punto (4,22) es la intersección; a la derecha Plan A ($m=3$) es más barato.`);
+}
+function resetGrafLineal() {
+  ['gl1','gl3','gl4'].forEach(g => {
+    sels[g]=undefined;
+    ['a','b','c'].forEach(o => {
+      const el=document.getElementById(`o${g}${o}`);
+      if(el) el.classList.remove('sel','ok','mal');
+    });
+    const m=document.getElementById(`m${g}`); if(m) m.textContent='';
+  });
+  const inp=document.getElementById('gl2'); if(inp) inp.value='';
+  const m2=document.getElementById('mgl2'); if(m2) m2.textContent='';
+  clearFb('fb-gl');
+}
+
+// ─── TABLA → GRÁFICA (s2-3) ──────────────────────────────────
+function verTablaGraf() {
+  let c = 0;
+  const inp1 = document.getElementById('tm1'), m1 = document.getElementById('mtm1');
+  const r1 = parseFloat(inp1?.value) === 4;
+  if (inp1?.value !== '') { if(m1) m1.textContent=r1?'✅':'❌'; if(r1) c++; }
+
+  const inp2 = document.getElementById('tm2'), m2 = document.getElementById('mtm2');
+  const r2 = parseFloat(inp2?.value) === -3;
+  if (inp2?.value !== '') { if(m2) m2.textContent=r2?'✅':'❌'; if(r2) c++; }
+
+  const sel3 = document.getElementById('tm3'), m3 = document.getElementById('mtm3');
+  const r3 = sel3?.value === 'a';
+  if (sel3?.value !== '') { if(m3) m3.textContent=r3?'✅':'❌'; if(r3) c++; }
+
+  setFb('fb-tg', c===3?'ok':'mal',
+    c===3 ? '🎉 ¡Excelente! Encontraste la ecuación desde la tabla.'
+          : `${c} de 3. $m=\\Delta y/\\Delta x=(1-(-3))/1=4$; $b=-3$ → $f(x)=4x-3$.`);
+}
+function resetTablaGraf() {
+  ['tm1','tm2'].forEach(id => {
+    const el=document.getElementById(id); if(el) el.value='';
+    const m=document.getElementById('m'+id); if(m) m.textContent='';
+  });
+  const s=document.getElementById('tm3'); if(s) s.value='';
+  const m=document.getElementById('mtm3'); if(m) m.textContent='';
+  clearFb('fb-tg');
+  const p=document.getElementById('pista-tg'); if(p) p.classList.remove('show');
+}
+
+// ─── TABLA CUADRÁTICA (s3-1) ─────────────────────────────────
+const dataQ = {hq1:0, hq2:3, hq3:4, hq4:3, hq5:0};
+function verTablaQ() {
+  let c=0, t=Object.keys(dataQ).length;
+  for (const [id,v] of Object.entries(dataQ)) {
+    const inp=document.getElementById(id), m=document.getElementById('m'+id);
+    if(!inp||!m) continue;
+    const ok=parseFloat(inp.value)===v;
+    if(inp.value!=='') { m.textContent=ok?'✅':'❌'; if(ok) c++; }
+  }
+  setFb('fb-tq', c===t?'ok':'mal',
+    c===t ? '🎉 ¡Perfecto! Evalúas correctamente funciones cuadráticas.'
+          : `${c} de ${t}. Recuerda: $(-2)^2=4$ primero, luego aplica el negativo exterior: $-(4)=-4$, finalmente $-4+4=0$.`);
+}
+function resetTablaQ() {
+  for (const id of Object.keys(dataQ)) {
+    const inp=document.getElementById(id); if(inp) inp.value='';
+    const m=document.getElementById('m'+id); if(m) m.textContent='';
+  }
+  clearFb('fb-tq');
+  const p=document.getElementById('pista-tq'); if(p) p.classList.remove('show');
+}
+
+// ─── GRÁFICA CUADRÁTICA (s3-2) ───────────────────────────────
+function verGrafQ() {
+  let c = 0;
+  const cfg = [
+    ['qg1','a'],  // f tiene vértice más alto
+    ['qg2','b'],  // g es más estrecha
+    ['qg3','b'],  // se cruzan en x=±2
+    ['qg4','a'],  // f(1)=1 > g(1)=-2
+  ];
+  cfg.forEach(([grupo, resp]) => {
+    const r = sels[grupo] === resp;
+    aplicarRadio(grupo, r); if(r) c++;
+    const m = document.getElementById('m'+grupo);
+    if (m && sels[grupo]) m.textContent = r?'✅':'❌';
+  });
+  setFb('fb-gq', c===4?'ok':'mal',
+    c===4 ? '🎉 ¡Excelente! Interpretas perfectamente las parábolas comparadas.'
+          : `${c} de 4. Vértice de $f$=$(0,0)$ > vértice de $g$=$(0,-4)$; $|a|=2>1$ → $g$ es más estrecha.`);
+}
+function resetGrafQ() {
+  ['qg1','qg2','qg3','qg4'].forEach(g => {
+    sels[g]=undefined;
+    ['a','b','c'].forEach(o => {
+      const el=document.getElementById(`o${g}${o}`);
+      if(el) el.classList.remove('sel','ok','mal');
+    });
+    const m=document.getElementById('m'+g); if(m) m.textContent='';
+  });
+  clearFb('fb-gq');
+}
+
+// ─── TIPO DE TABLA (s3-3) ─────────────────────────────────────
+function verTipoTab() {
+  let c=0;
+  const sA=document.getElementById('tipoA'), mA=document.getElementById('mtipoA');
+  const rA=sA?.value==='C'; if(sA?.value!=='') { if(mA) mA.textContent=rA?'✅':'❌'; if(rA) c++; }
+  const sB=document.getElementById('tipoB'), mB=document.getElementById('mtipoB');
+  const rB=sB?.value==='L'; if(sB?.value!=='') { if(mB) mB.textContent=rB?'✅':'❌'; if(rB) c++; }
+  setFb('fb-tipo', c===2?'ok':'mal',
+    c===2 ? '🎉 ¡Correcto! Diferencias constantes → lineal; diferencias que crecen → cuadrática.'
+          : `${c} de 2. Tabla A: $\\Delta y=3,5,7$ → no constante → cuadrática. Tabla B: $\\Delta y=3,3,3$ → constante → lineal.`);
+}
+function resetTipoTab() {
+  ['tipoA','tipoB'].forEach(id => {
+    const el=document.getElementById(id); if(el) el.value='';
+    const m=document.getElementById('m'+id.replace('tipo','mtipo')); if(m) m.textContent='';
+  });
+  document.getElementById('mtipoA').textContent='';
+  document.getElementById('mtipoB').textContent='';
+  clearFb('fb-tipo');
+  const p=document.getElementById('pista-tipo'); if(p) p.classList.remove('show');
+}
+
+// ─── PROBLEMA 1 ──────────────────────────────────────────────
+function verProb1() {
+  let c=0;
+  // V(200)=0.10*200+15=35
+  chkNum('e1a',35,'me1a',() => c++);
+  // S(200)=0.08*200+25=41
+  chkNum('e1b',41,'me1b',() => c++);
+  // Verde es más barata (35<41)
+  chkSel('e1c','V','me1c',() => c++);
+  // k=500
+  chkNum('e1d',500,'me1d',() => c++);
+  actuPuntaje('p1',c,4);
+  setFb('fb-p1', c===4?'ok':'mal',
+    c===4 ? '🎉 ¡Excelente! Comparaste perfectamente dos funciones lineales.'
+          : `${c}/4. $V(200)=0.10(200)+15=\\$35$; $S(200)=0.08(200)+25=\\$41$; equilibrio en $k=500$ kWh.`);
+}
+function resetProb1() {
+  ['e1a','e1b','e1d'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; const m=document.getElementById('m'+id); if(m) m.textContent=''; });
+  const s=document.getElementById('e1c'); if(s) s.value='';
+  document.getElementById('me1c').textContent='';
+  clearFb('fb-p1');
+}
+
+// ─── PROBLEMA 2 ──────────────────────────────────────────────
+function verProb2() {
+  let c=0;
+  // h(1)=-16+48=32
+  chkNum('e2a',32,'me2a',() => c++);
+  // t=1.5
+  chkNumEps('e2b',1.5,0.05,'me2b',() => c++);
+  // h_max=36
+  chkNum('e2c',36,'me2c',() => c++);
+  // aterriza t=3
+  chkNum('e2d',3,'me2d',() => c++);
+  // abre hacia abajo
+  chkSel('e2e','B','me2e',() => c++);
+  const pct=Math.round(c/5*100);
+  const bar=document.getElementById('bar2');
+  if(bar){bar.style.width=pct+'%';bar.textContent=pct+'%';}
+  actuPuntaje('p2',c,5);
+  setFb('fb-p2', c===5?'ok':'mal',
+    c===5 ? '🎉 ¡Dominas el análisis de la parábola en contexto!'
+          : `${c}/5. $h(1)=-16+48=32$; $t_{max}=1.5$ s; $h(1.5)=36$ pies; aterriza en $t=3$ s; $a=-16<0$ → abre ↓.`);
+}
+function resetProb2() {
+  ['e2a','e2b','e2c','e2d'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; const m=document.getElementById('m'+id); if(m) m.textContent=''; });
+  const s=document.getElementById('e2e'); if(s) s.value='';
+  document.getElementById('me2e').textContent='';
+  const bar=document.getElementById('bar2'); if(bar){bar.style.width='0%';bar.textContent='0%';}
+  clearFb('fb-p2');
+}
+
+// ─── PROBLEMA 3 ──────────────────────────────────────────────
+function verProb3() {
+  let c=0;
+  // C(5)=25-30+20=15
+  chkNum('e3a',15,'me3a',() => c++);
+  // I(5)=20
+  chkNum('e3b',20,'me3b',() => c++);
+  // Ganancia (20>15)
+  chkSel('e3c','G','me3c',() => c++);
+  // |I-C|=5
+  chkNum('e3d',5,'me3d',() => c++);
+  const pct=Math.round(c/4*100);
+  const bar=document.getElementById('bar3');
+  if(bar){bar.style.width=pct+'%';bar.textContent=pct+'%';}
+  actuPuntaje('p3',c,4);
+  setFb('fb-p3', c===4?'ok':'mal',
+    c===4 ? '🎉 ¡Perfecto! Comparas correctamente lineal vs cuadrática en contexto de negocios.'
+          : `${c}/4. $C(5)=25-30+20=15$; $I(5)=20$; ganancia $=20-15=5$.`);
+}
+function resetProb3() {
+  ['e3a','e3b','e3d'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; const m=document.getElementById('m'+id); if(m) m.textContent=''; });
+  const s=document.getElementById('e3c'); if(s) s.value='';
+  document.getElementById('me3c').textContent='';
+  const bar=document.getElementById('bar3'); if(bar){bar.style.width='0%';bar.textContent='0%';}
+  clearFb('fb-p3');
+}
+
+// ─── PROBLEMA 4 ──────────────────────────────────────────────
+function verProb4() {
+  let c=0;
+  // mínimo = -1
+  chkNum('e4a',-1,'me4a',() => c++);
+  // x=2
+  chkNum('e4b',2,'me4b',() => c++);
+  // g(3)=5 > f(3)=0 → b
+  const r3 = sels['e4c']==='b';
+  aplicarRadio('e4c',r3); if(r3) c++;
+  const m3=document.getElementById('me4c'); if(m3&&sels['e4c']) m3.textContent=r3?'✅':'❌';
+  // lineal → a
+  const r4 = sels['e4d']==='a';
+  aplicarRadio('e4d',r4); if(r4) c++;
+  const m4=document.getElementById('me4d'); if(m4&&sels['e4d']) m4.textContent=r4?'✅':'❌';
+  // g(2)=3 > f(2)=-1 → b
+  const r5 = sels['e4e']==='b';
+  aplicarRadio('e4e',r5); if(r5) c++;
+  const m5=document.getElementById('me4e'); if(m5&&sels['e4e']) m5.textContent=r5?'✅':'❌';
+  const pct=Math.round(c/5*100);
+  const bar=document.getElementById('bar4');
+  if(bar){bar.style.width=pct+'%';bar.textContent=pct+'%';}
+  actuPuntaje('p4',c,5);
+  setFb('fb-p4', c===5?'ok':'mal',
+    c===5 ? '🎉 ¡Excelente! Resolviste el problema estilo GED perfectamente.'
+          : `${c}/5. Vértice de $f$: $x=2$, $f(2)=-1$; $g$ es lineal; para $x=2$: $g(2)=3>f(2)=-1$.`);
+}
+function resetProb4() {
+  ['e4a','e4b'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; const m=document.getElementById('m'+id); if(m) m.textContent=''; });
+  ['e4c','e4d','e4e'].forEach(g => {
+    sels[g]=undefined;
+    ['a','b'].forEach(o => { const el=document.getElementById(`o${g}${o}`); if(el) el.classList.remove('sel','ok','mal'); });
+    const m=document.getElementById('m'+g); if(m) m.textContent='';
+  });
+  const bar=document.getElementById('bar4'); if(bar){bar.style.width='0%';bar.textContent='0%';}
+  clearFb('fb-p4');
+}
+
+// ─── AYUDANTES DE VERIFICACIÓN ───────────────────────────────
+function chkNum(inputId, expected, marcaId, onOk) {
+  const inp=document.getElementById(inputId), m=document.getElementById(marcaId);
+  if (!inp||!m) return;
+  if (inp.value==='') return;
+  const ok = parseFloat(inp.value) === expected;
+  m.textContent = ok?'✅':'❌';
+  if (ok) onOk();
+}
+function chkNumEps(inputId, expected, eps, marcaId, onOk) {
+  const inp=document.getElementById(inputId), m=document.getElementById(marcaId);
+  if (!inp||!m) return;
+  if (inp.value==='') return;
+  const ok = Math.abs(parseFloat(inp.value)-expected) <= eps;
+  m.textContent = ok?'✅':'❌';
+  if (ok) onOk();
+}
+function chkSel(selId, expected, marcaId, onOk) {
+  const el=document.getElementById(selId), m=document.getElementById(marcaId);
+  if (!el||!m) return;
+  if (el.value==='') return;
+  const ok = el.value === expected;
+  m.textContent = ok?'✅':'❌';
+  if (ok) onOk();
+}
+function aplicarRadio(grupo, esOk) {
+  const opc = sels[grupo];
+  if (!opc) return;
+  const el = document.getElementById(`o${grupo}${opc}`);
+  if (el) { el.classList.remove('sel'); el.classList.add(esOk?'ok':'mal'); }
+}
+
+// ─── RESUMEN GLOBAL ──────────────────────────────────────────
+const puntajes = {};
+function actuPuntaje(id, c, t) {
+  puntajes[id] = Math.round(c/t*100);
+  const keys = Object.keys(puntajes);
+  const prom = keys.reduce((s,k) => s+puntajes[k], 0) / keys.length;
+  const el = document.getElementById('resumen');
+  if (!el) return;
+  const ico = prom>=90?'🌟':prom>=70?'👍':'💪';
+  const msg = prom>=90 ? '¡Dominio excelente! Estás listo/a para el GED.'
+            : prom>=70 ? 'Buen progreso. Repasa los errores y vuelve a intentarlo.'
+            : 'Sigue practicando. Revisa los pasos y los conceptos clave.';
+  el.innerHTML = `${ico} <strong>Promedio: ${Math.round(prom)}%</strong> — ${msg}<br>Problemas completados: ${keys.length}`;
+}
+</script>
+</div>
+</body>
+</html>
