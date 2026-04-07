@@ -1,1 +1,648 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rapidez en números enteros — GED</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+    :root{ --cp:#0089cd; --ch:#00a8fc; }
+    body{
+      font-family:'Poppins',sans-serif;
+      margin:0; padding:10px;
+      background:linear-gradient(135deg,#1a237e,#0d47a1);
+      display:flex; justify-content:center; align-items:flex-start;
+      min-height:90vh; flex-direction:column; gap:10px;
+    }
+    #quiz-container{
+      background:#fff; border-radius:15px;
+      box-shadow:0 0 22px rgba(0,0,0,0.25);
+      overflow:hidden; width:clamp(300px,95%,820px); margin:0 auto;
+    }
+    .quiz-progress-header{
+      background:linear-gradient(135deg,#f8f9fa,#e9ecef);
+      padding:16px 22px; border-bottom:3px solid var(--cp);
+    }
+    .progress-text{
+      text-align:center; font-weight:700;
+      font-size:clamp(0.95em,2.5vw,1.1em);
+      color:var(--cp); margin-bottom:10px;
+      text-transform:uppercase; letter-spacing:0.8px;
+    }
+    .progress-container{
+      background:#e0e0e0; height:12px; border-radius:6px;
+      overflow:hidden; box-shadow:inset 0 2px 4px rgba(0,0,0,0.15);
+    }
+    .progress-bar{
+      height:100%; width:5%;
+      background:linear-gradient(90deg,var(--cp),var(--ch));
+      transition:width 0.5s cubic-bezier(0.4,0,0.2,1); border-radius:6px;
+    }
+    .question-meta{
+      display:flex; align-items:center; justify-content:center;
+      padding:14px 20px 0; gap:10px; flex-wrap:wrap;
+    }
+    .cat-badge{
+      padding:5px 15px; border-radius:20px;
+      font-size:0.8em; font-weight:700; color:#fff; letter-spacing:0.4px;
+    }
+    .time-badge{
+      padding:4px 12px; border-radius:20px;
+      font-size:0.78em; font-weight:600;
+      background:#e8f4f8; color:#444; border:1px solid #ccc;
+    }
+    .question-header{
+      padding:16px 22px 8px;
+      font-size:clamp(1em,2.6vw,1.2em);
+      font-weight:700; text-align:center;
+      color:#1a1a2e; line-height:1.55;
+    }
+    /* Caja matemática grande y clara */
+    .math-box{
+      background:linear-gradient(135deg,#f0f7ff,#e4effc);
+      border:2px solid var(--cp); border-radius:12px;
+      margin:0 22px 16px; padding:16px 20px;
+      font-size:clamp(1.3em,4vw,1.9em);
+      font-weight:700; text-align:center;
+      color:#003366; font-family:'Courier New',monospace;
+      letter-spacing:1px; line-height:1.4;
+    }
+    .regla-box{
+      background:#fff8e1; border-left:4px solid #f9a825;
+      border-radius:6px; margin:0 22px 12px;
+      padding:9px 14px; font-size:0.8em; color:#5d4037;
+      font-style:italic; line-height:1.5;
+    }
+    .options{ padding:0 18px; }
+    .option-item{
+      display:block; padding:12px 16px; margin-bottom:11px;
+      background:#f0f4f8; color:#333;
+      border:2px solid #e0e0e0; border-radius:8px;
+      cursor:pointer; transition:all 0.25s ease;
+      font-size:clamp(0.95em,2.5vw,1.1em);
+      font-weight:700; line-height:1.4; user-select:none;
+      font-family:'Courier New',monospace;
+    }
+    .option-item:hover:not(.disabled){
+      background:#dff0ff; border-color:var(--ch);
+      transform:translateY(-2px);
+      box-shadow:0 4px 8px rgba(0,0,0,0.1);
+    }
+    .option-item.correct { background:#4caf50!important;color:#fff!important;border-color:#4caf50!important; }
+    .option-item.incorrect{ background:#f44336!important;color:#fff!important;border-color:#f44336!important; }
+    .option-item.disabled { cursor:not-allowed; opacity:0.85; }
+    .btn-container{ padding:4px 18px 18px; }
+    .primary-btn{
+      display:block; width:100%; padding:13px; color:#fff;
+      border:none; border-radius:8px; font-size:1.05em;
+      font-weight:700; cursor:pointer; transition:all 0.25s ease;
+      text-transform:uppercase; letter-spacing:1px;
+      background:var(--cp); text-align:center;
+      user-select:none; box-sizing:border-box;
+    }
+    .primary-btn:hover{ background:var(--ch); transform:translateY(-2px); box-shadow:0 4px 10px rgba(0,0,0,0.2); }
+    .timer-container{
+      background:linear-gradient(135deg,#fff8e1,#ffecb3);
+      padding:11px 18px; border-top:2px solid #f39c12;
+    }
+    .timer-text{
+      text-align:center; font-weight:700;
+      font-size:clamp(0.88em,2.2vw,1em);
+      color:#c77a00; margin-bottom:7px;
+    }
+    .timer-bar-container{ background:#f0d0d0; height:8px; border-radius:4px; overflow:hidden; }
+    .timer-bar{
+      height:100%; width:100%;
+      background:linear-gradient(90deg,#28a745,#ffc107,#dc3545);
+      transition:width 0.1s linear; border-radius:4px;
+    }
+    @keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .timer-warning{ animation:pulse 0.9s infinite; }
+    .result-screen{ padding:35px 28px; text-align:center; }
+    .result-screen.hidden{ display:none; }
+    .result-screen h2{ color:var(--cp); font-size:clamp(1.4em,4vw,1.9em); margin-bottom:10px; }
+    .result-score{
+      font-size:clamp(2em,6vw,2.8em)!important;
+      font-weight:800; color:var(--cp)!important; margin:12px 0!important;
+    }
+    .result-msg{ font-size:clamp(1em,2.8vw,1.2em); color:#333; margin:8px 0; }
+    .cat-results{ margin:18px 0; text-align:left; }
+    .cat-results h3{ color:var(--cp); font-size:0.95em; margin-bottom:10px; }
+    .cat-row{ display:flex; align-items:center; gap:8px; margin:8px 0; }
+    .cat-lbl{ flex:1.4; font-size:0.78em; font-weight:600; }
+    .cat-bar-out{ flex:2; background:#eee; border-radius:4px; height:11px; }
+    .cat-bar-in{ height:100%; border-radius:4px; transition:width 0.6s; }
+    .cat-sc{ font-weight:700; color:var(--cp); font-size:0.82em; min-width:55px; text-align:right; }
+    .tip-box{
+      background:#e8f5e9; border-left:4px solid #43a047;
+      border-radius:6px; padding:10px 14px; margin:14px 0 4px;
+      font-size:0.82em; color:#2e7d32; text-align:left; line-height:1.6;
+    }
+  </style>
+</head>
+<body>
+<div id="quiz-container">
 
+  <div class="quiz-progress-header">
+    <div class="progress-text" id="progress-text">Pregunta 1 de 20</div>
+    <div class="progress-container">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+  </div>
+
+  <div id="question-area"></div>
+
+  <div class="timer-container" id="timer-container">
+    <div class="timer-text" id="timer-text">⏱ Tiempo: 30s</div>
+    <div class="timer-bar-container">
+      <div class="timer-bar" id="timer-bar"></div>
+    </div>
+  </div>
+
+  <div class="result-screen hidden" id="result-screen">
+    <h2>🎯 ¡Cuestionario completado!</h2>
+    <p class="result-score" id="final-score"></p>
+    <p class="result-msg" id="final-msg"></p>
+    <div class="cat-results" id="cat-results"></div>
+    <div class="tip-box" id="tip-box"></div>
+    <div class="btn-container" style="padding-top:14px">
+      <div class="primary-btn" id="restart-btn">🔄 Nuevas preguntas (reiniciar)</div>
+    </div>
+  </div>
+
+</div>
+<script>
+(function(){
+  if(window.quizEnterosIniciado) return;
+  window.quizEnterosIniciado=true;
+
+  /* ── UTILIDADES ── */
+  const M='\u2212'; // − tipográfico
+  const SQ='\u221A'; // √
+  function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+  function randNZ(a,b){ let v; do{v=rand(a,b);}while(v===0); return v; }
+  function shuffle(arr){
+    const a=arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+  // Número con signo tipográfico (−5, 3)
+  function mn(n){ return n<0?(M+Math.abs(n)):String(n); }
+  // Número entre paréntesis si negativo: (−5) o 3
+  function pn(n){ return n<0?('('+M+Math.abs(n)+')'):String(n); }
+  // Número entre paréntesis siempre: (−5) o (3)
+  function pan(n){ return n<0?('('+M+Math.abs(n)+')'):'('+n+')'; }
+  // Signo de operación con espacios
+  function opStr(n){ return n>=0?(' + '+n):(' '+M+' '+Math.abs(n)); }
+
+  function makeOpts(correct, distractors){
+    const cs=String(correct), seen=new Set([cs]), uniq=[];
+    for(const d of distractors){
+      const ds=String(d);
+      if(!seen.has(ds)&&uniq.length<3){ seen.add(ds); uniq.push(ds); }
+    }
+    let extra=(parseInt(cs)||0)+13;
+    while(uniq.length<3){
+      const c2=String(extra++);
+      if(!seen.has(c2)){ seen.add(c2); uniq.push(c2); }
+    }
+    const all=shuffle([cs,...uniq]);
+    const L=['a','b','c','d'];
+    return{
+      opciones:all.map((v,i)=>({valor:L[i],texto:L[i].toUpperCase()+'. '+v})),
+      correcta:L[all.indexOf(cs)]
+    };
+  }
+
+  /* ── CATEGORÍAS ── */
+  const CC={
+    'Suma y resta de enteros':'#1565c0',
+    'Multiplicación y división':'#6a1b9a',
+    'Expresiones con paréntesis':'#e65100',
+    'Potencias de enteros':'#2e7d32',
+    'Raíces cuadradas':'#00695c',
+    'Valor absoluto':'#c62828'
+  };
+  const CI={
+    'Suma y resta de enteros':'➕',
+    'Multiplicación y división':'✖️',
+    'Expresiones con paréntesis':'🔢',
+    'Potencias de enteros':'⬆️',
+    'Raíces cuadradas':'√',
+    'Valor absoluto':'| |'
+  };
+  const TIPS={
+    'Suma y resta de enteros':
+      'Regla clave: dos negativos que se suman → suma los valores y pon signo negativo. ' +
+      'Si son signos distintos → resta el menor del mayor y usa el signo del mayor.',
+    'Multiplicación y división':
+      'Regla de signos: igual × igual = positivo  |  distinto × distinto = negativo. ' +
+      'Lo mismo aplica para la división.',
+    'Expresiones con paréntesis':
+      'Primero resuelve lo que está dentro del paréntesis. ' +
+      'Un negativo delante del paréntesis cambia el signo de todos los términos adentro.',
+    'Potencias de enteros':
+      'Base negativa con exponente PAR → resultado POSITIVO: (−2)⁴ = 16. ' +
+      'Base negativa con exponente IMPAR → resultado NEGATIVO: (−2)³ = −8. ' +
+      'Ojo: −2² = −4 (el exponente solo afecta al 2, no al signo).',
+    'Raíces cuadradas':
+      'La raíz cuadrada de un número perfecto siempre es positiva en el GED. ' +
+      'Memoriza: √1=1, √4=2, √9=3, √16=4, √25=5, √36=6, √49=7, √64=8, √81=9, √100=10.',
+    'Valor absoluto':
+      'El valor absoluto siempre da un resultado positivo (o cero). ' +
+      '|−7| = 7.  Evalúa primero la expresión dentro de | | y luego aplica el valor absoluto.'
+  };
+
+  // Cuadrados perfectos disponibles
+  const PERFECTS=[[1,1],[4,2],[9,3],[16,4],[25,5],[36,6],[49,7],[64,8],[81,9],[100,10]];
+  function randPerf(){ return PERFECTS[rand(0,PERFECTS.length-1)]; }
+
+  /* ── GENERADORES (20) ── */
+  const GEN=[
+
+    /* 1 · Suma dos negativos: (−a) + (−b) · 30 s */
+    ()=>{
+      const a=rand(2,9), b=rand(2,9), r=-(a+b);
+      const {opciones,correcta}=makeOpts(r,[r+1,r-1,a+b,-(a-b)]);
+      return{ cat:'Suma y resta de enteros', t:30,
+        q:'Calcula:',
+        math:`${pn(-a)} + ${pn(-b)}`,
+        opciones, correcta,
+        regla:'Mismos signos → suma y conserva el signo.'};
+    },
+
+    /* 2 · Suma de signos distintos: (−a) + b · 30 s */
+    ()=>{
+      const a=rand(2,9), b=rand(2,9), r=-a+b;
+      const {opciones,correcta}=makeOpts(r,[r+1,r-1,-(a+b),a+b]);
+      return{ cat:'Suma y resta de enteros', t:30,
+        q:'Calcula:',
+        math:`${pn(-a)} + ${b}`,
+        opciones, correcta,
+        regla:'Signos distintos → resta y conserva el signo del mayor en valor absoluto.'};
+    },
+
+    /* 3 · Restar un negativo: a − (−b) = a + b · 30 s */
+    ()=>{
+      const a=rand(2,9), b=rand(2,9), r=a+b;
+      const {opciones,correcta}=makeOpts(r,[r-2*b,r-1,a-b,-(a+b)]);
+      return{ cat:'Suma y resta de enteros', t:30,
+        q:'Calcula:',
+        math:`${a} ${M} ${pn(-b)}`,
+        opciones, correcta,
+        regla:'Restar un negativo equivale a sumar: a − (−b) = a + b.'};
+    },
+
+    /* 4 · (−a) − b = −(a+b) · 30 s */
+    ()=>{
+      const a=rand(2,9), b=rand(2,9), r=-(a+b);
+      const {opciones,correcta}=makeOpts(r,[r+1,a-b,b-a,a+b]);
+      return{ cat:'Suma y resta de enteros', t:30,
+        q:'Calcula:',
+        math:`${pn(-a)} ${M} ${b}`,
+        opciones, correcta,
+        regla:'Negativo menos positivo → suma los valores y pon signo negativo.'};
+    },
+
+    /* 5 · (−a) × (−b) = positivo · 30 s */
+    ()=>{
+      const a=rand(2,8), b=rand(2,8), r=a*b;
+      const {opciones,correcta}=makeOpts(r,[-(a*b),r+b,r-a,-(a+b)]);
+      return{ cat:'Multiplicación y división', t:30,
+        q:'Calcula:',
+        math:`${pn(-a)} × ${pn(-b)}`,
+        opciones, correcta,
+        regla:'(−) × (−) = (+)  Signos iguales → resultado positivo.'};
+    },
+
+    /* 6 · (−a) × b = negativo · 30 s */
+    ()=>{
+      const a=rand(2,8), b=rand(2,8), r=-(a*b);
+      const {opciones,correcta}=makeOpts(r,[a*b,r+b,r+a,-(a+b)]);
+      return{ cat:'Multiplicación y división', t:30,
+        q:'Calcula:',
+        math:`${pn(-a)} × ${b}`,
+        opciones, correcta,
+        regla:'(−) × (+) = (−)  Signos distintos → resultado negativo.'};
+    },
+
+    /* 7 · (−a) ÷ (−b) = positivo · 30 s */
+    ()=>{
+      const b=rand(2,7), r=rand(2,7), a=b*r;
+      const {opciones,correcta}=makeOpts(r,[-(r),r+1,r-1,-(b)]);
+      return{ cat:'Multiplicación y división', t:30,
+        q:'Calcula:',
+        math:`${pn(-a)} ÷ ${pn(-b)}`,
+        opciones, correcta,
+        regla:'(−) ÷ (−) = (+)  Signos iguales → resultado positivo.'};
+    },
+
+    /* 8 · a ÷ (−b) = negativo · 30 s */
+    ()=>{
+      const b=rand(2,7), r=rand(2,7), a=b*r;
+      const {opciones,correcta}=makeOpts(-r,[r,-r+1,-r-1,-(b)]);
+      return{ cat:'Multiplicación y división', t:30,
+        q:'Calcula:',
+        math:`${a} ÷ ${pn(-b)}`,
+        opciones, correcta,
+        regla:'(+) ÷ (−) = (−)  Signos distintos → resultado negativo.'};
+    },
+
+    /* 9 · a × (b − c) con paréntesis · 45 s */
+    ()=>{
+      const a=rand(2,6), b=rand(3,9), c=rand(1,b-1), r=a*(b-c);
+      const {opciones,correcta}=makeOpts(r,[a*b-c,a*(b+c),r+a,r-a]);
+      return{ cat:'Expresiones con paréntesis', t:45,
+        q:'Calcula (respeta el orden de operaciones):',
+        math:`${a} × (${b} ${M} ${c})`,
+        opciones, correcta,
+        regla:'Primero el paréntesis, luego multiplica.'};
+    },
+
+    /* 10 · −(a − b): distribuir el negativo · 45 s */
+    ()=>{
+      const a=rand(3,9), b=rand(1,a-1), r=-(a-b);
+      const {opciones,correcta}=makeOpts(r,[a-b,-(a+b),b-a===r?r-1:b-a,r+2]);
+      return{ cat:'Expresiones con paréntesis', t:45,
+        q:'Elimina el paréntesis y calcula:',
+        math:`${M}(${a} ${M} ${b})`,
+        opciones, correcta,
+        regla:'Un (−) delante del paréntesis cambia el signo de TODOS los términos adentro.'};
+    },
+
+    /* 11 · (−a)(b) + c · 45 s */
+    ()=>{
+      const a=rand(2,6), b=rand(2,6), c=rand(1,9), r=-(a*b)+c;
+      const {opciones,correcta}=makeOpts(r,[a*b+c,-(a*b+c),r+2,r-2]);
+      return{ cat:'Expresiones con paréntesis', t:45,
+        q:'Calcula:',
+        math:`${pn(-a)}${pan(b)} + ${c}`,
+        opciones, correcta,
+        regla:'Dos paréntesis juntos indican multiplicación. Luego suma.'};
+    },
+
+    /* 12 · (−n)² = positivo · 45 s */
+    ()=>{
+      const n=rand(2,7), r=n*n;
+      const {opciones,correcta}=makeOpts(r,[-(r),n*2,-(n*2),r+1]);
+      return{ cat:'Potencias de enteros', t:45,
+        q:'Calcula:',
+        math:`(${M}${n})²`,
+        opciones, correcta,
+        regla:'Exponente PAR con base negativa → resultado POSITIVO: (−n)² = n²'};
+    },
+
+    /* 13 · (−n)³ = negativo · 45 s */
+    ()=>{
+      const n=rand(2,5), r=-(n*n*n);
+      const {opciones,correcta}=makeOpts(r,[n*n*n,-(n*3),n*3,r+1]);
+      return{ cat:'Potencias de enteros', t:45,
+        q:'Calcula:',
+        math:`(${M}${n})³`,
+        opciones, correcta,
+        regla:'Exponente IMPAR con base negativa → resultado NEGATIVO: (−n)³ = −n³'};
+    },
+
+    /* 14 · Trampa clásica: −n² vs (−n)² · 45 s */
+    ()=>{
+      const n=rand(2,6);
+      // pregunta: ¿cuánto es -n²?
+      const r=-(n*n);
+      const {opciones,correcta}=makeOpts(r,[n*n,n*2,-(n),r+1]);
+      return{ cat:'Potencias de enteros', t:45,
+        q:`¿Cuánto vale <strong>${M}${n}²</strong>? (El exponente solo afecta al ${n})`,
+        math:`${M}${n}² = ${M}(${n}²) = ?`,
+        opciones, correcta,
+        regla:`Ojo: −${n}² ≠ (−${n})².  −${n}² = −${n*n},  pero  (−${n})² = +${n*n}`};
+    },
+
+    /* 15 · (−n)⁴ = positivo · 45 s */
+    ()=>{
+      const n=rand(2,4), r=n*n*n*n;
+      const {opciones,correcta}=makeOpts(r,[-(r),n*4,-(n*4),n*n]);
+      return{ cat:'Potencias de enteros', t:45,
+        q:'Calcula:',
+        math:`(${M}${n})⁴`,
+        opciones, correcta,
+        regla:'Exponente PAR (4 es par) → resultado siempre POSITIVO.'};
+    },
+
+    /* 16 · √ de cuadrado perfecto · 30 s */
+    ()=>{
+      const [sq,rt]=randPerf();
+      const wrong=[rt+1,rt-1===0?rt+2:rt-1,rt+2].filter(v=>v!==rt&&v>0);
+      const {opciones,correcta}=makeOpts(rt,wrong);
+      return{ cat:'Raíces cuadradas', t:30,
+        q:'Calcula:',
+        math:`${SQ}${sq}`,
+        opciones, correcta,
+        regla:`${SQ}${sq} pregunta: ¿qué número multiplicado por sí mismo da ${sq}?`};
+    },
+
+    /* 17 · √a + b ó √a − b · 45 s */
+    ()=>{
+      const [sq,rt]=randPerf();
+      const b=rand(1,8);
+      const op=rand(0,1)===0?1:-1;
+      const r=rt+(op*b);
+      const opChar=op===1?'+':M;
+      const {opciones,correcta}=makeOpts(r,[r+1,r-1,sq+b*op,rt]);
+      return{ cat:'Raíces cuadradas', t:45,
+        q:'Calcula (primero la raíz, luego la operación):',
+        math:`${SQ}${sq} ${opChar} ${b}`,
+        opciones, correcta,
+        regla:`Primero: ${SQ}${sq} = ${rt}. Luego: ${rt} ${opChar} ${b} = ${r}.`};
+    },
+
+    /* 18 · |−n| básico · 30 s */
+    ()=>{
+      const n=rand(2,12), r=n;
+      const {opciones,correcta}=makeOpts(r,[-(r),r+1,0,r-1===0?r+2:r-1]);
+      return{ cat:'Valor absoluto', t:30,
+        q:'Calcula:',
+        math:`|${M}${n}|`,
+        opciones, correcta,
+        regla:'El valor absoluto elimina el signo: |−n| = n. Siempre positivo (o cero).'};
+    },
+
+    /* 19 · |a| − |b| o |a| + |−b| · 45 s */
+    ()=>{
+      const a=rand(3,10), b=rand(1,8);
+      const tipo=rand(0,1);
+      let math_str, r;
+      if(tipo===0){
+        r=a+b;
+        math_str=`|${a}| + |${M}${b}|`;
+      } else {
+        r=a-b;
+        math_str=`|${M}${a}| ${M} |${b}|`;
+      }
+      const {opciones,correcta}=makeOpts(r,[r+1,r-1,-(r),a+b===r?a-b:a+b]);
+      return{ cat:'Valor absoluto', t:45,
+        q:'Calcula (primero el valor absoluto de cada término):',
+        math:math_str,
+        opciones, correcta,
+        regla:'Evalúa cada |  | por separado antes de operar.'};
+    },
+
+    /* 20 · |a − b| cuando a < b · 45 s */
+    ()=>{
+      const b=rand(4,10), a=rand(1,b-1), r=b-a; // siempre positivo
+      const {opciones,correcta}=makeOpts(r,[-(r),a-b,a+b,r+1]);
+      return{ cat:'Valor absoluto', t:45,
+        q:'Calcula:',
+        math:`|${a} ${M} ${b}|`,
+        opciones, correcta,
+        regla:`Primero: ${a} − ${b} = −${b-a}. Luego el valor absoluto: |−${b-a}| = ${r}.`};
+    }
+
+  ]; // fin GEN
+
+  /* ── GENERAR Y MEZCLAR ── */
+  const preguntas=shuffle(GEN.map(g=>g()));
+  const total=preguntas.length;
+  let actual=0, puntos=0, respondida=false, reloj=null, segs=0;
+  const catPts={}, catTot={};
+  preguntas.forEach(p=>{ catTot[p.cat]=(catTot[p.cat]||0)+1; catPts[p.cat]=catPts[p.cat]||0; });
+
+  const qArea=document.getElementById('question-area');
+  const barP=document.getElementById('progress-bar');
+  const txtP=document.getElementById('progress-text');
+
+  /* ── RENDERIZAR ── */
+  function render(i){
+    const p=preguntas[i];
+    const col=CC[p.cat]||'#0089cd';
+    const icon=CI[p.cat]||'📝';
+    const tLabel=p.t<=30?'⚡ Rápida':p.t<=45?'🕐 Media':'⏳ Compleja';
+    const opHtml=p.opciones.map(o=>
+      `<div class="option-item" data-val="${o.valor}" onclick="window.__eClick(this)">${o.texto}</div>`
+    ).join('');
+    const mathHtml=p.math?`<div class="math-box">${p.math}</div>`:'';
+    const reglaHtml=p.regla?`<div class="regla-box">💡 ${p.regla}</div>`:'';
+    const btnLbl=i===total-1?'Ver resultados':'Siguiente ›';
+    qArea.innerHTML=`
+      <div class="question-meta">
+        <span class="cat-badge" style="background:${col}">${icon} ${p.cat}</span>
+        <span class="time-badge">${tLabel} · ${p.t}s</span>
+      </div>
+      <div class="question-header">${p.q}</div>
+      ${mathHtml}
+      ${reglaHtml}
+      <div class="options">${opHtml}</div>
+      <div class="btn-container">
+        <div class="primary-btn" onclick="window.__eNext()">${btnLbl}</div>
+      </div>`;
+    if(barP) barP.style.width=((i+1)/total*100)+'%';
+    if(txtP) txtP.textContent=`Pregunta ${i+1} de ${total}`;
+    iniciarReloj(p.t);
+  }
+
+  /* ── CLICK OPCIÓN ── */
+  window.__eClick=function(el){
+    if(respondida) return;
+    pararReloj(); respondida=true;
+    const p=preguntas[actual];
+    const elegida=el.getAttribute('data-val');
+    if(elegida===p.correcta){
+      el.className='option-item correct disabled';
+      puntos++; catPts[p.cat]++;
+    } else {
+      el.className='option-item incorrect disabled';
+      const ok=qArea.querySelector(`.option-item[data-val="${p.correcta}"]`);
+      if(ok) ok.className='option-item correct disabled';
+    }
+    qArea.querySelectorAll('.option-item').forEach(o=>{
+      if(!o.className.includes('disabled')) o.className+=' disabled';
+    });
+  };
+
+  /* ── SIGUIENTE ── */
+  window.__eNext=function(){
+    pararReloj(); actual++; respondida=false;
+    if(actual<total) render(actual);
+    else mostrarResultados();
+  };
+
+  /* ── RELOJ ── */
+  function iniciarReloj(s){
+    pararReloj(); segs=s; actualizarReloj();
+    reloj=setInterval(()=>{ segs--; actualizarReloj(); if(segs<=0) tiempoAgotado(); },1000);
+  }
+  function pararReloj(){ if(reloj){clearInterval(reloj);reloj=null;} }
+  function actualizarReloj(){
+    const p=preguntas[actual]||{t:30};
+    const tt=document.getElementById('timer-text');
+    const tb=document.getElementById('timer-bar');
+    const tc=document.getElementById('timer-container');
+    if(tt) tt.textContent=`⏱ Tiempo: ${segs}s`;
+    const pct=(segs/p.t)*100;
+    if(tb){
+      tb.style.width=pct+'%';
+      if(pct<=25){ tb.style.background='#dc3545'; if(tc) tc.className='timer-container timer-warning'; }
+      else if(pct<=50){ tb.style.background='linear-gradient(90deg,#ffc107,#dc3545)'; if(tc) tc.className='timer-container'; }
+      else{ tb.style.background='linear-gradient(90deg,#28a745,#ffc107,#dc3545)'; if(tc) tc.className='timer-container'; }
+    }
+  }
+  function tiempoAgotado(){
+    pararReloj(); respondida=true;
+    const p=preguntas[actual];
+    const ok=qArea.querySelector(`.option-item[data-val="${p.correcta}"]`);
+    if(ok) ok.className='option-item correct disabled';
+    qArea.querySelectorAll('.option-item').forEach(o=>{ if(!o.className.includes('disabled')) o.className+=' disabled'; });
+    const tt=document.getElementById('timer-text'); if(tt) tt.textContent='⏰ ¡Tiempo agotado!';
+    const tc=document.getElementById('timer-container'); if(tc) tc.className='timer-container timer-warning';
+  }
+
+  /* ── RESULTADOS ── */
+  function mostrarResultados(){
+    pararReloj();
+    qArea.innerHTML='';
+    document.getElementById('timer-container').style.display='none';
+    const pct=Math.round(puntos/total*100);
+    document.getElementById('final-score').textContent=`${puntos} / ${total}  (${pct}%)`;
+    let msg='';
+    if(pct>=85) msg='🏆 ¡Excelente! Dominas los enteros del GED.';
+    else if(pct>=70) msg='👍 ¡Muy bien! Sigue practicando los signos.';
+    else if(pct>=50) msg='💪 Buen intento. Repasa las categorías marcadas.';
+    else msg='📚 Enfócate en las reglas de signos — son la clave de todo.';
+    document.getElementById('final-msg').textContent=msg;
+
+    let html='<h3>Resultados por categoría:</h3>';
+    for(const cat of Object.keys(catTot)){
+      const s=catPts[cat]||0, t2=catTot[cat];
+      const p2=Math.round(s/t2*100);
+      const col=CC[cat]||'#0089cd';
+      html+=`<div class="cat-row">
+        <span class="cat-lbl">${CI[cat]} ${cat}</span>
+        <div class="cat-bar-out"><div class="cat-bar-in" style="width:${p2}%;background:${col}"></div></div>
+        <span class="cat-sc">${s}/${t2} ✓</span>
+      </div>`;
+    }
+    document.getElementById('cat-results').innerHTML=html;
+
+    // Consejo para la categoría más débil
+    let minCat='', minPct=999;
+    for(const cat of Object.keys(catTot)){
+      const pp=(catPts[cat]||0)/catTot[cat];
+      if(pp<minPct){ minPct=pp; minCat=cat; }
+    }
+    document.getElementById('tip-box').innerHTML=
+      minPct<1
+        ? '<strong>📌 Para mejorar en «'+minCat+'»:</strong><br>'+TIPS[minCat]
+        : '✅ ¡Sin categorías con puntuación 0! Intenta mejorar tus tiempos.';
+
+    document.getElementById('result-screen').className='result-screen';
+    document.querySelector('.quiz-progress-header').style.display='none';
+    document.getElementById('restart-btn').onclick=()=>window.location.reload();
+  }
+
+  /* ── ARRANQUE ── */
+  render(0);
+})();
+</script>
+</body>
+</html>
