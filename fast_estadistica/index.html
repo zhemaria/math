@@ -1,1 +1,432 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rapidez en estadística — GED</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+    :root{ --cp:#0089cd; --ch:#00a8fc; }
+    body{
+      font-family:'Poppins',sans-serif; margin:0; padding:10px;
+      background:linear-gradient(135deg,#004d40,#006064);
+      display:flex; justify-content:center; align-items:flex-start;
+      min-height:90vh; flex-direction:column; gap:10px;
+    }
+    #quiz-container{
+      background:#fff; border-radius:15px;
+      box-shadow:0 0 22px rgba(0,0,0,0.25);
+      overflow:hidden; width:clamp(300px,95%,860px); margin:0 auto;
+    }
+    .quiz-progress-header{
+      background:linear-gradient(135deg,#f8f9fa,#e9ecef);
+      padding:16px 22px; border-bottom:3px solid var(--cp);
+    }
+    .progress-text{
+      text-align:center; font-weight:700;
+      font-size:clamp(0.95em,2.5vw,1.1em);
+      color:var(--cp); margin-bottom:10px;
+      text-transform:uppercase; letter-spacing:0.8px;
+    }
+    .progress-container{
+      background:#e0e0e0; height:12px; border-radius:6px;
+      overflow:hidden; box-shadow:inset 0 2px 4px rgba(0,0,0,0.15);
+    }
+    .progress-bar{
+      height:100%; width:5%;
+      background:linear-gradient(90deg,var(--cp),var(--ch));
+      transition:width 0.5s cubic-bezier(0.4,0,0.2,1); border-radius:6px;
+    }
+    .question-meta{
+      display:flex; align-items:center; justify-content:center;
+      padding:14px 20px 0; gap:10px; flex-wrap:wrap;
+    }
+    .cat-badge{ padding:5px 15px; border-radius:20px; font-size:0.8em; font-weight:700; color:#fff; }
+    .time-badge{ padding:4px 12px; border-radius:20px; font-size:0.78em; font-weight:600; background:#e8f4f8; color:#444; border:1px solid #ccc; }
+    .question-header{ padding:16px 22px 10px; font-size:clamp(0.95em,2.4vw,1.15em); font-weight:700; text-align:center; color:#1a1a2e; line-height:1.55; }
+    .data-box{ background:linear-gradient(135deg,#f0f7ff,#e4effc); border:2px solid var(--cp); border-radius:12px; margin:0 22px 12px; padding:14px 18px; text-align:center; }
+    .chips{ display:flex; gap:9px; justify-content:center; flex-wrap:wrap; padding:4px 0; }
+    .chip{ background:#fff; border:2px solid var(--cp); border-radius:8px; padding:6px 14px; font-size:clamp(1.1em,3vw,1.35em); font-weight:800; color:#003366; min-width:32px; text-align:center; }
+    .chip.hi{ background:var(--cp); color:#fff; }
+    .chip.mo{ background:#7b1fa2; border-color:#7b1fa2; color:#fff; }
+    .chip-label{ font-size:0.72em; font-weight:600; color:#555; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
+    .formula-box{ background:#e8f5e9; border:1px dashed #43a047; border-radius:8px; margin:0 22px 10px; padding:9px 16px; font-size:0.82em; color:#1b5e20; text-align:center; font-weight:600; }
+    .regla-box{ background:#fff8e1; border-left:4px solid #f9a825; border-radius:6px; margin:0 22px 12px; padding:9px 14px; font-size:0.8em; color:#5d4037; font-style:italic; line-height:1.5; }
+    .stat-table{ width:auto; margin:0 auto; border-collapse:collapse; font-size:clamp(0.85em,2.2vw,0.95em); }
+    .stat-table th{ background:var(--cp); color:#fff; padding:7px 14px; font-weight:700; }
+    .stat-table td{ padding:6px 14px; border:1px solid #ccd; text-align:center; font-weight:600; color:#1a1a2e; }
+    .stat-table tr:nth-child(even) td{ background:#e8f4fb; }
+    .options{ padding:0 18px; }
+    .option-item{ display:block; padding:11px 16px; margin-bottom:10px; background:#f0f4f8; color:#333; border:2px solid #e0e0e0; border-radius:8px; cursor:pointer; transition:all 0.25s ease; font-size:clamp(0.95em,2.4vw,1.05em); font-weight:700; line-height:1.4; user-select:none; }
+    .option-item:hover:not(.disabled){ background:#dff0ff; border-color:var(--ch); transform:translateY(-2px); box-shadow:0 4px 8px rgba(0,0,0,0.1); }
+    .option-item.correct{ background:#4caf50!important; color:#fff!important; border-color:#4caf50!important; }
+    .option-item.incorrect{ background:#f44336!important; color:#fff!important; border-color:#f44336!important; }
+    .option-item.disabled{ cursor:not-allowed; opacity:0.85; }
+    .btn-container{ padding:4px 18px 18px; }
+    .primary-btn{ display:block; width:100%; padding:13px; color:#fff; border:none; border-radius:8px; font-size:1.05em; font-weight:700; cursor:pointer; transition:all 0.25s ease; text-transform:uppercase; letter-spacing:1px; background:var(--cp); text-align:center; user-select:none; box-sizing:border-box; }
+    .primary-btn:hover{ background:var(--ch); transform:translateY(-2px); box-shadow:0 4px 10px rgba(0,0,0,0.2); }
+    .timer-container{ background:linear-gradient(135deg,#fff8e1,#ffecb3); padding:11px 18px; border-top:2px solid #f39c12; }
+    .timer-text{ text-align:center; font-weight:700; font-size:clamp(0.88em,2.2vw,1em); color:#c77a00; margin-bottom:7px; }
+    .timer-bar-container{ background:#f0d0d0; height:8px; border-radius:4px; overflow:hidden; }
+    .timer-bar{ height:100%; width:100%; background:linear-gradient(90deg,#28a745,#ffc107,#dc3545); transition:width 0.1s linear; border-radius:4px; }
+    @keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .timer-warning{ animation:pulse 0.9s infinite; }
+    .result-screen{ padding:35px 28px; text-align:center; }
+    .result-screen.hidden{ display:none; }
+    .result-screen h2{ color:var(--cp); font-size:clamp(1.4em,4vw,1.9em); margin-bottom:10px; }
+    .result-score{ font-size:clamp(2em,6vw,2.8em)!important; font-weight:800; color:var(--cp)!important; margin:12px 0!important; }
+    .result-msg{ font-size:clamp(1em,2.8vw,1.2em); color:#333; margin:8px 0; }
+    .cat-results{ margin:18px 0; text-align:left; }
+    .cat-results h3{ color:var(--cp); font-size:0.95em; margin-bottom:10px; }
+    .cat-row{ display:flex; align-items:center; gap:8px; margin:8px 0; }
+    .cat-lbl{ flex:1.4; font-size:0.78em; font-weight:600; }
+    .cat-bar-out{ flex:2; background:#eee; border-radius:4px; height:11px; }
+    .cat-bar-in{ height:100%; border-radius:4px; transition:width 0.6s; }
+    .cat-sc{ font-weight:700; color:var(--cp); font-size:0.82em; min-width:55px; text-align:right; }
+    .tip-box{ background:#e8f5e9; border-left:4px solid #43a047; border-radius:6px; padding:10px 14px; margin:14px 0 4px; font-size:0.82em; color:#2e7d32; text-align:left; line-height:1.6; }
+  </style>
+</head>
+<body>
+<div id="quiz-container">
+  <div class="quiz-progress-header">
+    <div class="progress-text" id="progress-text">Pregunta 1 de 20</div>
+    <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+  </div>
+  <div id="question-area"></div>
+  <div class="timer-container" id="timer-container">
+    <div class="timer-text" id="timer-text">&#9201; Tiempo: 60s</div>
+    <div class="timer-bar-container"><div class="timer-bar" id="timer-bar"></div></div>
+  </div>
+  <div class="result-screen hidden" id="result-screen">
+    <h2>&#127919; &iexcl;Cuestionario completado!</h2>
+    <p class="result-score" id="final-score"></p>
+    <p class="result-msg" id="final-msg"></p>
+    <div class="cat-results" id="cat-results"></div>
+    <div class="tip-box" id="tip-box"></div>
+    <div class="btn-container" style="padding-top:14px">
+      <div class="primary-btn" id="restart-btn">&#128260; Nuevas preguntas (reiniciar)</div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  if(window.quizEstadIniciado) return;
+  window.quizEstadIniciado=true;
 
+  function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+  function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+  function sorted(arr){ return [...arr].sort((a,b)=>a-b); }
+  function sum(arr){ return arr.reduce((a,b)=>a+b,0); }
+  function meanF(arr){ return sum(arr)/arr.length; }
+  function medianF(arr){ const s=sorted(arr),n=s.length; return n%2===0?(s[n/2-1]+s[n/2])/2:s[Math.floor(n/2)]; }
+  function modesF(arr){ const f={}; arr.forEach(v=>f[v]=(f[v]||0)+1); const mx=Math.max(...Object.values(f)); return Object.keys(f).filter(k=>f[k]===mx).map(Number).sort((a,b)=>a-b); }
+  function rangeF(arr){ const s=sorted(arr); return s[s.length-1]-s[0]; }
+  function makeSet(n,m,lo=2,hi=18){
+    for(let t=0;t<200;t++){ const a=Array.from({length:n-1},()=>rand(lo,hi)); const last=n*m-sum(a); if(last>=lo&&last<=hi){a.push(last);return shuffle(a);} }
+    return Array.from({length:n},(_,i)=>m-Math.floor(n/2)+i);
+  }
+
+  function chips(arr){
+    return '<div class="chips">'+arr.map(v=>'<span class="chip">'+v+'</span>').join('')+'</div>';
+  }
+  function chipsSorted(arr){
+    const s=sorted(arr);
+    return '<div class="chip-label">Ord&eacute;nalos de menor a mayor</div><div class="chips">'+s.map(v=>'<span class="chip">'+v+'</span>').join('')+'</div>';
+  }
+  function tbl(headers,rows){
+    let h='<table class="stat-table"><tr>'+headers.map(h=>'<th>'+h+'</th>').join('')+'</tr>';
+    rows.forEach((r,i)=>{ h+='<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>'; });
+    return h+'</table>';
+  }
+
+  function makeOpts(correct,distractors){
+    const cs=String(correct),seen=new Set([cs]),uniq=[];
+    for(const d of distractors){const ds=String(d);if(!seen.has(ds)&&uniq.length<3){seen.add(ds);uniq.push(ds);}}
+    let ex=(parseFloat(cs)||0)+17;
+    while(uniq.length<3){const c2=String(ex++);if(!seen.has(c2)){seen.add(c2);uniq.push(c2);}}
+    const all=shuffle([cs,...uniq]);
+    const L=['a','b','c','d'];
+    return{opciones:all.map((v,i)=>({valor:L[i],texto:L[i].toUpperCase()+'. '+v})),correcta:L[all.indexOf(cs)]};
+  }
+
+  const CC={'Media (promedio)':'#1565c0','Moda':'#6a1b9a','Rango':'#bf360c','Mediana':'#2e7d32','Estadigrafos combinados':'#00695c','Problemas de la vida diaria':'#b71c1c'};
+  const CI={'Media (promedio)':'&#128202;','Moda':'&#127942;','Rango':'&#8596;','Mediana':'&#11035;','Estadigrafos combinados':'&#128300;','Problemas de la vida diaria':'&#127968;'};
+  const TIPS={
+    'Media (promedio)':'Formula: Media = Suma de todos los datos / Cantidad de datos. Si falta un dato: Dato faltante = (Media x n) - Suma de los demas.',
+    'Moda':'La moda es el valor que MAS se repite. Puede haber mas de una moda (bimodal) o ninguna (si todos aparecen igual).',
+    'Rango':'Formula: Rango = Valor maximo - Valor minimo. Mide la dispersion total del conjunto.',
+    'Mediana':'Ordena los datos de menor a mayor. Cantidad impar: el del centro. Cantidad par: promedia los dos del centro.',
+    'Estadigrafos combinados':'Practica calculando los 4 estadigrafos del mismo conjunto: media, moda, mediana y rango.',
+    'Problemas de la vida diaria':'Lee bien, identifica que estadigrafo pide, organiza los datos en lista y aplica la formula.'
+  };
+
+  const GEN=[
+    // 1. Media de 5 numeros
+    ()=>{
+      const m=rand(6,14),arr=makeSet(5,m),r=m;
+      const {opciones,correcta}=makeOpts(r,[r+1,r-1,r+2,Math.round(medianF(arr))].filter(v=>v!==r));
+      return{cat:'Media (promedio)',t:60,q:'Calcula la <strong>media</strong> del siguiente conjunto de datos:',data:chips(arr),formula:'Media = Suma / Cantidad  &rarr;  '+sum(arr)+' / '+arr.length+' = ?',opciones,correcta,regla:'Suma todos los valores y divide entre la cantidad total de datos.'};
+    },
+    // 2. Media de 6 numeros
+    ()=>{
+      const m=rand(7,16),arr=makeSet(6,m),r=m;
+      const {opciones,correcta}=makeOpts(r,[r+2,r-2,r+3,Math.round(medianF(arr))].filter(v=>v!==r));
+      return{cat:'Media (promedio)',t:60,q:'Calcula la <strong>media</strong> del siguiente conjunto de datos:',data:chips(arr),formula:'Media = '+sum(arr)+' / '+arr.length+' = ?',opciones,correcta,regla:'Suma los 6 valores y divide entre 6.'};
+    },
+    // 3. Dato faltante dado la media
+    ()=>{
+      const m=rand(8,15),n=5,arr=makeSet(n,m),falt=arr[n-1],conoc=arr.slice(0,n-1),sumC=sum(conoc);
+      const {opciones,correcta}=makeOpts(falt,[falt+1,falt-1,falt+2,n*m-sumC+1].filter(v=>v!==falt));
+      const chipsD='<div class="chip-label">Datos conocidos</div><div class="chips">'+conoc.map(v=>'<span class="chip">'+v+'</span>').join('')+'<span class="chip" style="border-style:dashed;color:#999">?</span></div>';
+      return{cat:'Media (promedio)',t:75,q:'La <strong>media</strong> de 5 datos es <strong>'+m+'</strong>. Cuatro datos son los que ves. &iquest;Cu&aacute;nto vale el <strong>dato faltante</strong>?',data:chipsD,formula:'Faltante = (Media &times; n) &minus; Suma conocidos  &rarr;  ('+m+' &times; 5) &minus; '+sumC+' = ?',opciones,correcta,regla:'Suma total necesaria = media x n. Resta los datos que ya conoces.'};
+    },
+    // 4. Media verbal: calificaciones
+    ()=>{
+      const m=rand(72,90),notas=makeSet(4,m,58,98),r=m;
+      const exa=['1er examen','2do examen','3er examen','4to examen'];
+      const tabla=tbl(['Examen','Calificaci&oacute;n'],exa.map((d,i)=>[d,notas[i]]));
+      const {opciones,correcta}=makeOpts(r,[r+3,r-3,r+5,Math.round(medianF(notas))].filter(v=>v!==r));
+      return{cat:'Media (promedio)',t:75,q:'Un estudiante obtuvo estas calificaciones. &iquest;Cu&aacute;l es su <strong>promedio</strong>?',data:tabla,formula:'Suma = '+sum(notas)+'  |  Promedio = '+sum(notas)+' &divide; 4 = ?',opciones,correcta,regla:'Suma las 4 calificaciones y divide entre 4.'};
+    },
+    // 5. Media verbal: gastos diarios
+    ()=>{
+      const m=rand(12,25),gastos=makeSet(5,m,5,40),r=m;
+      const dias=['Lunes','Martes','Mi&eacute;rcoles','Jueves','Viernes'];
+      const tabla=tbl(['D&iacute;a','Gasto ($)'],dias.map((d,i)=>[d,gastos[i]]));
+      const {opciones,correcta}=makeOpts(r,[r+2,r-2,r+3,rangeF(gastos)].filter(v=>v!==r));
+      return{cat:'Problemas de la vida diaria',t:75,q:'Ana registr&oacute; sus gastos diarios durante la semana. &iquest;Cu&aacute;l fue su <strong>gasto promedio diario</strong>?',data:tabla,formula:'Total: $'+sum(gastos)+'  |  Promedio = $'+sum(gastos)+' &divide; 5 = ?',opciones,correcta,regla:'Suma los 5 d&iacute;as y divide entre 5.'};
+    },
+    // 6. Moda simple
+    ()=>{
+      const modo=rand(3,12);
+      let arr=[modo,modo,modo];
+      const used=new Set([modo]);
+      while(arr.length<8){const v=rand(1,15);if(!used.has(v)){used.add(v);arr.push(v);}}
+      arr=shuffle(arr);
+      const r=modo;
+      const {opciones,correcta}=makeOpts(r,[arr.find(v=>v!==modo)||r+3,r+1,r===1?r+2:r-1,Math.round(meanF(arr))].filter(v=>v!==r));
+      return{cat:'Moda',t:45,q:'&iquest;Cu&aacute;l es la <strong>moda</strong> del siguiente conjunto?',data:chips(arr),opciones,correcta,regla:'La moda es el valor que aparece con m&aacute;s frecuencia.'};
+    },
+    // 7. Moda en tabla de frecuencias
+    ()=>{
+      const vals=[rand(2,5),rand(6,9),rand(10,13),rand(14,17)];
+      const freqs=[rand(1,3),rand(1,3),rand(1,3),rand(1,3)];
+      const maxF=Math.max(...freqs)+1,moIdx=rand(0,3);
+      freqs[moIdx]=maxF;
+      const r=vals[moIdx];
+      const tabla=tbl(['Valor','Frecuencia'],vals.map((v,i)=>[v,freqs[i]]));
+      const otros=vals.filter(v=>v!==r);
+      const {opciones,correcta}=makeOpts(r,[otros[0],otros[1],maxF,r+1].filter(v=>v!==r));
+      return{cat:'Moda',t:45,q:'Seg&uacute;n la tabla de frecuencias, &iquest;cu&aacute;l es la <strong>moda</strong>?',data:tabla,opciones,correcta,regla:'La moda es el valor con la frecuencia m&aacute;s alta.'};
+    },
+    // 8. Moda bimodal
+    ()=>{
+      const m1=rand(2,8),m2=rand(m1+2,14);
+      let arr=[m1,m1,m2,m2];
+      const used=new Set([m1,m2]);
+      while(arr.length<8){const v=rand(1,16);if(!used.has(v)){used.add(v);arr.push(v);}}
+      arr=shuffle(arr);
+      const r=m1+' y '+m2;
+      const {opciones,correcta}=makeOpts(r,[String(m1),String(m2),String(m1+m2),'Sin moda'].filter(v=>v!==r));
+      return{cat:'Moda',t:45,q:'&iquest;Cu&aacute;l o cu&aacute;les son las <strong>modas</strong>? (puede haber m&aacute;s de una)',data:chips(arr),opciones,correcta,regla:'Si dos valores se repiten igual (la frecuencia m&aacute;s alta), el conjunto es bimodal.'};
+    },
+    // 9. Rango simple
+    ()=>{
+      const arr=Array.from({length:6},()=>rand(2,20));
+      const s=sorted(arr),mn=s[0],mx=s[s.length-1],r=mx-mn;
+      const {opciones,correcta}=makeOpts(r,[r+1,r-1,mx,mn].filter(v=>v!==r));
+      return{cat:'Rango',t:30,q:'&iquest;Cu&aacute;l es el <strong>rango</strong> del siguiente conjunto?',data:chips(arr),formula:'Rango = M&aacute;ximo &minus; M&iacute;nimo  &rarr;  '+mx+' &minus; '+mn+' = ?',opciones,correcta,regla:'Rango = el valor m&aacute;s alto menos el valor m&aacute;s bajo.'};
+    },
+    // 10. Rango verbal: temperaturas
+    ()=>{
+      const temps=Array.from({length:7},()=>rand(55,95));
+      const s=sorted(temps),mn=s[0],mx=s[s.length-1],r=mx-mn;
+      const dias=['Lun','Mar','Mi&eacute;','Jue','Vie','S&aacute;b','Dom'];
+      const tabla=tbl(['D&iacute;a','Temp. (&deg;F)'],dias.map((d,i)=>[d,temps[i]]));
+      const {opciones,correcta}=makeOpts(r,[r+2,r-2,mx,mn].filter(v=>v!==r));
+      return{cat:'Problemas de la vida diaria',t:45,q:'La tabla muestra las temperaturas m&aacute;ximas de la semana. &iquest;Cu&aacute;l fue el <strong>rango</strong> de temperaturas?',data:tabla,formula:'Rango = '+mx+'&deg;F &minus; '+mn+'&deg;F = ?',opciones,correcta,regla:'Identifica la temperatura m&aacute;s alta y la m&aacute;s baja, luego r&eacute;stalas.'};
+    },
+    // 11. Mediana de 5 numeros (impar)
+    ()=>{
+      const a5=Array.from({length:5},()=>rand(2,18));
+      const srt=sorted(a5),r=srt[2];
+      const {opciones,correcta}=makeOpts(r,[srt[1],srt[3],Math.round(meanF(a5)),r+1].filter(v=>v!==r));
+      return{cat:'Mediana',t:60,q:'&iquest;Cu&aacute;l es la <strong>mediana</strong> del siguiente conjunto?',data:chipsSorted(a5),opciones,correcta,regla:'Con 5 datos (impar), la mediana es el 3er valor una vez ordenados.'};
+    },
+    // 12. Mediana de 6 numeros resultado entero
+    ()=>{
+      const med=rand(6,14);
+      const arr=[med,med,rand(2,med-1),rand(2,med-1),rand(med+1,med+6),rand(med+1,med+6)];
+      const srt=sorted(arr),r=med;
+      const {opciones,correcta}=makeOpts(r,[r+1,r-1,Math.round(meanF(arr)),rangeF(arr)].filter(v=>v!==r));
+      return{cat:'Mediana',t:60,q:'&iquest;Cu&aacute;l es la <strong>mediana</strong> de este conjunto de 6 datos?',data:chipsSorted(arr),formula:'Mediana = ('+srt[2]+' + '+srt[3]+') &divide; 2 = ?',opciones,correcta,regla:'Con 6 datos (par), promedia los dos valores del centro (posiciones 3 y 4).'};
+    },
+    // 13. Mediana de 6 numeros resultado .5
+    ()=>{
+      const m1=rand(5,13),m2=m1+1;
+      const arr=[m1,m2,rand(1,m1-1),rand(1,m1-1),rand(m2+1,m2+6),rand(m2+1,m2+6)];
+      const srt=sorted(arr),r=(m1+m2)/2;
+      const {opciones,correcta}=makeOpts(r,[m1,m2,m1+1,r+1].filter(v=>v!==r));
+      return{cat:'Mediana',t:60,q:'&iquest;Cu&aacute;l es la <strong>mediana</strong> de este conjunto de 6 datos?',data:chipsSorted(arr),formula:'Mediana = ('+srt[2]+' + '+srt[3]+') &divide; 2 = ?',opciones,correcta,regla:'El promedio de dos n&uacute;meros consecutivos siempre termina en .5'};
+    },
+    // 14. Mediana de 7 numeros
+    ()=>{
+      const a7=Array.from({length:7},()=>rand(2,20));
+      const srt=sorted(a7),r=srt[3];
+      const {opciones,correcta}=makeOpts(r,[srt[2],srt[4],Math.round(meanF(a7)),r+1].filter(v=>v!==r));
+      return{cat:'Mediana',t:60,q:'&iquest;Cu&aacute;l es la <strong>mediana</strong> de este conjunto de 7 datos?',data:chipsSorted(a7),opciones,correcta,regla:'Con 7 datos, la mediana es el 4to valor una vez ordenados.'};
+    },
+    // 15. Mediana verbal: sueldos
+    ()=>{
+      const suel=Array.from({length:5},()=>rand(35,85)*10);
+      const srt=sorted(suel),r=srt[2];
+      const emp=['Carlos','Diana','Elena','F&eacute;lix','Gloria'];
+      const tabla=tbl(['Empleado','Sueldo ($/sem)'],emp.map((e,i)=>[e,suel[i]]));
+      const {opciones,correcta}=makeOpts(r,[srt[1],srt[3],Math.round(meanF(suel)/10)*10,rangeF(suel)].filter(v=>v!==r));
+      return{cat:'Problemas de la vida diaria',t:75,q:'La tabla muestra los sueldos semanales de 5 empleados. &iquest;Cu&aacute;l es el <strong>sueldo mediano</strong>?',data:tabla,opciones,correcta,regla:'Ordena los 5 sueldos de menor a mayor. El mediano es el del centro (3er lugar).'};
+    },
+    // 16. Combinado: media o mediana mayor (outlier)
+    ()=>{
+      const base=Array.from({length:4},()=>rand(5,12));
+      const outlier=rand(32,45);
+      const arr=[...base,outlier];
+      const med=medianF(arr),mn=meanF(arr);
+      const winner=mn>med?'La media':'La mediana';
+      const {opciones,correcta}=makeOpts(winner,['La media','La mediana','Son iguales','No se puede saber'].filter(v=>v!==winner));
+      return{cat:'Estadigrafos combinados',t:75,q:'Para este conjunto, &iquest;cu&aacute;l es <strong>mayor</strong>?',data:chips(arr),formula:'Media = '+mn.toFixed(1)+'  |  Mediana = '+med,opciones,correcta,regla:'Un valor muy alto (valor at&iacute;pico) sube la media pero casi no afecta la mediana.'};
+    },
+    // 17. Combinado: tabla de puntuaciones preguntar rango o media
+    ()=>{
+      const nomb=['Luis','Mar&iacute;a','Jorge','Ana','Pedro','Sara'];
+      const pts=Array.from({length:6},()=>rand(40,95));
+      const ask=rand(0,1);
+      const r=ask===0?rangeF(pts):Math.round(meanF(pts));
+      const lbl=ask===0?'rango':'promedio';
+      const tabla=tbl(['Estudiante','Puntos'],nomb.map((n,i)=>[n,pts[i]]));
+      const {opciones,correcta}=makeOpts(r,[r+3,r-3,r+6,ask===0?Math.round(meanF(pts)):rangeF(pts)].filter(v=>v!==r));
+      return{cat:'Estadigrafos combinados',t:75,q:'La tabla muestra puntuaciones de un juego. &iquest;Cu&aacute;l es el <strong>'+lbl+'</strong>?',data:tabla,opciones,correcta,regla:ask===0?'Rango = puntuaci&oacute;n m&aacute;s alta &minus; puntuaci&oacute;n m&aacute;s baja.':'Suma todos los puntos y divide entre el n&uacute;mero de estudiantes.'};
+    },
+    // 18. Combinado: se agrega un dato nueva media
+    ()=>{
+      const arr=Array.from({length:4},()=>rand(5,15));
+      const extra=rand(5,15);
+      const nArr=[...arr,extra];
+      const r=meanF(nArr);
+      const rStr=Number.isInteger(r)?String(r):r.toFixed(1);
+      const vieja=meanF(arr);
+      const vStr=Number.isInteger(vieja)?String(vieja):vieja.toFixed(1);
+      const {opciones,correcta}=makeOpts(rStr,[vStr,String(Math.round(r)+1),String(Math.round(r)-1),String(extra)].filter(v=>v!==rStr));
+      return{cat:'Estadigrafos combinados',t:90,q:'El conjunto ten&iacute;a 4 datos con media = <strong>'+vStr+'</strong>. Se agrega el valor <strong>'+extra+'</strong>. &iquest;Cu&aacute;l es la <strong>nueva media</strong>?',data:chips(arr)+'<div style="font-size:0.8em;color:#555;margin:5px 0">+ se agrega</div><div class="chips"><span class="chip hi">'+extra+'</span></div>',formula:'Nueva suma = '+sum(arr)+' + '+extra+' = '+sum(nArr)+'  |  Nueva media = '+sum(nArr)+' &divide; 5 = ?',opciones,correcta,regla:'Al agregar un dato, recalcula la suma total y divide entre el nuevo n&uacute;mero de datos.'};
+    },
+    // 19. Verbal: cuanto necesita en el ultimo examen
+    ()=>{
+      const meta=rand(75,90),arr=makeSet(3,meta-rand(2,5),55,meta+5),falt=4*meta-sum(arr);
+      const exa=['1er examen','2do examen','3er examen','4to examen (falta)'];
+      const tabla=tbl(['Examen','Nota'],exa.map((e,i)=>i<3?[e,arr[i]]:[e,'?']));
+      const rStr=String(falt);
+      const {opciones,correcta}=makeOpts(rStr,[String(falt+5),String(falt-5),String(meta),String(meta+10)].filter(v=>v!==rStr));
+      return{cat:'Problemas de la vida diaria',t:90,q:'Para aprobar, un estudiante necesita un <strong>promedio de '+meta+' puntos</strong> en 4 ex&aacute;menes. Ya tiene 3 notas. &iquest;Cu&aacute;nto necesita en el <strong>4to examen</strong>?',data:tabla,formula:'Nota necesaria = (Meta &times; 4) &minus; Suma actuales  &rarr;  ('+meta+' &times; 4) &minus; '+sum(arr)+' = ?',opciones,correcta,regla:'Suma total necesaria = meta &times; n. Resta lo que ya tienes.'};
+    },
+    // 20. Combinado completo: todos los estadigrafos, preguntar uno
+    ()=>{
+      const modo=rand(5,12);
+      const arr=shuffle([modo,modo,rand(2,modo-1),rand(modo+1,modo+5),rand(modo+2,modo+7)]);
+      const pIdx=rand(0,3);
+      const pNom=['media','moda','mediana','rango'];
+      const pRes=[
+        +(Math.round(meanF(arr)*10)/10),
+        modesF(arr)[0],
+        medianF(arr),
+        rangeF(arr)
+      ];
+      const r=String(pRes[pIdx]);
+      const otros=pRes.filter((_,i)=>i!==pIdx).map(String);
+      const {opciones,correcta}=makeOpts(r,[...otros,String(pRes[pIdx]+(pIdx===0?0.5:1))].filter(v=>v!==r));
+      return{cat:'Estadigrafos combinados',t:90,q:'Para el siguiente conjunto, calcula la <strong>'+pNom[pIdx]+'</strong>:',data:chips(arr),formula:'Media='+pRes[0]+' | Moda='+pRes[1]+' | Mediana='+pRes[2]+' | Rango='+pRes[3],opciones,correcta,regla:'Practica los 4 estadigrafos del mismo conjunto. En el GED pueden pedir cualquiera.'};
+    }
+  ];
+
+  const preguntas=shuffle(GEN.map(g=>g()));
+  const total=preguntas.length;
+  let actual=0,puntos=0,respondida=false,reloj=null,segs=0;
+  const catPts={},catTot={};
+  preguntas.forEach(p=>{catTot[p.cat]=(catTot[p.cat]||0)+1;catPts[p.cat]=catPts[p.cat]||0;});
+
+  const qArea=document.getElementById('question-area');
+  const barP=document.getElementById('progress-bar');
+  const txtP=document.getElementById('progress-text');
+
+  function render(i){
+    const p=preguntas[i];
+    const col=CC[p.cat]||'#0089cd',icon=CI[p.cat]||'';
+    const tLbl=p.t<=45?'&#9889; R&aacute;pida':p.t<=60?'&#128336; Media':'&#9203; Compleja';
+    const opHtml=p.opciones.map(o=>'<div class="option-item" data-val="'+o.valor+'" onclick="window.__stClick(this)">'+o.texto+'</div>').join('');
+    const dH=p.data?'<div class="data-box">'+p.data+'</div>':'';
+    const fH=p.formula?'<div class="formula-box">&#128208; '+p.formula+'</div>':'';
+    const rH=p.regla?'<div class="regla-box">&#128161; '+p.regla+'</div>':'';
+    const btn=i===total-1?'Ver resultados':'Siguiente &rsaquo;';
+    qArea.innerHTML='<div class="question-meta"><span class="cat-badge" style="background:'+col+'">'+icon+' '+p.cat+'</span><span class="time-badge">'+tLbl+' &middot; '+p.t+'s</span></div><div class="question-header">'+p.q+'</div>'+dH+'<div class="options">'+opHtml+'</div><div class="btn-container"><div class="primary-btn" onclick="window.__stNext()">'+btn+'</div></div>';
+    if(barP) barP.style.width=((i+1)/total*100)+'%';
+    if(txtP) txtP.textContent='Pregunta '+(i+1)+' de '+total;
+    iniciarReloj(p.t);
+  }
+
+  window.__stClick=function(el){
+    if(respondida) return;
+    pararReloj(); respondida=true;
+    const p=preguntas[actual];
+    const elegida=el.getAttribute('data-val');
+    if(elegida===p.correcta){el.className='option-item correct disabled';puntos++;catPts[p.cat]++;}
+    else{el.className='option-item incorrect disabled';const ok=qArea.querySelector('.option-item[data-val="'+p.correcta+'"]');if(ok)ok.className='option-item correct disabled';}
+    qArea.querySelectorAll('.option-item').forEach(o=>{if(!o.className.includes('disabled'))o.className+=' disabled';});
+  };
+
+  window.__stNext=function(){
+    pararReloj(); actual++; respondida=false;
+    if(actual<total) render(actual); else mostrarRes();
+  };
+
+  function iniciarReloj(s){pararReloj();segs=s;updReloj();reloj=setInterval(()=>{segs--;updReloj();if(segs<=0)tAgotado();},1000);}
+  function pararReloj(){if(reloj){clearInterval(reloj);reloj=null;}}
+  function updReloj(){
+    const p=preguntas[actual]||{t:60};
+    const tt=document.getElementById('timer-text'),tb=document.getElementById('timer-bar'),tc=document.getElementById('timer-container');
+    if(tt)tt.textContent='\u23F1 Tiempo: '+segs+'s';
+    const pct=(segs/p.t)*100;
+    if(tb){tb.style.width=pct+'%';if(pct<=25){tb.style.background='#dc3545';if(tc)tc.className='timer-container timer-warning';}else if(pct<=50){tb.style.background='linear-gradient(90deg,#ffc107,#dc3545)';if(tc)tc.className='timer-container';}else{tb.style.background='linear-gradient(90deg,#28a745,#ffc107,#dc3545)';if(tc)tc.className='timer-container';}}
+  }
+  function tAgotado(){
+    pararReloj();respondida=true;
+    const p=preguntas[actual];
+    const ok=qArea.querySelector('.option-item[data-val="'+p.correcta+'"]');if(ok)ok.className='option-item correct disabled';
+    qArea.querySelectorAll('.option-item').forEach(o=>{if(!o.className.includes('disabled'))o.className+=' disabled';});
+    const tt=document.getElementById('timer-text');if(tt)tt.textContent='\u23F0 \u00A1Tiempo agotado!';
+    const tc=document.getElementById('timer-container');if(tc)tc.className='timer-container timer-warning';
+  }
+
+  function mostrarRes(){
+    pararReloj();qArea.innerHTML='';
+    document.getElementById('timer-container').style.display='none';
+    const pct=Math.round(puntos/total*100);
+    document.getElementById('final-score').textContent=puntos+' / '+total+'  ('+pct+'%)';
+    let msg=pct>=85?'&#127942; &iexcl;Excelente! Dominas estad&iacute;stica b&aacute;sica GED.':pct>=70?'&#128077; &iexcl;Muy bien! Sigue practicando.':pct>=50?'&#128170; Buen intento. Repasa las categor&iacute;as marcadas.':'&#128218; Enf&oacute;cate en media y mediana, las m&aacute;s frecuentes en el GED.';
+    document.getElementById('final-msg').innerHTML=msg;
+    let html='<h3>Resultados por categor&iacute;a:</h3>';
+    for(const cat of Object.keys(catTot)){
+      const s=catPts[cat]||0,t2=catTot[cat],p2=Math.round(s/t2*100),col=CC[cat]||'#0089cd';
+      html+='<div class="cat-row"><span class="cat-lbl">'+CI[cat]+' '+cat+'</span><div class="cat-bar-out"><div class="cat-bar-in" style="width:'+p2+'%;background:'+col+'"></div></div><span class="cat-sc">'+s+'/'+t2+' &#10003;</span></div>';
+    }
+    document.getElementById('cat-results').innerHTML=html;
+    let minCat='',minPct=999;
+    for(const cat of Object.keys(catTot)){const pp=(catPts[cat]||0)/catTot[cat];if(pp<minPct){minPct=pp;minCat=cat;}}
+    document.getElementById('tip-box').innerHTML=minPct<1?'<strong>&#128204; Para mejorar en &laquo;'+minCat+'&raquo;:</strong><br>'+(TIPS[minCat]||''):'&#10003; Sin categor&iacute;as con cero. &iexcl;Sigue mejorando los tiempos!';
+    document.getElementById('result-screen').className='result-screen';
+    document.querySelector('.quiz-progress-header').style.display='none';
+    document.getElementById('restart-btn').onclick=()=>window.location.reload();
+  }
+
+  render(0);
+})();
+</script>
+</body>
+</html>
