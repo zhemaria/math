@@ -1,1 +1,567 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rapidez en geometr&iacute;a — GED</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+    :root{ --cp:#0089cd; --ch:#00a8fc; }
+    body{ font-family:'Poppins',sans-serif; margin:0; padding:10px;
+      background:linear-gradient(135deg,#4a148c,#1a237e);
+      display:flex; justify-content:center; align-items:flex-start;
+      min-height:90vh; flex-direction:column; gap:10px; }
+    #quiz-container{ background:#fff; border-radius:15px;
+      box-shadow:0 0 22px rgba(0,0,0,0.25);
+      overflow:hidden; width:clamp(300px,95%,860px); margin:0 auto; }
+    .quiz-progress-header{ background:linear-gradient(135deg,#f8f9fa,#e9ecef);
+      padding:16px 22px; border-bottom:3px solid var(--cp); }
+    .progress-text{ text-align:center; font-weight:700;
+      font-size:clamp(0.95em,2.5vw,1.1em); color:var(--cp);
+      margin-bottom:10px; text-transform:uppercase; letter-spacing:0.8px; }
+    .progress-container{ background:#e0e0e0; height:12px; border-radius:6px;
+      overflow:hidden; box-shadow:inset 0 2px 4px rgba(0,0,0,0.15); }
+    .progress-bar{ height:100%; width:5%;
+      background:linear-gradient(90deg,var(--cp),var(--ch));
+      transition:width 0.5s cubic-bezier(0.4,0,0.2,1); border-radius:6px; }
+    .question-meta{ display:flex; align-items:center; justify-content:center;
+      padding:14px 20px 0; gap:10px; flex-wrap:wrap; }
+    .cat-badge{ padding:5px 15px; border-radius:20px; font-size:0.8em; font-weight:700; color:#fff; }
+    .time-badge{ padding:4px 12px; border-radius:20px; font-size:0.78em; font-weight:600;
+      background:#e8f4f8; color:#444; border:1px solid #ccc; }
+    .question-header{ padding:16px 22px 10px;
+      font-size:clamp(0.95em,2.4vw,1.15em); font-weight:700;
+      text-align:center; color:#1a1a2e; line-height:1.55; }
+    .data-box{ background:linear-gradient(135deg,#f5f0ff,#ede7f6);
+      border:2px solid #7c3aed; border-radius:12px;
+      margin:0 22px 12px; padding:14px 18px; text-align:center; }
+    .data-box svg{ display:block; margin:0 auto; }
+    .stat-table{ width:auto; margin:0 auto; border-collapse:collapse;
+      font-size:clamp(0.85em,2.2vw,0.95em); }
+    .stat-table th{ background:var(--cp); color:#fff; padding:7px 14px; font-weight:700; }
+    .stat-table td{ padding:6px 14px; border:1px solid #ccd;
+      text-align:center; font-weight:600; color:#1a1a2e; }
+    .stat-table tr:nth-child(even) td{ background:#e8f4fb; }
+    .sim-table{ display:flex; gap:20px; justify-content:center; flex-wrap:wrap; }
+    .sim-tri{ background:#fff; border:2px solid #7c3aed; border-radius:10px;
+      padding:10px 16px; min-width:130px; }
+    .sim-tri h4{ margin:0 0 8px; font-size:0.82em; text-transform:uppercase;
+      color:#5b21b6; letter-spacing:0.5px; }
+    .sim-side{ font-size:1.1em; font-weight:700; color:#1a1a2e;
+      margin:4px 0; font-family:'Courier New',monospace; }
+    .sim-side.missing{ color:#dc2626; }
+    .options{ padding:0 18px; }
+    .option-item{ display:block; padding:11px 16px; margin-bottom:10px;
+      background:#f0f4f8; color:#333; border:2px solid #e0e0e0;
+      border-radius:8px; cursor:pointer; transition:all 0.25s ease;
+      font-size:clamp(0.95em,2.4vw,1.05em); font-weight:700;
+      line-height:1.4; user-select:none; }
+    .option-item:hover:not(.disabled){ background:#ede9fe; border-color:#7c3aed;
+      transform:translateY(-2px); box-shadow:0 4px 8px rgba(0,0,0,0.1); }
+    .option-item.correct{ background:#4caf50!important; color:#fff!important; border-color:#4caf50!important; }
+    .option-item.incorrect{ background:#f44336!important; color:#fff!important; border-color:#f44336!important; }
+    .option-item.disabled{ cursor:not-allowed; opacity:0.85; }
+    .btn-container{ padding:4px 18px 18px; }
+    .primary-btn{ display:block; width:100%; padding:13px; color:#fff; border:none;
+      border-radius:8px; font-size:1.05em; font-weight:700; cursor:pointer;
+      transition:all 0.25s ease; text-transform:uppercase; letter-spacing:1px;
+      background:var(--cp); text-align:center; user-select:none; box-sizing:border-box; }
+    .primary-btn:hover{ background:var(--ch); transform:translateY(-2px);
+      box-shadow:0 4px 10px rgba(0,0,0,0.2); }
+    .timer-container{ background:linear-gradient(135deg,#fff8e1,#ffecb3);
+      padding:11px 18px; border-top:2px solid #f39c12; }
+    .timer-text{ text-align:center; font-weight:700;
+      font-size:clamp(0.88em,2.2vw,1em); color:#c77a00; margin-bottom:7px; }
+    .timer-bar-container{ background:#f0d0d0; height:8px; border-radius:4px; overflow:hidden; }
+    .timer-bar{ height:100%; width:100%;
+      background:linear-gradient(90deg,#28a745,#ffc107,#dc3545);
+      transition:width 0.1s linear; border-radius:4px; }
+    @keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .timer-warning{ animation:pulse 0.9s infinite; }
+    .result-screen{ padding:35px 28px; text-align:center; }
+    .result-screen.hidden{ display:none; }
+    .result-screen h2{ color:var(--cp); font-size:clamp(1.4em,4vw,1.9em); margin-bottom:10px; }
+    .result-score{ font-size:clamp(2em,6vw,2.8em)!important; font-weight:800;
+      color:var(--cp)!important; margin:12px 0!important; }
+    .result-msg{ font-size:clamp(1em,2.8vw,1.2em); color:#333; margin:8px 0; }
+    .cat-results{ margin:18px 0; text-align:left; }
+    .cat-results h3{ color:var(--cp); font-size:0.95em; margin-bottom:10px; }
+    .cat-row{ display:flex; align-items:center; gap:8px; margin:8px 0; }
+    .cat-lbl{ flex:1.4; font-size:0.78em; font-weight:600; }
+    .cat-bar-out{ flex:2; background:#eee; border-radius:4px; height:11px; }
+    .cat-bar-in{ height:100%; border-radius:4px; transition:width 0.6s; }
+    .cat-sc{ font-weight:700; color:var(--cp); font-size:0.82em; min-width:55px; text-align:right; }
+    .tip-box{ background:#ede9fe; border-left:4px solid #7c3aed; border-radius:6px;
+      padding:10px 14px; margin:14px 0 4px;
+      font-size:0.82em; color:#4c1d95; text-align:left; line-height:1.6; }
+  </style>
+</head>
+<body>
+<div id="quiz-container">
+  <div class="quiz-progress-header">
+    <div class="progress-text" id="progress-text">Pregunta 1 de 20</div>
+    <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+  </div>
+  <div id="question-area"></div>
+  <div class="timer-container" id="timer-container">
+    <div class="timer-text" id="timer-text">\u23F1 Tiempo: 60s</div>
+    <div class="timer-bar-container"><div class="timer-bar" id="timer-bar"></div></div>
+  </div>
+  <div class="result-screen hidden" id="result-screen">
+    <h2>&#127919; &iexcl;Cuestionario completado!</h2>
+    <p class="result-score" id="final-score"></p>
+    <p class="result-msg" id="final-msg"></p>
+    <div class="cat-results" id="cat-results"></div>
+    <div class="tip-box" id="tip-box"></div>
+    <div class="btn-container" style="padding-top:14px">
+      <div class="primary-btn" id="restart-btn">&#128260; Nuevas preguntas (reiniciar)</div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  if(window.quizGeoIniciado) return;
+  window.quizGeoIniciado=true;
 
+  /* ── MATH UTILS ── */
+  function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+  function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+  function sqrt(n){ return Math.round(Math.sqrt(n)*100)/100; }
+
+  /* ── OPCIONES ── */
+  function makeOpts(correct,dist){
+    const cs=String(correct),seen=new Set([cs]),uniq=[];
+    for(const d of dist){const ds=String(d);if(!seen.has(ds)&&uniq.length<3){seen.add(ds);uniq.push(ds);}}
+    let ex=(parseFloat(cs)||0)+19;
+    while(uniq.length<3){const c2=String(ex++);if(!seen.has(c2)){seen.add(c2);uniq.push(c2);}}
+    const all=shuffle([cs,...uniq]);
+    const L=['a','b','c','d'];
+    return{opciones:all.map((v,i)=>({valor:L[i],texto:L[i].toUpperCase()+'. '+v})),correcta:L[all.indexOf(cs)]};
+  }
+
+  /* ── SVG HELPERS ── */
+  // Rectángulo con etiquetas
+  function svgRect(l,w){
+    return '<svg viewBox="0 0 240 130" style="width:min(240px,100%)" xmlns="http://www.w3.org/2000/svg">'
+      +'<rect x="30" y="22" width="175" height="86" fill="#dbeafe" stroke="#1565c0" stroke-width="2.5" rx="3"/>'
+      +'<text x="118" y="15" text-anchor="middle" font-size="16" font-weight="bold" fill="#1e3a8a">'+l+'</text>'
+      +'<text x="216" y="70" text-anchor="middle" font-size="16" font-weight="bold" fill="#1e3a8a">'+w+'</text>'
+      +'<line x1="205" y1="22" x2="215" y2="22" stroke="#1565c0" stroke-width="1.5"/>'
+      +'<line x1="205" y1="108" x2="215" y2="108" stroke="#1565c0" stroke-width="1.5"/>'
+      +'<line x1="210" y1="22" x2="210" y2="108" stroke="#1565c0" stroke-width="1.5"/>'
+      +'</svg>';
+  }
+  // Cuadrado
+  function svgSquare(s){
+    return '<svg viewBox="0 0 160 140" style="width:min(160px,100%)" xmlns="http://www.w3.org/2000/svg">'
+      +'<rect x="20" y="18" width="110" height="110" fill="#dbeafe" stroke="#1565c0" stroke-width="2.5" rx="3"/>'
+      +'<text x="75" y="13" text-anchor="middle" font-size="16" font-weight="bold" fill="#1e3a8a">'+s+'</text>'
+      +'<text x="145" y="78" text-anchor="middle" font-size="16" font-weight="bold" fill="#1e3a8a">'+s+'</text>'
+      +'</svg>';
+  }
+  // Triángulo rectángulo: cateto a (vertical), cateto b (horizontal), hipotenusa c
+  function svgRightTri(aL,bL,cL){
+    return '<svg viewBox="0 0 210 155" style="width:min(210px,100%)" xmlns="http://www.w3.org/2000/svg">'
+      +'<polygon points="30,130 30,18 178,130" fill="#dcfce7" stroke="#166534" stroke-width="2.5"/>'
+      +'<rect x="30" y="110" width="20" height="20" fill="none" stroke="#166534" stroke-width="1.5"/>'
+      +'<text x="14" y="78" text-anchor="middle" font-size="15" font-weight="bold" fill="#14532d">'+aL+'</text>'
+      +'<text x="104" y="150" text-anchor="middle" font-size="15" font-weight="bold" fill="#14532d">'+bL+'</text>'
+      +'<text x="118" y="65" text-anchor="middle" font-size="15" font-weight="bold" fill="#dc2626">'+cL+'</text>'
+      +'</svg>';
+  }
+  // Triángulo general con tres lados etiquetados
+  function svgTri(aL,bL,cL){
+    return '<svg viewBox="0 0 230 162" style="width:min(230px,100%)" xmlns="http://www.w3.org/2000/svg">'
+      +'<polygon points="115,12 18,132 212,132" fill="#fce7f3" stroke="#9d174d" stroke-width="2.5"/>'
+      +'<text x="62" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="#831843">'+aL+'</text>'
+      +'<text x="168" y="88" text-anchor="middle" font-size="14" font-weight="bold" fill="#831843">'+bL+'</text>'
+      +'<text x="115" y="155" text-anchor="middle" font-size="15" font-weight="bold" fill="#831843">'+cL+'</text>'
+      +'</svg>';
+  }
+  // Paralelogramo
+  function svgParal(b,h){
+    return '<svg viewBox="0 0 250 130" style="width:min(250px,100%)" xmlns="http://www.w3.org/2000/svg">'
+      +'<polygon points="50,110 22,22 202,22 230,110" fill="#fef9c3" stroke="#854d0e" stroke-width="2.5"/>'
+      +'<line x1="50" y1="22" x2="50" y2="110" stroke="#854d0e" stroke-width="1.5" stroke-dasharray="5,3"/>'
+      +'<text x="30" y="12" font-size="13" font-weight="bold" fill="#78350f">h='+h+'</text>'
+      +'<text x="126" y="125" text-anchor="middle" font-size="15" font-weight="bold" fill="#78350f">b='+b+'</text>'
+      +'</svg>';
+  }
+  // Trapecio
+  function svgTrap(b1,b2,h){
+    const off=25;
+    return '<svg viewBox="0 0 260 130" style="width:min(260px,100%)" xmlns="http://www.w3.org/2000/svg">'
+      +'<polygon points="'+(off)+',110 '+(260-off)+',110 '+(260-off-off)+',22 '+(off+off)+',22" fill="#ffedd5" stroke="#c2410c" stroke-width="2.5"/>'
+      +'<line x1="'+off+'" y1="22" x2="'+off+'" y2="110" stroke="#c2410c" stroke-width="1.5" stroke-dasharray="5,3"/>'
+      +'<text x="130" y="125" text-anchor="middle" font-size="14" font-weight="bold" fill="#9a3412">b\u2081='+b1+'</text>'
+      +'<text x="130" y="15" text-anchor="middle" font-size="14" font-weight="bold" fill="#9a3412">b\u2082='+b2+'</text>'
+      +'<text x="12" y="72" text-anchor="middle" font-size="13" font-weight="bold" fill="#9a3412">h='+h+'</text>'
+      +'</svg>';
+  }
+  // Tabla para semejanza
+  function simTbl(s1,s2){
+    const TH='background:#7c3aed;color:#fff;padding:7px 14px;font-weight:700;font-size:0.9em';
+    const TD='padding:6px 14px;border:1px solid #ccd;text-align:center;font-weight:700;font-size:1em;color:#1a1a2e';
+    const TDq='padding:6px 14px;border:1px solid #ccd;text-align:center;font-weight:700;font-size:1.1em;color:#dc2626';
+    let h='<table style="margin:0 auto;border-collapse:collapse"><tr><th style="'+TH+'">Lado</th><th style="'+TH+'">\u25B3 peque\u00F1o</th><th style="'+TH+'">\u25B3 grande</th></tr>';
+    const lbl=['a','b','c'];
+    lbl.forEach((l,i)=>{
+      const v2=s2[i]==='?';
+      h+='<tr><td style="'+TD+'">'+l+'</td><td style="'+TD+'">'+s1[i]+'</td><td style="'+(v2?TDq:TD)+'">'+s2[i]+'</td></tr>';
+    });
+    return h+'</table>';
+  }
+  // Tabla informativa general
+  function tbl(headers,rows){
+    const TH='background:var(--cp);color:#fff;padding:7px 14px;font-weight:700';
+    const TD='padding:6px 14px;border:1px solid #ccd;text-align:center;font-weight:600;color:#1a1a2e';
+    const TDE='padding:6px 14px;border:1px solid #ccd;text-align:center;font-weight:600;color:#1a1a2e;background:#e8f4fb';
+    let h='<table class="stat-table"><tr>'+headers.map(h=>'<th style="'+TH+'">'+h+'</th>').join('')+'</tr>';
+    rows.forEach((r,i)=>{ h+='<tr>'+r.map(c=>'<td style="'+(i%2===1?TDE:TD)+'">'+c+'</td>').join('')+'</tr>'; });
+    return h+'</table>';
+  }
+
+  /* ── TRIPLES PITAGÓRICOS ── */
+  const TRIPS=[[3,4,5],[6,8,10],[9,12,15],[5,12,13],[8,15,17],[7,24,25],[10,24,26],[20,21,29]];
+
+  /* ── CATEGORÍAS ── */
+  const CC={
+    'Per\u00EDmetro':'#1565c0',
+    '\u00C1rea':'#2e7d32',
+    'Sem\u00E1mejanza de tri\u00E1ngulos':'#7c3aed',
+    'Teorema de Pit\u00E1goras':'#c62828'
+  };
+  const CI={
+    'Per\u00EDmetro':'\u25A1',
+    '\u00C1rea':'\u25A0',
+    'Sem\u00E1mejanza de tri\u00E1ngulos':'\u25B3',
+    'Teorema de Pit\u00E1goras':'\u221A'
+  };
+  const TIPS={
+    'Per\u00EDmetro':'P(rect\u00E1ngulo) = 2(largo + ancho). P(tri\u00E1ngulo) = a + b + c. P(cuadrado) = 4 \u00D7 lado.',
+    '\u00C1rea':'A(rect\u00E1ngulo) = base \u00D7 altura. A(tri\u00E1ngulo) = \u00BD base \u00D7 altura. A(trapecio) = \u00BD(b\u2081+b\u2082) \u00D7 h.',
+    'Sem\u00E1mejanza de tri\u00E1ngulos':'Si dos tri\u00E1ngulos son semejantes, sus lados son proporcionales. Forma una proporci\u00F3n: lado1/lado2 = lado3/lado4.',
+    'Teorema de Pit\u00E1goras':'a\u00B2 + b\u00B2 = c\u00B2 donde c es la hipotenusa. Para hallar un cateto: a = \u221A(c\u00B2 \u2212 b\u00B2).'
+  };
+
+  /* ══════════════════════════════════════
+     GENERADORES — 20 preguntas
+  ══════════════════════════════════════ */
+  const GEN=[
+
+    /* 1 · Perímetro rectángulo · 45s */
+    ()=>{
+      const l=rand(4,15),w=rand(3,12),r=2*(l+w);
+      const {opciones,correcta}=makeOpts(r,[l+w,2*l*w,l*w,r+2].filter(v=>v!==r));
+      return{cat:'Per\u00EDmetro',t:45,
+        q:'&iquest;Cu&aacute;l es el <strong>per&iacute;metro</strong> del rect&aacute;ngulo? (unidades en cm)',
+        data:svgRect(l+' cm',w+' cm'),opciones,correcta};
+    },
+
+    /* 2 · Perímetro triángulo (3 lados distintos) · 45s */
+    ()=>{
+      const a=rand(3,10),b=rand(3,10),c=rand(3,10),r=a+b+c;
+      const {opciones,correcta}=makeOpts(r,[a+b,b+c,a*b,r+1].filter(v=>v!==r));
+      return{cat:'Per\u00EDmetro',t:45,
+        q:'&iquest;Cu&aacute;l es el <strong>per&iacute;metro</strong> del tri&aacute;ngulo?',
+        data:svgTri(a,b,c),opciones,correcta};
+    },
+
+    /* 3 · Perímetro cuadrado · 30s */
+    ()=>{
+      const s=rand(4,14),r=4*s;
+      const {opciones,correcta}=makeOpts(r,[s*s,s+4,2*s,r+4].filter(v=>v!==r));
+      return{cat:'Per\u00EDmetro',t:30,
+        q:'&iquest;Cu&aacute;l es el <strong>per&iacute;metro</strong> del cuadrado?',
+        data:svgSquare(s+' cm'),opciones,correcta};
+    },
+
+    /* 4 · Área rectángulo · 45s */
+    ()=>{
+      const l=rand(4,14),w=rand(3,10),r=l*w;
+      const {opciones,correcta}=makeOpts(r,[2*(l+w),l+w,r+l,r-w].filter(v=>v!==r));
+      return{cat:'\u00C1rea',t:45,
+        q:'&iquest;Cu&aacute;l es el <strong>&aacute;rea</strong> del rect&aacute;ngulo?',
+        data:svgRect(l+' m',w+' m'),opciones,correcta};
+    },
+
+    /* 5 · Área cuadrado · 30s */
+    ()=>{
+      const s=rand(3,12),r=s*s;
+      const {opciones,correcta}=makeOpts(r,[4*s,2*s*s,r+s,r-s].filter(v=>v!==r));
+      return{cat:'\u00C1rea',t:30,
+        q:'&iquest;Cu&aacute;l es el <strong>&aacute;rea</strong> del cuadrado?',
+        data:svgSquare(s+' ft'),opciones,correcta};
+    },
+
+    /* 6 · Área triángulo A=½bh · 45s */
+    ()=>{
+      const b=rand(4,16),h=rand(3,12);
+      // Ensure ½bh is integer: make b even
+      const be=b%2===0?b:b+1, r=(be*h)/2;
+      const {opciones,correcta}=makeOpts(r,[be*h,be+h,(be*h)/2+h,r+be].filter(v=>v!==r));
+      return{cat:'\u00C1rea',t:45,
+        q:'&iquest;Cu&aacute;l es el <strong>&aacute;rea</strong> del tri&aacute;ngulo? (A = &frac12;bh)',
+        data:'<div style="font-size:0.85em;color:#555;margin-bottom:6px">Base = '+be+' cm &nbsp; | &nbsp; Altura = '+h+' cm</div>'+svgTri('h='+h,'','b='+be),
+        opciones,correcta};
+    },
+
+    /* 7 · Área paralelogramo A=bh · 45s */
+    ()=>{
+      const b=rand(4,14),h=rand(3,10),r=b*h;
+      const {opciones,correcta}=makeOpts(r,[2*(b+h),r+b,r+h,b+h].filter(v=>v!==r));
+      return{cat:'\u00C1rea',t:45,
+        q:'&iquest;Cu&aacute;l es el <strong>&aacute;rea</strong> del paralelogramo? (A = b &times; h)',
+        data:svgParal(b+' m',h+' m'),opciones,correcta};
+    },
+
+    /* 8 · Área trapecio A=½(b1+b2)h · 60s */
+    ()=>{
+      const b2=rand(4,10),b1=rand(b2+2,b2+8),h=rand(3,8);
+      const r=Math.round((b1+b2)*h/2);
+      const {opciones,correcta}=makeOpts(r,[(b1+b2)*h,b1*h,r+h,r-b2].filter(v=>v!==r));
+      return{cat:'\u00C1rea',t:60,
+        q:'&iquest;Cu&aacute;l es el <strong>&aacute;rea</strong> del trapecio? [A = &frac12;(b\u2081+b\u2082) &times; h]',
+        data:svgTrap(b1+' m',b2+' m',h+' m'),opciones,correcta};
+    },
+
+    /* 9 · Área verbal: piso rectangular · 60s */
+    ()=>{
+      const l=rand(8,20),w=rand(6,14),r=l*w;
+      const {opciones,correcta}=makeOpts(r,[2*(l+w),r+l,r-w,l+w].filter(v=>v!==r));
+      return{cat:'\u00C1rea',t:60,
+        q:'Un cuarto rectangular mide <strong>'+l+' pies de largo</strong> y <strong>'+w+' pies de ancho</strong>. &iquest;Cu&aacute;ntos pies cuadrados de alfombra se necesitan para cubrirlo?',
+        data:tbl(['Medida','Valor'],['Largo','Ancho','&Aacute;rea buscada'].map((m,i)=>[m,i<2?[l+' ft',w+' ft'][i]:'?'])),
+        opciones,correcta};
+    },
+
+    /* 10 · Área verbal: jardín triangular · 60s */
+    ()=>{
+      const b=rand(10,24)*2,h=rand(6,14),r=b*h/2;
+      const {opciones,correcta}=makeOpts(r,[b*h,b+h,r+b,r-h].filter(v=>v!==r));
+      return{cat:'\u00C1rea',t:60,
+        q:'Un jard&iacute;n tiene forma triangular con <strong>base '+b+' m</strong> y <strong>altura '+h+' m</strong>. &iquest;Cu&aacute;l es su &aacute;rea?',
+        data:tbl(['Medida','Valor'],[['Base',b+' m'],['Altura',h+' m'],['F&oacute;rmula','A = \u00BDbh']]),
+        opciones,correcta};
+    },
+
+    /* 11 · Semejanza: encontrar lado faltante (ratio simple) · 75s */
+    ()=>{
+      const k=rand(2,4);
+      const [a,b,c]=[rand(3,7),rand(3,7),rand(3,7)];
+      const r=a*k;
+      const {opciones,correcta}=makeOpts(r,[a+k,b*k,c*k,r+1].filter(v=>v!==r));
+      return{cat:'Sem\u00E1mejanza de tri\u00E1ngulos',t:75,
+        q:'Los dos tri&aacute;ngulos son <strong>semejantes</strong>. &iquest;Cu&aacute;nto mide el lado <strong>a</strong> del tri&aacute;ngulo grande?',
+        data:simTbl([a,b,c],[String(r)+'=?',b*k,c*k].map((v,i)=>i===0?'?':v)),
+        opciones,correcta};
+    },
+
+    /* 12 · Semejanza: razón con fracciones enteras · 75s */
+    ()=>{
+      const k=rand(2,4);
+      const [a,b,c]=[rand(4,9),rand(4,9),rand(4,9)];
+      const r=b*k;
+      const {opciones,correcta}=makeOpts(r,[b+k,a*k,r+2,r-k].filter(v=>v!==r));
+      return{cat:'Sem\u00E1mejanza de tri\u00E1ngulos',t:75,
+        q:'Los dos tri&aacute;ngulos son <strong>semejantes</strong>. Encuentra el lado <strong>b</strong> del tri&aacute;ngulo grande.',
+        data:simTbl([a,b,c],[a*k,'?',c*k]),
+        opciones,correcta};
+    },
+
+    /* 13 · Semejanza verbal: sombra / vara · 75s */
+    ()=>{
+      const hV=rand(2,5),sV=rand(4,8),sA=rand(8,20);
+      const r=Math.round(hV*sA/sV);
+      // Ensure integer
+      const sAfix=sV*r/hV; // adjust sA so result is integer
+      const rFix=r;
+      const {opciones,correcta}=makeOpts(rFix,[rFix+1,rFix-1,sV*hV,sAfix+hV].filter(v=>v!==rFix));
+      return{cat:'Sem\u00E1mejanza de tri\u00E1ngulos',t:75,
+        q:'Una vara de <strong>'+hV+' m de altura</strong> proyecta una sombra de <strong>'+sV+' m</strong>. Al mismo tiempo, un &aacute;rbol proyecta una sombra de <strong>'+sAfix+' m</strong>. &iquest;Cu&aacute;nto mide el &aacute;rbol?',
+        data:tbl(['Objeto','Altura','Sombra'],[['Vara',hV+' m',sV+' m'],['&Aacute;rbol','?',sAfix+' m']]),
+        opciones,correcta};
+    },
+
+    /* 14 · Semejanza verbal: escala de plano · 75s */
+    ()=>{
+      const escN=rand(2,5), escD=rand(10,30);
+      const distPlano=rand(4,12);
+      const r=distPlano*escD/escN;
+      const rFix=Number.isInteger(r)?r:Math.round(r);
+      const distP2=escN*rFix/escD; // back-calc so it's exact
+      const {opciones,correcta}=makeOpts(rFix,[rFix+escD,rFix-escN,distPlano*escN,rFix+10].filter(v=>v!==rFix&&v>0));
+      return{cat:'Sem\u00E1mejanza de tri\u00E1ngulos',t:75,
+        q:'En un plano, <strong>'+escN+' cm representan '+escD+' m</strong> reales. Dos edificios est&aacute;n separados <strong>'+distP2+' cm en el plano</strong>. &iquest;Cu&aacute;l es la distancia real en metros?',
+        data:tbl(['Plano (cm)','Real (m)'],[[escN,escD],[distP2,'?']]),
+        opciones,correcta};
+    },
+
+    /* 15 · Pitágoras: hallar hipotenusa · 60s */
+    ()=>{
+      const trip=TRIPS[rand(0,5)];
+      const [a,b,c]=trip;
+      const {opciones,correcta}=makeOpts(c,[a+b,a*b,Math.round(Math.sqrt(a*a+b*b+5)),c+1].filter(v=>v!==c));
+      return{cat:'Teorema de Pit\u00E1goras',t:60,
+        q:'&iquest;Cu&aacute;l es la longitud de la <strong>hipotenusa</strong>? (c = ?)',
+        data:svgRightTri(a,b,'?'),opciones,correcta};
+    },
+
+    /* 16 · Pitágoras: hallar cateto · 60s */
+    ()=>{
+      const trip=TRIPS[rand(0,5)];
+      const [a,b,c]=trip;
+      const {opciones,correcta}=makeOpts(a,[b,c,Math.round(Math.sqrt(c*c+b*b)),a+1].filter(v=>v!==a));
+      return{cat:'Teorema de Pit\u00E1goras',t:60,
+        q:'&iquest;Cu&aacute;nto mide el cateto <strong>a</strong>? (usa a\u00B2 + b\u00B2 = c\u00B2)',
+        data:svgRightTri('?',b,c),opciones,correcta};
+    },
+
+    /* 17 · Pitágoras: ¿es triángulo rectángulo? · 60s */
+    ()=>{
+      const esRect=rand(0,1)===1;
+      let a,b,c;
+      if(esRect){
+        const t=TRIPS[rand(0,5)]; [a,b,c]=t;
+      } else {
+        const t=TRIPS[rand(0,5)]; [a,b]=t; c=t[2]+rand(1,3); // c incorrecto
+      }
+      const r=esRect?'S\u00ED, es rect\u00E1ngulo':'No es rect\u00E1ngulo';
+      const {opciones,correcta}=makeOpts(r,['S\u00ED, es rect\u00E1ngulo','No es rect\u00E1ngulo','Faltan datos','Es is\u00F3sceles'].filter(v=>v!==r));
+      return{cat:'Teorema de Pit\u00E1goras',t:60,
+        q:'Un tri\u00E1ngulo tiene lados <strong>'+a+', '+b+' y '+c+'</strong>. &iquest;Es un <strong>tri\u00E1ngulo rect\u00E1ngulo</strong>?',
+        data:tbl(['C\u00E1lculo','Resultado'],[[a+'\u00B2 + '+b+'\u00B2',a*a+' + '+b*b+' = '+(a*a+b*b)],[c+'\u00B2',c*c],['\u00BFIguales?',(a*a+b*b===c*c)?'S\u00ED \u2714':'No \u2718']]),
+        opciones,correcta};
+    },
+
+    /* 18 · Pitágoras verbal: escalera / pared · 75s */
+    ()=>{
+      const trip=TRIPS[rand(0,4)];
+      const [cat1,cat2,hip]=trip;
+      const pared=trip[0], suelo=trip[1], escal=trip[2];
+      const {opciones,correcta}=makeOpts(escal,[pared+suelo,Math.round(Math.sqrt(pared*pared+suelo*suelo+4)),escal+1,escal-1].filter(v=>v!==escal));
+      return{cat:'Teorema de Pit\u00E1goras',t:75,
+        q:'Una escalera apoya contra una pared vertical. La pared mide <strong>'+pared+' m de alto</strong> y la base de la escalera est&aacute; a <strong>'+suelo+' m de la pared</strong>. &iquest;Cu&aacute;nto mide la <strong>escalera</strong>?',
+        data:svgRightTri(pared+' m',suelo+' m','?'),opciones,correcta};
+    },
+
+    /* 19 · Pitágoras verbal: diagonal de terreno · 75s */
+    ()=>{
+      const trip=TRIPS[rand(0,4)];
+      const [l,w,d]=trip;
+      const {opciones,correcta}=makeOpts(d,[l+w,Math.round(Math.sqrt(l*l+w*w+6)),d+2,l*w].filter(v=>v!==d));
+      return{cat:'Teorema de Pit\u00E1goras',t:75,
+        q:'Un terreno rectangular mide <strong>'+l+' m de largo</strong> y <strong>'+w+' m de ancho</strong>. &iquest;Cu&aacute;nto mide la <strong>diagonal</strong> del terreno?',
+        data:svgRect(l+' m',w+' m')+'<div style="font-size:0.82em;color:#555;margin-top:4px">La diagonal es la hipotenusa del tri&aacute;ngulo formado.</div>',
+        opciones,correcta};
+    },
+
+    /* 20 · Triple pitagórico: completar la terna · 75s */
+    ()=>{
+      const trip=TRIPS[rand(0,7)];
+      const [a,b,c]=trip;
+      const pIdx=rand(0,2); // which side to ask
+      const known=[a,b,c]; const r=known[pIdx];
+      const shown=known.map((v,i)=>i===pIdx?'?':v);
+      const {opciones,correcta}=makeOpts(r,[r+1,r-1,r+2,known[(pIdx+1)%3]].filter(v=>v!==r));
+      return{cat:'Teorema de Pit\u00E1goras',t:75,
+        q:'Completa el <strong>triple pitag&oacute;rico</strong>: los tres lados forman un tri&aacute;ngulo rect&aacute;ngulo.',
+        data:svgRightTri(shown[0],shown[1],shown[2]),opciones,correcta};
+    }
+
+  ]; // fin GEN
+
+  /* ── MOTOR ── */
+  const preguntas=shuffle(GEN.map(g=>g()));
+  const total=preguntas.length;
+  let actual=0,puntos=0,respondida=false,reloj=null,segs=0;
+  const catPts={},catTot={};
+  preguntas.forEach(p=>{catTot[p.cat]=(catTot[p.cat]||0)+1;catPts[p.cat]=catPts[p.cat]||0;});
+
+  const qArea=document.getElementById('question-area');
+  const barP=document.getElementById('progress-bar');
+  const txtP=document.getElementById('progress-text');
+
+  function render(i){
+    const p=preguntas[i];
+    const col=CC[p.cat]||'#0089cd',icon=CI[p.cat]||'';
+    const tLbl=p.t<=45?'&#9889; R\u00e1pida':p.t<=60?'&#128336; Media':'&#9203; Compleja';
+    const opHtml=p.opciones.map(o=>'<div class="option-item" data-val="'+o.valor+'" onclick="window.__gClick(this)">'+o.texto+'</div>').join('');
+    const dH=p.data?'<div class="data-box">'+p.data+'</div>':'';
+    const btn=i===total-1?'Ver resultados':'Siguiente &rsaquo;';
+    qArea.innerHTML='<div class="question-meta"><span class="cat-badge" style="background:'+col+'">'+icon+' '+p.cat+'</span><span class="time-badge">'+tLbl+' &middot; '+p.t+'s</span></div>'
+      +'<div class="question-header">'+p.q+'</div>'+dH
+      +'<div class="options">'+opHtml+'</div>'
+      +'<div class="btn-container"><div class="primary-btn" onclick="window.__gNext()">'+btn+'</div></div>';
+    if(barP) barP.style.width=((i+1)/total*100)+'%';
+    if(txtP) txtP.textContent='Pregunta '+(i+1)+' de '+total;
+    iniciarReloj(p.t);
+  }
+
+  window.__gClick=function(el){
+    if(respondida) return;
+    pararReloj(); respondida=true;
+    const p=preguntas[actual];
+    const elegida=el.getAttribute('data-val');
+    if(elegida===p.correcta){el.className='option-item correct disabled';puntos++;catPts[p.cat]++;}
+    else{el.className='option-item incorrect disabled';const ok=qArea.querySelector('.option-item[data-val="'+p.correcta+'"]');if(ok)ok.className='option-item correct disabled';}
+    qArea.querySelectorAll('.option-item').forEach(o=>{if(!o.className.includes('disabled'))o.className+=' disabled';});
+  };
+
+  window.__gNext=function(){
+    pararReloj(); actual++; respondida=false;
+    if(actual<total) render(actual); else mostrarRes();
+  };
+
+  function iniciarReloj(s){pararReloj();segs=s;updReloj();reloj=setInterval(()=>{segs--;updReloj();if(segs<=0)tAgotado();},1000);}
+  function pararReloj(){if(reloj){clearInterval(reloj);reloj=null;}}
+  function updReloj(){
+    const p=preguntas[actual]||{t:60};
+    const tt=document.getElementById('timer-text'),tb=document.getElementById('timer-bar'),tc=document.getElementById('timer-container');
+    if(tt)tt.textContent='\u23F1 Tiempo: '+segs+'s';
+    const pct=(segs/p.t)*100;
+    if(tb){tb.style.width=pct+'%';
+      if(pct<=25){tb.style.background='#dc3545';if(tc)tc.className='timer-container timer-warning';}
+      else if(pct<=50){tb.style.background='linear-gradient(90deg,#ffc107,#dc3545)';if(tc)tc.className='timer-container';}
+      else{tb.style.background='linear-gradient(90deg,#28a745,#ffc107,#dc3545)';if(tc)tc.className='timer-container';}}
+  }
+  function tAgotado(){
+    pararReloj();respondida=true;
+    const p=preguntas[actual];
+    const ok=qArea.querySelector('.option-item[data-val="'+p.correcta+'"]');if(ok)ok.className='option-item correct disabled';
+    qArea.querySelectorAll('.option-item').forEach(o=>{if(!o.className.includes('disabled'))o.className+=' disabled';});
+    const tt=document.getElementById('timer-text');if(tt)tt.textContent='\u23F0 \u00A1Tiempo agotado!';
+    const tc=document.getElementById('timer-container');if(tc)tc.className='timer-container timer-warning';
+  }
+
+  function mostrarRes(){
+    pararReloj();qArea.innerHTML='';
+    document.getElementById('timer-container').style.display='none';
+    const pct=Math.round(puntos/total*100);
+    document.getElementById('final-score').textContent=puntos+' / '+total+'  ('+pct+'%)';
+    let msg=pct>=85?'\u{1F3C6} \u00A1Excelente! Dominas geometr\u00EDa b\u00E1sica GED.'
+      :pct>=70?'\u{1F44D} \u00A1Muy bien! Practica los temas marcados.'
+      :pct>=50?'\u{1F4AA} Buen intento. Repasa las f\u00F3rmulas y vuelve.'
+      :'\u{1F4DA} Enf\u00F3cate en \u00E1reas y Pit\u00E1goras: los m\u00E1s frecuentes en el GED.';
+    document.getElementById('final-msg').textContent=msg;
+    let html='<h3>Resultados por categor\u00EDa:</h3>';
+    for(const cat of Object.keys(catTot)){
+      const s=catPts[cat]||0,t2=catTot[cat],p2=Math.round(s/t2*100),col=CC[cat]||'#0089cd';
+      html+='<div class="cat-row"><span class="cat-lbl">'+CI[cat]+' '+cat+'</span><div class="cat-bar-out"><div class="cat-bar-in" style="width:'+p2+'%;background:'+col+'"></div></div><span class="cat-sc">'+s+'/'+t2+' \u2713</span></div>';
+    }
+    document.getElementById('cat-results').innerHTML=html;
+    let minCat='',minPct=999;
+    for(const cat of Object.keys(catTot)){const pp=(catPts[cat]||0)/catTot[cat];if(pp<minPct){minPct=pp;minCat=cat;}}
+    document.getElementById('tip-box').innerHTML=minPct<1
+      ?'<strong>\u{1F4CC} Para mejorar en \u00ABQu\u00E9 es '+minCat+'\u00BB:</strong><br>'+(TIPS[minCat]||'')
+      :'\u2705 \u00A1Sin categor\u00EDas con cero! Mejora tus tiempos.';
+    document.getElementById('result-screen').className='result-screen';
+    document.querySelector('.quiz-progress-header').style.display='none';
+    document.getElementById('restart-btn').onclick=()=>window.location.reload();
+  }
+
+  render(0);
+})();
+</script>
+</body>
+</html>
