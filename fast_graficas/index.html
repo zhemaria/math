@@ -1,1 +1,752 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rapidez: Funciones y Gr&aacute;ficas &mdash; GED</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+      :root { --cp: #0089cd; --ch: #00a8fc; }
+      body {
+        font-family: 'Poppins', sans-serif; margin: 0; padding: 10px;
+        background: linear-gradient(135deg, #0c1a3a, #1a0a2e);
+        display: flex; justify-content: center; align-items: flex-start;
+        min-height: 90vh; flex-direction: column; gap: 10px;
+      }
+      #quiz-container {
+        background: #fff; border-radius: 15px;
+        box-shadow: 0 0 22px rgba(0,0,0,.25); overflow: hidden;
+        width: clamp(300px,95%,880px); margin: 0 auto;
+      }
+      .quiz-progress-header {
+        background: linear-gradient(135deg,#f8f9fa,#e9ecef);
+        padding: 16px 22px; border-bottom: 3px solid var(--cp);
+      }
+      .progress-text {
+        text-align: center; font-weight: 700;
+        font-size: clamp(.95em,2.5vw,1.1em); color: var(--cp);
+        margin-bottom: 10px; text-transform: uppercase; letter-spacing: .8px;
+      }
+      .progress-container {
+        background: #e0e0e0; height: 12px; border-radius: 6px;
+        overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,.15);
+      }
+      .progress-bar {
+        height: 100%; width: 5%;
+        background: linear-gradient(90deg,var(--cp),var(--ch));
+        transition: width .5s cubic-bezier(.4,0,.2,1); border-radius: 6px;
+      }
+      .question-meta {
+        display: flex; align-items: center; justify-content: center;
+        padding: 14px 20px 0; gap: 10px; flex-wrap: wrap;
+      }
+      .cat-badge {
+        padding: 5px 15px; border-radius: 20px;
+        font-size: .8em; font-weight: 700; color: #fff;
+      }
+      .time-badge {
+        padding: 4px 12px; border-radius: 20px; font-size: .78em;
+        font-weight: 600; background: #e8f4f8; color: #444; border: 1px solid #ccc;
+      }
+      .question-header {
+        padding: 16px 22px 10px; font-size: clamp(.95em,2.4vw,1.15em);
+        font-weight: 700; text-align: center; color: #1a1a2e; line-height: 1.55;
+      }
+      .data-box {
+        background: linear-gradient(135deg,#eef2ff,#e0e7ff);
+        border: 2px solid #4f46e5; border-radius: 12px;
+        margin: 0 22px 12px; padding: 14px 18px; text-align: center;
+      }
+      .stat-table { width: auto; margin: 0 auto; border-collapse: collapse; font-size: clamp(.85em,2.2vw,.95em); }
+      .stat-table th { background: var(--cp); color: #fff; padding: 7px 14px; font-weight: 700; }
+      .stat-table td { padding: 6px 14px; border: 1px solid #ccd; text-align: center; font-weight: 600; color: #1a1a2e; }
+      .stat-table tr:nth-child(even) td { background: #e8f4fb; }
+      .options { padding: 0 18px; }
+      .option-item {
+        display: block; padding: 11px 16px; margin-bottom: 10px;
+        background: #f0f4f8; color: #333; border: 2px solid #e0e0e0;
+        border-radius: 8px; cursor: pointer; transition: all .25s ease;
+        font-size: clamp(.95em,2.4vw,1.05em); font-weight: 700;
+        line-height: 1.4; user-select: none;
+      }
+      .option-item:hover:not(.disabled) {
+        background: #eef2ff; border-color: #4f46e5;
+        transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,.1);
+      }
+      .option-item.correct  { background:#4caf50!important; color:#fff!important; border-color:#4caf50!important; }
+      .option-item.incorrect{ background:#f44336!important; color:#fff!important; border-color:#f44336!important; }
+      .option-item.disabled { cursor: not-allowed; opacity: .85; }
+      .btn-container { padding: 4px 18px 18px; }
+      .primary-btn {
+        display: block; width: 100%; padding: 13px; color: #fff; border: none;
+        border-radius: 8px; font-size: 1.05em; font-weight: 700; cursor: pointer;
+        transition: all .25s ease; text-transform: uppercase; letter-spacing: 1px;
+        background: var(--cp); text-align: center; user-select: none; box-sizing: border-box;
+      }
+      .primary-btn:hover { background: var(--ch); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,.2); }
+      .timer-container { background: linear-gradient(135deg,#fff8e1,#ffecb3); padding: 11px 18px; border-top: 2px solid #f39c12; }
+      .timer-text { text-align: center; font-weight: 700; font-size: clamp(.88em,2.2vw,1em); color: #c77a00; margin-bottom: 7px; }
+      .timer-bar-container { background: #f0d0d0; height: 8px; border-radius: 4px; overflow: hidden; }
+      .timer-bar { height: 100%; width: 100%; background: linear-gradient(90deg,#28a745,#ffc107,#dc3545); transition: width .1s linear; border-radius: 4px; }
+      @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.6} }
+      .timer-warning { animation: pulse .9s infinite; }
+      .result-screen { padding: 35px 28px; text-align: center; }
+      .result-screen.hidden { display: none; }
+      .result-screen h2 { color: var(--cp); font-size: clamp(1.4em,4vw,1.9em); margin-bottom: 10px; }
+      .result-score { font-size: clamp(2em,6vw,2.8em)!important; font-weight: 800; color: var(--cp)!important; margin: 12px 0!important; }
+      .result-msg   { font-size: clamp(1em,2.8vw,1.2em); color: #333; margin: 8px 0; }
+      .cat-results  { margin: 18px 0; text-align: left; }
+      .cat-results h3 { color: var(--cp); font-size: .95em; margin-bottom: 10px; }
+      .cat-row      { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+      .cat-lbl      { flex: 1.4; font-size: .78em; font-weight: 600; }
+      .cat-bar-out  { flex: 2; background: #eee; border-radius: 4px; height: 11px; }
+      .cat-bar-in   { height: 100%; border-radius: 4px; transition: width .6s; }
+      .cat-sc       { font-weight: 700; color: var(--cp); font-size: .82em; min-width: 55px; text-align: right; }
+      .tip-box {
+        background: #eef2ff; border-left: 4px solid #4f46e5; border-radius: 6px;
+        padding: 10px 14px; margin: 14px 0 4px; font-size: .82em; color: #1e1b4b;
+        text-align: left; line-height: 1.6;
+      }
+      .eq-box {
+        font-family: 'Georgia', serif; font-size: 1.45em; font-weight: bold;
+        color: #1e1b4b; padding: 10px 14px; text-align: center;
+        background: #f0f4ff; border-radius: 8px; border: 2px solid #c7d2fe;
+        margin-bottom: 10px; letter-spacing: .5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="quiz-container">
+      <div class="quiz-progress-header">
+        <div class="progress-text" id="progress-text">Pregunta 1 de 20</div>
+        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+      </div>
+      <div id="question-area"></div>
+      <div class="timer-container" id="timer-container">
+        <div class="timer-text" id="timer-text">&#9201; Tiempo: 60s</div>
+        <div class="timer-bar-container"><div class="timer-bar" id="timer-bar"></div></div>
+      </div>
+      <div class="result-screen hidden" id="result-screen">
+        <h2>&#127919; &iexcl;Cuestionario completado!</h2>
+        <p class="result-score" id="final-score"></p>
+        <p class="result-msg"  id="final-msg"></p>
+        <div class="cat-results" id="cat-results"></div>
+        <div class="tip-box"    id="tip-box"></div>
+        <div class="btn-container" style="padding-top:14px">
+          <div class="primary-btn" id="restart-btn">&#128260; Nuevas preguntas (reiniciar)</div>
+        </div>
+      </div>
+      <p style="text-align:center;font-size:.78em;color:#777;padding:6px 0 10px">
+        Creado por Jos&eacute; M. Fern&aacute;ndez con Claude Sonnet 4.6
+      </p>
+    </div>
 
+    <script>
+    (function () {
+      if (window.quizFuncIniciado) return;
+      window.quizFuncIniciado = true;
+
+      /* ── UTILS ── */
+      function rand(a, b) { return Math.floor(Math.random()*(b-a+1))+a; }
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+        return a;
+      }
+      function sgn(n) { return n<0?'−'+Math.abs(n):(n===0?'':'+'+n); }  // "+3" or "−3"
+      function fmtLin(m,b) {  // "3x + 2" or "−2x − 5"
+        const ms = (m===1?'':m===-1?'−':m<0?'−'+Math.abs(m):String(m));
+        const bs = b===0?'':(b>0?' + '+b:' − '+Math.abs(b));
+        return ms+'x'+bs;
+      }
+      function fmtCuad(a,b,c) {
+        const as = (a===1?'':a===-1?'−':a<0?'−'+Math.abs(a):String(a));
+        const bs = b===0?'':(b>0?(' + '+b):(' − '+Math.abs(b)));
+        const bsp = b===0?'':(b>0?(' + '+b+'x'):(' − '+Math.abs(b)+'x'));
+        const cs = c===0?'':(c>0?(' + '+c):(' − '+Math.abs(c)));
+        return as+'x²'+bsp+cs;
+      }
+
+      /* ── OPCIONES ── */
+      function makeOpts(correct, dist) {
+        const cs=String(correct), seen=new Set([cs]), uniq=[];
+        for(const d of dist){const ds=String(d);if(!seen.has(ds)&&uniq.length<3){seen.add(ds);uniq.push(ds);}}
+        let ex=(parseFloat(cs)||0)+17;
+        while(uniq.length<3){const c2=String(Math.round(ex));ex+=7;if(!seen.has(c2)){seen.add(c2);uniq.push(c2);}}
+        const all=shuffle([cs,...uniq]);
+        const L=['a','b','c','d'];
+        return{opciones:all.map((v,i)=>({valor:L[i],texto:L[i].toUpperCase()+'. '+v})),correcta:L[all.indexOf(cs)]};
+      }
+
+      /* ── TABLA ── */
+      function tbl(headers,rows){
+        const TH='background:var(--cp);color:#fff;padding:7px 14px;font-weight:700';
+        const TD='padding:6px 14px;border:1px solid #ccd;text-align:center;font-weight:600;color:#1a1a2e';
+        const TDE='padding:6px 14px;border:1px solid #ccd;text-align:center;font-weight:600;color:#1a1a2e;background:#e8f4fb';
+        let h='<table class="stat-table"><tr>'+headers.map(hh=>'<th style="'+TH+'">'+hh+'</th>').join('')+'</tr>';
+        rows.forEach((r,i)=>{h+='<tr>'+r.map(c=>'<td style="'+(i%2===1?TDE:TD)+'">'+c+'</td>').join('')+'</tr>';});
+        return h+'</table>';
+      }
+
+      /* ── SVG: PLANO COORDENADO ── */
+      // Centro (120,100), escala 20px/unidad, x:−6..6, y:−5..5
+      function _sx(x){return 120+x*20;}
+      function _sy(y){return 100-y*20;}
+
+      function _ejes() {
+        let g='';
+        for(let x=-6;x<=6;x++) g+='<line x1="'+_sx(x)+'" y1="0" x2="'+_sx(x)+'" y2="200" stroke="#f3f4f6" stroke-width="1"/>';
+        for(let y=-5;y<=5;y++) g+='<line x1="0" y1="'+_sy(y)+'" x2="240" y2="'+_sy(y)+'" stroke="#f3f4f6" stroke-width="1"/>';
+        g+='<line x1="0" y1="100" x2="240" y2="100" stroke="#9ca3af" stroke-width="1.5"/>';
+        g+='<line x1="120" y1="0" x2="120" y2="200" stroke="#9ca3af" stroke-width="1.5"/>';
+        // Flechas de ejes
+        g+='<polygon points="240,97 240,103 248,100" fill="#9ca3af"/>';
+        g+='<polygon points="117,0 123,0 120,-8" fill="#9ca3af"/>';
+        // Etiquetas de ejes
+        g+='<text x="244" y="104" font-size="11" font-weight="bold" fill="#6b7280">x</text>';
+        g+='<text x="124" y="-2" font-size="11" font-weight="bold" fill="#6b7280">y</text>';
+        // Marcas numéricas
+        for(let x=-5;x<=5;x+=1){if(x!==0){g+='<text x="'+_sx(x)+'" y="113" text-anchor="middle" font-size="9" fill="#9ca3af">'+x+'</text>';}}
+        for(let y=-4;y<=4;y+=1){if(y!==0){g+='<text x="115" y="'+(_sy(y)+3)+'" text-anchor="end" font-size="9" fill="#9ca3af">'+y+'</text>';}}
+        return g;
+      }
+
+      function svgLinea(m, b, markX) {
+        let g = _ejes();
+        // Trazar línea recortada a y ∈ [−5.5, 5.5]
+        const pts=[];
+        for(let x=-6;x<=6;x+=0.5){const y=m*x+b;if(y>=-5.5&&y<=5.5)pts.push([_sx(x),_sy(y)]);}
+        if(pts.length>1){
+          const d='M'+pts.map(p=>p[0]+','+p[1]).join(' L');
+          g+='<path d="'+d+'" fill="none" stroke="#1565c0" stroke-width="2.5" stroke-linecap="round"/>';
+        }
+        // Punto en y-intercept
+        if(b>=-5&&b<=5) g+='<circle cx="120" cy="'+_sy(b)+'" r="4" fill="#1565c0"/>';
+        // Punto resaltado opcional
+        if(markX!==undefined){const y=m*markX+b;g+='<circle cx="'+_sx(markX)+'" cy="'+_sy(y)+'" r="5" fill="#dc2626"/>'+'<text x="'+(_sx(markX)+7)+'" y="'+(_sy(y)-5)+'" font-size="10" font-weight="bold" fill="#dc2626">('+markX+','+y+')</text>';}
+        return '<svg viewBox="0 0 250 200" style="width:min(250px,100%)" xmlns="http://www.w3.org/2000/svg">'+g+'</svg>';
+      }
+
+      function svgParabola(a, b, c, markVertex) {
+        let g = _ejes();
+        const pts=[];
+        for(let x=-6;x<=6;x+=0.2){const y=a*x*x+b*x+c;if(y>=-5.5&&y<=5.5)pts.push([_sx(x),_sy(y)]);}
+        // Dibujar como segmentos continuos (pueden haber huecos si la parábola sale del rango)
+        if(pts.length>1){
+          const d='M'+pts.map(p=>p[0]+','+p[1]).join(' L');
+          g+='<path d="'+d+'" fill="none" stroke="#c2410c" stroke-width="2.5" stroke-linecap="round"/>';
+        }
+        // Vértice
+        if(markVertex){
+          const hv=-b/(2*a), kv=a*hv*hv+b*hv+c;
+          if(kv>=-5&&kv<=5){
+            g+='<circle cx="'+_sx(hv)+'" cy="'+_sy(kv)+'" r="5" fill="#c2410c"/>';
+            g+='<text x="'+(_sx(hv)+7)+'" y="'+(_sy(kv)-5)+'" font-size="10" font-weight="bold" fill="#c2410c">V('+hv+','+kv+')</text>';
+          }
+        }
+        return '<svg viewBox="0 0 250 200" style="width:min(250px,100%)" xmlns="http://www.w3.org/2000/svg">'+g+'</svg>';
+      }
+
+      function eqBox(html){
+        return '<div class="eq-box">'+html+'</div>';
+      }
+
+      /* ── CATEGORÍAS ── */
+      const CC={
+        'Evaluaci\u00f3n':     '#1565c0',
+        'F. lineal':           '#1b7a3e',
+        'F. cuadr\u00e1tica':  '#c2410c',
+        'Tablas':              '#7c3aed',
+        'Dom. y rango':        '#b45309'
+      };
+      const CI={
+        'Evaluaci\u00f3n':    'f(x)',
+        'F. lineal':          '\u2215',
+        'F. cuadr\u00e1tica': '\u222B',
+        'Tablas':             '\u229e',
+        'Dom. y rango':       '\u2194'
+      };
+      const TIPS={
+        'Evaluaci\u00f3n':
+          'Para evaluar f(n): sustituye x por n en la expresi\u00f3n. f(3) con f(x)=2x\u22121 \u2192 2(3)\u22121 = 5.',
+        'F. lineal':
+          'y = mx + b: m es la pendiente (tasa de cambio), b es el intercepto en y. Pendiente entre dos puntos: m = (y\u2082\u2212y\u2081)/(x\u2082\u2212x\u2081).',
+        'F. cuadr\u00e1tica':
+          'Forma v\u00e9rtice: y = a(x\u2212h)\u00b2+k, v\u00e9rtice en (h,k). Eje de simetr\u00eda: x = \u2212b/(2a). Si a>0 abre arriba; si a<0 abre abajo.',
+        'Tablas':
+          'Funci\u00f3n lineal: diferencias en y constantes. Cuadr\u00e1tica: segundas diferencias constantes. Tasa de cambio = \u0394y / \u0394x.',
+        'Dom. y rango':
+          'Dominio: valores permitidos de x. Rango: valores posibles de y. Una relaci\u00f3n es funci\u00f3n si cada x tiene exactamente un y.'
+      };
+
+      /* ═══════════════════════════════════
+           GENERADORES — 20 PREGUNTAS
+      ═══════════════════════════════════ */
+      const GEN = [
+
+        /* ── EVALUACIÓN 1: f(x) lineal, calcular f(n) ── */
+        () => {
+          const m=rand(1,4), b=rand(-5,5), n=rand(1,5);
+          const r=m*n+b;
+          const {opciones,correcta}=makeOpts(r,[m*n,m+b+n,m*n-b,r+m].filter(v=>v!==r));
+          return{
+            cat:'Evaluaci\u00f3n',t:45,
+            q:'Dada la funci\u00f3n <strong>f(x) = '+fmtLin(m,b)+'</strong>, \u00bfcu\u00e1nto vale <strong>f('+n+')</strong>?',
+            data:eqBox('f(x) = '+fmtLin(m,b))+
+              '<div style="font-size:.82em;color:#374151;margin-top:4px">Sustituye x = '+n+' en la expresi\u00f3n</div>',
+            opciones,correcta
+          };
+        },
+
+        /* ── EVALUACIÓN 2: f(x) cuadrática, calcular f(n) ── */
+        () => {
+          const a=rand(1,3), c=rand(-4,4), n=rand(1,4);
+          const r=a*n*n+c;
+          const {opciones,correcta}=makeOpts(r,[a*n+c,a*n*n,a*n*n-c,r+a].filter(v=>v!==r));
+          return{
+            cat:'Evaluaci\u00f3n',t:45,
+            q:'Dada la funci\u00f3n <strong>f(x) = '+a+'x\u00b2'+(c>0?' + '+c:c<0?' \u2212 '+Math.abs(c):'')+'</strong>, \u00bfcu\u00e1nto vale <strong>f('+n+')</strong>?',
+            data:eqBox('f(x) = '+a+'x\u00b2'+(c>0?' + '+c:c<0?' \u2212 '+Math.abs(c):''))+
+              '<div style="font-size:.82em;color:#374151;margin-top:4px">Sustituye x = '+n+' &nbsp;\u2192&nbsp; '+a+'('+n+')\u00b2 '+(c>=0?'+ '+c:'− '+Math.abs(c))+'</div>',
+            opciones,correcta
+          };
+        },
+
+        /* ── EVALUACIÓN 3: Tabla → encontrar valor faltante ── */
+        () => {
+          const m=rand(2,4), b=rand(-3,3);
+          const xs=[1,2,3,4,5], ys=xs.map(x=>m*x+b);
+          const r=ys[4]; // f(5)
+          const {opciones,correcta}=makeOpts(r,[ys[3]+1,ys[3]+m-1,ys[3]+m+1,r+1].filter(v=>v!==r));
+          return{
+            cat:'Evaluaci\u00f3n',t:60,
+            q:'La tabla muestra valores de una funci\u00f3n. \u00bfCu\u00e1l es el valor que falta cuando <strong>x = 5</strong>?',
+            data:tbl(['x','f(x)'],xs.slice(0,4).map((x,i)=>[x,ys[i]]).concat([[5,'?']])),
+            opciones,correcta
+          };
+        },
+
+        /* ── EVALUACIÓN 4: Función verbal (costo) ── */
+        () => {
+          const tarifa=rand(2,6), base=rand(5,20), n=rand(2,5);
+          const r=tarifa*n+base;
+          const {opciones,correcta}=makeOpts(r,[tarifa*n,base+n,tarifa+base,r+tarifa].filter(v=>v!==r));
+          return{
+            cat:'Evaluaci\u00f3n',t:60,
+            q:'El costo de rentar una bicicleta es <strong>f(h) = '+tarifa+'h + '+base+'</strong>, donde h es el n\u00famero de horas. \u00bfCu\u00e1nto cuesta rentar <strong>'+n+' horas</strong>?',
+            data:eqBox('f(h) = '+tarifa+'h + '+base)+
+              tbl(['Horas (h)','Costo f(h)'],[[1,'$'+(tarifa+base)],[2,'$'+(2*tarifa+base)],[n,'?']]),
+            opciones,correcta
+          };
+        },
+
+        /* ── FUNCIÓN LINEAL 5: Identificar la pendiente ── */
+        () => {
+          const m=rand(-4,4)===0?2:rand(-4,4), b=rand(-5,5);
+          const r=m;
+          const {opciones,correcta}=makeOpts(r,[b,m+1,m-1,-m].filter(v=>v!==r));
+          return{
+            cat:'F. lineal',t:30,
+            q:'En la ecuaci\u00f3n <strong>y = '+fmtLin(m,b)+'</strong>, \u00bfcu\u00e1l es la <strong>pendiente</strong>?',
+            data:eqBox('y = '+fmtLin(m,b))+svgLinea(m,b),
+            opciones,correcta
+          };
+        },
+
+        /* ── FUNCIÓN LINEAL 6: Identificar el intercepto en y ── */
+        () => {
+          const m=(rand(1,4))*(rand(0,1)?1:-1), b=rand(-5,5);
+          const r=b;
+          const {opciones,correcta}=makeOpts(r,[m,b+m,b-m,-b].filter(v=>v!==r));
+          return{
+            cat:'F. lineal',t:30,
+            q:'En la ecuaci\u00f3n <strong>y = '+fmtLin(m,b)+'</strong>, \u00bfcu\u00e1l es el <strong>intercepto en y</strong> (valor de y cuando x=0)?',
+            data:eqBox('y = '+fmtLin(m,b))+svgLinea(m,b),
+            opciones,correcta
+          };
+        },
+
+        /* ── FUNCIÓN LINEAL 7: Pendiente desde dos puntos ── */
+        () => {
+          const x1=rand(-3,0), m=rand(-3,3)===0?1:rand(-3,3), b=rand(-3,3);
+          const y1=m*x1+b, x2=rand(1,4), y2=m*x2+b;
+          const r=m;
+          const {opciones,correcta}=makeOpts(r,[(y2-y1),(x2-x1),m+1,-m].filter(v=>v!==r));
+          return{
+            cat:'F. lineal',t:60,
+            q:'Calcula la <strong>pendiente</strong> de la recta que pasa por los puntos <strong>('+x1+', '+y1+')</strong> y <strong>('+x2+', '+y2+')</strong>.',
+            data:eqBox('m = (y\u2082 \u2212 y\u2081) / (x\u2082 \u2212 x\u2081)')+
+              tbl(['Punto','x','y'],[['P\u2081',x1,y1],['P\u2082',x2,y2]]),
+            opciones,correcta
+          };
+        },
+
+        /* ── FUNCIÓN LINEAL 8: ¿Es lineal la tabla? ── */
+        () => {
+          const esLineal=rand(0,1)===1;
+          let xs,ys,r;
+          if(esLineal){
+            const m=rand(2,5),b=rand(-3,3);
+            xs=[0,1,2,3,4]; ys=xs.map(x=>m*x+b); r='S\u00ed, lineal (\u0394y constante)';
+          } else {
+            // cuadrática
+            const a=rand(1,2),c=rand(-2,2);
+            xs=[0,1,2,3,4]; ys=xs.map(x=>a*x*x+c); r='No, no es lineal (\u0394y no es constante)';
+          }
+          const diffs=ys.slice(1).map((y,i)=>y-ys[i]);
+          const opts=esLineal
+            ?['No, no es lineal (\u0394y no es constante)','No se puede determinar','S\u00ed, pero solo en algunos puntos']
+            :['S\u00ed, lineal (\u0394y constante)','No se puede determinar','Solo si se extiende la tabla'];
+          const {opciones,correcta}=makeOpts(r,opts);
+          return{
+            cat:'F. lineal',t:60,
+            q:'Observa la tabla de valores. \u00bfRepresenta una <strong>funci\u00f3n lineal</strong>?',
+            data:tbl(['x','y','Diferencia \u0394y'],
+              xs.map((x,i)=>[x,ys[i],i===0?'\u2014':diffs[i-1]])
+            ),
+            opciones,correcta
+          };
+        },
+
+        /* ── CUADRÁTICA 9: Evaluar f(x)=ax²+bx+c ── */
+        () => {
+          const sets=[[1,2,-3],[1,-1,-6],[2,1,-5],[1,3,2],[2,-3,1],[1,-2,-8]];
+          const [a,b,c]=sets[rand(0,sets.length-1)];
+          const n=rand(1,4);
+          const r=a*n*n+b*n+c;
+          const {opciones,correcta}=makeOpts(r,[a*n*n,b*n+c,r+b,r-a].filter(v=>v!==r));
+          return{
+            cat:'F. cuadr\u00e1tica',t:60,
+            q:'Dada <strong>f(x) = '+fmtCuad(a,b,c)+'</strong>, calcula <strong>f('+n+')</strong>.',
+            data:eqBox('f(x) = '+fmtCuad(a,b,c))+
+              '<div style="font-size:.82em;color:#374151;margin-top:4px">f('+n+') = '+a+'('+n+')\u00b2 + '+b+'('+n+') + ('+c+')</div>',
+            opciones,correcta
+          };
+        },
+
+        /* ── CUADRÁTICA 10: Identificar el vértice ── */
+        () => {
+          const h=rand(-3,3)===0?1:rand(-3,3), k=rand(-4,4)===0?-2:rand(-4,4);
+          const a=(rand(0,1)?1:-1);
+          const hd=-h, kd=-k;
+          const r='('+h+', '+k+')';
+          const opts=['('+hd+', '+k+')','('+h+', '+kd+')','('+kd+', '+hd+')'];
+          const {opciones,correcta}=makeOpts(r,opts);
+          return{
+            cat:'F. cuadr\u00e1tica',t:45,
+            q:'Identifica el <strong>v\u00e9rtice</strong> de la par\u00e1bola:&nbsp; <strong>y = '+(a===1?'':'−')+'(x '+(h>=0?'− '+h:'+ '+Math.abs(h))+')\u00b2 '+(k>=0?'+ '+k:'− '+Math.abs(k))+'</strong>',
+            data:eqBox('y = '+(a===1?'':'−')+'(x '+(h>=0?'− '+h:'+ '+Math.abs(h))+')\u00b2 '+(k>=0?'+ '+k:'− '+Math.abs(k)))+
+              '<div style="font-size:.8em;color:#555;margin-top:6px">Forma v\u00e9rtice: y = a(x \u2212 <em>h</em>)\u00b2 + <em>k</em> &nbsp;\u2192&nbsp; v\u00e9rtice en (<em>h</em>, <em>k</em>)</div>',
+            opciones,correcta
+          };
+        },
+
+        /* ── CUADRÁTICA 11: ¿Abre arriba o abajo? ── */
+        () => {
+          const aPos=rand(0,1)===1;
+          const aVal=(aPos?1:-1)*rand(1,3);
+          const b=rand(-3,3), c=rand(-4,4);
+          const r=aPos?'Hacia arriba \u2b06 (tiene m\u00ednimo)':'Hacia abajo \u2b07 (tiene m\u00e1ximo)';
+          const opts=aPos
+            ?['Hacia abajo \u2b07 (tiene m\u00e1ximo)','No se puede determinar','Depende del valor de x']
+            :['Hacia arriba \u2b06 (tiene m\u00ednimo)','No se puede determinar','Depende del valor de x'];
+          const {opciones,correcta}=makeOpts(r,opts);
+          return{
+            cat:'F. cuadr\u00e1tica',t:30,
+            q:'La par\u00e1bola <strong>y = '+fmtCuad(aVal,b,c)+'</strong>. \u00bfHacia d\u00f3nde <strong>abre</strong>?',
+            data:eqBox('y = '+fmtCuad(aVal,b,c))+svgParabola(aVal,b,c,true),
+            opciones,correcta
+          };
+        },
+
+        /* ── CUADRÁTICA 12: Eje de simetría x = −b/(2a) ── */
+        () => {
+          const axisData=[[1,-4,3,2],[2,4,-1,-1],[1,6,0,-3],[2,-8,5,2],[3,6,0,-1],[1,-2,-3,1],[2,-4,1,1]];
+          const [a,b,c,r]=axisData[rand(0,axisData.length-1)];
+          const {opciones,correcta}=makeOpts(r,[r+1,r-1,-r,b/(2*a)].filter(v=>v!==r));
+          return{
+            cat:'F. cuadr\u00e1tica',t:60,
+            q:'Encuentra el <strong>eje de simetr\u00eda</strong> de la par\u00e1bola <strong>y = '+fmtCuad(a,b,c)+'</strong>.',
+            data:eqBox('Eje de simetr\u00eda: x = \u2212b / (2a)')+
+              tbl(['Dato','Valor'],[['a',a],['b',b],['Eje: \u2212('+b+')/(2\u00d7'+a+')',r]]),
+            opciones,correcta
+          };
+        },
+
+        /* ── TABLAS 13: Completar tabla función lineal ── */
+        () => {
+          const m=rand(2,5), b=rand(-4,4);
+          const xAsk=rand(4,7);
+          const r=m*xAsk+b;
+          const xs=[0,1,2,3], rows=xs.map(x=>[x,m*x+b]);
+          const {opciones,correcta}=makeOpts(r,[r+m,r-m,r+1,m*(xAsk-1)+b].filter(v=>v!==r));
+          return{
+            cat:'Tablas',t:60,
+            q:'Completa la tabla para <strong>y = '+fmtLin(m,b)+'</strong>. \u00bfCu\u00e1l es y cuando <strong>x = '+xAsk+'</strong>?',
+            data:tbl(['x','y'],rows.concat([[xAsk,'?']])),
+            opciones,correcta
+          };
+        },
+
+        /* ── TABLAS 14: Completar tabla función cuadrática ── */
+        () => {
+          const a=rand(1,2), c=rand(-3,3);
+          const xAsk=rand(3,5);
+          const r=a*xAsk*xAsk+c;
+          const xs=[0,1,2], rows=xs.map(x=>[x,a*x*x+c]);
+          const {opciones,correcta}=makeOpts(r,[r+a,r-a,a*xAsk+c,r+1].filter(v=>v!==r));
+          return{
+            cat:'Tablas',t:60,
+            q:'Completa la tabla para <strong>y = '+a+'x\u00b2'+(c>=0?' + '+c:' \u2212 '+Math.abs(c))+'</strong>. \u00bfCu\u00e1l es y cuando <strong>x = '+xAsk+'</strong>?',
+            data:tbl(['x','y'],rows.concat([[xAsk,'?']])),
+            opciones,correcta
+          };
+        },
+
+        /* ── TABLAS 15: Identificar tipo desde tabla ── */
+        () => {
+          const esCuad=rand(0,1)===1;
+          let xs,ys,r,nota;
+          xs=[0,1,2,3,4];
+          if(!esCuad){
+            const m=rand(2,4),b=rand(-2,2);
+            ys=xs.map(x=>m*x+b);
+            r='Lineal (diferencias de 1\u00ba orden constantes)';
+            nota='&Delta;y: '+ys.slice(1).map((y,i)=>y-ys[i]).join(', ');
+          } else {
+            const a=rand(1,2),c=rand(-1,2);
+            ys=xs.map(x=>a*x*x+c);
+            r='No lineal / cuadr\u00e1tica';
+            const d1=ys.slice(1).map((y,i)=>y-ys[i]);
+            nota='&Delta;y: '+d1.join(', ')+' (no constante)';
+          }
+          const opts=esCuad
+            ?['Lineal (diferencias de 1\u00ba orden constantes)','Constante','No se puede determinar']
+            :['No lineal / cuadr\u00e1tica','Constante','No se puede determinar'];
+          const {opciones,correcta}=makeOpts(r,opts);
+          return{
+            cat:'Tablas',t:60,
+            q:'Analiza la tabla. \u00bfQu\u00e9 tipo de funci\u00f3n representa?',
+            data:tbl(['x','y'],xs.map((x,i)=>[x,ys[i]]))+
+              '<div style="font-size:.78em;color:#555;margin-top:6px">Pista: '+nota+'</div>',
+            opciones,correcta
+          };
+        },
+
+        /* ── TABLAS 16: Tasa de cambio promedio ── */
+        () => {
+          const m=rand(2,5), b=rand(-3,3);
+          const x1=rand(0,2), x2=x1+rand(2,4);
+          const y1=m*x1+b, y2=m*x2+b;
+          const r=m; // tasa de cambio = pendiente para función lineal
+          const {opciones,correcta}=makeOpts(r,[y2-y1,x2-x1,(y2-y1)*(x2-x1),r+1].filter(v=>v!==r&&v>0));
+          return{
+            cat:'Tablas',t:60,
+            q:'Para la funci\u00f3n <strong>f(x) = '+fmtLin(m,b)+'</strong>, calcula la <strong>tasa de cambio promedio</strong> entre x = '+x1+' y x = '+x2+'.',
+            data:tbl(['x','f(x)'],[[x1,y1],[x2,y2]])+
+              eqBox('Tasa de cambio = [f('+x2+') \u2212 f('+x1+')] / ('+x2+' \u2212 '+x1+')'),
+            opciones,correcta
+          };
+        },
+
+        /* ── DOM. Y RANGO 17: Rango desde una tabla ── */
+        () => {
+          const m=rand(1,3), b=rand(-4,4);
+          const xs=[-2,-1,0,1,2,3], ys=xs.map(x=>m*x+b);
+          const maxY=Math.max(...ys), minY=Math.min(...ys);
+          const r=maxY;
+          const {opciones,correcta}=makeOpts(r,[minY,maxY+1,maxY+m,minY-1].filter(v=>v!==r));
+          return{
+            cat:'Dom. y rango',t:60,
+            q:'Para la funci\u00f3n representada en la tabla, \u00bfcu\u00e1l es el <strong>valor m\u00e1ximo del rango</strong>?',
+            data:tbl(['x','f(x)'],xs.map((x,i)=>[x,ys[i]])),
+            opciones,correcta
+          };
+        },
+
+        /* ── DOM. Y RANGO 18: Interpretar la pendiente en contexto ── */
+        () => {
+          const contexts=[
+            {m:3,  b:50,  var:'n\u00famero de libros (x)',      dep:'precio total ($)',     interp:'El precio aumenta $3 por cada libro adicional'},
+            {m:60, b:0,   var:'horas manejando (x)',            dep:'millas recorridas',   interp:'Se recorren 60 millas por cada hora'},
+            {m:15, b:200, var:'d\u00edas de trabajo (x)',        dep:'dinero ahorrado ($)', interp:'Se ahorran $15 por cada d\u00eda de trabajo'},
+            {m:5,  b:20,  var:'art\u00edculos vendidos (x)',     dep:'ganancia ($)',        interp:'La ganancia aumenta $5 por cada art\u00edculo'},
+            {m:2,  b:30,  var:'minutos de ejercicio (x)',       dep:'calor\u00edas quemadas',interp:'Se queman 2 calor\u00edas por minuto'}
+          ];
+          const ctx=contexts[rand(0,contexts.length-1)];
+          const r=ctx.interp;
+          const otras=contexts.filter(c=>c.interp!==r).map(c=>c.interp);
+          const {opciones,correcta}=makeOpts(r,[otras[0],otras[1],otras[2]]);
+          return{
+            cat:'Dom. y rango',t:60,
+            q:'La funci\u00f3n <strong>f(x) = '+ctx.m+'x + '+ctx.b+'</strong> relaciona el '+ctx.var+' con el/la '+ctx.dep+'. \u00bfQu\u00e9 <strong>representa la pendiente '+ctx.m+'</strong>?',
+            data:eqBox('f(x) = '+ctx.m+'x + '+ctx.b)+
+              tbl(['Dato','Valor'],[['Variable independiente (x)',ctx.var],['Variable dependiente f(x)',ctx.dep],['Pendiente m',ctx.m]]),
+            opciones,correcta
+          };
+        },
+
+        /* ── DOM. Y RANGO 19: Comparar f(x) y g(x) en x = n ── */
+        () => {
+          const m1=rand(1,3), b1=rand(-3,3);
+          const a2=rand(1,2), c2=rand(-5,3);
+          const n=rand(2,5);
+          const fv=m1*n+b1, gv=a2*n*n+c2;
+          const r = fv>gv ? 'f('+n+') = '+fv+' &gt; g('+n+') = '+gv
+                          : fv<gv ? 'g('+n+') = '+gv+' &gt; f('+n+') = '+fv
+                          : 'Son iguales: f('+n+') = g('+n+') = '+fv;
+          const opts=[
+            'f('+n+') = '+fv+' &gt; g('+n+') = '+gv,
+            'g('+n+') = '+gv+' &gt; f('+n+') = '+fv,
+            'Son iguales: f('+n+') = g('+n+') = '+fv,
+            'No se puede comparar'
+          ].filter(o=>o!==r);
+          const {opciones,correcta}=makeOpts(r,opts);
+          return{
+            cat:'Dom. y rango',t:75,
+            q:'Dadas <strong>f(x) = '+fmtLin(m1,b1)+'</strong> y <strong>g(x) = '+a2+'x\u00b2'+(c2>=0?' + '+c2:' \u2212 '+Math.abs(c2))+'</strong>. \u00bfCu\u00e1l es mayor cuando <strong>x = '+n+'</strong>?',
+            data:tbl(['','Funci\u00f3n','x = '+n,'Valor'],[
+              ['f(x)', fmtLin(m1,b1), n, fv],
+              ['g(x)', a2+'x\u00b2'+(c2>=0?' + '+c2:' \u2212 '+Math.abs(c2)), n, gv]
+            ]),
+            opciones,correcta
+          };
+        },
+
+        /* ── DOM. Y RANGO 20: ¿Es función? (concepto) ── */
+        () => {
+          const casos=[
+            {desc:'Cada estudiante tiene exactamente una calificaci\u00f3n final.',fn:true,
+             tabla:[['Estudiante','Calificaci\u00f3n'],['Ana','90'],['Luis','85'],['Mar\u00eda','95'],['Carlos','88']]},
+            {desc:'Un n\u00famero de tel\u00e9fono corresponde a varios due\u00f1os distintos.',fn:false,
+             tabla:[['Tel\u00e9fono','Due\u00f1o'],['555-1234','Ana'],['555-1234','Luis'],['555-5678','Mar\u00eda']]},
+            {desc:'Cada mes del a\u00f1o tiene exactamente una fecha de inicio.',fn:true,
+             tabla:[['Mes','D\u00eda de inicio'],['Enero',1],['Febrero',1],['Marzo',1],['Abril',1]]},
+            {desc:'Un mismo precio de un art\u00edculo cambi\u00f3 en dos fechas distintas.',fn:false,
+             tabla:[['Art\u00edculo','Precio'],['Silla','$50'],['Silla','$45'],['Mesa','$120']]}
+          ];
+          const caso=casos[rand(0,casos.length-1)];
+          const r=caso.fn?'S\u00ed, es una funci\u00f3n (cada x tiene exactamente un y)':'No es una funci\u00f3n (un x tiene m\u00e1s de un y)';
+          const opts=caso.fn
+            ?['No es una funci\u00f3n (un x tiene m\u00e1s de un y)','Solo si los valores son enteros','Depende del dominio']
+            :['S\u00ed, es una funci\u00f3n (cada x tiene exactamente un y)','Solo si los valores son enteros','Depende del dominio'];
+          const {opciones,correcta}=makeOpts(r,opts);
+          return{
+            cat:'Dom. y rango',t:60,
+            q:'Lee la situaci\u00f3n: <strong>«'+caso.desc+'»</strong> \u00bfRepresenta una <strong>funci\u00f3n</strong>?',
+            data:tbl(caso.tabla[0],caso.tabla.slice(1)),
+            opciones,correcta
+          };
+        }
+
+      ]; // fin GEN
+
+      /* ── MOTOR ── */
+      const preguntas=shuffle(GEN.map(g=>g()));
+      const total=preguntas.length;
+      let actual=0,puntos=0,respondida=false,reloj=null,segs=0;
+      const catPts={},catTot={};
+      preguntas.forEach(p=>{catTot[p.cat]=(catTot[p.cat]||0)+1;catPts[p.cat]=catPts[p.cat]||0;});
+
+      const qArea=document.getElementById('question-area');
+      const barP =document.getElementById('progress-bar');
+      const txtP =document.getElementById('progress-text');
+
+      function render(i){
+        const p=preguntas[i];
+        const col=CC[p.cat]||'#0089cd',icon=CI[p.cat]||'';
+        const tLbl=p.t<=45?'&#9889; R\u00e1pida':p.t<=60?'&#128336; Media':'&#9203; Compleja';
+        const opHtml=p.opciones.map(o=>
+          '<div class="option-item" data-val="'+o.valor+'" onclick="window.__fxClick(this)">'+o.texto+'</div>'
+        ).join('');
+        const dH=p.data?'<div class="data-box">'+p.data+'</div>':'';
+        const btn=i===total-1?'Ver resultados':'Siguiente &rsaquo;';
+        qArea.innerHTML=
+          '<div class="question-meta">'+
+            '<span class="cat-badge" style="background:'+col+'">'+icon+' '+p.cat+'</span>'+
+            '<span class="time-badge">'+tLbl+' &middot; '+p.t+'s</span>'+
+          '</div>'+
+          '<div class="question-header">'+p.q+'</div>'+
+          dH+
+          '<div class="options">'+opHtml+'</div>'+
+          '<div class="btn-container"><div class="primary-btn" onclick="window.__fxNext()">'+btn+'</div></div>';
+        if(barP) barP.style.width=((i+1)/total)*100+'%';
+        if(txtP) txtP.textContent='Pregunta '+(i+1)+' de '+total;
+        iniciarReloj(p.t);
+      }
+
+      window.__fxClick=function(el){
+        if(respondida)return;
+        pararReloj();respondida=true;
+        const p=preguntas[actual];
+        const elegida=el.getAttribute('data-val');
+        if(elegida===p.correcta){el.className='option-item correct disabled';puntos++;catPts[p.cat]++;}
+        else{
+          el.className='option-item incorrect disabled';
+          const ok=qArea.querySelector('.option-item[data-val="'+p.correcta+'"]');
+          if(ok)ok.className='option-item correct disabled';
+        }
+        qArea.querySelectorAll('.option-item').forEach(o=>{if(!o.className.includes('disabled'))o.className+=' disabled';});
+      };
+      window.__fxNext=function(){
+        pararReloj();actual++;respondida=false;
+        if(actual<total)render(actual);else mostrarRes();
+      };
+      function iniciarReloj(s){
+        pararReloj();segs=s;updReloj();
+        reloj=setInterval(()=>{segs--;updReloj();if(segs<=0)tAgotado();},1000);
+      }
+      function pararReloj(){if(reloj){clearInterval(reloj);reloj=null;}}
+      function updReloj(){
+        const p=preguntas[actual]||{t:60};
+        const tt=document.getElementById('timer-text'),tb=document.getElementById('timer-bar'),tc=document.getElementById('timer-container');
+        if(tt)tt.textContent='\u23F1 Tiempo: '+segs+'s';
+        const pct=(segs/p.t)*100;
+        if(tb){
+          tb.style.width=pct+'%';
+          if(pct<=25){tb.style.background='#dc3545';if(tc)tc.className='timer-container timer-warning';}
+          else if(pct<=50){tb.style.background='linear-gradient(90deg,#ffc107,#dc3545)';if(tc)tc.className='timer-container';}
+          else{tb.style.background='linear-gradient(90deg,#28a745,#ffc107,#dc3545)';if(tc)tc.className='timer-container';}
+        }
+      }
+      function tAgotado(){
+        pararReloj();respondida=true;
+        const p=preguntas[actual];
+        const ok=qArea.querySelector('.option-item[data-val="'+p.correcta+'"]');
+        if(ok)ok.className='option-item correct disabled';
+        qArea.querySelectorAll('.option-item').forEach(o=>{if(!o.className.includes('disabled'))o.className+=' disabled';});
+        const tt=document.getElementById('timer-text');if(tt)tt.textContent='\u23F0 \u00a1Tiempo agotado!';
+        const tc=document.getElementById('timer-container');if(tc)tc.className='timer-container timer-warning';
+      }
+      function mostrarRes(){
+        pararReloj();qArea.innerHTML='';
+        document.getElementById('timer-container').style.display='none';
+        const pct=Math.round((puntos/total)*100);
+        document.getElementById('final-score').textContent=puntos+' / '+total+'  ('+pct+'%)';
+        let msg=pct>=85?'\u{1F3C6} \u00a1Excelente! Dominas funciones y gr\u00e1ficas para el GED.'
+               :pct>=70?'\u{1F44D} \u00a1Muy bien! Practica los temas marcados.'
+               :pct>=50?'\u{1F4AA} Buen intento. Repasa las f\u00f3rmulas de funci\u00f3n lineal y cuadr\u00e1tica.'
+               :'\u{1F4DA} Enf\u00f3cate en evaluaci\u00f3n y pendiente: son los m\u00e1s frecuentes en el GED.';
+        document.getElementById('final-msg').textContent=msg;
+        let html='<h3>Resultados por categor\u00eda:</h3>';
+        for(const cat of Object.keys(catTot)){
+          const s=catPts[cat]||0,t2=catTot[cat],p2=Math.round(s/t2*100),col=CC[cat]||'#0089cd';
+          html+='<div class="cat-row"><span class="cat-lbl">'+CI[cat]+' '+cat+'</span>'+
+            '<div class="cat-bar-out"><div class="cat-bar-in" style="width:'+p2+'%;background:'+col+'"></div></div>'+
+            '<span class="cat-sc">'+s+'/'+t2+' \u2713</span></div>';
+        }
+        document.getElementById('cat-results').innerHTML=html;
+        let minCat='',minPct=999;
+        for(const cat of Object.keys(catTot)){const pp=(catPts[cat]||0)/catTot[cat];if(pp<minPct){minPct=pp;minCat=cat;}}
+        document.getElementById('tip-box').innerHTML=minPct<1
+          ?'<strong>\u{1F4CC} Para mejorar en \u00ab'+minCat+'\u00bb:</strong><br>'+(TIPS[minCat]||'')
+          :'\u2705 \u00a1Sin categor\u00edas con cero! Mejora tus tiempos.';
+        document.getElementById('result-screen').className='result-screen';
+        document.querySelector('.quiz-progress-header').style.display='none';
+        document.getElementById('restart-btn').onclick=()=>window.location.reload();
+      }
+      render(0);
+    })();
+    </script>
+  </body>
+</html>
