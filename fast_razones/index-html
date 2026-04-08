@@ -1,1 +1,750 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rapidez: Razones, Proporciones y Porcentajes &mdash; GED</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+      :root { --cp: #0089cd; --ch: #00a8fc; }
+      body {
+        font-family: 'Poppins', sans-serif; margin: 0; padding: 10px;
+        background: linear-gradient(135deg, #3b1f00, #0d2b4a);
+        display: flex; justify-content: center; align-items: flex-start;
+        min-height: 90vh; flex-direction: column; gap: 10px;
+      }
+      #quiz-container {
+        background: #fff; border-radius: 15px;
+        box-shadow: 0 0 22px rgba(0,0,0,0.25); overflow: hidden;
+        width: clamp(300px, 95%, 860px); margin: 0 auto;
+      }
+      .quiz-progress-header {
+        background: linear-gradient(135deg,#f8f9fa,#e9ecef);
+        padding: 16px 22px; border-bottom: 3px solid var(--cp);
+      }
+      .progress-text {
+        text-align: center; font-weight: 700;
+        font-size: clamp(0.95em,2.5vw,1.1em); color: var(--cp);
+        margin-bottom: 10px; text-transform: uppercase; letter-spacing: .8px;
+      }
+      .progress-container {
+        background: #e0e0e0; height: 12px; border-radius: 6px;
+        overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,.15);
+      }
+      .progress-bar {
+        height: 100%; width: 5%;
+        background: linear-gradient(90deg,var(--cp),var(--ch));
+        transition: width .5s cubic-bezier(.4,0,.2,1); border-radius: 6px;
+      }
+      .question-meta {
+        display: flex; align-items: center; justify-content: center;
+        padding: 14px 20px 0; gap: 10px; flex-wrap: wrap;
+      }
+      .cat-badge {
+        padding: 5px 15px; border-radius: 20px;
+        font-size: .8em; font-weight: 700; color: #fff;
+      }
+      .time-badge {
+        padding: 4px 12px; border-radius: 20px; font-size: .78em;
+        font-weight: 600; background: #e8f4f8; color: #444; border: 1px solid #ccc;
+      }
+      .question-header {
+        padding: 16px 22px 10px; font-size: clamp(.95em,2.4vw,1.15em);
+        font-weight: 700; text-align: center; color: #1a1a2e; line-height: 1.55;
+      }
+      .data-box {
+        background: linear-gradient(135deg,#fff7ed,#ffedd5);
+        border: 2px solid #f97316; border-radius: 12px;
+        margin: 0 22px 12px; padding: 14px 18px; text-align: center;
+      }
+      .stat-table { width: auto; margin: 0 auto; border-collapse: collapse; font-size: clamp(.85em,2.2vw,.95em); }
+      .stat-table th { background: var(--cp); color: #fff; padding: 7px 14px; font-weight: 700; }
+      .stat-table td { padding: 6px 14px; border: 1px solid #ccd; text-align: center; font-weight: 600; color: #1a1a2e; }
+      .stat-table tr:nth-child(even) td { background: #e8f4fb; }
+      .options { padding: 0 18px; }
+      .option-item {
+        display: block; padding: 11px 16px; margin-bottom: 10px;
+        background: #f0f4f8; color: #333; border: 2px solid #e0e0e0;
+        border-radius: 8px; cursor: pointer; transition: all .25s ease;
+        font-size: clamp(.95em,2.4vw,1.05em); font-weight: 700;
+        line-height: 1.4; user-select: none;
+      }
+      .option-item:hover:not(.disabled) {
+        background: #fff7ed; border-color: #f97316;
+        transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,.1);
+      }
+      .option-item.correct  { background:#4caf50!important; color:#fff!important; border-color:#4caf50!important; }
+      .option-item.incorrect{ background:#f44336!important; color:#fff!important; border-color:#f44336!important; }
+      .option-item.disabled { cursor: not-allowed; opacity: .85; }
+      .btn-container { padding: 4px 18px 18px; }
+      .primary-btn {
+        display: block; width: 100%; padding: 13px; color: #fff; border: none;
+        border-radius: 8px; font-size: 1.05em; font-weight: 700; cursor: pointer;
+        transition: all .25s ease; text-transform: uppercase; letter-spacing: 1px;
+        background: var(--cp); text-align: center; user-select: none; box-sizing: border-box;
+      }
+      .primary-btn:hover { background: var(--ch); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,.2); }
+      .timer-container { background: linear-gradient(135deg,#fff8e1,#ffecb3); padding: 11px 18px; border-top: 2px solid #f39c12; }
+      .timer-text { text-align: center; font-weight: 700; font-size: clamp(.88em,2.2vw,1em); color: #c77a00; margin-bottom: 7px; }
+      .timer-bar-container { background: #f0d0d0; height: 8px; border-radius: 4px; overflow: hidden; }
+      .timer-bar { height: 100%; width: 100%; background: linear-gradient(90deg,#28a745,#ffc107,#dc3545); transition: width .1s linear; border-radius: 4px; }
+      @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.6} }
+      .timer-warning { animation: pulse .9s infinite; }
+      .result-screen { padding: 35px 28px; text-align: center; }
+      .result-screen.hidden { display: none; }
+      .result-screen h2 { color: var(--cp); font-size: clamp(1.4em,4vw,1.9em); margin-bottom: 10px; }
+      .result-score { font-size: clamp(2em,6vw,2.8em)!important; font-weight: 800; color: var(--cp)!important; margin: 12px 0!important; }
+      .result-msg   { font-size: clamp(1em,2.8vw,1.2em); color: #333; margin: 8px 0; }
+      .cat-results  { margin: 18px 0; text-align: left; }
+      .cat-results h3 { color: var(--cp); font-size: .95em; margin-bottom: 10px; }
+      .cat-row      { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+      .cat-lbl      { flex: 1.4; font-size: .78em; font-weight: 600; }
+      .cat-bar-out  { flex: 2; background: #eee; border-radius: 4px; height: 11px; }
+      .cat-bar-in   { height: 100%; border-radius: 4px; transition: width .6s; }
+      .cat-sc       { font-weight: 700; color: var(--cp); font-size: .82em; min-width: 55px; text-align: right; }
+      .tip-box {
+        background: #fff7ed; border-left: 4px solid #f97316; border-radius: 6px;
+        padding: 10px 14px; margin: 14px 0 4px; font-size: .82em; color: #7c2d12;
+        text-align: left; line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="quiz-container">
+      <div class="quiz-progress-header">
+        <div class="progress-text" id="progress-text">Pregunta 1 de 20</div>
+        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+      </div>
+      <div id="question-area"></div>
+      <div class="timer-container" id="timer-container">
+        <div class="timer-text" id="timer-text">&#9201; Tiempo: 60s</div>
+        <div class="timer-bar-container"><div class="timer-bar" id="timer-bar"></div></div>
+      </div>
+      <div class="result-screen hidden" id="result-screen">
+        <h2>&#127919; &iexcl;Cuestionario completado!</h2>
+        <p class="result-score" id="final-score"></p>
+        <p class="result-msg"  id="final-msg"></p>
+        <div class="cat-results" id="cat-results"></div>
+        <div class="tip-box"    id="tip-box"></div>
+        <div class="btn-container" style="padding-top:14px">
+          <div class="primary-btn" id="restart-btn">&#128260; Nuevas preguntas (reiniciar)</div>
+        </div>
+      </div>
+      <p style="text-align:center;font-size:.78em;color:#777;padding:6px 0 10px">
+        Creado por Jos&eacute; M. Fern&aacute;ndez con Claude Sonnet 4.6
+      </p>
+    </div>
 
+    <script>
+    (function () {
+      if (window.quizRPPIniciado) return;
+      window.quizRPPIniciado = true;
+
+      /* ── UTILS ── */
+      function rand(a, b) { return Math.floor(Math.random()*(b-a+1))+a; }
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length-1; i > 0; i--) {
+          const j = Math.floor(Math.random()*(i+1));
+          [a[i],a[j]] = [a[j],a[i]];
+        }
+        return a;
+      }
+      function r1(n) { return Math.round(n*10)/10; }
+      function r2(n) { return Math.round(n*100)/100; }
+
+      /* ── OPCIONES ── */
+      function makeOpts(correct, dist) {
+        const cs = String(correct), seen = new Set([cs]), uniq = [];
+        for (const d of dist) {
+          const ds = String(d);
+          if (!seen.has(ds) && uniq.length < 3) { seen.add(ds); uniq.push(ds); }
+        }
+        let ex = (parseFloat(cs)||0)+17;
+        while (uniq.length < 3) {
+          const c2 = String(Math.round(ex));
+          ex += 7;
+          if (!seen.has(c2)) { seen.add(c2); uniq.push(c2); }
+        }
+        const all = shuffle([cs,...uniq]);
+        const L = ['a','b','c','d'];
+        return { opciones: all.map((v,i)=>({valor:L[i], texto:L[i].toUpperCase()+'. '+v})), correcta: L[all.indexOf(cs)] };
+      }
+
+      /* ── DISPLAY HELPERS ── */
+      function tbl(headers, rows) {
+        const TH = 'background:var(--cp);color:#fff;padding:7px 14px;font-weight:700';
+        const TD = 'padding:6px 14px;border:1px solid #ccd;text-align:center;font-weight:600;color:#1a1a2e';
+        const TDE= 'padding:6px 14px;border:1px solid #ccd;text-align:center;font-weight:600;color:#1a1a2e;background:#e8f4fb';
+        let h = '<table class="stat-table"><tr>'+headers.map(hh=>'<th style="'+TH+'">'+hh+'</th>').join('')+'</tr>';
+        rows.forEach((r,i) => {
+          h += '<tr>'+r.map(c=>'<td style="'+(i%2===1?TDE:TD)+'">'+c+'</td>').join('')+'</tr>';
+        });
+        return h+'</table>';
+      }
+
+      // Barra de porcentaje visual
+      function svgPctBar(pct, color) {
+        const col = color||'#f97316';
+        const w = Math.max(4, Math.min(pct,100)/100*210);
+        return '<svg viewBox="0 0 250 72" style="width:min(250px,100%)" xmlns="http://www.w3.org/2000/svg">'+
+          '<rect x="20" y="18" width="210" height="30" fill="#e5e7eb" rx="6" stroke="#9ca3af" stroke-width="1.5"/>'+
+          '<rect x="20" y="18" width="'+w+'" height="30" fill="'+col+'" rx="6"/>'+
+          '<text x="125" y="39" text-anchor="middle" font-size="15" font-weight="bold" fill="#fff">'+pct+'%</text>'+
+          '<text x="20"  y="62" font-size="11" fill="#9a3412">0%</text>'+
+          '<text x="215" y="62" text-anchor="end" font-size="11" fill="#9a3412">100%</text>'+
+          '</svg>';
+      }
+
+      // Diagrama de proporción tipo balanza
+      function svgProp(a, b, c, xL) {
+        const box = (x,y,val,col,w) =>
+          '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="34" rx="6" fill="'+col+'" stroke="none"/>'+
+          '<text x="'+(x+w/2)+'" y="'+(y+22)+'" text-anchor="middle" font-size="16" font-weight="bold" fill="#fff">'+val+'</text>';
+        return '<svg viewBox="0 0 260 90" style="width:min(260px,100%)" xmlns="http://www.w3.org/2000/svg">'+
+          box(12,10,a,'#1565c0',50)+
+          '<text x="72" y="32" text-anchor="middle" font-size="20" font-weight="bold" fill="#555">/</text>'+
+          box(85,10,b,'#1565c0',50)+
+          '<text x="148" y="32" text-anchor="middle" font-size="18" font-weight="bold" fill="#555">=</text>'+
+          box(162,10,c,'#1b7a3e',50)+
+          '<text x="220" y="32" text-anchor="middle" font-size="20" font-weight="bold" fill="#555">/</text>'+
+          box(228,10,xL,'#dc2626',24)+
+          '<text x="130" y="78" text-anchor="middle" font-size="12" font-weight="bold" fill="#555">Productos cruzados: '+a+' \u00d7 x = '+b+' \u00d7 '+c+'</text>'+
+          '</svg>';
+      }
+
+      // Barras de razón
+      function svgRazonBars(a, b, lblA, lblB) {
+        const total = a+b, W = 200;
+        const wa = Math.round(a/total*W), wb = W-wa;
+        return '<svg viewBox="0 0 240 80" style="width:min(240px,100%)" xmlns="http://www.w3.org/2000/svg">'+
+          '<rect x="20" y="16" width="'+wa+'" height="32" fill="#1565c0" rx="4"/>'+
+          '<rect x="'+(20+wa)+'" y="16" width="'+wb+'" height="32" fill="#f97316" rx="4"/>'+
+          '<text x="'+(20+wa/2)+'" y="37" text-anchor="middle" font-size="13" font-weight="bold" fill="#fff">'+lblA+'</text>'+
+          '<text x="'+(20+wa+wb/2)+'" y="37" text-anchor="middle" font-size="13" font-weight="bold" fill="#fff">'+lblB+'</text>'+
+          '<text x="20" y="70" font-size="12" font-weight="600" fill="#1a1a2e">Raz\u00f3n '+lblA+' : '+lblB+' = '+a+' : '+b+'</text>'+
+          '</svg>';
+      }
+
+      // Flecha de cambio porcentual
+      function svgCambio(desde, hasta, tipo) {
+        const col = tipo==='up'?'#16a34a':'#dc2626';
+        const arrow = tipo==='up'?'\u2197':'\u2198';
+        return '<svg viewBox="0 0 260 80" style="width:min(260px,100%)" xmlns="http://www.w3.org/2000/svg">'+
+          '<rect x="14" y="18" width="80" height="42" rx="8" fill="#dbeafe" stroke="#1565c0" stroke-width="2"/>'+
+          '<text x="54" y="44" text-anchor="middle" font-size="18" font-weight="bold" fill="#1e3a8a">'+desde+'</text>'+
+          '<text x="130" y="44" text-anchor="middle" font-size="26" fill="'+col+'">'+arrow+'</text>'+
+          '<rect x="166" y="18" width="80" height="42" rx="8" fill="'+col.replace('#','#')+'22" stroke="'+col+'" stroke-width="2"/>'+
+          '<text x="206" y="44" text-anchor="middle" font-size="18" font-weight="bold" fill="'+col+'">'+hasta+'</text>'+
+          '</svg>';
+      }
+
+      /* ── CATEGORÍAS ── */
+      const CC = {
+        'Razones':       '#1565c0',
+        'Proporciones':  '#1b7a3e',
+        'Porcentajes':   '#c2410c',
+        '% de cambio':   '#6a1b9a',
+        'Aplicaciones':  '#b71c1c'
+      };
+      const CI = {
+        'Razones':      '\u2237',
+        'Proporciones': '\u2696',
+        'Porcentajes':  '%',
+        '% de cambio':  '\u0394',
+        'Aplicaciones': '$'
+      };
+      const TIPS = {
+        'Razones':      'Raz\u00f3n a:b significa "por cada a unidades hay b". Simplifica dividiendo entre el MCD. Precio unitario = precio total \u00f7 cantidad.',
+        'Proporciones': 'Proporci\u00f3n: a/b = c/x. Productos cruzados: a\u00d7x = b\u00d7c, despeja x = (b\u00d7c)/a.',
+        'Porcentajes':  '% de Y = (% \u00f7 100) \u00d7 Y. \u00bfQu\u00e9 % es X de Y? = (X\u00f7Y)\u00d7100. Total si X es P% = X\u00d7100\u00f7P.',
+        '% de cambio':  '% cambio = (nuevo\u2212anterior)\u00f7anterior \u00d7 100. Positivo = aumento. Negativo = disminuci\u00f3n.',
+        'Aplicaciones': 'Inter\u00e9s simple: I = P\u00d7r\u00d7t. Descuento: ahorro = precio\u00d7% \u00f7 100. Precio final = precio\u2212ahorro.'
+      };
+
+      /* ══════════════════════════════════════
+           GENERADORES — 20 preguntas
+      ══════════════════════════════════════ */
+      const GEN = [
+
+        /* ── RAZONES 1: Razón a:b → partes de un total ── */
+        () => {
+          const pares = [[2,3],[3,5],[1,4],[2,5],[3,7],[1,3],[3,4],[2,7]];
+          const [a,b] = pares[rand(0,pares.length-1)];
+          const mult = rand(3,8);
+          const total = (a+b)*mult, r = a*mult;
+          const {opciones,correcta} = makeOpts(r,[b*mult, total-a, mult*(a+b)-r, r+mult].filter(v=>v!==r));
+          return {
+            cat:'Razones', t:60,
+            q:'La raz\u00f3n de ni\u00f1as a ni\u00f1os en un sal\u00f3n es <strong>'+a+':'+b+'</strong>. Si hay <strong>'+total+' estudiantes en total</strong>, \u00bfcu\u00e1ntas ni\u00f1as hay?',
+            data: svgRazonBars(a,b,'Ni\u00f1as','Ni\u00f1os')+
+              '<div style="font-size:.82em;color:#555;margin-top:6px">Partes totales: '+a+'+'+b+' = '+(a+b)+' &nbsp;|&nbsp; Valor de cada parte: '+total+'&divide;'+(a+b)+' = '+mult+'</div>',
+            opciones, correcta
+          };
+        },
+
+        /* ── RAZONES 2: Dado primer grupo → hallar segundo ── */
+        () => {
+          const pares = [[2,3],[3,5],[1,4],[2,5],[3,4]];
+          const [a,b] = pares[rand(0,pares.length-1)];
+          const n1 = rand(2,7)*a;
+          const r = (n1/a)*b;
+          const {opciones,correcta} = makeOpts(r,[n1+b, n1*b, r+a, (n1/a)*(a+b)].filter(v=>v!==r));
+          return {
+            cat:'Razones', t:60,
+            q:'La raz\u00f3n de jugo a agua en una mezcla es <strong>'+a+':'+b+'</strong>. Si se usan <strong>'+n1+' oz de jugo</strong>, \u00bfcu\u00e1ntas oz de agua se necesitan?',
+            data: tbl(['Ingrediente','Raz\u00f3n','Cantidad real'],[
+              ['Jugo',    a+' partes', n1+' oz'],
+              ['Agua',    b+' partes', '?'],
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── RAZONES 3: Precio unitario ── */
+        () => {
+          const precio = rand(3,12), qty = rand(4,9);
+          const total = precio*qty, r = precio;
+          const {opciones,correcta} = makeOpts(r,[total,total+precio,r+1,qty+precio].filter(v=>v!==r));
+          return {
+            cat:'Razones', t:45,
+            q:'Un paquete de <strong>'+qty+' cuadernos cuesta $'+total+'</strong>. \u00bfCu\u00e1l es el <strong>precio por cuaderno</strong>?',
+            data: tbl(['Cuadernos','Precio total','Precio unitario'],[
+              [qty, '$'+total, '?']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── RAZONES 4: Receta proporcional (razón directa) ── */
+        () => {
+          const [a,b] = [[2,3],[1,4],[3,5],[2,5],[1,3]][rand(0,4)];
+          const mult = rand(2,5);
+          const dado = a*mult, r = b*mult;
+          const {opciones,correcta} = makeOpts(r,[r+1,dado+b,dado*b,r-a].filter(v=>v!==r&&v>0));
+          return {
+            cat:'Razones', t:60,
+            q:'Una receta usa <strong>'+a+' tazas de az\u00facar por cada '+b+' tazas de harina</strong>. Si se usan <strong>'+dado+' tazas de az\u00facar</strong>, \u00bfcu\u00e1ntas de harina se necesitan?',
+            data: tbl(['Ingrediente','Receta base','Con '+dado+' tazas az\u00facar'],[
+              ['Az\u00facar', a+' tazas', dado+' tazas'],
+              ['Harina',   b+' tazas', '?']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── PROPORCIONES 5: Resolver a/b = c/x ── */
+        () => {
+          const a = rand(2,6), b = rand(3,8), mult = rand(2,5);
+          const c = a*mult, r = b*mult;
+          const {opciones,correcta} = makeOpts(r,[a+b+c, c-a+b, r+b, r-a].filter(v=>v!==r&&v>0));
+          return {
+            cat:'Proporciones', t:60,
+            q:'Resuelve la proporci\u00f3n: &nbsp;<strong>'+a+' / '+b+' &nbsp;=&nbsp; '+c+' / x</strong>',
+            data: svgProp(a,b,c,'x'),
+            opciones, correcta
+          };
+        },
+
+        /* ── PROPORCIONES 6: Receta verbal ── */
+        () => {
+          const [harina, porc] = [[3,4],[2,6],[4,8],[2,4],[3,6]][rand(0,4)];
+          const mult = rand(2,4);
+          const porc2 = porc*mult, r = harina*mult;
+          const {opciones,correcta} = makeOpts(r,[harina*porc,r+harina,porc2-harina,r+1].filter(v=>v!==r&&v>0));
+          return {
+            cat:'Proporciones', t:60,
+            q:'Una receta de pan usa <strong>'+harina+' tazas de harina para '+porc+' porciones</strong>. \u00bfCu\u00e1ntas tazas se necesitan para <strong>'+porc2+' porciones</strong>?',
+            data: tbl(['Tazas de harina','Porciones'],[
+              [harina, porc],
+              ['?',    porc2]
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── PROPORCIONES 7: Velocidad/distancia ── */
+        () => {
+          const vel = [50,55,60,65,70][rand(0,4)];
+          const horas = rand(2,5), r = vel*horas;
+          const {opciones,correcta} = makeOpts(r,[vel+horas,r+vel,r-horas,vel*horas+10].filter(v=>v!==r));
+          return {
+            cat:'Proporciones', t:45,
+            q:'Un auto viaja a <strong>'+vel+' millas por hora</strong>. Manteniendo esa velocidad, \u00bfcu\u00e1ntas millas recorrer\u00e1 en <strong>'+horas+' horas</strong>?',
+            data: tbl(['Velocidad','Tiempo','Distancia'],[
+              [vel+' mi/h', horas+' h', '?']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── PROPORCIONES 8: Escala de mapa ── */
+        () => {
+          const escalas = [[1,25],[1,50],[2,60],[1,30],[2,80]];
+          const [scN, scD] = escalas[rand(0,escalas.length-1)];
+          const dist = rand(3,8)*scN;
+          const r = dist*(scD/scN);
+          const {opciones,correcta} = makeOpts(r,[dist+scD,r+scN,dist*scN,r-scD].filter(v=>v!==r&&v>0));
+          return {
+            cat:'Proporciones', t:75,
+            q:'En un mapa, <strong>'+scN+' cm representan '+scD+' km</strong> reales. Dos ciudades distan <strong>'+dist+' cm en el mapa</strong>. \u00bfCu\u00e1l es la distancia real en km?',
+            data: tbl(['Mapa (cm)','Real (km)'],[
+              [scN, scD],
+              [dist, '?']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── PORCENTAJES 9: X% de Y = ? ── */
+        () => {
+          const pares = [[10,80],[20,60],[25,80],[30,60],[15,80],[40,75],[50,84],[35,60],[75,40],[60,45],[45,60],[12,75]];
+          const [P,Y] = pares[rand(0,pares.length-1)];
+          const r = P*Y/100;
+          const {opciones,correcta} = makeOpts(r,[P+Y,Y-r,r*2,Math.round(r*1.5)].filter(v=>v!==r&&v>0));
+          return {
+            cat:'Porcentajes', t:45,
+            q:'\u00bfCu\u00e1nto es el <strong>'+P+'% de '+Y+'</strong>?',
+            data: svgPctBar(P),
+            opciones, correcta
+          };
+        },
+
+        /* ── PORCENTAJES 10: ¿Qué % es X de Y? ── */
+        () => {
+          const pares = [[12,60,20],[15,60,25],[18,90,20],[24,80,30],[25,50,50],[30,120,25],[45,60,75],[9,45,20],[21,70,30],[8,40,20]];
+          const [X,Y,r] = pares[rand(0,pares.length-1)];
+          const {opciones,correcta} = makeOpts(r,[Math.round(Y/X*10),X,Math.round(X/Y*10),r+10].filter(v=>v!==r&&v>0));
+          return {
+            cat:'Porcentajes', t:60,
+            q:'<strong>'+X+'</strong> es \u00bfqu\u00e9 porcentaje de <strong>'+Y+'</strong>? (Responde en %)',
+            data: svgPctBar(r,'#1565c0'),
+            opciones: makeOpts(r,[Math.round(Y/X*10),X+5,Math.round(X/Y*100)+5,r+10].filter(v=>v!==r&&v>0&&v<=100)).opciones,
+            correcta: makeOpts(r,[Math.round(Y/X*10),X+5,Math.round(X/Y*100)+5,r+10].filter(v=>v!==r&&v>0&&v<=100)).correcta
+          };
+        },
+
+        /* ── PORCENTAJES 11: X es P% de ¿cuánto? ── */
+        () => {
+          const pares = [[20,50,40],[30,25,120],[18,90,20],[15,30,50],[25,50,50],[12,40,30],[24,30,80],[16,20,80]];
+          const [X,P,r] = pares[rand(0,pares.length-1)];
+          const {opciones,correcta} = makeOpts(r,[X*P,X+P,Math.round(X/P*10),r+X].filter(v=>v!==r&&v>0));
+          return {
+            cat:'Porcentajes', t:75,
+            q:'<strong>'+X+'</strong> es el <strong>'+P+'%</strong> de \u00bfcu\u00e1nto? (Halla el total)',
+            data: tbl(['Dato','Valor'],[
+              ['Parte conocida', X],
+              ['% que representa', P+'%'],
+              ['F\u00f3rmula', 'Total = parte \u00f7 (% \u00f7 100)'],
+              ['Total', '?']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── PORCENTAJES 12: Descuento ── */
+        () => {
+          const precios = [80,120,60,100,150,200,90,75];
+          const descs   = [10,15,20,25,30,40];
+          const precio  = precios[rand(0,precios.length-1)];
+          const pct     = descs[rand(0,descs.length-1)];
+          const ahorro  = precio*pct/100;
+          const r       = precio - ahorro;
+          const {opciones,correcta} = makeOpts(r,[precio+ahorro,ahorro,r+pct,r-pct].filter(v=>v!==r&&v>0));
+          return {
+            cat:'Porcentajes', t:60,
+            q:'Un art\u00edculo cuesta <strong>$'+precio+'</strong>. Tiene un <strong>descuento del '+pct+'%</strong>. \u00bfCu\u00e1l es el <strong>precio final</strong> despu\u00e9s del descuento?',
+            data: tbl(['Dato','Valor'],[
+              ['Precio original', '$'+precio],
+              ['Descuento',        pct+'%'],
+              ['Ahorro ($)',       '$'+ahorro],
+              ['Precio final',    '?']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── % DE CAMBIO 13: Calcular % de aumento ── */
+        () => {
+          const pares = [[40,50,25],[60,75,25],[80,100,25],[200,250,25],[30,36,20],[50,60,20],[100,120,20],[40,48,20],[50,75,50],[60,90,50]];
+          const [ant,nuevo,r] = pares[rand(0,pares.length-1)];
+          const {opciones,correcta} = makeOpts(r,[nuevo-ant,Math.round(ant/nuevo*100),r+5,r-5].filter(v=>v!==r&&v>0));
+          return {
+            cat:'% de cambio', t:60,
+            q:'El precio de un producto subi\u00f3 de <strong>$'+ant+'</strong> a <strong>$'+nuevo+'</strong>. \u00bfCu\u00e1l fue el <strong>porcentaje de aumento</strong>?',
+            data: svgCambio(ant,nuevo,'up'),
+            opciones, correcta
+          };
+        },
+
+        /* ── % DE CAMBIO 14: Calcular % de disminución ── */
+        () => {
+          const pares = [[200,150,25],[80,60,25],[120,90,25],[50,40,20],[100,80,20],[60,48,20],[200,100,50],[80,40,50],[90,60,33]];
+          const [ant,nuevo,r] = pares[rand(0,pares.length-1)];
+          const {opciones,correcta} = makeOpts(r,[ant-nuevo,Math.round(nuevo/ant*100),r+5,r-5].filter(v=>v!==r&&v>0));
+          return {
+            cat:'% de cambio', t:60,
+            q:'El n\u00famero de empleados baj\u00f3 de <strong>'+ant+'</strong> a <strong>'+nuevo+'</strong>. \u00bfCu\u00e1l fue el <strong>porcentaje de disminuci\u00f3n</strong>?',
+            data: svgCambio(ant,nuevo,'down'),
+            opciones, correcta
+          };
+        },
+
+        /* ── % DE CAMBIO 15: Nuevo valor tras % aumento ── */
+        () => {
+          const pares = [[200,10,220],[500,20,600],[80,25,100],[400,15,460],[120,25,150],[300,20,360],[600,10,660]];
+          const [base,pct,r] = pares[rand(0,pares.length-1)];
+          const aumento = r-base;
+          const {opciones,correcta} = makeOpts(r,[base+pct,base-aumento,r+pct,base*pct/100].filter(v=>v!==r&&v>0));
+          return {
+            cat:'% de cambio', t:60,
+            q:'Un salario de <strong>$'+base+' por mes</strong> recibe un aumento del <strong>'+pct+'%</strong>. \u00bfCu\u00e1nto ser\u00e1 el <strong>nuevo salario</strong>?',
+            data: tbl(['Dato','Valor'],[
+              ['Salario actual',  '$'+base],
+              ['% de aumento',    pct+'%'],
+              ['Aumento ($)',     '$'+aumento],
+              ['Nuevo salario',  '?']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── % DE CAMBIO 16: Nuevo valor tras % disminución ── */
+        () => {
+          const pares = [[500,20,400],[200,25,150],[400,10,360],[300,15,255],[800,25,600],[120,10,108]];
+          const [base,pct,r] = pares[rand(0,pares.length-1)];
+          const ahorro = base-r;
+          const {opciones,correcta} = makeOpts(r,[base+ahorro,base-pct,r-pct,base*pct/100].filter(v=>v!==r&&v>0));
+          return {
+            cat:'% de cambio', t:60,
+            q:'Una televisi\u00f3n cuesta <strong>$'+base+'</strong>. Est\u00e1 en liquidaci\u00f3n con un <strong>'+pct+'% de descuento</strong>. \u00bfCu\u00e1l es el <strong>precio de venta</strong>?',
+            data: tbl(['Dato','Valor'],[
+              ['Precio original', '$'+base],
+              ['% descuento',     pct+'%'],
+              ['Ahorro ($)',      '$'+ahorro],
+              ['Precio de venta','?']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── APLICACIONES 17: Interés simple I = P × r × t ── */
+        () => {
+          const datos = [
+            {P:500, r:4, t:2, I:40},
+            {P:1000,r:5, t:3, I:150},
+            {P:800, r:5, t:2, I:80},
+            {P:2000,r:3, t:2, I:120},
+            {P:600, r:5, t:4, I:120},
+            {P:1500,r:4, t:3, I:180},
+            {P:400, r:5, t:2, I:40}
+          ];
+          const d = datos[rand(0,datos.length-1)];
+          const r = d.I;
+          const {opciones,correcta} = makeOpts(r,[d.P*d.r,d.r*d.t,d.P+r,r*2].filter(v=>v!==r&&v>0));
+          return {
+            cat:'Aplicaciones', t:75,
+            q:'Se invierte <strong>$'+d.P+'</strong> a una tasa de inter\u00e9s simple del <strong>'+d.r+'% anual</strong> durante <strong>'+d.t+' a\u00f1os</strong>. \u00bfCu\u00e1nto inter\u00e9s se ganar\u00e1?',
+            data: tbl(['Dato','Valor'],[
+              ['Capital (P)',    '$'+d.P],
+              ['Tasa (r)',       d.r+'% = 0.0'+d.r],
+              ['Tiempo (t)',     d.t+' a\u00f1os'],
+              ['F\u00f3rmula',  'I = P \u00d7 r \u00d7 t'],
+              ['Inter\u00e9s',  '?']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── APLICACIONES 18: Propina ── */
+        () => {
+          const cuentas = [40,45,50,60,80,90,100,120];
+          const pcts    = [10,15,20];
+          const cuenta  = cuentas[rand(0,cuentas.length-1)];
+          const pct     = pcts[rand(0,pcts.length-1)];
+          const r       = cuenta*pct/100;
+          const {opciones,correcta} = makeOpts(r,[cuenta+r,cuenta-r,r*2,r+cuenta*0.1].filter(v=>v!==r&&v>0));
+          return {
+            cat:'Aplicaciones', t:45,
+            q:'La cuenta de un restaurante es <strong>$'+cuenta+'</strong>. Si dejas el <strong>'+pct+'% de propina</strong>, \u00bfcu\u00e1nto dejas de propina?',
+            data: tbl(['Dato','Valor'],[
+              ['Cuenta total',  '$'+cuenta],
+              ['% propina',     pct+'%'],
+              ['Propina ($)',   '?']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── APLICACIONES 19: Precio con impuesto ── */
+        () => {
+          const precios = [50,80,120,200,150,100,75,60];
+          const taxes   = [5,8,10];
+          const precio  = precios[rand(0,precios.length-1)];
+          const pct     = taxes[rand(0,taxes.length-1)];
+          const imp     = r2(precio*pct/100);
+          const r       = r2(precio+imp);
+          const {opciones,correcta} = makeOpts(r,[precio-imp,imp,r+pct,precio+pct].filter(v=>String(v)!==String(r)&&v>0));
+          return {
+            cat:'Aplicaciones', t:60,
+            q:'Un art\u00edculo cuesta <strong>$'+precio+'</strong>. El <strong>impuesto de ventas es del '+pct+'%</strong>. \u00bfCu\u00e1nto se paga en total incluyendo el impuesto?',
+            data: tbl(['Dato','Valor'],[
+              ['Precio sin impuesto', '$'+precio],
+              ['Tasa de impuesto',   pct+'%'],
+              ['Impuesto ($)',       '$'+imp],
+              ['Total a pagar',     '?']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── APLICACIONES 20: Problema combinado (ahorro mensual) ── */
+        () => {
+          const salarios = [1200,1500,2000,1800,2400,3000];
+          const pcts     = [10,15,20,25];
+          const sal  = salarios[rand(0,salarios.length-1)];
+          const pct  = pcts[rand(0,pcts.length-1)];
+          const r    = sal*pct/100;
+          const meses = rand(3,8);
+          const total = r*meses;
+          const {opciones,correcta} = makeOpts(total,[sal*meses, r+meses, total+r, total-r*2].filter(v=>v!==total&&v>0));
+          return {
+            cat:'Aplicaciones', t:75,
+            q:'Mar\u00eda gana <strong>$'+sal+' al mes</strong> y ahorra el <strong>'+pct+'%</strong> de su salario. \u00bfCu\u00e1nto dinero habr\u00e1 ahorrado despu\u00e9s de <strong>'+meses+' meses</strong>?',
+            data: tbl(['Dato','Valor'],[
+              ['Salario mensual', '$'+sal],
+              ['% que ahorra',   pct+'%'],
+              ['Ahorro/mes',     '$'+r],
+              ['N\u00famero de meses', meses],
+              ['Ahorro total',   '?']
+            ]),
+            opciones, correcta
+          };
+        }
+
+      ]; // fin GEN
+
+      /* ── MOTOR (idéntico al patrón de la serie) ── */
+      const preguntas = shuffle(GEN.map(g => g()));
+      const total = preguntas.length;
+      let actual = 0, puntos = 0, respondida = false, reloj = null, segs = 0;
+      const catPts = {}, catTot = {};
+      preguntas.forEach(p => {
+        catTot[p.cat] = (catTot[p.cat]||0)+1;
+        catPts[p.cat] = catPts[p.cat]||0;
+      });
+
+      const qArea = document.getElementById('question-area');
+      const barP  = document.getElementById('progress-bar');
+      const txtP  = document.getElementById('progress-text');
+
+      function render(i) {
+        const p   = preguntas[i];
+        const col = CC[p.cat]||'#0089cd', icon = CI[p.cat]||'';
+        const tLbl = p.t<=45?'&#9889; R\u00e1pida':p.t<=60?'&#128336; Media':'&#9203; Compleja';
+        const opHtml = p.opciones.map(o =>
+          '<div class="option-item" data-val="'+o.valor+'" onclick="window.__rppClick(this)">'+o.texto+'</div>'
+        ).join('');
+        const dH  = p.data?'<div class="data-box">'+p.data+'</div>':'';
+        const btn = i===total-1?'Ver resultados':'Siguiente &rsaquo;';
+        qArea.innerHTML =
+          '<div class="question-meta">'+
+            '<span class="cat-badge" style="background:'+col+'">'+icon+' '+p.cat+'</span>'+
+            '<span class="time-badge">'+tLbl+' &middot; '+p.t+'s</span>'+
+          '</div>'+
+          '<div class="question-header">'+p.q+'</div>'+
+          dH+
+          '<div class="options">'+opHtml+'</div>'+
+          '<div class="btn-container"><div class="primary-btn" onclick="window.__rppNext()">'+btn+'</div></div>';
+        if (barP) barP.style.width = ((i+1)/total)*100+'%';
+        if (txtP) txtP.textContent = 'Pregunta '+(i+1)+' de '+total;
+        iniciarReloj(p.t);
+      }
+
+      window.__rppClick = function(el) {
+        if (respondida) return;
+        pararReloj(); respondida = true;
+        const p = preguntas[actual];
+        const elegida = el.getAttribute('data-val');
+        if (elegida===p.correcta) {
+          el.className = 'option-item correct disabled'; puntos++; catPts[p.cat]++;
+        } else {
+          el.className = 'option-item incorrect disabled';
+          const ok = qArea.querySelector('.option-item[data-val="'+p.correcta+'"]');
+          if (ok) ok.className = 'option-item correct disabled';
+        }
+        qArea.querySelectorAll('.option-item').forEach(o=>{ if(!o.className.includes('disabled')) o.className+=' disabled'; });
+      };
+
+      window.__rppNext = function() {
+        pararReloj(); actual++; respondida = false;
+        if (actual<total) render(actual); else mostrarRes();
+      };
+
+      function iniciarReloj(s) {
+        pararReloj(); segs = s; updReloj();
+        reloj = setInterval(()=>{ segs--; updReloj(); if(segs<=0) tAgotado(); },1000);
+      }
+      function pararReloj() { if(reloj){clearInterval(reloj);reloj=null;} }
+      function updReloj() {
+        const p  = preguntas[actual]||{t:60};
+        const tt = document.getElementById('timer-text');
+        const tb = document.getElementById('timer-bar');
+        const tc = document.getElementById('timer-container');
+        if(tt) tt.textContent='\u23F1 Tiempo: '+segs+'s';
+        const pct=(segs/p.t)*100;
+        if(tb){
+          tb.style.width=pct+'%';
+          if(pct<=25){tb.style.background='#dc3545';if(tc)tc.className='timer-container timer-warning';}
+          else if(pct<=50){tb.style.background='linear-gradient(90deg,#ffc107,#dc3545)';if(tc)tc.className='timer-container';}
+          else{tb.style.background='linear-gradient(90deg,#28a745,#ffc107,#dc3545)';if(tc)tc.className='timer-container';}
+        }
+      }
+      function tAgotado() {
+        pararReloj(); respondida = true;
+        const p  = preguntas[actual];
+        const ok = qArea.querySelector('.option-item[data-val="'+p.correcta+'"]');
+        if(ok) ok.className='option-item correct disabled';
+        qArea.querySelectorAll('.option-item').forEach(o=>{ if(!o.className.includes('disabled')) o.className+=' disabled'; });
+        const tt = document.getElementById('timer-text');
+        if(tt) tt.textContent='\u23F0 \u00a1Tiempo agotado!';
+        const tc = document.getElementById('timer-container');
+        if(tc) tc.className='timer-container timer-warning';
+      }
+
+      function mostrarRes() {
+        pararReloj(); qArea.innerHTML='';
+        document.getElementById('timer-container').style.display='none';
+        const pct = Math.round((puntos/total)*100);
+        document.getElementById('final-score').textContent = puntos+' / '+total+'  ('+pct+'%)';
+        let msg = pct>=85?'\u{1F3C6} \u00a1Excelente! Dominas razones, proporciones y porcentajes.'
+                : pct>=70?'\u{1F44D} \u00a1Muy bien! Practica los temas marcados.'
+                : pct>=50?'\u{1F4AA} Buen intento. Repasa las f\u00f3rmulas y vuelve.'
+                : '\u{1F4DA} Enf\u00f3cate en porcentajes y proporciones: son clave en el GED.';
+        document.getElementById('final-msg').textContent = msg;
+        let html='<h3>Resultados por categor\u00eda:</h3>';
+        for(const cat of Object.keys(catTot)){
+          const s=catPts[cat]||0, t2=catTot[cat], p2=Math.round(s/t2*100), col=CC[cat]||'#0089cd';
+          html+='<div class="cat-row"><span class="cat-lbl">'+CI[cat]+' '+cat+'</span>'+
+            '<div class="cat-bar-out"><div class="cat-bar-in" style="width:'+p2+'%;background:'+col+'"></div></div>'+
+            '<span class="cat-sc">'+s+'/'+t2+' \u2713</span></div>';
+        }
+        document.getElementById('cat-results').innerHTML=html;
+        let minCat='',minPct=999;
+        for(const cat of Object.keys(catTot)){
+          const pp=(catPts[cat]||0)/catTot[cat];
+          if(pp<minPct){minPct=pp;minCat=cat;}
+        }
+        document.getElementById('tip-box').innerHTML = minPct<1
+          ?'<strong>\u{1F4CC} Para mejorar en \u00ab'+minCat+'\u00bb:</strong><br>'+(TIPS[minCat]||'')
+          :'\u2705 \u00a1Sin categor\u00edas con cero! Mejora tus tiempos.';
+        document.getElementById('result-screen').className='result-screen';
+        document.querySelector('.quiz-progress-header').style.display='none';
+        document.getElementById('restart-btn').onclick=()=>window.location.reload();
+      }
+
+      render(0);
+    })();
+    </script>
+  </body>
+</html>
