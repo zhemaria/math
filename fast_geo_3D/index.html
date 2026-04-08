@@ -1,1 +1,1000 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rapidez en geometr&iacute;a 3D &mdash; GED</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+      :root {
+        --cp: #0089cd;
+        --ch: #00a8fc;
+      }
+      body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 10px;
+        background: linear-gradient(135deg, #1a3a2e, #0d2b4a);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 90vh;
+        flex-direction: column;
+        gap: 10px;
+      }
+      #quiz-container {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 0 22px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        width: clamp(300px, 95%, 860px);
+        margin: 0 auto;
+      }
+      .quiz-progress-header {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 16px 22px;
+        border-bottom: 3px solid var(--cp);
+      }
+      .progress-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.95em, 2.5vw, 1.1em);
+        color: var(--cp);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      .progress-container {
+        background: #e0e0e0;
+        height: 12px;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+      }
+      .progress-bar {
+        height: 100%;
+        width: 5%;
+        background: linear-gradient(90deg, var(--cp), var(--ch));
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 6px;
+      }
+      .question-meta {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 20px 0;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .cat-badge {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 700;
+        color: #fff;
+      }
+      .time-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78em;
+        font-weight: 600;
+        background: #e8f4f8;
+        color: #444;
+        border: 1px solid #ccc;
+      }
+      .question-header {
+        padding: 16px 22px 10px;
+        font-size: clamp(0.95em, 2.4vw, 1.15em);
+        font-weight: 700;
+        text-align: center;
+        color: #1a1a2e;
+        line-height: 1.55;
+      }
+      .data-box {
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        border: 2px solid #16a34a;
+        border-radius: 12px;
+        margin: 0 22px 12px;
+        padding: 14px 18px;
+        text-align: center;
+      }
+      .data-box svg {
+        display: block;
+        margin: 0 auto;
+      }
+      .stat-table {
+        width: auto;
+        margin: 0 auto;
+        border-collapse: collapse;
+        font-size: clamp(0.85em, 2.2vw, 0.95em);
+      }
+      .stat-table th {
+        background: var(--cp);
+        color: #fff;
+        padding: 7px 14px;
+        font-weight: 700;
+      }
+      .stat-table td {
+        padding: 6px 14px;
+        border: 1px solid #ccd;
+        text-align: center;
+        font-weight: 600;
+        color: #1a1a2e;
+      }
+      .stat-table tr:nth-child(even) td {
+        background: #e8f4fb;
+      }
+      .options {
+        padding: 0 18px;
+      }
+      .option-item {
+        display: block;
+        padding: 11px 16px;
+        margin-bottom: 10px;
+        background: #f0f4f8;
+        color: #333;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        font-size: clamp(0.95em, 2.4vw, 1.05em);
+        font-weight: 700;
+        line-height: 1.4;
+        user-select: none;
+      }
+      .option-item:hover:not(.disabled) {
+        background: #dcfce7;
+        border-color: #16a34a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .option-item.correct {
+        background: #4caf50 !important;
+        color: #fff !important;
+        border-color: #4caf50 !important;
+      }
+      .option-item.incorrect {
+        background: #f44336 !important;
+        color: #fff !important;
+        border-color: #f44336 !important;
+      }
+      .option-item.disabled {
+        cursor: not-allowed;
+        opacity: 0.85;
+      }
+      .btn-container {
+        padding: 4px 18px 18px;
+      }
+      .primary-btn {
+        display: block;
+        width: 100%;
+        padding: 13px;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.05em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: var(--cp);
+        text-align: center;
+        user-select: none;
+        box-sizing: border-box;
+      }
+      .primary-btn:hover {
+        background: var(--ch);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      .timer-container {
+        background: linear-gradient(135deg, #fff8e1, #ffecb3);
+        padding: 11px 18px;
+        border-top: 2px solid #f39c12;
+      }
+      .timer-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.88em, 2.2vw, 1em);
+        color: #c77a00;
+        margin-bottom: 7px;
+      }
+      .timer-bar-container {
+        background: #f0d0d0;
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .timer-bar {
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+        transition: width 0.1s linear;
+        border-radius: 4px;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+      }
+      .timer-warning { animation: pulse 0.9s infinite; }
+      .result-screen {
+        padding: 35px 28px;
+        text-align: center;
+      }
+      .result-screen.hidden { display: none; }
+      .result-screen h2 {
+        color: var(--cp);
+        font-size: clamp(1.4em, 4vw, 1.9em);
+        margin-bottom: 10px;
+      }
+      .result-score {
+        font-size: clamp(2em, 6vw, 2.8em) !important;
+        font-weight: 800;
+        color: var(--cp) !important;
+        margin: 12px 0 !important;
+      }
+      .result-msg {
+        font-size: clamp(1em, 2.8vw, 1.2em);
+        color: #333;
+        margin: 8px 0;
+      }
+      .cat-results { margin: 18px 0; text-align: left; }
+      .cat-results h3 { color: var(--cp); font-size: 0.95em; margin-bottom: 10px; }
+      .cat-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+      .cat-lbl { flex: 1.4; font-size: 0.78em; font-weight: 600; }
+      .cat-bar-out { flex: 2; background: #eee; border-radius: 4px; height: 11px; }
+      .cat-bar-in { height: 100%; border-radius: 4px; transition: width 0.6s; }
+      .cat-sc { font-weight: 700; color: var(--cp); font-size: 0.82em; min-width: 55px; text-align: right; }
+      .tip-box {
+        background: #f0fdf4;
+        border-left: 4px solid #16a34a;
+        border-radius: 6px;
+        padding: 10px 14px;
+        margin: 14px 0 4px;
+        font-size: 0.82em;
+        color: #14532d;
+        text-align: left;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="quiz-container">
+      <div class="quiz-progress-header">
+        <div class="progress-text" id="progress-text">Pregunta 1 de 20</div>
+        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+      </div>
+      <div id="question-area"></div>
+      <div class="timer-container" id="timer-container">
+        <div class="timer-text" id="timer-text">&#9201; Tiempo: 60s</div>
+        <div class="timer-bar-container"><div class="timer-bar" id="timer-bar"></div></div>
+      </div>
+      <div class="result-screen hidden" id="result-screen">
+        <h2>&#127919; &iexcl;Cuestionario completado!</h2>
+        <p class="result-score" id="final-score"></p>
+        <p class="result-msg" id="final-msg"></p>
+        <div class="cat-results" id="cat-results"></div>
+        <div class="tip-box" id="tip-box"></div>
+        <div class="btn-container" style="padding-top:14px">
+          <div class="primary-btn" id="restart-btn">&#128260; Nuevas preguntas (reiniciar)</div>
+        </div>
+      </div>
+      <p style="text-align:center;font-size:0.78em;color:#777;padding:6px 0 10px">
+        Creado por Jos&eacute; M. Fern&aacute;ndez con Claude Sonnet 4.6
+      </p>
+    </div>
 
+    <script>
+    (function () {
+      if (window.quizGeo3DIniciado) return;
+      window.quizGeo3DIniciado = true;
+
+      /* ── MATH UTILS ── */
+      const PI = 3.14;
+      function rand(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      function r2(n) { return Math.round(n * 100) / 100; }
+
+      /* ── OPCIONES ── */
+      function makeOpts(correct, dist) {
+        const cs = String(correct), seen = new Set([cs]), uniq = [];
+        for (const d of dist) {
+          const ds = String(d);
+          if (!seen.has(ds) && uniq.length < 3) { seen.add(ds); uniq.push(ds); }
+        }
+        let ex = (parseFloat(cs) || 0) + 17;
+        while (uniq.length < 3) {
+          const c2 = String(r2(ex)); ex += 7;
+          if (!seen.has(c2)) { seen.add(c2); uniq.push(c2); }
+        }
+        const all = shuffle([cs, ...uniq]);
+        const L = ['a', 'b', 'c', 'd'];
+        return { opciones: all.map((v, i) => ({ valor: L[i], texto: L[i].toUpperCase() + '. ' + v })), correcta: L[all.indexOf(cs)] };
+      }
+
+      /* ── SVG HELPERS 3D ── */
+
+      // Prisma rectangular (isométrico)
+      function svgPrisma(lL, wL, hL) {
+        return '<svg viewBox="0 0 210 148" style="width:min(210px,100%)" xmlns="http://www.w3.org/2000/svg">' +
+          '<rect x="18" y="48" width="105" height="78" fill="#dbeafe" stroke="#1565c0" stroke-width="2.5"/>' +
+          '<polygon points="18,48 52,20 157,20 123,48" fill="#bfdbfe" stroke="#1565c0" stroke-width="2.5"/>' +
+          '<polygon points="123,48 157,20 157,98 123,126" fill="#93c5fd" stroke="#1565c0" stroke-width="2.5"/>' +
+          '<text x="70" y="93" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e3a8a">' + lL + '</text>' +
+          '<text x="87" y="16" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e3a8a">' + wL + '</text>' +
+          '<text x="148" y="70" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e3a8a">' + hL + '</text>' +
+          '</svg>';
+      }
+
+      // Cubo
+      function svgCubo(sL) {
+        return '<svg viewBox="0 0 165 138" style="width:min(165px,100%)" xmlns="http://www.w3.org/2000/svg">' +
+          '<rect x="18" y="44" width="88" height="82" fill="#dbeafe" stroke="#1565c0" stroke-width="2.5"/>' +
+          '<polygon points="18,44 50,18 138,18 106,44" fill="#bfdbfe" stroke="#1565c0" stroke-width="2.5"/>' +
+          '<polygon points="106,44 138,18 138,100 106,126" fill="#93c5fd" stroke="#1565c0" stroke-width="2.5"/>' +
+          '<text x="62" y="90" text-anchor="middle" font-size="15" font-weight="bold" fill="#1e3a8a">a=' + sL + '</text>' +
+          '</svg>';
+      }
+
+      // Cilindro
+      function svgCilindro(rL, hL) {
+        return '<svg viewBox="0 0 190 155" style="width:min(190px,100%)" xmlns="http://www.w3.org/2000/svg">' +
+          '<ellipse cx="90" cy="122" rx="62" ry="17" fill="#bbf7d0" stroke="#166534" stroke-width="2"/>' +
+          '<rect x="28" y="38" width="124" height="84" fill="#dcfce7" stroke="none"/>' +
+          '<line x1="28" y1="38" x2="28" y2="122" stroke="#166534" stroke-width="2.5"/>' +
+          '<line x1="152" y1="38" x2="152" y2="122" stroke="#166534" stroke-width="2.5"/>' +
+          '<ellipse cx="90" cy="122" rx="62" ry="17" fill="#bbf7d0" stroke="#166534" stroke-width="2"/>' +
+          '<ellipse cx="90" cy="38" rx="62" ry="17" fill="#dcfce7" stroke="#166534" stroke-width="2.5"/>' +
+          '<line x1="160" y1="38" x2="160" y2="122" stroke="#166534" stroke-width="1.5"/>' +
+          '<line x1="155" y1="38" x2="165" y2="38" stroke="#166534" stroke-width="1.5"/>' +
+          '<line x1="155" y1="122" x2="165" y2="122" stroke="#166534" stroke-width="1.5"/>' +
+          '<text x="90" y="30" text-anchor="middle" font-size="13" font-weight="bold" fill="#14532d">r=' + rL + '</text>' +
+          '<text x="178" y="84" text-anchor="middle" font-size="13" font-weight="bold" fill="#14532d">h=' + hL + '</text>' +
+          '</svg>';
+      }
+
+      // Cono
+      function svgCono(rL, hL, lL) {
+        return '<svg viewBox="0 0 210 158" style="width:min(210px,100%)" xmlns="http://www.w3.org/2000/svg">' +
+          '<polygon points="105,14 28,125 182,125" fill="#ffedd5" stroke="none" opacity="0.85"/>' +
+          '<line x1="28" y1="125" x2="105" y2="14" stroke="#c2410c" stroke-width="2.5"/>' +
+          '<line x1="182" y1="125" x2="105" y2="14" stroke="#c2410c" stroke-width="2.5"/>' +
+          '<ellipse cx="105" cy="125" rx="77" ry="19" fill="#fed7aa" stroke="#c2410c" stroke-width="2"/>' +
+          '<line x1="105" y1="14" x2="105" y2="125" stroke="#c2410c" stroke-width="1.5" stroke-dasharray="5,3"/>' +
+          '<text x="105" y="152" text-anchor="middle" font-size="13" font-weight="bold" fill="#9a3412">r=' + rL + '</text>' +
+          '<text x="91" y="82" text-anchor="middle" font-size="13" font-weight="bold" fill="#9a3412">h=' + hL + '</text>' +
+          '<text x="156" y="75" text-anchor="middle" font-size="13" font-weight="bold" fill="#dc2626">l=' + lL + '</text>' +
+          '</svg>';
+      }
+
+      // Pirámide cuadrada
+      function svgPiramide(bL, hL, lL) {
+        return '<svg viewBox="0 0 210 158" style="width:min(210px,100%)" xmlns="http://www.w3.org/2000/svg">' +
+          '<polygon points="105,135 30,105 70,82 145,112" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>' +
+          '<polygon points="105,135 30,105 105,16" fill="#ddd6fe" stroke="#7c3aed" stroke-width="2.5"/>' +
+          '<polygon points="105,135 145,112 105,16" fill="#c4b5fd" stroke="#7c3aed" stroke-width="2.5"/>' +
+          '<polygon points="30,105 70,82 105,16" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>' +
+          '<line x1="105" y1="16" x2="105" y2="112" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4,3"/>' +
+          '<text x="105" y="153" text-anchor="middle" font-size="13" font-weight="bold" fill="#5b21b6">b=' + bL + '</text>' +
+          '<text x="116" y="74" text-anchor="middle" font-size="13" font-weight="bold" fill="#5b21b6">h=' + hL + '</text>' +
+          (lL ? '<text x="152" y="105" text-anchor="middle" font-size="12" font-weight="bold" fill="#dc2626">l=' + lL + '</text>' : '') +
+          '</svg>';
+      }
+
+      // Esfera
+      function svgEsfera(rL) {
+        return '<svg viewBox="0 0 170 155" style="width:min(170px,100%)" xmlns="http://www.w3.org/2000/svg">' +
+          '<circle cx="85" cy="78" r="64" fill="#fee2e2" stroke="#b91c1c" stroke-width="2.5"/>' +
+          '<ellipse cx="85" cy="78" rx="64" ry="22" fill="none" stroke="#b91c1c" stroke-width="1.5" stroke-dasharray="6,4"/>' +
+          '<line x1="85" y1="78" x2="149" y2="78" stroke="#b91c1c" stroke-width="2"/>' +
+          '<circle cx="85" cy="78" r="3" fill="#b91c1c"/>' +
+          '<text x="117" y="70" text-anchor="middle" font-size="15" font-weight="bold" fill="#7f1d1d">r=' + rL + '</text>' +
+          '</svg>';
+      }
+
+      // Tabla informativa
+      function tbl(headers, rows) {
+        const TH = 'background:var(--cp);color:#fff;padding:7px 14px;font-weight:700';
+        const TD = 'padding:6px 14px;border:1px solid #ccd;text-align:center;font-weight:600;color:#1a1a2e';
+        const TDE = 'padding:6px 14px;border:1px solid #ccd;text-align:center;font-weight:600;color:#1a1a2e;background:#e8f4fb';
+        let h = '<table class="stat-table"><tr>' + headers.map(hh => '<th style="' + TH + '">' + hh + '</th>').join('') + '</tr>';
+        rows.forEach((r, i) => {
+          h += '<tr>' + r.map(c => '<td style="' + (i % 2 === 1 ? TDE : TD) + '">' + c + '</td>').join('') + '</tr>';
+        });
+        return h + '</table>';
+      }
+
+      /* ── TRIPLES PITAGÓRICOS para cono (r, h, l) ── */
+      const CONE_T = [[3,4,5],[4,3,5],[5,12,13],[6,8,10],[8,6,10],[9,12,15]];
+      /* Pirámide cuadrada (b, h, l_apotema) donde l=√(h²+(b/2)²) ── */
+      const PYRA_T = [[6,4,5],[8,3,5],[10,12,13],[12,8,10],[16,6,10],[6,8,10]];
+
+      /* ── CATEGORÍAS ── */
+      const CC = {
+        'Prisma':    '#1565c0',
+        'Cilindro':  '#1b7a3e',
+        'Cono':      '#c2410c',
+        'Pir\u00e1mide': '#6a1b9a',
+        'Esfera':    '#b71c1c'
+      };
+      const CI = {
+        'Prisma':    '\u25a6',
+        'Cilindro':  '\u29c2',
+        'Cono':      '\u25b2',
+        'Pir\u00e1mide': '\u25c6',
+        'Esfera':    '\u25cf'
+      };
+      const TIPS = {
+        'Prisma':
+          'V(prisma rect.) = largo \u00d7 ancho \u00d7 altura. AS = 2(la + lh + ah). V(cubo) = a\u00b3. AS(cubo) = 6a\u00b2.',
+        'Cilindro':
+          'V(cilindro) = \u03c0r\u00b2h. AS(cilindro) = 2\u03c0r(r + h). Usa \u03c0 \u2248 3.14.',
+        'Cono':
+          'V(cono) = \u00bdr\u00b2h \u00d7 \u03c0/3 = \u2153\u03c0r\u00b2h. AS(cono) = \u03c0r(r + l), l = apotema = \u221a(r\u00b2 + h\u00b2).',
+        'Pir\u00e1mide':
+          'V(pir\u00e1mide) = \u2153 \u00d7 base\u00b2 \u00d7 h. AS = b\u00b2 + 2bl, donde l = \u221a(h\u00b2 + (b/2)\u00b2).',
+        'Esfera':
+          'V(esfera) = \u2074\u2044\u2083\u03c0r\u00b3. AS(esfera) = 4\u03c0r\u00b2. Recuerda: volumen usa r\u00b3, \u00e1rea usa r\u00b2.'
+      };
+
+      /* ══════════════════════════════════════
+         GENERADORES — 20 preguntas
+         4 por categoría: V gráfico, AS gráfico, V verbal, AS verbal
+      ══════════════════════════════════════ */
+      const GEN = [
+
+        /* ── PRISMA 1: Volumen prisma rectangular ── */
+        () => {
+          const l = rand(3, 9), w = rand(2, 7), h = rand(2, 6);
+          const r = l * w * h;
+          const { opciones, correcta } = makeOpts(r, [
+            2*(l*w + l*h + w*h),
+            l*w + l*h + w*h,
+            l + w + h,
+            r + l
+          ].filter(v => v !== r));
+          return {
+            cat: 'Prisma', t: 45,
+            q: '&iquest;Cu&aacute;l es el <strong>volumen</strong> del prisma rectangular? (V = l &times; a &times; h)',
+            data: svgPrisma(l+' cm', w+' cm', h+' cm'),
+            opciones, correcta
+          };
+        },
+
+        /* ── PRISMA 2: Área total prisma rectangular ── */
+        () => {
+          const l = rand(3, 9), w = rand(2, 6), h = rand(2, 6);
+          const r = 2*(l*w + l*h + w*h);
+          const { opciones, correcta } = makeOpts(r, [
+            l*w*h,
+            l*w + l*h + w*h,
+            2*(l+w+h),
+            r + 2*w
+          ].filter(v => v !== r));
+          return {
+            cat: 'Prisma', t: 60,
+            q: '&iquest;Cu&aacute;l es el <strong>&aacute;rea total</strong> del prisma? [AS = 2(la + lh + ah)]',
+            data: svgPrisma(l+' m', w+' m', h+' m'),
+            opciones, correcta
+          };
+        },
+
+        /* ── PRISMA 3: Volumen cubo ── */
+        () => {
+          const s = rand(3, 8);
+          const r = s * s * s;
+          const { opciones, correcta } = makeOpts(r, [
+            6*s*s, s*s, 4*s*s, r+s
+          ].filter(v => v !== r));
+          return {
+            cat: 'Prisma', t: 30,
+            q: '&iquest;Cu&aacute;l es el <strong>volumen</strong> del cubo? (V = a&sup3;)',
+            data: svgCubo(s+' cm'),
+            opciones, correcta
+          };
+        },
+
+        /* ── PRISMA 4: Área total cubo ── */
+        () => {
+          const s = rand(3, 8);
+          const r = 6*s*s;
+          const { opciones, correcta } = makeOpts(r, [
+            s*s*s, 4*s*s, s*s, r+s*s
+          ].filter(v => v !== r));
+          return {
+            cat: 'Prisma', t: 30,
+            q: '&iquest;Cu&aacute;l es el <strong>&aacute;rea total</strong> del cubo? (AS = 6a&sup2;)',
+            data: svgCubo(s+' ft'),
+            opciones, correcta
+          };
+        },
+
+        /* ── CILINDRO 5: Volumen cilindro ── */
+        () => {
+          const sets = [[2,5],[3,4],[3,7],[4,5],[5,3],[2,8]];
+          const [rv, hv] = sets[rand(0, sets.length-1)];
+          const r = r2(PI*rv*rv*hv);
+          const { opciones, correcta } = makeOpts(r, [
+            r2(PI*rv*hv),           // olvidó elevar al cuadrado
+            r2(2*PI*rv*(rv+hv)),    // área en vez de volumen
+            r2(PI*rv*rv*hv*2),      // multiplicó por 2
+            r2(r + PI*rv)
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Cilindro', t: 60,
+            q: '&iquest;Cu&aacute;l es el <strong>volumen</strong> del cilindro? (V = &pi;r&sup2;h, &pi; &asymp; 3.14)',
+            data: svgCilindro(rv+' cm', hv+' cm'),
+            opciones, correcta
+          };
+        },
+
+        /* ── CILINDRO 6: Área total cilindro ── */
+        () => {
+          const sets = [[2,5],[3,4],[4,5],[3,7],[5,4]];
+          const [rv, hv] = sets[rand(0, sets.length-1)];
+          const r = r2(2*PI*rv*(rv+hv));
+          const { opciones, correcta } = makeOpts(r, [
+            r2(PI*rv*rv*hv),         // volumen
+            r2(2*PI*rv*hv),          // lateral solo (olvidó bases)
+            r2(2*PI*rv*rv),          // solo las dos bases
+            r2(r + 2*PI*rv)
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Cilindro', t: 60,
+            q: '&iquest;Cu&aacute;l es el <strong>&aacute;rea total</strong> del cilindro? [AS = 2&pi;r(r + h), &pi; &asymp; 3.14]',
+            data: svgCilindro(rv+' m', hv+' m'),
+            opciones, correcta
+          };
+        },
+
+        /* ── CILINDRO 7: Volumen verbal (tanque) ── */
+        () => {
+          const rv = rand(2, 5), hv = rand(4, 10);
+          const r = r2(PI*rv*rv*hv);
+          const { opciones, correcta } = makeOpts(r, [
+            r2(2*PI*rv*(rv+hv)),
+            r2(PI*rv*hv),
+            r2(PI*rv*rv*hv + PI*rv*rv),
+            r2(r + rv*hv)
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Cilindro', t: 75,
+            q: 'Un tanque cil&iacute;ndrico tiene <strong>radio ' + rv + ' m</strong> y <strong>altura ' + hv + ' m</strong>. &iquest;Cu&aacute;ntos metros c&uacute;bicos de agua puede almacenar? (&pi; &asymp; 3.14)',
+            data: tbl(['Dato', 'Valor'], [
+              ['Radio (r)', rv+' m'],
+              ['Altura (h)', hv+' m'],
+              ['F&oacute;rmula', 'V = &pi;r&sup2;h']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── CILINDRO 8: Área verbal (lata) ── */
+        () => {
+          const rv = rand(2, 5), hv = rand(4, 9);
+          const r = r2(2*PI*rv*(rv+hv));
+          const { opciones, correcta } = makeOpts(r, [
+            r2(PI*rv*rv*hv),
+            r2(2*PI*rv*hv),
+            r2(2*PI*rv*rv + PI*rv*hv),
+            r2(r + 2*rv)
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Cilindro', t: 75,
+            q: 'Una lata cil&iacute;ndrica tiene <strong>radio ' + rv + ' cm</strong> y <strong>altura ' + hv + ' cm</strong>. &iquest;Cu&aacute;ntos cm&sup2; de metal se necesitan para fabricarla (incluyendo las tapas)? (&pi; &asymp; 3.14)',
+            data: tbl(['Dato', 'Valor'], [
+              ['Radio (r)', rv+' cm'],
+              ['Altura (h)', hv+' cm'],
+              ['F&oacute;rmula', 'AS = 2&pi;r(r+h)']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── CONO 9: Volumen cono ── */
+        () => {
+          const [rv, hv, lv] = CONE_T[rand(0, CONE_T.length-1)];
+          const r = r2((1/3)*PI*rv*rv*hv);
+          const { opciones, correcta } = makeOpts(r, [
+            r2(PI*rv*rv*hv),         // olvidó ⅓
+            r2(PI*rv*(rv+lv)),       // área en vez de volumen
+            r2((1/3)*PI*rv*hv),      // olvidó r²
+            r2(r + PI*rv)
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Cono', t: 60,
+            q: '&iquest;Cu&aacute;l es el <strong>volumen</strong> del cono? (V = &frac13;&pi;r&sup2;h, &pi; &asymp; 3.14)',
+            data: svgCono(rv+' cm', hv+' cm', lv+' cm'),
+            opciones, correcta
+          };
+        },
+
+        /* ── CONO 10: Área total cono ── */
+        () => {
+          const [rv, hv, lv] = CONE_T[rand(0, CONE_T.length-1)];
+          const r = r2(PI*rv*(rv+lv));
+          const { opciones, correcta } = makeOpts(r, [
+            r2((1/3)*PI*rv*rv*hv),   // volumen
+            r2(PI*rv*lv),             // olvidó la base
+            r2(PI*rv*rv),             // solo base
+            r2(r + PI*rv)
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Cono', t: 75,
+            q: '&iquest;Cu&aacute;l es el <strong>&aacute;rea total</strong> del cono? [AS = &pi;r(r + l), l = apotema = ' + lv + ' cm, &pi; &asymp; 3.14]',
+            data: svgCono(rv+' cm', hv+' cm', lv+' cm'),
+            opciones, correcta
+          };
+        },
+
+        /* ── CONO 11: Volumen verbal (nieve raspada / sombrero) ── */
+        () => {
+          const [rv, hv, lv] = CONE_T[rand(0, CONE_T.length-1)];
+          const r = r2((1/3)*PI*rv*rv*hv);
+          const { opciones, correcta } = makeOpts(r, [
+            r2(PI*rv*rv*hv),
+            r2(PI*rv*(rv+lv)),
+            r2((2/3)*PI*rv*rv*hv),
+            r2(r + rv)
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Cono', t: 75,
+            q: 'Un cono de helado tiene <strong>radio ' + rv + ' cm</strong> y <strong>altura ' + hv + ' cm</strong>. &iquest;Cu&aacute;ntos cm&sup3; de helado puede contener? (&pi; &asymp; 3.14)',
+            data: tbl(['Dato', 'Valor'], [
+              ['Radio (r)', rv+' cm'],
+              ['Altura (h)', hv+' cm'],
+              ['Apotema (l)', lv+' cm'],
+              ['F&oacute;rmula', 'V = \u2153\u03c0r\u00b2h']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── CONO 12: Área verbal (techo cónico / sombrero de bruja) ── */
+        () => {
+          const [rv, hv, lv] = CONE_T[rand(0, CONE_T.length-1)];
+          const r = r2(PI*rv*(rv+lv));
+          const { opciones, correcta } = makeOpts(r, [
+            r2((1/3)*PI*rv*rv*hv),
+            r2(PI*rv*lv),
+            r2(2*PI*rv*(rv+hv)),
+            r2(r + lv)
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Cono', t: 75,
+            q: 'Un sombrero c&oacute;nico tiene <strong>radio ' + rv + ' cm</strong> y <strong>apotema (generatriz) ' + lv + ' cm</strong>. &iquest;Cu&aacute;ntos cm&sup2; de tela se necesitan para confeccionarlo (incluyendo la base)? (&pi; &asymp; 3.14)',
+            data: tbl(['Dato', 'Valor'], [
+              ['Radio (r)', rv+' cm'],
+              ['Apotema (l)', lv+' cm'],
+              ['F&oacute;rmula', 'AS = \u03c0r(r + l)']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── PIRÁMIDE 13: Volumen pirámide cuadrada ── */
+        () => {
+          const [bv, hv, lv] = PYRA_T[rand(0, PYRA_T.length-1)];
+          const r = r2((1/3)*bv*bv*hv);
+          const { opciones, correcta } = makeOpts(r, [
+            bv*bv*hv,               // olvidó ⅓
+            bv*bv + 2*bv*lv,        // área en vez de volumen
+            (1/3)*bv*hv,            // olvidó b²
+            r + bv
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Pir\u00e1mide', t: 60,
+            q: '&iquest;Cu&aacute;l es el <strong>volumen</strong> de la pir&aacute;mide de base cuadrada? (V = &frac13;b&sup2;h)',
+            data: svgPiramide(bv+' cm', hv+' cm', null),
+            opciones, correcta
+          };
+        },
+
+        /* ── PIRÁMIDE 14: Área total pirámide cuadrada ── */
+        () => {
+          const [bv, hv, lv] = PYRA_T[rand(0, PYRA_T.length-1)];
+          const r = bv*bv + 2*bv*lv;
+          const { opciones, correcta } = makeOpts(r, [
+            r2((1/3)*bv*bv*hv),     // volumen
+            bv*bv + bv*lv,          // solo 1 cara lateral por b
+            4*bv*lv,                // 4 caras laterales sin base
+            r + bv
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Pir\u00e1mide', t: 75,
+            q: '&iquest;Cu&aacute;l es el <strong>&aacute;rea total</strong> de la pir&aacute;mide? [AS = b&sup2; + 2bl, apotema l = ' + lv + ' cm]',
+            data: svgPiramide(bv+' cm', hv+' cm', lv+' cm'),
+            opciones, correcta
+          };
+        },
+
+        /* ── PIRÁMIDE 15: Volumen verbal (monumento / pirámide de arena) ── */
+        () => {
+          const [bv, hv, lv] = PYRA_T[rand(0, PYRA_T.length-1)];
+          const r = r2((1/3)*bv*bv*hv);
+          const { opciones, correcta } = makeOpts(r, [
+            bv*bv*hv,
+            bv*bv + 2*bv*lv,
+            r2((2/3)*bv*bv*hv),
+            r + bv
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Pir\u00e1mide', t: 75,
+            q: 'Una pir&aacute;mide de base cuadrada tiene <strong>base ' + bv + ' m</strong> y <strong>altura ' + hv + ' m</strong>. &iquest;Cu&aacute;ntos metros c&uacute;bicos de material s&oacute;lido contiene?',
+            data: tbl(['Dato', 'Valor'], [
+              ['Base (b)', bv+' m'],
+              ['Altura (h)', hv+' m'],
+              ['F&oacute;rmula', 'V = \u2153b\u00b2h']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── PIRÁMIDE 16: Área verbal (tienda de campaña / pirámide de cristal) ── */
+        () => {
+          const [bv, hv, lv] = PYRA_T[rand(0, PYRA_T.length-1)];
+          const r = bv*bv + 2*bv*lv;
+          const { opciones, correcta } = makeOpts(r, [
+            r2((1/3)*bv*bv*hv),
+            4*bv*lv,
+            bv*bv,
+            r + lv
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Pir\u00e1mide', t: 75,
+            q: 'Una tienda de campa&ntilde;a piramidal tiene <strong>base cuadrada de ' + bv + ' m</strong> y <strong>apotema lateral ' + lv + ' m</strong>. &iquest;Cu&aacute;ntos m&sup2; de tela se necesitan para cubrirla completamente (incluyendo piso)?',
+            data: tbl(['Dato', 'Valor'], [
+              ['Base (b)', bv+' m'],
+              ['Apotema (l)', lv+' m'],
+              ['F&oacute;rmula', 'AS = b\u00b2 + 2bl']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── ESFERA 17: Volumen esfera ── */
+        () => {
+          const rv = [2,3,4,5,6][rand(0,4)];
+          const r = r2((4/3)*PI*rv*rv*rv);
+          const { opciones, correcta } = makeOpts(r, [
+            r2(4*PI*rv*rv),          // área en vez de volumen
+            r2((1/3)*PI*rv*rv*rv),   // olvidó el 4
+            r2(2*PI*rv*rv*rv),       // coeficiente incorrecto
+            r2(r + PI*rv)
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Esfera', t: 60,
+            q: '&iquest;Cu&aacute;l es el <strong>volumen</strong> de la esfera? (V = &frac43;&pi;r&sup3;, &pi; &asymp; 3.14)',
+            data: svgEsfera(rv+' cm'),
+            opciones, correcta
+          };
+        },
+
+        /* ── ESFERA 18: Área total esfera ── */
+        () => {
+          const rv = [2,3,4,5,6][rand(0,4)];
+          const r = r2(4*PI*rv*rv);
+          const { opciones, correcta } = makeOpts(r, [
+            r2((4/3)*PI*rv*rv*rv),   // volumen
+            r2(2*PI*rv*rv),          // olvidó el 4
+            r2(PI*rv*rv),            // solo pi*r²
+            r2(r + 2*PI*rv)
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Esfera', t: 45,
+            q: '&iquest;Cu&aacute;l es el <strong>&aacute;rea total</strong> de la esfera? (AS = 4&pi;r&sup2;, &pi; &asymp; 3.14)',
+            data: svgEsfera(rv+' m'),
+            opciones, correcta
+          };
+        },
+
+        /* ── ESFERA 19: Volumen verbal (pelota / planeta) ── */
+        () => {
+          const rv = [3,4,5,6][rand(0,3)];
+          const r = r2((4/3)*PI*rv*rv*rv);
+          const { opciones, correcta } = makeOpts(r, [
+            r2(4*PI*rv*rv),
+            r2(PI*rv*rv*rv),
+            r2((4/3)*PI*rv*rv),
+            r2(r + rv*rv)
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Esfera', t: 75,
+            q: 'Un bal&oacute;n de baloncesto tiene <strong>radio ' + rv + ' cm</strong>. &iquest;Cu&aacute;ntos cm&sup3; de aire puede contener? (&pi; &asymp; 3.14)',
+            data: tbl(['Dato', 'Valor'], [
+              ['Radio (r)', rv+' cm'],
+              ['F&oacute;rmula', 'V = \u2074\u2044\u2083\u03c0r\u00b3'],
+              ['r\u00b3', rv+'&sup3; = ' + rv*rv*rv]
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── ESFERA 20: Área verbal (burbuja / pintar esfera) ── */
+        () => {
+          const rv = [2,3,4,5,6][rand(0,4)];
+          const r = r2(4*PI*rv*rv);
+          const { opciones, correcta } = makeOpts(r, [
+            r2((4/3)*PI*rv*rv*rv),
+            r2(PI*rv*rv),
+            r2(2*PI*rv*rv),
+            r2(r + rv)
+          ].filter(v => String(v) !== String(r)));
+          return {
+            cat: 'Esfera', t: 60,
+            q: 'Hay que pintar una esfera decorativa de <strong>radio ' + rv + ' m</strong>. &iquest;Cu&aacute;ntos m&sup2; de pintura se necesitan para cubrirla por completo? (&pi; &asymp; 3.14)',
+            data: tbl(['Dato', 'Valor'], [
+              ['Radio (r)', rv+' m'],
+              ['F&oacute;rmula', 'AS = 4\u03c0r\u00b2'],
+              ['r\u00b2', rv+'&sup2; = ' + rv*rv]
+            ]),
+            opciones, correcta
+          };
+        }
+
+      ]; // fin GEN
+
+      /* ── MOTOR ── */
+      const preguntas = shuffle(GEN.map(g => g()));
+      const total = preguntas.length;
+      let actual = 0, puntos = 0, respondida = false, reloj = null, segs = 0;
+      const catPts = {}, catTot = {};
+      preguntas.forEach(p => {
+        catTot[p.cat] = (catTot[p.cat] || 0) + 1;
+        catPts[p.cat] = catPts[p.cat] || 0;
+      });
+
+      const qArea = document.getElementById('question-area');
+      const barP  = document.getElementById('progress-bar');
+      const txtP  = document.getElementById('progress-text');
+
+      function render(i) {
+        const p = preguntas[i];
+        const col  = CC[p.cat]  || '#0089cd';
+        const icon = CI[p.cat]  || '';
+        const tLbl = p.t <= 45 ? '&#9889; R\u00e1pida'
+                   : p.t <= 60 ? '&#128336; Media'
+                   : '&#9203; Compleja';
+        const opHtml = p.opciones.map(o =>
+          '<div class="option-item" data-val="' + o.valor + '" onclick="window.__g3Click(this)">' + o.texto + '</div>'
+        ).join('');
+        const dH  = p.data ? '<div class="data-box">' + p.data + '</div>' : '';
+        const btn = i === total - 1 ? 'Ver resultados' : 'Siguiente &rsaquo;';
+        qArea.innerHTML =
+          '<div class="question-meta">' +
+            '<span class="cat-badge" style="background:' + col + '">' + icon + ' ' + p.cat + '</span>' +
+            '<span class="time-badge">' + tLbl + ' &middot; ' + p.t + 's</span>' +
+          '</div>' +
+          '<div class="question-header">' + p.q + '</div>' +
+          dH +
+          '<div class="options">' + opHtml + '</div>' +
+          '<div class="btn-container"><div class="primary-btn" onclick="window.__g3Next()">' + btn + '</div></div>';
+        if (barP) barP.style.width = ((i + 1) / total) * 100 + '%';
+        if (txtP) txtP.textContent = 'Pregunta ' + (i + 1) + ' de ' + total;
+        iniciarReloj(p.t);
+      }
+
+      window.__g3Click = function (el) {
+        if (respondida) return;
+        pararReloj();
+        respondida = true;
+        const p = preguntas[actual];
+        const elegida = el.getAttribute('data-val');
+        if (elegida === p.correcta) {
+          el.className = 'option-item correct disabled';
+          puntos++;
+          catPts[p.cat]++;
+        } else {
+          el.className = 'option-item incorrect disabled';
+          const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+          if (ok) ok.className = 'option-item correct disabled';
+        }
+        qArea.querySelectorAll('.option-item').forEach(o => {
+          if (!o.className.includes('disabled')) o.className += ' disabled';
+        });
+      };
+
+      window.__g3Next = function () {
+        pararReloj();
+        actual++;
+        respondida = false;
+        if (actual < total) render(actual);
+        else mostrarRes();
+      };
+
+      function iniciarReloj(s) {
+        pararReloj();
+        segs = s;
+        updReloj();
+        reloj = setInterval(() => { segs--; updReloj(); if (segs <= 0) tAgotado(); }, 1000);
+      }
+      function pararReloj() {
+        if (reloj) { clearInterval(reloj); reloj = null; }
+      }
+      function updReloj() {
+        const p  = preguntas[actual] || { t: 60 };
+        const tt = document.getElementById('timer-text');
+        const tb = document.getElementById('timer-bar');
+        const tc = document.getElementById('timer-container');
+        if (tt) tt.textContent = '\u23F1 Tiempo: ' + segs + 's';
+        const pct = (segs / p.t) * 100;
+        if (tb) {
+          tb.style.width = pct + '%';
+          if (pct <= 25) {
+            tb.style.background = '#dc3545';
+            if (tc) tc.className = 'timer-container timer-warning';
+          } else if (pct <= 50) {
+            tb.style.background = 'linear-gradient(90deg,#ffc107,#dc3545)';
+            if (tc) tc.className = 'timer-container';
+          } else {
+            tb.style.background = 'linear-gradient(90deg,#28a745,#ffc107,#dc3545)';
+            if (tc) tc.className = 'timer-container';
+          }
+        }
+      }
+      function tAgotado() {
+        pararReloj();
+        respondida = true;
+        const p  = preguntas[actual];
+        const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+        if (ok) ok.className = 'option-item correct disabled';
+        qArea.querySelectorAll('.option-item').forEach(o => {
+          if (!o.className.includes('disabled')) o.className += ' disabled';
+        });
+        const tt = document.getElementById('timer-text');
+        if (tt) tt.textContent = '\u23F0 \u00a1Tiempo agotado!';
+        const tc = document.getElementById('timer-container');
+        if (tc) tc.className = 'timer-container timer-warning';
+      }
+
+      function mostrarRes() {
+        pararReloj();
+        qArea.innerHTML = '';
+        document.getElementById('timer-container').style.display = 'none';
+        const pct = Math.round((puntos / total) * 100);
+        document.getElementById('final-score').textContent = puntos + ' / ' + total + '  (' + pct + '%)';
+        let msg = pct >= 85 ? '\u{1F3C6} \u00a1Excelente! Dominas geometr\u00eda 3D para el GED.'
+                : pct >= 70 ? '\u{1F44D} \u00a1Muy bien! Practica los temas marcados.'
+                : pct >= 50 ? '\u{1F4AA} Buen intento. Repasa las f\u00f3rmulas de volumen y \u00e1rea.'
+                : '\u{1F4DA} Enf\u00f3cate en cilindro y esfera: son los m\u00e1s frecuentes en el GED.';
+        document.getElementById('final-msg').textContent = msg;
+        let html = '<h3>Resultados por categor\u00eda:</h3>';
+        for (const cat of Object.keys(catTot)) {
+          const s  = catPts[cat] || 0;
+          const t2 = catTot[cat];
+          const p2 = Math.round((s / t2) * 100);
+          const col = CC[cat] || '#0089cd';
+          html +=
+            '<div class="cat-row">' +
+              '<span class="cat-lbl">' + CI[cat] + ' ' + cat + '</span>' +
+              '<div class="cat-bar-out"><div class="cat-bar-in" style="width:' + p2 + '%;background:' + col + '"></div></div>' +
+              '<span class="cat-sc">' + s + '/' + t2 + ' \u2713</span>' +
+            '</div>';
+        }
+        document.getElementById('cat-results').innerHTML = html;
+        let minCat = '', minPct = 999;
+        for (const cat of Object.keys(catTot)) {
+          const pp = (catPts[cat] || 0) / catTot[cat];
+          if (pp < minPct) { minPct = pp; minCat = cat; }
+        }
+        document.getElementById('tip-box').innerHTML = minPct < 1
+          ? '<strong>\u{1F4CC} Para mejorar en \u00ab' + minCat + '\u00bb:</strong><br>' + (TIPS[minCat] || '')
+          : '\u2705 \u00a1Sin categor\u00edas con cero! Mejora tus tiempos.';
+        document.getElementById('result-screen').className = 'result-screen';
+        document.querySelector('.quiz-progress-header').style.display = 'none';
+        document.getElementById('restart-btn').onclick = () => window.location.reload();
+      }
+
+      render(0);
+    })();
+    </script>
+  </body>
+</html>
