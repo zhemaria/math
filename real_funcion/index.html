@@ -1,1 +1,1549 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Funciones en la Vida Real</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      :root {
+        --azul: #1d4ed8;
+        --azul-cl: #dbeafe;
+        --rojo: #dc2626;
+        --rojo-cl: #fee2e2;
+        --verde: #15803d;
+        --verde-cl: #dcfce7;
+        --morado: #7c3aed;
+        --morado-cl: #f3e8ff;
+        --naranja: #ea580c;
+        --amarillo: #ca8a04;
+        --amar-cl: #fef9c3;
+        --bg: #f0f4f8;
+        --card: #ffffff;
+        --ink: #0f172a;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --r: 12px;
+        --sh: 0 2px 12px rgba(15, 23, 42, 0.1);
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: 'Nunito', sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        padding: 16px;
+        min-height: 100vh;
+      }
 
+      /* ── HEADER ── */
+      .hdr {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 24px 16px 20px;
+        background: var(--card);
+        border-radius: var(--r);
+        box-shadow: var(--sh);
+        border-top: 5px solid var(--azul);
+        position: relative;
+        overflow: hidden;
+      }
+      .hdr::before {
+        content: '';
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 180px;
+        height: 180px;
+        background: radial-gradient(circle, rgba(29, 78, 216, 0.08) 0%, transparent 70%);
+        border-radius: 50%;
+      }
+      .hdr h1 {
+        font-size: 1.55rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+      }
+      .hdr p {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-top: 5px;
+        font-weight: 600;
+      }
+      .badges {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      .badges span {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 3px 11px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--muted);
+      }
+
+      /* ── TABS ── */
+      .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin-bottom: 14px;
+      }
+      .tab {
+        padding: 9px 18px;
+        border: 2px solid var(--border);
+        border-radius: 24px;
+        background: var(--card);
+        cursor: pointer;
+        font-size: 0.8rem;
+        font-weight: 700;
+        font-family: 'Nunito', sans-serif;
+        transition: all 0.18s;
+        white-space: nowrap;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      }
+      .tab:hover {
+        border-color: #94a3b8;
+        transform: translateY(-1px);
+      }
+      .tab.active {
+        background: var(--ink);
+        color: #fff;
+        border-color: var(--ink);
+        box-shadow: 0 3px 10px rgba(15, 23, 42, 0.25);
+      }
+
+      /* ── HELP PANEL ── */
+      .help-panel {
+        background: var(--card);
+        border-radius: var(--r);
+        box-shadow: var(--sh);
+        margin-bottom: 14px;
+        border-left: 5px solid var(--amarillo);
+        overflow: hidden;
+      }
+      .help-toggle {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 18px;
+        cursor: pointer;
+        user-select: none;
+        background: #fffbeb;
+        transition: background 0.15s;
+      }
+      .help-toggle:hover {
+        background: #fef9c3;
+      }
+      .help-toggle-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 800;
+        font-size: 0.88rem;
+        color: var(--amarillo);
+      }
+      .help-toggle-right {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .help-arrow {
+        transition: transform 0.25s;
+        display: inline-block;
+        font-size: 0.8rem;
+      }
+      .help-arrow.open {
+        transform: rotate(180deg);
+      }
+      .help-body {
+        padding: 16px 18px 18px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 620px) {
+        .help-body {
+          grid-template-columns: 1fr;
+        }
+      }
+      .help-card {
+        border-radius: 10px;
+        padding: 13px 15px;
+        font-size: 0.8rem;
+        line-height: 1.65;
+      }
+      .help-card h4 {
+        font-size: 0.82rem;
+        font-weight: 800;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .help-card p {
+        color: #374151;
+        font-weight: 600;
+      }
+      .help-card ul {
+        padding-left: 16px;
+        color: #374151;
+        font-weight: 600;
+      }
+      .help-card ul li {
+        margin-bottom: 3px;
+      }
+      .hc-ctx {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+      }
+      .hc-ctx h4 {
+        color: var(--azul);
+      }
+      .hc-lin {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+      }
+      .hc-lin h4 {
+        color: var(--verde);
+      }
+      .hc-quad {
+        background: var(--rojo-cl);
+        border: 1px solid #fecaca;
+      }
+      .hc-quad h4 {
+        color: var(--rojo);
+      }
+      .hc-tip {
+        background: var(--amar-cl);
+        border: 1px solid #fde68a;
+      }
+      .hc-tip h4 {
+        color: var(--amarillo);
+      }
+      .help-kw {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.76rem;
+        background: rgba(0, 0, 0, 0.07);
+        border-radius: 4px;
+        padding: 0 4px;
+      }
+
+      /* ── MAIN GRID ── */
+      .main-grid {
+        display: grid;
+        grid-template-columns: 270px 1fr 270px;
+        gap: 14px;
+        align-items: start;
+        margin-bottom: 14px;
+      }
+      @media (max-width: 920px) {
+        .main-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .chart-area {
+          grid-column: 1/-1;
+          order: -1;
+        }
+      }
+      @media (max-width: 600px) {
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+        .chart-area {
+          order: 0;
+        }
+      }
+
+      /* ── PANELS ── */
+      .panel {
+        background: var(--card);
+        border-radius: var(--r);
+        padding: 16px;
+        box-shadow: var(--sh);
+      }
+      .panel-lin {
+        border-top: 4px solid var(--azul);
+      }
+      .panel-quad {
+        border-top: 4px solid var(--rojo);
+      }
+      .panel-title {
+        font-size: 0.92rem;
+        font-weight: 800;
+        margin-bottom: 3px;
+      }
+      .panel-lin .panel-title {
+        color: var(--azul);
+      }
+      .panel-quad .panel-title {
+        color: var(--rojo);
+      }
+      .panel-desc {
+        font-size: 0.76rem;
+        color: var(--muted);
+        line-height: 1.5;
+        background: var(--bg);
+        border-radius: 8px;
+        padding: 8px 10px;
+        margin-bottom: 11px;
+        white-space: pre-line;
+        font-weight: 600;
+      }
+      .formula {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-align: center;
+        padding: 8px;
+        border-radius: 8px;
+        margin-bottom: 13px;
+      }
+      .panel-lin .formula {
+        background: var(--azul-cl);
+        color: var(--azul);
+      }
+      .panel-quad .formula {
+        background: var(--rojo-cl);
+        color: var(--rojo);
+      }
+
+      /* ── SLIDERS ── */
+      .sl-group {
+        margin-bottom: 13px;
+      }
+      .sl-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 4px;
+      }
+      .sl-name {
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: var(--ink);
+      }
+      .sl-val {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.8rem;
+        font-weight: 600;
+        background: var(--bg);
+        border-radius: 6px;
+        padding: 1px 7px;
+        min-width: 52px;
+        text-align: center;
+      }
+      .panel-lin .sl-val {
+        color: var(--azul);
+      }
+      .panel-quad .sl-val {
+        color: var(--rojo);
+      }
+      input[type='range'] {
+        width: 100%;
+        height: 4px;
+        cursor: pointer;
+      }
+      .panel-lin input[type='range'] {
+        accent-color: var(--azul);
+      }
+      .panel-quad input[type='range'] {
+        accent-color: var(--rojo);
+      }
+
+      /* ── STATS ── */
+      .stats {
+        background: var(--bg);
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-top: 12px;
+        font-size: 0.78rem;
+        line-height: 2;
+      }
+      .stats b {
+        color: var(--ink);
+        font-weight: 700;
+      }
+      .vh {
+        color: var(--verde);
+        font-weight: 800;
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .vm {
+        color: var(--morado);
+        font-weight: 800;
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .badge {
+        display: inline-block;
+        padding: 1px 9px;
+        border-radius: 10px;
+        font-size: 0.72rem;
+        font-weight: 800;
+      }
+      .up {
+        background: var(--verde-cl);
+        color: #14532d;
+      }
+      .dn {
+        background: var(--rojo-cl);
+        color: #991b1b;
+      }
+      .nt {
+        background: var(--amar-cl);
+        color: #713f12;
+      }
+      .mx {
+        background: var(--morado-cl);
+        color: #6b21a8;
+      }
+
+      /* ── CHART AREA ── */
+      .chart-area {
+        background: var(--card);
+        border-radius: var(--r);
+        padding: 18px;
+        box-shadow: var(--sh);
+        border-top: 4px solid var(--border);
+      }
+      .chart-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 10px;
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .leg-circle {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+      .leg-diamond {
+        width: 10px;
+        height: 10px;
+        transform: rotate(45deg);
+      }
+      .chart-area canvas {
+        width: 100% !important;
+      }
+
+      /* ── TABLE OF VALUES ── */
+      .table-section {
+        background: var(--card);
+        border-radius: var(--r);
+        padding: 18px;
+        box-shadow: var(--sh);
+        margin-bottom: 14px;
+        border-top: 4px solid var(--muted);
+      }
+      .table-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .table-top h3 {
+        font-size: 0.92rem;
+        font-weight: 800;
+      }
+      .table-hint {
+        font-size: 0.74rem;
+        font-weight: 700;
+        color: var(--muted);
+      }
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .val-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8rem;
+      }
+      .val-table th {
+        background: var(--ink);
+        color: #fff;
+        padding: 8px 12px;
+        text-align: right;
+        font-weight: 800;
+        font-size: 0.75rem;
+      }
+      .val-table th:first-child {
+        text-align: center;
+      }
+      .val-table td {
+        padding: 6px 12px;
+        border-bottom: 1px solid var(--border);
+        text-align: right;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.77rem;
+      }
+      .val-table td:first-child {
+        text-align: center;
+        font-weight: 700;
+        color: var(--muted);
+      }
+      .val-table tr:nth-child(even):not(.is-int) {
+        background: #f8fafc;
+      }
+      .val-table tr.is-int {
+        background: var(--amar-cl) !important;
+      }
+      .val-table tr.is-int td {
+        font-weight: 800;
+      }
+      .val-table tr.is-int td:first-child {
+        color: var(--morado);
+      }
+      .int-tag {
+        display: inline-block;
+        background: var(--morado-cl);
+        color: var(--morado);
+        border-radius: 5px;
+        padding: 0 4px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        margin-left: 3px;
+      }
+
+      /* ── ANIMATION ── */
+      .anim-section {
+        background: var(--card);
+        border-radius: var(--r);
+        padding: 18px;
+        box-shadow: var(--sh);
+        margin-bottom: 14px;
+        border-top: 4px solid var(--naranja);
+        display: none;
+      }
+      .anim-section.show {
+        display: block;
+      }
+      .anim-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .anim-head h3 {
+        font-size: 0.95rem;
+        font-weight: 800;
+      }
+      .anim-info {
+        font-size: 0.76rem;
+        color: var(--muted);
+        margin-top: 8px;
+        font-weight: 600;
+      }
+      #animCanvas {
+        display: block;
+        width: 100%;
+        border-radius: 10px;
+        background: #e0f2fe;
+      }
+      .btn {
+        padding: 9px 22px;
+        border: none;
+        border-radius: 8px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-weight: 800;
+        font-family: 'Nunito', sans-serif;
+        transition: all 0.18s;
+      }
+      .btn-launch {
+        background: var(--naranja);
+      }
+      .btn-launch:hover {
+        background: #c2410c;
+        transform: translateY(-1px);
+      }
+
+      /* ── CHALLENGE ── */
+      .challenge {
+        background: var(--card);
+        border-radius: var(--r);
+        padding: 20px;
+        box-shadow: var(--sh);
+        border-top: 4px solid var(--morado);
+      }
+      .chal-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .chal-title {
+        font-size: 1rem;
+        font-weight: 900;
+        color: var(--morado);
+      }
+      .score-box {
+        background: var(--morado-cl);
+        color: #6b21a8;
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .chal-desc {
+        font-size: 0.83rem;
+        color: var(--muted);
+        margin-bottom: 14px;
+        line-height: 1.6;
+        font-weight: 600;
+      }
+      .chal-desc strong {
+        color: var(--ink);
+      }
+      .btn-check {
+        background: var(--morado);
+      }
+      .btn-check:hover {
+        background: #6d28d9;
+        transform: translateY(-1px);
+      }
+      .btn-new {
+        background: #94a3b8;
+        margin-left: 8px;
+      }
+      .btn-new:hover {
+        background: #64748b;
+      }
+      .chal-result {
+        margin-top: 12px;
+        font-size: 0.88rem;
+        font-weight: 800;
+        min-height: 22px;
+      }
+      .ok {
+        color: var(--verde);
+      }
+      .ko {
+        color: var(--rojo);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hdr">
+      <h1>Funciones en la Vida Real</h1>
+      <p>
+        Compara funciones lineales y cuadráticas con ejemplos del mundo cotidiano
+        <br />
+        Creado por José M. Fernández con Claude Sonnet 4.6
+      </p>
+      <div class="badges">
+        <span>📈 Lineal: ritmo constante</span>
+        <span>📉 Cuadrática: ritmo variable</span>
+        <span>🟢 Vértice automático</span>
+        <span>🟣 Intersecciones marcadas</span>
+        <span>📋 Tabla de valores</span>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-sc="libre">🎛️ Modo libre</button>
+      <button class="tab" data-sc="taxi">🚕 Taxi &amp; 🏀 Pelota</button>
+      <button class="tab" data-sc="trabajo">💼 Trabajo &amp; 💰 Negocio</button>
+      <button class="tab" data-sc="tanque">🚰 Tanque &amp; 📐 Terreno</button>
+      <button class="tab" data-sc="auto">🚗 Auto &amp; 🚴 Ciclista</button>
+    </div>
+
+    <!-- ══ HELP PANEL ══ -->
+    <div class="help-panel" id="helpPanel">
+      <div class="help-toggle" onclick="toggleHelp()" id="helpToggle">
+        <span class="help-toggle-left">📖 Guía del escenario</span>
+        <span class="help-toggle-right">
+          <span>Haz clic para leer antes de comenzar</span>
+          <span class="help-arrow open" id="helpArrow">▲</span>
+        </span>
+      </div>
+      <div class="help-body" id="helpBody">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <div class="main-grid">
+      <div class="panel panel-lin">
+        <div class="panel-title" id="linTitle">📈 Función Lineal</div>
+        <div class="panel-desc" id="linDesc"></div>
+        <div class="formula" id="linFormula"></div>
+        <div id="linSliders"></div>
+        <div class="stats" id="linStats"></div>
+      </div>
+
+      <div class="chart-area">
+        <div class="chart-legend">
+          <span class="legend-item">
+            <span class="leg-circle" style="background: var(--azul)"></span>
+            Lineal
+          </span>
+          <span class="legend-item">
+            <span class="leg-circle" style="background: var(--rojo)"></span>
+            Cuadrática
+          </span>
+          <span class="legend-item">
+            <span class="leg-circle" style="background: var(--verde)"></span>
+            Vértice
+          </span>
+          <span class="legend-item">
+            <span class="leg-diamond" style="background: var(--morado)"></span>
+            Intersección
+          </span>
+        </div>
+        <canvas id="mainChart"></canvas>
+      </div>
+
+      <div class="panel panel-quad">
+        <div class="panel-title" id="quadTitle">📉 Función Cuadrática</div>
+        <div class="panel-desc" id="quadDesc"></div>
+        <div class="formula" id="quadFormula"></div>
+        <div id="quadSliders"></div>
+        <div class="stats" id="quadStats"></div>
+      </div>
+    </div>
+
+    <!-- TABLE OF VALUES -->
+    <div class="table-section">
+      <div class="table-top">
+        <h3>📋 Tabla de valores</h3>
+        <span class="table-hint">
+          Filas
+          <span style="background: var(--amar-cl); padding: 1px 6px; border-radius: 4px; font-weight: 800">⚡</span>
+          = punto donde se cruzan las dos funciones
+        </span>
+      </div>
+      <div class="table-scroll">
+        <table class="val-table">
+          <thead>
+            <tr>
+              <th>x</th>
+              <th id="thLin">Lineal</th>
+              <th id="thQuad">Cuadrática</th>
+              <th>Diferencia</th>
+            </tr>
+          </thead>
+          <tbody id="valBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ANIMATION -->
+    <div class="anim-section" id="animSection">
+      <div class="anim-head">
+        <h3>🏀 Animación — Trayectoria de la pelota</h3>
+        <button class="btn btn-launch" id="btnLaunch">▶ Lanzar</button>
+      </div>
+      <canvas id="animCanvas" height="170"></canvas>
+      <p class="anim-info" id="animInfo"></p>
+    </div>
+
+    <!-- CHALLENGE -->
+    <div class="challenge">
+      <div class="chal-head">
+        <div class="chal-title">🎯 Desafío: Alcanza el objetivo</div>
+        <div class="score-box">
+          ⭐ Puntos:
+          <span id="scoreTxt">0</span>
+        </div>
+      </div>
+      <div class="chal-desc" id="chalDesc"></div>
+      <button class="btn btn-check" onclick="checkChallenge()">✅ Verificar</button>
+      <button class="btn btn-new" onclick="newChallenge()">🔄 Nuevo desafío</button>
+      <div class="chal-result" id="chalResult"></div>
+    </div>
+
+    <script>
+      'use strict';
+
+      // ════════════════════════════════════════════════════════════
+      //  HELPER
+      // ════════════════════════════════════════════════════════════
+      function n(v) {
+        if (v === null || v === undefined || isNaN(v)) return '?';
+        const f = parseFloat(v);
+        return Math.abs(f % 1) < 0.005 ? f.toFixed(0) : f.toFixed(2);
+      }
+      function kw(t) {
+        return `<span class="help-kw">${t}</span>`;
+      }
+
+      // ════════════════════════════════════════════════════════════
+      //  SCENARIOS
+      // ════════════════════════════════════════════════════════════
+      const SC = {
+        libre: {
+          linTitle: '📈 Función Lineal',
+          linDesc: 'Explora la forma general.\nf(x) = m·x + b',
+          quadTitle: '📉 Función Cuadrática',
+          quadDesc: 'Explora la forma general.\nf(x) = a·x² + b·x + c',
+          xLabel: 'x',
+          yLabel: 'f(x)',
+          xMin: -10,
+          xMax: 10,
+          xStep: 0.4,
+          linSliders: [
+            {id: 'lin_m', label: 'Pendiente (m)', min: -10, max: 10, step: 0.1, val: 2, unit: ''},
+            {id: 'lin_b', label: 'Intercepto (b)', min: -20, max: 20, step: 1, val: 3, unit: ''}
+          ],
+          quadSliders: [
+            {id: 'quad_a', label: 'Coef. cuadrático (a)', min: -5, max: 5, step: 0.1, val: -1, unit: ''},
+            {id: 'quad_b', label: 'Coef. lineal (b)', min: -10, max: 10, step: 0.1, val: 4, unit: ''},
+            {id: 'quad_c', label: 'Término indep. (c)', min: -20, max: 20, step: 1, val: 0, unit: ''}
+          ],
+          linFn: (x, p) => p.lin_m * x + p.lin_b,
+          quadFn: (x, p) => p.quad_a * x * x + p.quad_b * x + p.quad_c,
+          linFormula: p => `f(x) = ${n(p.lin_m)}x + ${n(p.lin_b)}`,
+          quadFormula: p => `f(x) = ${n(p.quad_a)}x² + ${n(p.quad_b)}x + ${n(p.quad_c)}`,
+          linStats: p => {
+            const m = p.lin_m,
+              b = p.lin_b;
+            const cls = m > 0 ? 'up' : m < 0 ? 'dn' : 'nt',
+              lbl = m > 0 ? '📈 Creciente' : m < 0 ? '📉 Decreciente' : '➡️ Constante';
+            const xi = m !== 0 ? `(${n(-b / m)}, 0)` : 'N/A';
+            return `<b>Pendiente:</b> ${m} <span class="badge ${cls}">${lbl}</span><br>
+              <b>Intercepto en y:</b> (0, ${b})<br><b>Intercepto en x:</b> ${xi}`;
+          },
+          quadStats: p => {
+            const a = p.quad_a,
+              b = p.quad_b,
+              c = p.quad_c;
+            if (a === 0) return '<b>⚠️ Con a=0 la función es una recta</b>';
+            const xv = -b / (2 * a),
+              yv = a * xv * xv + b * xv + c;
+            return `<b>Vértice:</b> <span class="vh">(${n(xv)}, ${n(yv)})</span><br>
+              <b>Tipo:</b> ${a > 0 ? '⬆️ Mínimo' : '⬇️ Máximo'}: <span class="vh">${n(yv)}</span><br>
+              <b>Eje de simetría:</b> x = ${n(xv)}`;
+          },
+          getVertex: p => {
+            if (!p.quad_a) return null;
+            const xv = -p.quad_b / (2 * p.quad_a);
+            return {xv, yv: p.quad_a * xv * xv + p.quad_b * xv + p.quad_c};
+          },
+          getChalVal: p => {
+            if (!p.quad_a) return null;
+            const xv = -p.quad_b / (2 * p.quad_a);
+            return p.quad_a * xv * xv + p.quad_b * xv + p.quad_c;
+          },
+          showAnim: false,
+          chalTargets: [5, 10, 15, 20, -5, -10, 0, 8],
+          chalLabel: 'el valor del vértice (eje y)',
+          help: {
+            ctx: `<h4>📌 ¿Qué son estas funciones?</h4>
+           <p>Una <b>función lineal</b> produce una <b>recta</b>: cada unidad de x cambia y en la misma cantidad.<br>
+           Una <b>función cuadrática</b> produce una <b>parábola</b>: la tasa de cambio no es constante.</p>`,
+            lin: `<h4>📈 Controles de la recta</h4>
+           <ul>
+             <li>${kw('m')} = <b>pendiente</b>: controla la inclinación. Si m&gt;0 sube; si m&lt;0 baja; si m=0 es horizontal.</li>
+             <li>${kw('b')} = <b>intercepto</b>: dónde la recta cruza el eje y (cuando x=0).</li>
+           </ul>`,
+            quad: `<h4>📉 Controles de la parábola</h4>
+            <ul>
+              <li>${kw('a')} = si es positivo, la parábola <b>abre hacia arriba</b> (∪); si es negativo, <b>hacia abajo</b> (∩).</li>
+              <li>${kw('b')} = desplaza el vértice horizontalmente.</li>
+              <li>${kw('c')} = eleva o baja toda la parábola.</li>
+            </ul>`,
+            tip: `<h4>💡 Qué observar y el desafío</h4>
+           <ul>
+             <li>El punto <b>verde 🟢</b> es el vértice: el máximo o mínimo de la parábola.</li>
+             <li>Los rombos <b>morados 🟣</b> son intersecciones: donde las dos funciones tienen el mismo valor.</li>
+             <li><b>Desafío:</b> ajusta ${kw('a')}, ${kw('b')} y ${kw('c')} hasta que el vértice llegue al valor objetivo.</li>
+           </ul>`
+          }
+        },
+
+        taxi: {
+          linTitle: '🚕 Costo de Taxi',
+          linDesc: 'Tarifa base más costo por km.\nC(km) = m·km + b',
+          quadTitle: '🏀 Lanzamiento de Pelota',
+          quadDesc: 'Altura según el tiempo.\nh(t) = −5t² + v₀t + h₀',
+          xLabel: 'Kilómetros / Tiempo (s)',
+          yLabel: 'Costo ($) / Altura (m)',
+          xMin: 0,
+          xMax: 10,
+          xStep: 0.2,
+          linSliders: [
+            {id: 'lin_m', label: 'Tarifa por km ($/km)', min: 0.5, max: 5, step: 0.1, val: 2, unit: '$/km'},
+            {id: 'lin_b', label: 'Tarifa base ($)', min: 0, max: 10, step: 0.5, val: 3, unit: '$'}
+          ],
+          quadSliders: [
+            {id: 'quad_v', label: 'Velocidad inicial (m/s)', min: 5, max: 25, step: 0.5, val: 15, unit: 'm/s'},
+            {id: 'quad_h0', label: 'Altura inicial (m)', min: 0, max: 10, step: 0.5, val: 1, unit: 'm'}
+          ],
+          linFn: (x, p) => p.lin_m * x + p.lin_b,
+          quadFn: (x, p) => -5 * x * x + p.quad_v * x + p.quad_h0,
+          linFormula: p => `C(km) = ${n(p.lin_m)}·km + ${n(p.lin_b)}`,
+          quadFormula: p => `h(t) = −5t² + ${n(p.quad_v)}t + ${n(p.quad_h0)}`,
+          linStats: p => `<b>Tarifa base:</b> $${n(p.lin_b)}<br>
+      <b>Costo/km:</b> $${n(p.lin_m)}<br>
+      <b>A 5 km:</b> $${n(p.lin_m * 5 + p.lin_b)}<br>
+      <b>A 10 km:</b> $${n(p.lin_m * 10 + p.lin_b)}<br>
+      <span class="badge up">📈 El costo siempre aumenta</span>`,
+          quadStats: p => {
+            const xv = p.quad_v / 10,
+              yv = -5 * xv * xv + p.quad_v * xv + p.quad_h0;
+            const tGnd = (p.quad_v + Math.sqrt(p.quad_v * p.quad_v + 20 * p.quad_h0)) / 10;
+            return `<b>Altura máxima:</b> <span class="vh">${n(yv)} m</span><br>
+              <b>Tiempo al máximo:</b> <span class="vh">${n(xv)} s</span><br>
+              <b>Cae al suelo en:</b> ${n(tGnd)} s<br>
+              <span class="badge dn">⬇️ Parábola abre hacia abajo</span>`;
+          },
+          getVertex: p => {
+            const xv = p.quad_v / 10;
+            return {xv, yv: -5 * xv * xv + p.quad_v * xv + p.quad_h0};
+          },
+          getChalVal: p => {
+            const xv = p.quad_v / 10;
+            return -5 * xv * xv + p.quad_v * xv + p.quad_h0;
+          },
+          showAnim: true,
+          chalTargets: [10, 15, 20, 25, 30, 35],
+          chalLabel: 'la altura máxima (metros)',
+          help: {
+            ctx: `<h4>📌 ¿Qué representa cada función?</h4>
+           <p>El <b>costo del taxi</b> sube de forma <b>lineal</b>: cada km adicional cuesta lo mismo.<br>
+           La <b>pelota lanzada</b> sigue una <b>parábola</b>: la gravedad la frena, detiene y hace caer.</p>`,
+            lin: `<h4>🚕 Controles del taxi</h4>
+           <ul>
+             <li>${kw('m')} = precio por cada kilómetro recorrido.</li>
+             <li>${kw('b')} = tarifa base: lo que pagas solo por subir al taxi, antes de avanzar.</li>
+             <li>El costo <b>siempre sube</b>: nunca baja aunque hayas llegado.</li>
+           </ul>`,
+            quad: `<h4>🏀 Controles de la pelota</h4>
+            <ul>
+              <li>${kw('v₀')} = fuerza del lanzamiento. Más fuerza = más altura y más tiempo en el aire.</li>
+              <li>${kw('h₀')} = altura desde donde se lanza (ej: de pie = ~1.8 m).</li>
+              <li>El coeficiente ${kw('-5')} representa la <b>gravedad</b> (la mitad de 9.8 m/s²).</li>
+            </ul>`,
+            tip: `<h4>💡 Qué observar y el desafío</h4>
+           <ul>
+             <li>El punto <b>verde 🟢</b> es la <b>altura máxima</b>: el momento en que la pelota deja de subir.</li>
+             <li>Presiona <b>▶ Lanzar</b> para ver la animación de la trayectoria.</li>
+             <li><b>Desafío:</b> ajusta ${kw('v₀')} hasta que la pelota alcance la altura objetivo.</li>
+           </ul>`
+          }
+        },
+
+        trabajo: {
+          linTitle: '💼 Pago por Horas',
+          linDesc: 'Salario por hora más bono fijo.\nP(h) = s·h + bono',
+          quadTitle: '💰 Ganancia del Negocio',
+          quadDesc: 'Ganancia según precio del producto.\nG(x) = −2x² + p·x − costo',
+          xLabel: 'Horas / Precio ($)',
+          yLabel: 'Pago ($) / Ganancia ($)',
+          xMin: 0,
+          xMax: 20,
+          xStep: 0.4,
+          linSliders: [
+            {id: 'lin_s', label: 'Salario/hora ($/h)', min: 8, max: 30, step: 0.5, val: 15, unit: '$/h'},
+            {id: 'lin_bono', label: 'Bono fijo ($)', min: 0, max: 200, step: 5, val: 50, unit: '$'}
+          ],
+          quadSliders: [
+            {id: 'quad_p', label: 'Factor precio', min: 10, max: 50, step: 1, val: 30, unit: ''},
+            {id: 'quad_cost', label: 'Costo fijo ($)', min: 10, max: 150, step: 5, val: 50, unit: '$'}
+          ],
+          linFn: (x, p) => p.lin_s * x + p.lin_bono,
+          quadFn: (x, p) => -2 * x * x + p.quad_p * x - p.quad_cost,
+          linFormula: p => `P(h) = ${n(p.lin_s)}·h + ${n(p.lin_bono)}`,
+          quadFormula: p => `G(x) = −2x² + ${n(p.quad_p)}x − ${n(p.quad_cost)}`,
+          linStats: p => `<b>Salario/hora:</b> $${n(p.lin_s)}<br>
+      <b>Bono:</b> $${n(p.lin_bono)}<br>
+      <b>8 horas:</b> $${n(p.lin_s * 8 + p.lin_bono)}<br>
+      <b>40 horas:</b> $${n(p.lin_s * 40 + p.lin_bono)}<br>
+      <span class="badge up">📈 Ingreso crece linealmente</span>`,
+          quadStats: p => {
+            const xv = p.quad_p / 4,
+              yv = -2 * xv * xv + p.quad_p * xv - p.quad_cost;
+            return `<b>Precio óptimo:</b> <span class="vh">$${n(xv)}</span><br>
+              <b>Ganancia máxima:</b> <span class="vh">$${n(yv)}</span><br>
+              <b>¿Rentable?:</b> ${yv > 0 ? '✅ Sí' : '❌ No (pérdida)'}<br>
+              <span class="badge dn">⬇️ Parábola abre hacia abajo</span>`;
+          },
+          getVertex: p => {
+            const xv = p.quad_p / 4;
+            return {xv, yv: -2 * xv * xv + p.quad_p * xv - p.quad_cost};
+          },
+          getChalVal: p => {
+            const xv = p.quad_p / 4;
+            return -2 * xv * xv + p.quad_p * xv - p.quad_cost;
+          },
+          showAnim: false,
+          chalTargets: [50, 75, 100, 125, 150, 200],
+          chalLabel: 'la ganancia máxima ($)',
+          help: {
+            ctx: `<h4>📌 ¿Qué representa cada función?</h4>
+           <p>El <b>salario</b> crece en línea recta: cada hora trabajada suma la misma cantidad.<br>
+           La <b>ganancia del negocio</b> sigue una parábola: cobrar demasiado barato <em>o</em> demasiado caro hace que vendas menos o ganes menos.</p>`,
+            lin: `<h4>💼 Controles del salario</h4>
+           <ul>
+             <li>${kw('s')} = cuánto ganas por cada hora trabajada.</li>
+             <li>${kw('bono')} = ingreso fijo garantizado, independiente de las horas.</li>
+             <li>Nota: tu pago <b>nunca baja</b> aunque trabajes más horas.</li>
+           </ul>`,
+            quad: `<h4>💰 Controles del negocio</h4>
+            <ul>
+              <li>${kw('p')} = factor que controla el precio óptimo. El vértice estará en x = p÷4.</li>
+              <li>${kw('costo')} = gastos fijos del negocio (renta, luz, etc.). Bajan la ganancia.</li>
+              <li>Si cobras muy barato: pocas ganancias por unidad. Si cobras muy caro: nadie compra.</li>
+            </ul>`,
+            tip: `<h4>💡 Qué observar y el desafío</h4>
+           <ul>
+             <li>El punto <b>verde 🟢</b> es el <b>precio ideal</b>: donde la ganancia es máxima.</li>
+             <li>Si la parábola está por debajo del eje x, el negocio tiene pérdidas.</li>
+             <li><b>Desafío:</b> ajusta ${kw('p')} y ${kw('costo')} hasta alcanzar la ganancia objetivo.</li>
+           </ul>`
+          }
+        },
+
+        tanque: {
+          linTitle: '🚰 Llenado de Tanque',
+          linDesc: 'El tanque se llena a ritmo constante.\nV(t) = r·t + V₀',
+          quadTitle: '📐 Área del Terreno',
+          quadDesc: 'Maximiza el área con cerca fija.\nA(x) = x · (P/2 − x)',
+          xLabel: 'Tiempo (min) / Ancho (m)',
+          yLabel: 'Volumen (L) / Área (m²)',
+          xMin: 0,
+          xMax: 30,
+          xStep: 0.5,
+          linSliders: [
+            {id: 'lin_r', label: 'Flujo (L/min)', min: 2, max: 20, step: 0.5, val: 8, unit: 'L/min'},
+            {id: 'lin_v0', label: 'Volumen inicial (L)', min: 0, max: 200, step: 10, val: 100, unit: 'L'}
+          ],
+          quadSliders: [{id: 'quad_P', label: 'Perímetro disponible (m)', min: 20, max: 100, step: 2, val: 50, unit: 'm'}],
+          linFn: (x, p) => p.lin_r * x + p.lin_v0,
+          quadFn: (x, p) => x * (p.quad_P / 2 - x),
+          linFormula: p => `V(t) = ${n(p.lin_r)}t + ${n(p.lin_v0)}`,
+          quadFormula: p => `A(x) = x·(${n(p.quad_P / 2)} − x)`,
+          linStats: p => `<b>Flujo:</b> ${n(p.lin_r)} L/min<br>
+      <b>Vol. inicial:</b> ${n(p.lin_v0)} L<br>
+      <b>A los 10 min:</b> ${n(p.lin_r * 10 + p.lin_v0)} L<br>
+      <b>A los 20 min:</b> ${n(p.lin_r * 20 + p.lin_v0)} L<br>
+      <span class="badge up">📈 Crece a ritmo constante</span>`,
+          quadStats: p => {
+            const xv = p.quad_P / 4,
+              yv = xv * (p.quad_P / 2 - xv);
+            return `<b>Ancho óptimo:</b> <span class="vh">${n(xv)} m</span><br>
+              <b>Largo óptimo:</b> <span class="vh">${n(p.quad_P / 2 - xv)} m</span><br>
+              <b>Área máxima:</b> <span class="vh">${n(yv)} m²</span><br>
+              <span class="badge up">🔺 El cuadrado maximiza el área</span>`;
+          },
+          getVertex: p => {
+            const xv = p.quad_P / 4;
+            return {xv, yv: xv * (p.quad_P / 2 - xv)};
+          },
+          getChalVal: p => {
+            const xv = p.quad_P / 4;
+            return xv * (p.quad_P / 2 - xv);
+          },
+          showAnim: false,
+          chalTargets: [100, 150, 200, 300, 400, 500],
+          chalLabel: 'el área máxima (m²)',
+          help: {
+            ctx: `<h4>📌 ¿Qué representa cada función?</h4>
+           <p>El <b>tanque</b> se llena a ritmo fijo: cada minuto entra la misma cantidad de agua (función lineal).<br>
+           El <b>terreno</b> tiene un perímetro fijo de cerca: si lo haces muy largo y angosto, el área baja; si lo cuadras, el área es máxima (función cuadrática).</p>`,
+            lin: `<h4>🚰 Controles del tanque</h4>
+           <ul>
+             <li>${kw('r')} = caudal: cuántos litros entran por minuto.</li>
+             <li>${kw('V₀')} = agua que ya había en el tanque al inicio.</li>
+             <li>Si el tanque tiene capacidad máxima, la recta debe detenerse — aquí la mostramos sin límite.</li>
+           </ul>`,
+            quad: `<h4>📐 Controles del terreno</h4>
+            <ul>
+              <li>${kw('P')} = total de metros de cerca disponibles.</li>
+              <li>Si el ancho es ${kw('x')}, el largo es ${kw('P/2 − x')}. El área = ancho × largo.</li>
+              <li>Cuando ancho = largo (cuadrado perfecto), el área es <b>máxima</b>. Ese es el vértice.</li>
+            </ul>`,
+            tip: `<h4>💡 Qué observar y el desafío</h4>
+           <ul>
+             <li>El punto <b>verde 🟢</b> muestra el ancho que maximiza el área del terreno.</li>
+             <li>Observa: cuando el ancho es 0 o igual a P/2, el área es 0 (terreno degenerado).</li>
+             <li><b>Desafío:</b> ajusta el ${kw('Perímetro')} hasta que el área máxima llegue al valor objetivo.</li>
+           </ul>`
+          }
+        },
+
+        auto: {
+          linTitle: '🚴 Ciclista — velocidad constante',
+          linDesc: 'El ciclista pedalea a ritmo fijo.\nd(t) = v · t',
+          quadTitle: '🚗 Auto — aceleración constante',
+          quadDesc: 'El auto parte del reposo y acelera.\nd(t) = a · t²',
+          xLabel: 'Tiempo (s)',
+          yLabel: 'Distancia (m)',
+          xMin: 0,
+          xMax: 20,
+          xStep: 0.4,
+          linSliders: [{id: 'lin_v', label: 'Velocidad del ciclista (m/s)', min: 1, max: 20, step: 0.5, val: 8, unit: 'm/s'}],
+          quadSliders: [{id: 'quad_ac', label: 'Aceleración del auto (m/s²)', min: 0.2, max: 6, step: 0.1, val: 1, unit: 'm/s²'}],
+          linFn: (x, p) => p.lin_v * x,
+          quadFn: (x, p) => p.quad_ac * x * x,
+          linFormula: p => `d(t) = ${n(p.lin_v)} · t`,
+          quadFormula: p => `d(t) = ${n(p.quad_ac)} · t²`,
+          linStats: p => `<b>Velocidad:</b> ${n(p.lin_v)} m/s<br>
+      <b>A t = 5 s:</b> ${n(p.lin_v * 5)} m<br>
+      <b>A t = 10 s:</b> ${n(p.lin_v * 10)} m<br>
+      <b>A t = 20 s:</b> ${n(p.lin_v * 20)} m<br>
+      <span class="badge up">📈 Distancia crece a ritmo fijo</span>`,
+          quadStats: p => {
+            const tAlc = p.quad_ac > 0 ? p.lin_v / p.quad_ac : null;
+            const dAlc = tAlc ? p.quad_ac * tAlc * tAlc : null;
+            return `<b>Aceleración:</b> ${n(p.quad_ac)} m/s²<br>
+              <b>A t = 5 s:</b> ${n(p.quad_ac * 25)} m<br>
+              <b>A t = 10 s:</b> ${n(p.quad_ac * 100)} m<br>
+              <b>Alcanza al ciclista en:</b><br>
+              <span class="vm">t = ${tAlc ? n(tAlc) : '?'} s &nbsp;(${dAlc ? n(dAlc) : '?'} m)</span><br>
+              <span class="badge up">⬆️ Parábola abre hacia arriba</span>`;
+          },
+          getVertex: p => null,
+          getChalVal: p => (p.quad_ac > 0 ? p.lin_v / p.quad_ac : null),
+          showAnim: false,
+          chalTargets: [4, 5, 6, 8, 10, 12, 15],
+          chalLabel: 'el tiempo en que el auto alcanza al ciclista (s)',
+          help: {
+            ctx: `<h4>📌 ¿Qué representa cada función?</h4>
+           <p>El <b>ciclista</b> va siempre a la misma velocidad: su distancia crece en línea recta.<br>
+           El <b>auto</b> parte desde cero y acelera: al principio va más lento que el ciclista, pero la parábola sube cada vez más rápido hasta <b>superarlo</b>.</p>`,
+            lin: `<h4>🚴 Controles del ciclista</h4>
+           <ul>
+             <li>${kw('v')} = velocidad constante en metros por segundo.</li>
+             <li>Su distancia crece igual cada segundo. La recta no se curva nunca.</li>
+             <li>8 m/s ≈ 29 km/h (ciclista rápido de ciudad).</li>
+           </ul>`,
+            quad: `<h4>🚗 Controles del auto</h4>
+            <ul>
+              <li>${kw('a')} = aceleración. A mayor aceleración, más rápido supera al ciclista.</li>
+              <li>El auto empieza en 0 m/s. Su velocidad instantánea en el tiempo t es ${kw('2a·t')}.</li>
+              <li>La intersección 🟣 muestra el momento exacto del alcance.</li>
+            </ul>`,
+            tip: `<h4>💡 Qué observar y el desafío</h4>
+           <ul>
+             <li>El rombo <b>morado 🟣</b> en la gráfica y la fila <b>amarilla ⚡</b> en la tabla indican cuándo y dónde el auto alcanza al ciclista.</li>
+             <li>Observa la tabla: antes del cruce, la diferencia es negativa (ciclista adelante); después, positiva (auto adelante).</li>
+             <li><b>Desafío:</b> ajusta la aceleración para que el auto alcance al ciclista en exactamente el tiempo objetivo.</li>
+           </ul>`
+          }
+        }
+      };
+
+      // ════════════════════════════════════════════════════════════
+      //  STATE
+      // ════════════════════════════════════════════════════════════
+      let curSc = 'libre',
+        params = {},
+        score = 0,
+        chalTarget = 20,
+        chalAttempts = 0,
+        animRaf = null;
+      let helpOpen = true;
+
+      // ════════════════════════════════════════════════════════════
+      //  HELP PANEL
+      // ════════════════════════════════════════════════════════════
+      function toggleHelp() {
+        helpOpen = !helpOpen;
+        document.getElementById('helpBody').style.display = helpOpen ? 'grid' : 'none';
+        const arrow = document.getElementById('helpArrow');
+        arrow.textContent = helpOpen ? '▲' : '▼';
+        arrow.classList.toggle('open', helpOpen);
+        document.querySelector('.help-toggle-right span').textContent = helpOpen ? 'Haz clic para cerrar' : 'Haz clic para leer antes de comenzar';
+      }
+
+      function updateHelp(name) {
+        const h = SC[name].help;
+        document.getElementById('helpBody').innerHTML = `
+    <div class="help-card hc-ctx">${h.ctx}</div>
+    <div class="help-card hc-lin">${h.lin}</div>
+    <div class="help-card hc-quad">${h.quad}</div>
+    <div class="help-card hc-tip">${h.tip}</div>
+  `;
+        // Auto-open on scenario change
+        if (!helpOpen) toggleHelp();
+      }
+
+      // ════════════════════════════════════════════════════════════
+      //  CHART — 4 datasets
+      // ════════════════════════════════════════════════════════════
+      const chartCtx = document.getElementById('mainChart').getContext('2d');
+      const chart = new Chart(chartCtx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [
+            {label: 'Lineal', borderColor: '#1d4ed8', borderWidth: 2.5, data: [], fill: false, pointRadius: 0, tension: 0.05},
+            {label: 'Cuadrática', borderColor: '#dc2626', borderWidth: 2.5, data: [], fill: false, pointRadius: 0, tension: 0.05},
+            {label: 'Vértice', borderColor: '#15803d', backgroundColor: '#15803d', borderWidth: 0, data: [], fill: false, showLine: false, pointRadius: 9, pointHoverRadius: 11, pointStyle: 'circle'},
+            {
+              label: 'Intersección',
+              borderColor: '#7c3aed',
+              backgroundColor: '#7c3aed',
+              borderWidth: 2,
+              data: [],
+              fill: false,
+              showLine: false,
+              pointRadius: 8,
+              pointHoverRadius: 11,
+              pointStyle: 'rectRot'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          animation: {duration: 0},
+          plugins: {
+            legend: {display: false},
+            tooltip: {mode: 'index', intersect: false, callbacks: {title: items => `x = ${items[0].label}`}}
+          },
+          scales: {
+            x: {title: {display: true, text: 'x', font: {size: 11, weight: 'bold'}}, ticks: {maxTicksLimit: 12, font: {size: 10}}},
+            y: {title: {display: true, text: 'f(x)', font: {size: 11, weight: 'bold'}}, ticks: {font: {size: 10}}}
+          }
+        }
+      });
+
+      // ════════════════════════════════════════════════════════════
+      //  FIND INTERSECTIONS
+      // ════════════════════════════════════════════════════════════
+      function findIntersections(labels, ld, qd) {
+        const pts = [];
+        for (let i = 0; i < labels.length - 1; i++) {
+          const d1 = ld[i] - qd[i],
+            d2 = ld[i + 1] - qd[i + 1];
+          if (d1 * d2 <= 0 && Math.abs(d1) + Math.abs(d2) > 1e-9) {
+            const t = Math.abs(d1) / (Math.abs(d1) + Math.abs(d2));
+            const xi = parseFloat(labels[i]) + t * (parseFloat(labels[i + 1]) - parseFloat(labels[i]));
+            const yi = ld[i] + t * (ld[i + 1] - ld[i]);
+            pts.push({xi, yi, ri: i});
+          }
+        }
+        return pts;
+      }
+
+      // ════════════════════════════════════════════════════════════
+      //  BUILD TABLE
+      // ════════════════════════════════════════════════════════════
+      function buildTable(labels, ld, qd, intRows) {
+        const sc = SC[curSc],
+          tb = document.getElementById('valBody');
+        const nearSet = new Set();
+        intRows.forEach(r => {
+          nearSet.add(r);
+          nearSet.add(r + 1);
+        });
+        const total = labels.length,
+          step = Math.max(1, Math.floor(total / 12));
+        const idxs = [];
+        for (let i = 0; i < total; i += step) idxs.push(i);
+        if (!idxs.includes(total - 1)) idxs.push(total - 1);
+        tb.innerHTML = '';
+        idxs.forEach(i => {
+          const lv = ld[i],
+            qv = qd[i],
+            diff = lv - qv,
+            isInt = nearSet.has(i);
+          const tr = document.createElement('tr');
+          if (isInt) tr.classList.add('is-int');
+          const dc = Math.abs(diff) < 0.8 ? 'var(--morado)' : diff > 0 ? 'var(--azul)' : 'var(--rojo)';
+          tr.innerHTML = `
+      <td>${parseFloat(labels[i]).toFixed(1)}${isInt ? '<span class="int-tag">⚡</span>' : ''}</td>
+      <td>${n(lv)}</td><td>${n(qv)}</td>
+      <td style="color:${dc}">${diff > 0 ? '+' : ''}${n(diff)}</td>`;
+          tb.appendChild(tr);
+        });
+        document.getElementById('thLin').textContent = sc.linTitle.replace(/^\S+\s/, '');
+        document.getElementById('thQuad').textContent = sc.quadTitle.replace(/^\S+\s/, '');
+      }
+
+      // ════════════════════════════════════════════════════════════
+      //  BUILD SLIDERS
+      // ════════════════════════════════════════════════════════════
+      function buildSliders(cid, sliders) {
+        const cont = document.getElementById(cid);
+        cont.innerHTML = '';
+        sliders.forEach(s => {
+          const d = document.createElement('div');
+          d.className = 'sl-group';
+          d.innerHTML = `
+      <div class="sl-row">
+        <span class="sl-name">${s.label}</span>
+        <span class="sl-val" id="v_${s.id}">${s.val}${s.unit ? ' ' + s.unit : ''}</span>
+      </div>
+      <input type="range" id="r_${s.id}" min="${s.min}" max="${s.max}" step="${s.step}" value="${s.val}">`;
+          cont.appendChild(d);
+          d.querySelector('input').addEventListener('input', function () {
+            params[s.id] = parseFloat(this.value);
+            document.getElementById('v_' + s.id).textContent = params[s.id] + (s.unit ? ' ' + s.unit : '');
+            updateAll();
+          });
+        });
+      }
+
+      // ════════════════════════════════════════════════════════════
+      //  LOAD SCENARIO
+      // ════════════════════════════════════════════════════════════
+      function loadScenario(name) {
+        curSc = name;
+        const sc = SC[name];
+        document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.sc === name));
+        document.getElementById('linTitle').textContent = sc.linTitle;
+        document.getElementById('linDesc').textContent = sc.linDesc;
+        document.getElementById('quadTitle').textContent = sc.quadTitle;
+        document.getElementById('quadDesc').textContent = sc.quadDesc;
+        buildSliders('linSliders', sc.linSliders);
+        buildSliders('quadSliders', sc.quadSliders);
+        params = {};
+        [...sc.linSliders, ...sc.quadSliders].forEach(s => {
+          params[s.id] = s.val;
+        });
+        document.getElementById('animSection').classList.toggle('show', sc.showAnim);
+        chart.options.scales.x.title.text = sc.xLabel;
+        chart.options.scales.y.title.text = sc.yLabel;
+        updateHelp(name);
+        newChallenge();
+        updateAll();
+      }
+
+      // ════════════════════════════════════════════════════════════
+      //  UPDATE ALL
+      // ════════════════════════════════════════════════════════════
+      function updateAll() {
+        const sc = SC[curSc];
+        const {xMin, xMax, xStep} = sc;
+        const labels = [],
+          ld = [],
+          qd = [];
+        for (let x = xMin; x <= xMax + xStep * 0.01; x += xStep) {
+          labels.push(x.toFixed(1));
+          ld.push(sc.linFn(x, params));
+          qd.push(sc.quadFn(x, params));
+        }
+        const v = sc.getVertex(params);
+        const vtx = new Array(labels.length).fill(null);
+        if (v && isFinite(v.xv) && v.xv >= xMin && v.xv <= xMax) {
+          let bi = 0,
+            bd = Infinity;
+          labels.forEach((l, i) => {
+            const d = Math.abs(parseFloat(l) - v.xv);
+            if (d < bd) {
+              bd = d;
+              bi = i;
+            }
+          });
+          vtx[bi] = v.yv;
+        }
+        const ints = findIntersections(labels, ld, qd);
+        const intd = new Array(labels.length).fill(null);
+        ints.forEach(({xi, yi, ri}) => {
+          let bi = ri,
+            bd = Math.abs(parseFloat(labels[ri]) - xi);
+          [ri, ri + 1].forEach(i => {
+            if (i >= 0 && i < labels.length) {
+              const d = Math.abs(parseFloat(labels[i]) - xi);
+              if (d < bd) {
+                bd = d;
+                bi = i;
+              }
+            }
+          });
+          intd[bi] = yi;
+        });
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = ld;
+        chart.data.datasets[1].data = qd;
+        chart.data.datasets[2].data = vtx;
+        chart.data.datasets[3].data = intd;
+        chart.update('none');
+        document.getElementById('linFormula').textContent = sc.linFormula(params);
+        document.getElementById('quadFormula').textContent = sc.quadFormula(params);
+        document.getElementById('linStats').innerHTML = sc.linStats(params);
+        let qs = sc.quadStats(params);
+        if (ints.length > 0) {
+          const pts = ints.map(p => `(${n(p.xi)}, ${n(p.yi)})`).join(' y ');
+          qs += `<br><span class="badge mx">⚡ ${ints.length === 1 ? 'Intersección' : 'Intersecciones'}: ${pts}</span>`;
+        }
+        document.getElementById('quadStats').innerHTML = qs;
+        buildTable(
+          labels,
+          ld,
+          qd,
+          ints.map(p => p.ri)
+        );
+        if (sc.showAnim && v) document.getElementById('animInfo').textContent = `🏀 Altura máxima: ${n(v.yv)} m en t = ${n(v.xv)} s — Presiona ▶ para ver la animación`;
+      }
+
+      // ════════════════════════════════════════════════════════════
+      //  BALL ANIMATION
+      // ════════════════════════════════════════════════════════════
+      document.getElementById('btnLaunch').addEventListener('click', launchBall);
+      function launchBall() {
+        if (animRaf) {
+          cancelAnimationFrame(animRaf);
+          animRaf = null;
+        }
+        const canvas = document.getElementById('animCanvas');
+        canvas.width = canvas.offsetWidth || 600;
+        canvas.height = 170;
+        const cx = canvas.getContext('2d');
+        const v0 = params.quad_v || 15,
+          h0 = params.quad_h0 || 1,
+          a = -5;
+        const tPeak = v0 / 10,
+          hMax = -5 * tPeak * tPeak + v0 * tPeak + h0;
+        const tEnd = (v0 + Math.sqrt(v0 * v0 + 20 * h0)) / 10;
+        const W = canvas.width,
+          H = canvas.height,
+          P = 28;
+        const mX = t => P + (t / tEnd) * (W - 2 * P);
+        const mY = hh => H - P - (Math.max(hh, 0) / (hMax * 1.18)) * (H - 2 * P);
+        let t0 = null;
+        function frame(ts) {
+          if (!t0) t0 = ts;
+          const pct = Math.min((ts - t0) / 3000, 1),
+            t = pct * tEnd,
+            h = a * t * t + v0 * t + h0;
+          cx.clearRect(0, 0, W, H);
+          const sky = cx.createLinearGradient(0, 0, 0, H - P);
+          sky.addColorStop(0, '#bfdbfe');
+          sky.addColorStop(1, '#e0f2fe');
+          cx.fillStyle = sky;
+          cx.fillRect(0, 0, W, H - P);
+          cx.fillStyle = '#86efac';
+          cx.fillRect(0, H - P, W, P);
+          cx.fillStyle = '#22c55e';
+          cx.fillRect(0, H - P, W, 3);
+          cx.save();
+          cx.setLineDash([5, 4]);
+          cx.strokeStyle = 'rgba(220,38,38,.45)';
+          cx.lineWidth = 1.5;
+          cx.beginPath();
+          for (let i = 0; i <= 100; i++) {
+            const ti = (i / 100) * tEnd,
+              hi = a * ti * ti + v0 * ti + h0;
+            if (hi < 0) break;
+            i === 0 ? cx.moveTo(mX(ti), mY(hi)) : cx.lineTo(mX(ti), mY(hi));
+          }
+          cx.stroke();
+          cx.restore();
+          const ppx = mX(tPeak),
+            ppy = mY(hMax);
+          cx.save();
+          cx.setLineDash([3, 3]);
+          cx.strokeStyle = '#15803d';
+          cx.lineWidth = 1;
+          cx.beginPath();
+          cx.moveTo(ppx, ppy);
+          cx.lineTo(ppx, H - P);
+          cx.stroke();
+          cx.restore();
+          cx.fillStyle = '#14532d';
+          cx.font = 'bold 10px Nunito,Arial';
+          cx.fillText(`↑ ${n(hMax)} m`, ppx + 4, ppy - 5);
+          const bx = mX(t),
+            by = h >= 0 ? mY(h) : H - P - 11,
+            r = 11;
+          const sc2 = Math.max(0.2, 1 - h / (hMax || 1));
+          cx.save();
+          cx.globalAlpha = 0.18 * sc2;
+          cx.fillStyle = '#000';
+          cx.beginPath();
+          cx.ellipse(bx, H - P + 2, 11 * sc2, 4 * sc2, 0, 0, Math.PI * 2);
+          cx.fill();
+          cx.restore();
+          const gr = cx.createRadialGradient(bx - 3, by - 4, 1, bx, by, r);
+          gr.addColorStop(0, '#fb923c');
+          gr.addColorStop(1, '#b45309');
+          cx.fillStyle = gr;
+          cx.beginPath();
+          cx.arc(bx, by, r, 0, Math.PI * 2);
+          cx.fill();
+          cx.strokeStyle = 'rgba(0,0,0,.22)';
+          cx.lineWidth = 1.5;
+          cx.beginPath();
+          cx.arc(bx, by, r, 0.5, 2.7);
+          cx.stroke();
+          cx.beginPath();
+          cx.arc(bx, by, r, 3.8, 6.0);
+          cx.stroke();
+          if (h > 0.5) {
+            cx.fillStyle = '#1e293b';
+            cx.font = '10px Nunito,Arial';
+            cx.fillText(n(h) + ' m', bx + 14, by);
+          }
+          if (pct < 1) animRaf = requestAnimationFrame(frame);
+          else {
+            cx.fillStyle = '#166534';
+            cx.font = 'bold 13px Nunito,Arial';
+            cx.fillText('🏁 ¡Aterrizó!', bx - 28, H - P - 22);
+          }
+        }
+        animRaf = requestAnimationFrame(frame);
+      }
+
+      // ════════════════════════════════════════════════════════════
+      //  CHALLENGE
+      // ════════════════════════════════════════════════════════════
+      function newChallenge() {
+        const sc = SC[curSc],
+          tgts = sc.chalTargets;
+        chalTarget = tgts[Math.floor(Math.random() * tgts.length)];
+        chalAttempts = 0;
+        document.getElementById('chalResult').innerHTML = '';
+        document.getElementById('chalDesc').innerHTML = `Ajusta los parámetros para que <strong>${sc.chalLabel}</strong>
+     sea aproximadamente <strong>${chalTarget}</strong>. Luego presiona <em>Verificar</em>.`;
+      }
+      function checkChallenge() {
+        const sc = SC[curSc],
+          el = document.getElementById('chalResult');
+        const actual = sc.getChalVal(params);
+        if (actual === null || !isFinite(actual)) {
+          el.innerHTML = '<span class="ko">⚠️ Valor no definido. Ajusta los parámetros.</span>';
+          return;
+        }
+        chalAttempts++;
+        const tol = Math.max(Math.abs(chalTarget) * 0.08, 1.5);
+        if (Math.abs(actual - chalTarget) <= tol) {
+          const bonus = Math.max(12 - chalAttempts * 2 + 2, 2);
+          score += bonus;
+          document.getElementById('scoreTxt').textContent = score;
+          el.innerHTML = `<span class="ok">🎉 ¡Excelente! Obtenido: ${n(actual)} | Objetivo: ${chalTarget} | +${bonus} pts (intento #${chalAttempts})</span>`;
+          setTimeout(newChallenge, 2800);
+        } else {
+          const hint = actual > chalTarget ? '⬇️ Necesitas reducirlo' : '⬆️ Necesitas aumentarlo';
+          el.innerHTML = `<span class="ko">❌ Obtenido: ${n(actual)} | Objetivo: ${chalTarget} | ${hint}</span>`;
+        }
+      }
+
+      // ════════════════════════════════════════════════════════════
+      //  TABS & INIT
+      // ════════════════════════════════════════════════════════════
+      document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => loadScenario(btn.dataset.sc)));
+
+      loadScenario('libre');
+    </script>
+  </body>
+</html>
