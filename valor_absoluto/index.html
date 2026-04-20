@@ -1,1 +1,738 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valor absoluto como distancia — Recta numérica interactiva (GED Q.1.d)</title>
+<style>
+/* ============================================================
+   Mini-interactivo — Valor absoluto como distancia (Q.1.d)
+   GEDparaHispanos.com — Prof. José M. Fernández
+   Estilo DUA · solid hex colors · responsive · sin dependencias
+   ============================================================ */
 
+:root {
+  --c-bg:       #fafafa;
+  --c-surface:  #ffffff;
+  --c-ink:      #1a1a1a;
+  --c-ink-soft: #4a4a4a;
+  --c-ink-mute: #7a7a7a;
+  --c-line:     #e0e0e0;
+  --c-line-str: #b0b0b0;
+
+  --c-primary:  #1e5aa6;
+  --c-primary-d: #164881;
+  --c-primary-bg: #eaf2fb;
+
+  --c-point-a:  #d85a30;
+  --c-point-a-bg: #fbe9e0;
+  --c-point-b:  #0f7a5c;
+  --c-point-b-bg: #e8f5ee;
+
+  --c-good:     #0f7a5c;
+  --c-good-bg:  #e8f5ee;
+  --c-miss:     #a63d1e;
+  --c-miss-bg:  #fbe9e7;
+  --c-warn:     #b8860b;
+  --c-warn-bg:  #fdf6e3;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--c-ink);
+  background: var(--c-bg);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+}
+
+.card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-top: 5px solid var(--c-primary);
+  border-radius: 8px;
+  padding: 32px 28px;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 24px;
+  margin: 0 0 10px;
+  color: var(--c-ink);
+  line-height: 1.3;
+}
+h2 {
+  font-size: 20px;
+  margin: 24px 0 12px;
+  color: var(--c-ink);
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--c-line);
+}
+h3 {
+  font-size: 17px;
+  margin: 18px 0 10px;
+  color: var(--c-ink-soft);
+}
+.subtitle {
+  font-size: 15px;
+  color: var(--c-ink-mute);
+  margin: 0 0 20px;
+}
+
+p { margin: 0 0 14px; }
+
+.callout {
+  background: var(--c-primary-bg);
+  border-left: 4px solid var(--c-primary);
+  padding: 14px 18px;
+  margin: 16px 0;
+  border-radius: 4px;
+  font-size: 15px;
+}
+.callout.note {
+  background: var(--c-warn-bg);
+  border-left-color: var(--c-warn);
+}
+
+.math {
+  font-family: "Cambria Math", "STIX Two Math", ui-serif, Georgia, serif;
+  font-size: 1.05em;
+  letter-spacing: 0.02em;
+}
+
+/* ---------- Explorer (interactivo) ---------- */
+.explorer {
+  background: var(--c-bg);
+  border: 1px solid var(--c-line);
+  border-radius: 8px;
+  padding: 20px 20px 24px;
+  margin: 16px 0;
+}
+.explorer-svg {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 12px;
+}
+.explorer-svg svg {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+}
+
+.explorer-live {
+  text-align: center;
+  font-family: "Cambria Math", "STIX Two Math", ui-serif, Georgia, serif;
+  font-size: 22px;
+  padding: 10px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: 6px;
+  margin: 10px 0 16px;
+  letter-spacing: 0.03em;
+}
+.explorer-live .num-a { color: var(--c-point-a); font-weight: 700; }
+.explorer-live .num-b { color: var(--c-point-b); font-weight: 700; }
+.explorer-live .result {
+  color: var(--c-primary);
+  font-weight: 700;
+  font-size: 26px;
+}
+
+.slider-row {
+  display: grid;
+  grid-template-columns: 32px 1fr 50px;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+}
+.slider-letter {
+  font-family: "Cambria Math", ui-serif, Georgia, serif;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+.slider-letter.a { color: var(--c-point-a); }
+.slider-letter.b { color: var(--c-point-b); }
+.slider-val {
+  text-align: right;
+  font-family: "Cambria Math", ui-serif, Georgia, serif;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.slider-val.a { color: var(--c-point-a); }
+.slider-val.b { color: var(--c-point-b); }
+
+input[type=range] {
+  width: 100%;
+  height: 28px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+input[type=range]:focus { outline: none; }
+
+input[type=range]::-webkit-slider-runnable-track {
+  height: 6px;
+  background: var(--c-line);
+  border-radius: 3px;
+}
+input[type=range]::-moz-range-track {
+  height: 6px;
+  background: var(--c-line);
+  border-radius: 3px;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--c-primary);
+  border: 2px solid #ffffff;
+  margin-top: -9px;
+  cursor: grab;
+}
+input[type=range]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--c-primary);
+  border: 2px solid #ffffff;
+  cursor: grab;
+}
+input.slider-a::-webkit-slider-thumb { background: var(--c-point-a); }
+input.slider-a::-moz-range-thumb { background: var(--c-point-a); }
+input.slider-b::-webkit-slider-thumb { background: var(--c-point-b); }
+input.slider-b::-moz-range-thumb { background: var(--c-point-b); }
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 4px;
+  justify-content: center;
+}
+.preset-btn {
+  background: var(--c-surface);
+  color: var(--c-ink-soft);
+  border: 1px solid var(--c-line-str);
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.preset-btn:hover {
+  border-color: var(--c-primary);
+  color: var(--c-primary);
+  background: var(--c-primary-bg);
+}
+
+/* ---------- Formula box ---------- */
+.formula {
+  background: var(--c-surface);
+  border: 2px solid var(--c-primary);
+  border-radius: 6px;
+  padding: 20px;
+  margin: 16px 0;
+  text-align: center;
+}
+.formula-big {
+  font-family: "Cambria Math", ui-serif, Georgia, serif;
+  font-size: 26px;
+  color: var(--c-ink);
+  margin: 8px 0;
+  letter-spacing: 0.03em;
+}
+.formula-label {
+  font-size: 13px;
+  color: var(--c-ink-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+/* ---------- Ejercicios ---------- */
+.exercise {
+  background: var(--c-bg);
+  border: 1px solid var(--c-line);
+  border-left: 4px solid var(--c-primary);
+  border-radius: 5px;
+  padding: 16px 18px;
+  margin: 14px 0;
+}
+.ex-num {
+  font-size: 13px;
+  color: var(--c-ink-mute);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.ex-question {
+  font-size: 16px;
+  margin-bottom: 12px;
+  color: var(--c-ink);
+}
+.ex-question .math { font-size: 18px; }
+.ex-svg {
+  text-align: center;
+  margin: 8px 0;
+}
+.ex-svg svg { max-width: 100%; height: auto; }
+
+.ex-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+}
+.ex-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--c-surface);
+  border: 2px solid var(--c-line);
+  border-radius: 5px;
+  font-size: 15px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  width: 100%;
+  color: var(--c-ink);
+  transition: all 0.15s;
+}
+.ex-option:hover:not(:disabled) {
+  border-color: var(--c-primary);
+  background: var(--c-primary-bg);
+}
+.ex-option:disabled { cursor: not-allowed; }
+
+.ex-option-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  color: var(--c-ink-soft);
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.ex-option:hover:not(:disabled) .ex-option-marker {
+  background: var(--c-primary);
+  color: #ffffff;
+}
+.ex-option.correct {
+  border-color: var(--c-good);
+  background: var(--c-good-bg);
+}
+.ex-option.correct .ex-option-marker {
+  background: var(--c-good);
+  color: #ffffff;
+}
+.ex-option.incorrect {
+  border-color: var(--c-miss);
+  background: var(--c-miss-bg);
+}
+.ex-option.incorrect .ex-option-marker {
+  background: var(--c-miss);
+  color: #ffffff;
+}
+.ex-option.reveal {
+  border-color: var(--c-good);
+  background: var(--c-good-bg);
+}
+.ex-option.reveal .ex-option-marker {
+  background: var(--c-good);
+  color: #ffffff;
+}
+
+.ex-feedback {
+  padding: 12px 14px;
+  border-radius: 5px;
+  margin: 10px 0 4px;
+  font-size: 14px;
+  border-left: 3px solid;
+  display: none;
+}
+.ex-feedback.good {
+  background: var(--c-good-bg);
+  border-left-color: var(--c-good);
+  color: #0a5540;
+}
+.ex-feedback.miss {
+  background: var(--c-miss-bg);
+  border-left-color: var(--c-miss);
+  color: #6e2a17;
+}
+.ex-feedback strong { display: block; margin-bottom: 4px; }
+
+/* ---------- Footer ---------- */
+.footer {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--c-ink-mute);
+  padding: 24px 16px 0;
+  line-height: 1.6;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 640px) {
+  .wrap { padding: 16px 12px 40px; }
+  .card { padding: 22px 18px; }
+  h1 { font-size: 20px; }
+  h2 { font-size: 18px; }
+  .explorer-live { font-size: 17px; }
+  .explorer-live .result { font-size: 21px; }
+  .formula-big { font-size: 20px; }
+  .ex-question { font-size: 15px; }
+}
+
+@media print {
+  body { background: #ffffff; }
+  .wrap { max-width: none; padding: 0; }
+  input[type=range], .preset-btn { display: none; }
+  .card { border: 1px solid #000; break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="card">
+  <h1>Valor absoluto como distancia</h1>
+  <p class="subtitle">GED Mathematical Reasoning · Q.1.d · Recta numérica interactiva</p>
+
+  <p>El <strong>valor absoluto</strong> de un número es la <strong>distancia</strong> entre ese número y el cero, medida a lo largo de la recta numérica. Nunca es negativo, porque una distancia no puede ser negativa. Lo escribimos con dos barras verticales: <span class="math">|x|</span>.</p>
+
+  <div class="callout">
+    <strong>Lo importante:</strong> el valor absoluto es una idea <em>geométrica</em>, no algebraica. No pienses "quítale el signo" — piensa "¿a qué distancia está del 0?"
+  </div>
+
+  <h2 id="sec1">1. El valor absoluto de un número</h2>
+  <p>Mueve el punto <span class="math" style="color: var(--c-point-a); font-weight: 700;">x</span> en la recta. Fíjate cómo <span class="math">|x|</span> siempre es positivo o cero, sin importar de qué lado del 0 esté el punto.</p>
+
+  <div class="explorer">
+    <div class="explorer-svg" id="svg1-container"></div>
+    <div class="explorer-live" id="live1"></div>
+    <div class="slider-row">
+      <span class="slider-letter a">x</span>
+      <input type="range" min="-10" max="10" value="4" step="1" class="slider-a" id="slider1" oninput="updateExplorer1()">
+      <span class="slider-val a" id="val1">4</span>
+    </div>
+    <div class="presets">
+      <button class="preset-btn" onclick="setExplorer1(7)">x = 7</button>
+      <button class="preset-btn" onclick="setExplorer1(-7)">x = −7</button>
+      <button class="preset-btn" onclick="setExplorer1(0)">x = 0</button>
+      <button class="preset-btn" onclick="setExplorer1(-3)">x = −3</button>
+    </div>
+  </div>
+
+  <div class="callout note">
+    <strong>Observación clave:</strong> <span class="math">|7|</span> y <span class="math">|−7|</span> dan lo mismo: 7. Porque ambos puntos están a 7 unidades de distancia del 0. El signo te dice la <em>dirección</em>; el valor absoluto te dice la <em>distancia</em>.
+  </div>
+</div>
+
+<div class="card">
+  <h2 id="sec2">2. Distancia entre dos puntos</h2>
+  <p>La distancia entre dos puntos <span class="math" style="color: var(--c-point-a); font-weight: 700;">a</span> y <span class="math" style="color: var(--c-point-b); font-weight: 700;">b</span> en la recta numérica es <span class="math">|a − b|</span>. Mueve los dos puntos y observa.</p>
+
+  <div class="explorer">
+    <div class="explorer-svg" id="svg2-container"></div>
+    <div class="explorer-live" id="live2"></div>
+    <div class="slider-row">
+      <span class="slider-letter a">a</span>
+      <input type="range" min="-10" max="10" value="3" step="1" class="slider-a" id="slider2a" oninput="updateExplorer2()">
+      <span class="slider-val a" id="val2a">3</span>
+    </div>
+    <div class="slider-row">
+      <span class="slider-letter b">b</span>
+      <input type="range" min="-10" max="10" value="-2" step="1" class="slider-b" id="slider2b" oninput="updateExplorer2()">
+      <span class="slider-val b" id="val2b">−2</span>
+    </div>
+    <div class="presets">
+      <button class="preset-btn" onclick="setExplorer2(3, -2)">a = 3, b = −2</button>
+      <button class="preset-btn" onclick="setExplorer2(-4, -7)">a = −4, b = −7</button>
+      <button class="preset-btn" onclick="setExplorer2(0, -6)">a = 0, b = −6</button>
+      <button class="preset-btn" onclick="setExplorer2(5, 5)">a = b = 5</button>
+      <button class="preset-btn" onclick="randomExplorer2()">Aleatorio</button>
+    </div>
+  </div>
+
+  <div class="formula">
+    <div class="formula-label">Fórmula</div>
+    <div class="formula-big">|a − b| = |b − a|</div>
+    <p style="margin: 10px 0 0; font-size: 14px; color: var(--c-ink-soft);">
+      No importa en qué orden restas: la distancia es la misma en ambas direcciones.
+    </p>
+  </div>
+
+  <div class="callout">
+    <strong>Truco rápido para el examen:</strong> si los dos números tienen signos distintos (uno positivo, uno negativo), la distancia es la <em>suma</em> de sus valores absolutos. Ejemplo: de 3 a −2 hay <span class="math">3 + 2 = 5</span> unidades. Si tienen el mismo signo, la distancia es la <em>diferencia</em> de sus valores absolutos. Ejemplo: de −4 a −7 hay <span class="math">7 − 4 = 3</span> unidades.
+  </div>
+</div>
+
+<div class="card">
+  <h2 id="sec3">3. Ejercicios de práctica</h2>
+  <p class="subtitle">Cinco preguntas sin tiempo. Haz clic en una opción y recibirás retroalimentación inmediata con explicación.</p>
+
+  <div class="exercise" id="ex1">
+    <div class="ex-num">Ejercicio 1</div>
+    <div class="ex-question">¿Cuál es el valor de <span class="math">|−8|</span>?</div>
+    <div class="ex-options"></div>
+    <div class="ex-feedback"></div>
+  </div>
+
+  <div class="exercise" id="ex2">
+    <div class="ex-num">Ejercicio 2</div>
+    <div class="ex-question">¿Cuál es la distancia entre <span class="math">4</span> y <span class="math">−3</span> en la recta numérica?</div>
+    <div class="ex-options"></div>
+    <div class="ex-feedback"></div>
+  </div>
+
+  <div class="exercise" id="ex3">
+    <div class="ex-num">Ejercicio 3</div>
+    <div class="ex-question">Calcula: <span class="math">|(−5) − 2|</span></div>
+    <div class="ex-options"></div>
+    <div class="ex-feedback"></div>
+  </div>
+
+  <div class="exercise" id="ex4">
+    <div class="ex-num">Ejercicio 4</div>
+    <div class="ex-question">La temperatura en Chicago amaneció en <span class="math">−3°C</span> y para el mediodía subió a <span class="math">5°C</span>. ¿Cuántos grados subió (es decir, cuál es la distancia entre ambas temperaturas en la recta)?</div>
+    <div class="ex-options"></div>
+    <div class="ex-feedback"></div>
+  </div>
+
+  <div class="exercise" id="ex5">
+    <div class="ex-num">Ejercicio 5</div>
+    <div class="ex-question">Si un punto está a <span class="math">9</span> unidades de distancia de <span class="math">−2</span> en la recta numérica, ¿cuáles son los posibles valores del punto?</div>
+    <div class="ex-options"></div>
+    <div class="ex-feedback"></div>
+  </div>
+
+</div>
+
+<div class="footer">
+  GEDparaHispanos.com · Prof. José M. Fernández · Harry S. Truman College (CCC)<br>
+  GED® es una marca registrada del American Council on Education.
+</div>
+
+</div>
+
+<script>
+// ===== Generador de SVG de recta numérica =====
+// Parámetros:
+//   mode: 'one' (un solo punto desde 0) | 'two' (dos puntos con segmento entre ellos)
+//   a, b: posiciones numéricas (en modo 'one' solo se usa a)
+function numberLineSVG(mode, a, b) {
+  const MIN = -10, MAX = 10;
+  const W = 620, H = 120;
+  const marginX = 30;
+  const axisY = 70;
+  const span = MAX - MIN;
+  const xFor = v => marginX + ((v - MIN) / span) * (W - 2*marginX);
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Recta numérica interactiva">`;
+
+  // Ticks y números
+  for (let v = MIN; v <= MAX; v++) {
+    const x = xFor(v);
+    const isZero = (v === 0);
+    svg += `<line x1="${x}" y1="${axisY - 6}" x2="${x}" y2="${axisY + 6}" stroke="${isZero ? '#1a1a1a' : '#7a7a7a'}" stroke-width="${isZero ? 2 : 1.3}"/>`;
+    svg += `<text x="${x}" y="${axisY + 24}" text-anchor="middle" font-family="system-ui, Arial" font-size="12" fill="#4a4a4a" font-weight="${isZero ? '700' : '400'}">${v}</text>`;
+  }
+
+  // Eje principal
+  svg += `<line x1="${marginX - 10}" y1="${axisY}" x2="${W - marginX + 10}" y2="${axisY}" stroke="#1a1a1a" stroke-width="2"/>`;
+  // Puntas de flecha en los extremos
+  svg += `<polygon points="${marginX - 10},${axisY} ${marginX - 2},${axisY - 5} ${marginX - 2},${axisY + 5}" fill="#1a1a1a"/>`;
+  svg += `<polygon points="${W - marginX + 10},${axisY} ${W - marginX + 2},${axisY - 5} ${W - marginX + 2},${axisY + 5}" fill="#1a1a1a"/>`;
+
+  if (mode === 'one') {
+    // Segmento sombreado de 0 a a (distancia desde el origen)
+    const x0 = xFor(0);
+    const xa = xFor(a);
+    const segMin = Math.min(x0, xa);
+    const segMax = Math.max(x0, xa);
+    if (a !== 0) {
+      svg += `<rect x="${segMin}" y="${axisY - 3}" width="${segMax - segMin}" height="6" fill="#1e5aa6" opacity="0.85"/>`;
+      // Etiqueta de la distancia encima del segmento
+      const midX = (segMin + segMax) / 2;
+      svg += `<text x="${midX}" y="${axisY - 12}" text-anchor="middle" font-family="Cambria Math, Georgia, serif" font-size="15" fill="#1e5aa6" font-weight="700">${Math.abs(a)}</text>`;
+    }
+    // Círculo en 0 (origen)
+    svg += `<circle cx="${x0}" cy="${axisY}" r="6" fill="#1a1a1a" stroke="#ffffff" stroke-width="1.5"/>`;
+    svg += `<text x="${x0}" y="${axisY - 28}" text-anchor="middle" font-family="system-ui, Arial" font-size="12" fill="#4a4a4a" font-weight="600">0</text>`;
+    // Círculo en a
+    svg += `<circle cx="${xa}" cy="${axisY}" r="9" fill="#d85a30" stroke="#ffffff" stroke-width="2.5"/>`;
+    svg += `<text x="${xa}" y="${axisY - 18}" text-anchor="middle" font-family="Cambria Math, Georgia, serif" font-size="16" fill="#d85a30" font-weight="700">x = ${a}</text>`;
+  }
+  else if (mode === 'two') {
+    const xa = xFor(a);
+    const xb = xFor(b);
+    const segMin = Math.min(xa, xb);
+    const segMax = Math.max(xa, xb);
+    const dist = Math.abs(a - b);
+    if (a !== b) {
+      svg += `<rect x="${segMin}" y="${axisY - 3}" width="${segMax - segMin}" height="6" fill="#1e5aa6" opacity="0.85"/>`;
+      const midX = (segMin + segMax) / 2;
+      svg += `<text x="${midX}" y="${axisY - 14}" text-anchor="middle" font-family="Cambria Math, Georgia, serif" font-size="16" fill="#1e5aa6" font-weight="700">${dist}</text>`;
+      svg += `<text x="${midX}" y="${axisY - 30}" text-anchor="middle" font-family="system-ui, Arial" font-size="11" fill="#7a7a7a">distancia</text>`;
+    }
+    // Círculo en a
+    svg += `<circle cx="${xa}" cy="${axisY}" r="9" fill="#d85a30" stroke="#ffffff" stroke-width="2.5"/>`;
+    svg += `<text x="${xa}" y="${axisY + 50}" text-anchor="middle" font-family="Cambria Math, Georgia, serif" font-size="15" fill="#d85a30" font-weight="700">a = ${a}</text>`;
+    // Círculo en b (si a = b, ponemos una corona concéntrica para verlo)
+    if (a === b) {
+      svg += `<circle cx="${xb}" cy="${axisY}" r="14" fill="none" stroke="#0f7a5c" stroke-width="2.5" stroke-dasharray="3 3"/>`;
+      svg += `<text x="${xb}" y="${axisY + 50}" text-anchor="middle" font-family="Cambria Math, Georgia, serif" font-size="15" fill="#0f7a5c" font-weight="700">b = ${b} (mismo punto)</text>`;
+    } else {
+      svg += `<circle cx="${xb}" cy="${axisY}" r="9" fill="#0f7a5c" stroke="#ffffff" stroke-width="2.5"/>`;
+      svg += `<text x="${xb}" y="${axisY + 50}" text-anchor="middle" font-family="Cambria Math, Georgia, serif" font-size="15" fill="#0f7a5c" font-weight="700">b = ${b}</text>`;
+    }
+  }
+
+  svg += `</svg>`;
+  return svg;
+}
+
+// Formatea un número negativo con signo matemático (U+2212)
+function fmt(n) {
+  return n < 0 ? '−' + Math.abs(n) : String(n);
+}
+
+// ===== Explorer 1 (valor absoluto de un número) =====
+function updateExplorer1() {
+  const x = parseInt(document.getElementById('slider1').value, 10);
+  document.getElementById('val1').textContent = fmt(x);
+  document.getElementById('svg1-container').innerHTML = numberLineSVG('one', x, null);
+  document.getElementById('live1').innerHTML =
+    `| <span class="num-a">${fmt(x)}</span> | &nbsp;=&nbsp; <span class="result">${Math.abs(x)}</span>`;
+}
+function setExplorer1(v) {
+  document.getElementById('slider1').value = v;
+  updateExplorer1();
+}
+
+// ===== Explorer 2 (distancia entre dos puntos) =====
+function updateExplorer2() {
+  const a = parseInt(document.getElementById('slider2a').value, 10);
+  const b = parseInt(document.getElementById('slider2b').value, 10);
+  document.getElementById('val2a').textContent = fmt(a);
+  document.getElementById('val2b').textContent = fmt(b);
+  document.getElementById('svg2-container').innerHTML = numberLineSVG('two', a, b);
+  const dist = Math.abs(a - b);
+  // Mostrar el cálculo paso a paso
+  const aStr = fmt(a);
+  const bStr = b < 0 ? '(' + fmt(b) + ')' : fmt(b);
+  document.getElementById('live2').innerHTML =
+    `| <span class="num-a">${aStr}</span> − <span class="num-b">${bStr}</span> | &nbsp;=&nbsp; | ${fmt(a - b)} | &nbsp;=&nbsp; <span class="result">${dist}</span>`;
+}
+function setExplorer2(a, b) {
+  document.getElementById('slider2a').value = a;
+  document.getElementById('slider2b').value = b;
+  updateExplorer2();
+}
+function randomExplorer2() {
+  const a = Math.floor(Math.random() * 21) - 10;
+  let b = Math.floor(Math.random() * 21) - 10;
+  if (a === b) { b = (b + 3 > 10) ? b - 3 : b + 3; }
+  setExplorer2(a, b);
+}
+
+// ===== Ejercicios de práctica =====
+const EXERCISES = [
+  {
+    id: 'ex1',
+    opts: ['−8', '0', '8', '16'],
+    ans: 2,
+    expl: 'El valor absoluto es la distancia al 0, y la distancia nunca es negativa. El punto −8 está a 8 unidades del 0, así que |−8| = 8.'
+  },
+  {
+    id: 'ex2',
+    opts: ['1', '7', '12', '−7'],
+    ans: 1,
+    expl: 'Distancia = |4 − (−3)| = |4 + 3| = |7| = 7. Truco rápido: como los signos son distintos (uno positivo, uno negativo), suma sus valores absolutos: 4 + 3 = 7.'
+  },
+  {
+    id: 'ex3',
+    opts: ['−7', '−3', '3', '7'],
+    ans: 3,
+    expl: 'Primero resuelve lo de adentro: (−5) − 2 = −7. Después aplica el valor absoluto: |−7| = 7. Siempre se hacen primero las operaciones dentro de las barras.'
+  },
+  {
+    id: 'ex4',
+    opts: ['2', '5', '8', '−8'],
+    ans: 2,
+    expl: 'Distancia = |5 − (−3)| = |5 + 3| = 8. La temperatura subió 8 grados. Como la respuesta es una distancia, nunca puede ser negativa.'
+  },
+  {
+    id: 'ex5',
+    opts: ['−11 o 7', '−11 solamente', '7 solamente', '11 o −7'],
+    ans: 0,
+    expl: 'Un punto a 9 unidades de distancia de −2 puede estar 9 unidades a la derecha: −2 + 9 = 7. O 9 unidades a la izquierda: −2 − 9 = −11. Por eso hay DOS soluciones posibles: 7 o −11.'
+  }
+];
+
+function renderExercises() {
+  const letters = ['A', 'B', 'C', 'D'];
+  EXERCISES.forEach(ex => {
+    const container = document.getElementById(ex.id);
+    const optsBox = container.querySelector('.ex-options');
+    ex.opts.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'ex-option';
+      btn.innerHTML = `<span class="ex-option-marker">${letters[i]}</span><span class="math">${opt}</span>`;
+      btn.onclick = () => selectExOption(ex.id, i);
+      optsBox.appendChild(btn);
+    });
+  });
+}
+
+function selectExOption(exId, idx) {
+  const ex = EXERCISES.find(e => e.id === exId);
+  const container = document.getElementById(exId);
+  const buttons = container.querySelectorAll('.ex-option');
+  const feedback = container.querySelector('.ex-feedback');
+
+  const isCorrect = (idx === ex.ans);
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === ex.ans) { btn.classList.add(isCorrect ? 'correct' : 'reveal'); }
+    else if (i === idx) { btn.classList.add('incorrect'); }
+  });
+
+  feedback.className = 'ex-feedback ' + (isCorrect ? 'good' : 'miss');
+  feedback.innerHTML = `<strong>${isCorrect ? '¡Correcto!' : 'No es correcto.'}</strong>${ex.expl}`;
+  feedback.style.display = 'block';
+}
+
+// ===== Inicialización =====
+window.addEventListener('DOMContentLoaded', () => {
+  updateExplorer1();
+  updateExplorer2();
+  renderExercises();
+});
+</script>
+</body>
+</html>
