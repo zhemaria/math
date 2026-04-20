@@ -1,1 +1,804 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz de rapidez — Porcentajes y proporciones (GED Q.3)</title>
+<style>
+/* ============================================================
+   Speed Quiz — Porcentajes y proporciones (Q.3)
+   GEDparaHispanos.com — Prof. José M. Fernández
+   Estilo DUA · solid hex colors · responsive · sin dependencias
+   ============================================================ */
 
+:root {
+  --c-bg:       #fafafa;
+  --c-surface:  #ffffff;
+  --c-ink:      #1a1a1a;
+  --c-ink-soft: #4a4a4a;
+  --c-ink-mute: #7a7a7a;
+  --c-line:     #e0e0e0;
+  --c-line-str: #b0b0b0;
+
+  --c-primary:  #1e5aa6;
+  --c-primary-d: #164881;
+  --c-primary-bg: #eaf2fb;
+
+  --c-good:     #0f7a5c;
+  --c-good-bg:  #e8f5ee;
+  --c-miss:     #a63d1e;
+  --c-miss-bg:  #fbe9e7;
+  --c-warn:     #b8860b;
+  --c-warn-bg:  #fdf6e3;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--c-ink);
+  background: var(--c-bg);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+}
+
+.card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-top: 5px solid var(--c-primary);
+  border-radius: 8px;
+  padding: 32px 28px;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 24px;
+  margin: 0 0 10px;
+  color: var(--c-ink);
+  line-height: 1.3;
+}
+h2 {
+  font-size: 19px;
+  margin: 0 0 12px;
+  color: var(--c-ink);
+}
+.subtitle {
+  font-size: 15px;
+  color: var(--c-ink-mute);
+  margin: 0 0 24px;
+}
+
+p { margin: 0 0 14px; }
+
+.btn {
+  background: var(--c-primary);
+  color: #ffffff;
+  border: none;
+  padding: 13px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 4px 8px 4px 0;
+  transition: background 0.15s;
+}
+.btn:hover  { background: var(--c-primary-d); }
+.btn:disabled { background: var(--c-line-str); cursor: not-allowed; }
+.btn.secondary {
+  background: var(--c-surface);
+  color: var(--c-primary);
+  border: 1px solid var(--c-primary);
+}
+.btn.secondary:hover { background: var(--c-primary-bg); }
+
+.instructions {
+  background: var(--c-primary-bg);
+  border-left: 4px solid var(--c-primary);
+  padding: 16px 20px;
+  margin: 18px 0 24px;
+  border-radius: 4px;
+  font-size: 15px;
+}
+.instructions ul { margin: 8px 0 0 4px; padding-left: 20px; }
+.instructions li { margin: 6px 0; }
+
+/* ---------- Header de pregunta ---------- */
+.q-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.q-counter {
+  font-size: 13px;
+  color: var(--c-ink-mute);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.q-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--c-warn-bg);
+  color: var(--c-warn);
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.q-timer.urgent {
+  background: var(--c-miss-bg);
+  color: var(--c-miss);
+  animation: pulse 0.6s ease-in-out infinite alternate;
+}
+@keyframes pulse {
+  from { transform: scale(1); }
+  to   { transform: scale(1.05); }
+}
+
+.progress-track {
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--c-primary);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* ---------- Pregunta y opciones ---------- */
+.question {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--c-ink);
+  margin: 8px 0 20px;
+  padding: 14px 0;
+}
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0 20px;
+}
+.option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--c-surface);
+  border: 2px solid var(--c-line);
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  width: 100%;
+  color: var(--c-ink);
+  transition: all 0.15s;
+}
+.option:hover:not(:disabled) {
+  border-color: var(--c-primary);
+  background: var(--c-primary-bg);
+}
+.option:disabled { cursor: not-allowed; }
+
+.option-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  color: var(--c-ink-soft);
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.option:hover:not(:disabled) .option-marker {
+  background: var(--c-primary);
+  color: #ffffff;
+}
+
+.option.correct {
+  border-color: var(--c-good);
+  background: var(--c-good-bg);
+}
+.option.correct .option-marker {
+  background: var(--c-good);
+  color: #ffffff;
+}
+.option.incorrect {
+  border-color: var(--c-miss);
+  background: var(--c-miss-bg);
+}
+.option.incorrect .option-marker {
+  background: var(--c-miss);
+  color: #ffffff;
+}
+.option.reveal-correct {
+  border-color: var(--c-good);
+  background: var(--c-good-bg);
+}
+.option.reveal-correct .option-marker {
+  background: var(--c-good);
+  color: #ffffff;
+}
+
+/* ---------- Feedback ---------- */
+.feedback {
+  padding: 16px 20px;
+  border-radius: 6px;
+  margin: 16px 0 12px;
+  font-size: 15px;
+  border-left: 4px solid;
+}
+.feedback.good {
+  background: var(--c-good-bg);
+  border-left-color: var(--c-good);
+  color: #0a5540;
+}
+.feedback.miss {
+  background: var(--c-miss-bg);
+  border-left-color: var(--c-miss);
+  color: #6e2a17;
+}
+.feedback-title {
+  font-weight: 700;
+  font-size: 16px;
+  margin: 0 0 6px;
+}
+.feedback-explanation {
+  margin: 8px 0 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+/* ---------- Pantalla final ---------- */
+.results-score {
+  text-align: center;
+  padding: 24px 0 12px;
+}
+.score-big {
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--c-primary);
+  line-height: 1;
+  margin: 0 0 8px;
+  font-variant-numeric: tabular-nums;
+}
+.score-pct {
+  font-size: 20px;
+  color: var(--c-ink-soft);
+  margin: 0 0 6px;
+}
+.score-time {
+  font-size: 14px;
+  color: var(--c-ink-mute);
+}
+
+.results-msg {
+  text-align: center;
+  padding: 16px 0;
+  font-size: 16px;
+  color: var(--c-ink-soft);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 24px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--c-line);
+}
+.review-header h2 { margin: 0; }
+
+.review-item {
+  padding: 14px 16px;
+  margin: 10px 0;
+  background: var(--c-bg);
+  border: 1px solid var(--c-line);
+  border-left: 4px solid;
+  border-radius: 5px;
+}
+.review-item.good { border-left-color: var(--c-good); }
+.review-item.miss { border-left-color: var(--c-miss); }
+.review-item.skip { border-left-color: var(--c-warn); }
+
+.review-q {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--c-ink);
+}
+.review-meta {
+  font-size: 13.5px;
+  color: var(--c-ink-soft);
+  margin: 4px 0;
+}
+.review-meta strong { color: var(--c-ink); }
+.review-meta .mark {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 6px;
+}
+.review-meta .mark.good { background: var(--c-good-bg); color: var(--c-good); }
+.review-meta .mark.miss { background: var(--c-miss-bg); color: var(--c-miss); }
+.review-meta .mark.skip { background: var(--c-warn-bg); color: var(--c-warn); }
+
+.review-expl {
+  font-size: 13.5px;
+  color: var(--c-ink-soft);
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  background: var(--c-surface);
+  border-radius: 3px;
+  border: 1px solid var(--c-line);
+  line-height: 1.5;
+}
+
+.actions-final {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 28px 0 12px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--c-ink-mute);
+  padding: 24px 16px 0;
+  line-height: 1.6;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 600px) {
+  .wrap { padding: 16px 12px 40px; }
+  .card { padding: 22px 18px; }
+  h1 { font-size: 20px; }
+  h2 { font-size: 17px; }
+  .question { font-size: 15.5px; }
+  .option { padding: 12px 14px; font-size: 14.5px; gap: 10px; }
+  .option-marker { width: 28px; height: 28px; font-size: 13px; }
+  .score-big { font-size: 44px; }
+  .btn { padding: 12px 22px; font-size: 15px; }
+}
+
+/* ---------- Print ---------- */
+@media print {
+  body { background: #ffffff; }
+  .wrap { max-width: none; padding: 0; }
+  .btn, .q-timer { display: none; }
+  .card { border: 1px solid #000; break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div id="screen-start" class="card">
+  <h1>Quiz de rapidez: Porcentajes y proporciones</h1>
+  <p class="subtitle">GED Mathematical Reasoning · Q.3 · Nivel hispano-adulto</p>
+
+  <p>Este quiz mide tu <strong>fluidez</strong> con problemas de porcentajes, razones y proporciones — uno de los temas más frecuentes en el examen de Matemáticas del GED. Son los problemas del día a día: descuentos, propinas, impuestos, interés, escalas y recetas.</p>
+
+  <div class="instructions">
+    <strong>Cómo funciona:</strong>
+    <ul>
+      <li><strong>15 preguntas</strong> con <strong>75 segundos</strong> cada una</li>
+      <li>Recibes retroalimentación inmediata después de cada respuesta</li>
+      <li>Si se acaba el tiempo, la pregunta cuenta como sin responder y pasas a la siguiente</li>
+      <li>Al final podrás revisar todas las respuestas y sus explicaciones</li>
+      <li>Puedes usar calculadora, pero trata de resolver mentalmente cuando sea posible</li>
+    </ul>
+  </div>
+
+  <p style="color: var(--c-ink-soft); font-size: 14.5px;">Consejo: el objetivo no es solo acertar, es <strong>acertar rápido</strong>. En el examen real tendrás más o menos un minuto y medio por pregunta. Entrenar a 75 segundos te da margen.</p>
+
+  <button class="btn" onclick="startQuiz()">Empezar el quiz</button>
+</div>
+
+<div id="screen-quiz" class="card" style="display:none;">
+  <div class="q-header">
+    <span class="q-counter" id="q-counter">Pregunta 1 de 15</span>
+    <span class="q-timer" id="q-timer">⏱ 1:15</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%;"></div></div>
+
+  <div class="question" id="q-text"></div>
+  <div class="options" id="q-options"></div>
+
+  <div id="q-feedback" style="display:none;"></div>
+  <div class="actions" id="q-actions" style="display:none;">
+    <button class="btn" id="btn-next" onclick="nextQuestion()">Siguiente pregunta →</button>
+  </div>
+</div>
+
+<div id="screen-results" class="card" style="display:none;">
+  <div class="results-score">
+    <div class="score-big" id="score-big">0 / 15</div>
+    <div class="score-pct" id="score-pct">0%</div>
+    <div class="score-time" id="score-time">Tiempo total: 0:00</div>
+  </div>
+  <div class="results-msg" id="results-msg"></div>
+
+  <div class="review-header">
+    <h2>Revisión de respuestas</h2>
+  </div>
+  <div id="review-list"></div>
+
+  <div class="actions-final">
+    <button class="btn" onclick="restartQuiz()">Reintentar quiz</button>
+    <button class="btn secondary" onclick="window.print()">Imprimir revisión</button>
+  </div>
+</div>
+
+<div class="footer">
+  GEDparaHispanos.com · Prof. José M. Fernández · Harry S. Truman College (CCC)<br>
+  GED® es una marca registrada del American Council on Education.
+</div>
+
+</div>
+
+<script>
+// ===== Banco de preguntas =====
+const QUESTIONS = [
+  {
+    q: "Un paquete de 8 pañales cuesta $12.80. ¿Cuánto cuesta cada pañal?",
+    opts: ["$1.40", "$1.50", "$1.60", "$2.00"],
+    ans: 2,
+    expl: "Tasa unitaria: $12.80 ÷ 8 = $1.60 por pañal. Es una división directa del precio total entre el número de unidades.",
+    tag: "Q.3.a · Tasa unitaria"
+  },
+  {
+    q: "En el Truman College, 280 estudiantes se inscribieron en clases de GED este semestre. Si el 35% asiste por la noche, ¿cuántos estudiantes son?",
+    opts: ["84", "98", "112", "140"],
+    ans: 1,
+    expl: "35% de 280 = 0.35 × 280 = 98 estudiantes. Para calcular un porcentaje de un número, multiplica el número por el decimal equivalente (35% = 0.35).",
+    tag: "Q.3.c · % de un número"
+  },
+  {
+    q: "María pagaba $800 de renta el año pasado. Este año le subieron a $864. ¿Cuál es el aumento porcentual?",
+    opts: ["6%", "7%", "8%", "9%"],
+    ans: 2,
+    expl: "Aumento = 864 − 800 = $64. Porcentaje = (64 ÷ 800) × 100 = 8%. Siempre divide la diferencia entre el valor original (no el nuevo).",
+    tag: "Q.3.c · Aumento porcentual"
+  },
+  {
+    q: "Un abrigo cuesta $75. Si está a 20% de descuento, ¿cuál es el precio final?",
+    opts: ["$55", "$60", "$65", "$70"],
+    ans: 1,
+    expl: "Método rápido: paga el 80% del precio → 0.80 × $75 = $60. O calcula el descuento: 20% de 75 = $15, y resta: 75 − 15 = $60.",
+    tag: "Q.3.c · Descuento"
+  },
+  {
+    q: "Carlos depositó $2,000 en una cuenta a 3% de interés simple anual. ¿Cuánto interés gana en 2 años?",
+    opts: ["$60", "$100", "$120", "$200"],
+    ans: 2,
+    expl: "Fórmula de interés simple: I = P × r × t = 2000 × 0.03 × 2 = $120. P es el capital, r la tasa decimal, t el tiempo en años.",
+    tag: "Q.3.c · Interés simple"
+  },
+  {
+    q: "Una receta para 4 personas pide 600 g de harina. ¿Cuánta harina se necesita para 6 personas?",
+    opts: ["800 g", "900 g", "1000 g", "1200 g"],
+    ans: 1,
+    expl: "Proporción directa: 600/4 = x/6. Despejando: x = (600 × 6) ÷ 4 = 900 g. O piensa: una persona usa 150 g, seis usan 900 g.",
+    tag: "Q.3.c · Proporción directa"
+  },
+  {
+    q: "En un mapa, 1 cm representa 50 km. Si dos ciudades están separadas por 3.5 cm en el mapa, ¿cuál es la distancia real?",
+    opts: ["150 km", "165 km", "175 km", "185 km"],
+    ans: 2,
+    expl: "Escala: 1 cm = 50 km, entonces 3.5 cm × 50 km/cm = 175 km. Es multiplicación directa del factor de escala.",
+    tag: "Q.3.b · Factor de escala"
+  },
+  {
+    q: "Luis contestó 27 de 30 preguntas correctamente en un examen. ¿Qué porcentaje contestó bien?",
+    opts: ["75%", "85%", "90%", "95%"],
+    ans: 2,
+    expl: "Porcentaje = (27 ÷ 30) × 100 = 90%. Siempre: la parte sobre el todo, multiplicado por 100.",
+    tag: "Q.3.c · Fracción a %"
+  },
+  {
+    q: "La cena costó $48 y quieres dejar 15% de propina. ¿Cuánta propina dejas?",
+    opts: ["$5.20", "$6.40", "$7.20", "$8.40"],
+    ans: 2,
+    expl: "15% de 48 = 0.15 × 48 = $7.20. Truco mental: 10% de 48 es $4.80, la mitad (5%) es $2.40; suma: $4.80 + $2.40 = $7.20.",
+    tag: "Q.3.c · Propinas"
+  },
+  {
+    q: "Un televisor cuesta $450 y el impuesto de ventas en Illinois es 10.25%. ¿Cuál es el precio total a pagar?",
+    opts: ["$481.25", "$486.13", "$495.00", "$496.13"],
+    ans: 3,
+    expl: "Impuesto: 450 × 0.1025 = $46.13 (aprox). Total: 450 + 46.13 = $496.13. O directo: 450 × 1.1025 = $496.13.",
+    tag: "Q.3.c · Impuesto de ventas"
+  },
+  {
+    q: "Una chaqueta está a 25% de descuento y ahora cuesta $60. ¿Cuál era el precio original?",
+    opts: ["$75", "$80", "$85", "$90"],
+    ans: 1,
+    expl: "Si hay 25% de descuento, pagas el 75% del original: 0.75 × P = 60. Despejando: P = 60 ÷ 0.75 = $80. Cuidado: 60 + 25% de 60 NO es la respuesta.",
+    tag: "Q.3.c · Descuento inverso"
+  },
+  {
+    q: "Un camión viaja 240 millas en 4 horas a velocidad constante. ¿Cuánto tardaría en viajar 420 millas?",
+    opts: ["6 horas", "6.5 horas", "7 horas", "7.5 horas"],
+    ans: 2,
+    expl: "Velocidad: 240 ÷ 4 = 60 mph. Tiempo para 420 millas: 420 ÷ 60 = 7 horas. O proporción: 240/4 = 420/t → t = 7.",
+    tag: "Q.3.a · Velocidad constante"
+  },
+  {
+    q: "El precio de la gasolina bajó de $4.00 a $3.60 por galón. ¿Qué porcentaje bajó?",
+    opts: ["8%", "10%", "12%", "15%"],
+    ans: 1,
+    expl: "Diferencia: $4.00 − $3.60 = $0.40. Porcentaje: (0.40 ÷ 4.00) × 100 = 10%. Divide siempre entre el precio ORIGINAL.",
+    tag: "Q.3.c · Disminución %"
+  },
+  {
+    q: "Si 3 trabajadores pintan una casa en 12 días, ¿cuántos días tardarían 4 trabajadores al mismo ritmo?",
+    opts: ["8", "9", "10", "16"],
+    ans: 1,
+    expl: "Proporción INVERSA: más trabajadores, menos días. Trabajo total: 3 × 12 = 36 días-persona. Con 4 trabajadores: 36 ÷ 4 = 9 días. ¡Ojo! Este es el error clásico: muchos multiplican directo y contestan 16.",
+    tag: "Q.3.c · Proporción inversa"
+  },
+  {
+    q: "El 15% del salario mensual de Ana es $450. ¿Cuál es su salario mensual completo?",
+    opts: ["$2,500", "$2,800", "$3,000", "$3,500"],
+    ans: 2,
+    expl: "Si 15% = 450, entonces 100% = 450 ÷ 0.15 = $3,000. Regla: para encontrar el todo cuando conoces una parte y su %, divide la parte entre el decimal equivalente del %.",
+    tag: "Q.3.c · Encontrar el todo"
+  }
+];
+
+// ===== Estado =====
+const TIME_PER_QUESTION = 75; // segundos
+let currentIdx = 0;
+let score = 0;
+let answers = []; // {chosen: n|null, correct: bool, timedOut: bool, timeSpent: number}
+let timerInterval = null;
+let timeLeft = TIME_PER_QUESTION;
+let quizStartTime = 0;
+let questionStartTime = 0;
+
+// ===== Navegación de pantallas =====
+function showScreen(id) {
+  ['screen-start', 'screen-quiz', 'screen-results'].forEach(s => {
+    document.getElementById(s).style.display = 'none';
+  });
+  document.getElementById(id).style.display = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== Inicio =====
+function startQuiz() {
+  currentIdx = 0;
+  score = 0;
+  answers = [];
+  quizStartTime = Date.now();
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+// ===== Render de pregunta =====
+function renderQuestion() {
+  const q = QUESTIONS[currentIdx];
+  document.getElementById('q-counter').textContent = `Pregunta ${currentIdx + 1} de ${QUESTIONS.length}`;
+  document.getElementById('q-text').textContent = q.q;
+
+  // Opciones
+  const optsContainer = document.getElementById('q-options');
+  optsContainer.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.setAttribute('data-idx', i);
+    btn.innerHTML = `<span class="option-marker">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    optsContainer.appendChild(btn);
+  });
+
+  // Reset feedback + actions
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').innerHTML = '';
+  document.getElementById('q-actions').style.display = 'none';
+  document.getElementById('btn-next').textContent =
+    (currentIdx === QUESTIONS.length - 1) ? 'Ver resultados →' : 'Siguiente pregunta →';
+
+  // Progress bar
+  const pctProgress = (currentIdx / QUESTIONS.length) * 100;
+  document.getElementById('progress-fill').style.width = pctProgress + '%';
+
+  // Timer
+  timeLeft = TIME_PER_QUESTION;
+  questionStartTime = Date.now();
+  updateTimerDisplay();
+  startTimer();
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timeLeft / 60);
+  const s = timeLeft % 60;
+  const tEl = document.getElementById('q-timer');
+  tEl.textContent = `⏱ ${m}:${s < 10 ? '0' : ''}${s}`;
+  if (timeLeft <= 15) { tEl.classList.add('urgent'); }
+  else { tEl.classList.remove('urgent'); }
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      timeout();
+    }
+  }, 1000);
+}
+
+function timeout() {
+  const q = QUESTIONS[currentIdx];
+  const timeSpent = TIME_PER_QUESTION;
+  answers.push({ chosen: null, correct: false, timedOut: true, timeSpent });
+
+  // Deshabilitar opciones y marcar correcta
+  document.querySelectorAll('.option').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.ans) { btn.classList.add('reveal-correct'); }
+  });
+
+  showFeedback(false, true);
+}
+
+function selectAnswer(idx) {
+  clearInterval(timerInterval);
+  const q = QUESTIONS[currentIdx];
+  const isCorrect = (idx === q.ans);
+  const timeSpent = Math.min(TIME_PER_QUESTION, Math.round((Date.now() - questionStartTime) / 1000));
+  if (isCorrect) score++;
+  answers.push({ chosen: idx, correct: isCorrect, timedOut: false, timeSpent });
+
+  // Deshabilitar opciones y marcar
+  document.querySelectorAll('.option').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.ans) { btn.classList.add('correct'); }
+    else if (i === idx) { btn.classList.add('incorrect'); }
+  });
+
+  showFeedback(isCorrect, false);
+}
+
+function showFeedback(isCorrect, timedOut) {
+  const q = QUESTIONS[currentIdx];
+  const fbEl = document.getElementById('q-feedback');
+  fbEl.className = 'feedback ' + (isCorrect ? 'good' : 'miss');
+  let title, prefix;
+  if (isCorrect) {
+    title = '¡Correcto!';
+  } else if (timedOut) {
+    title = '⏱ Se acabó el tiempo';
+  } else {
+    title = 'No es correcto';
+  }
+  fbEl.innerHTML = `
+    <p class="feedback-title">${title}</p>
+    <p class="feedback-explanation"><strong>Explicación:</strong> ${q.expl}</p>
+    <p class="feedback-explanation" style="margin-top:6px; font-size:13px; color:var(--c-ink-mute);">
+      <em>Target GED: ${q.tag}</em>
+    </p>
+  `;
+  fbEl.style.display = 'block';
+  document.getElementById('q-actions').style.display = 'flex';
+}
+
+function nextQuestion() {
+  currentIdx++;
+  if (currentIdx >= QUESTIONS.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+// ===== Pantalla final =====
+function showResults() {
+  clearInterval(timerInterval);
+  const totalSec = Math.round((Date.now() - quizStartTime) / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  const pct = Math.round((score / QUESTIONS.length) * 100);
+
+  document.getElementById('score-big').textContent = `${score} / ${QUESTIONS.length}`;
+  document.getElementById('score-pct').textContent = `${pct}% de aciertos`;
+  document.getElementById('score-time').textContent =
+    `Tiempo total: ${m}:${s < 10 ? '0' : ''}${s}`;
+
+  // Mensaje según desempeño
+  let msg = '';
+  if (pct >= 90) {
+    msg = '¡Excelente! Dominas muy bien los porcentajes y proporciones. Estás listo para esta sección del GED.';
+  } else if (pct >= 75) {
+    msg = 'Buen trabajo. Revisa las pocas preguntas erradas y practica de nuevo para fijar los conceptos.';
+  } else if (pct >= 60) {
+    msg = 'Vas por buen camino, pero conviene reforzar. Revisa las explicaciones y vuelve a hacer el quiz.';
+  } else {
+    msg = 'Este tema necesita más práctica. Revisa cada explicación con calma y vuelve a intentarlo.';
+  }
+  document.getElementById('results-msg').innerHTML =
+    `<p>${msg}</p>`;
+
+  // Revisión
+  const reviewEl = document.getElementById('review-list');
+  reviewEl.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  QUESTIONS.forEach((q, i) => {
+    const a = answers[i];
+    const cls = a.correct ? 'good' : (a.timedOut ? 'skip' : 'miss');
+    const markText = a.correct ? 'Correcta' : (a.timedOut ? 'Sin responder' : 'Incorrecta');
+
+    let chosenText = '';
+    if (a.timedOut) {
+      chosenText = '<em>Se acabó el tiempo</em>';
+    } else {
+      chosenText = `${letters[a.chosen]}. ${q.opts[a.chosen]}`;
+    }
+    const correctText = `${letters[q.ans]}. ${q.opts[q.ans]}`;
+
+    const item = document.createElement('div');
+    item.className = 'review-item ' + cls;
+    item.innerHTML = `
+      <p class="review-q">${i+1}. ${q.q}</p>
+      <p class="review-meta"><span class="mark ${cls}">${markText}</span> <strong>Tu respuesta:</strong> ${chosenText}</p>
+      ${a.correct ? '' : `<p class="review-meta"><strong>Respuesta correcta:</strong> ${correctText}</p>`}
+      <p class="review-meta"><strong>Tiempo:</strong> ${a.timeSpent}s</p>
+      <p class="review-expl">${q.expl}</p>
+    `;
+    reviewEl.appendChild(item);
+  });
+
+  showScreen('screen-results');
+}
+
+function restartQuiz() {
+  startQuiz();
+}
+</script>
+</body>
+</html>
