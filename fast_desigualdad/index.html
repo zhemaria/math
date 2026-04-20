@@ -1,1 +1,920 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz de rapidez — Desigualdades lineales (GED A.3)</title>
+<style>
+/* ============================================================
+   Speed Quiz — Desigualdades lineales (A.3)
+   GEDparaHispanos.com — Prof. José M. Fernández
+   Estilo DUA · solid hex colors · responsive · sin dependencias
+   ============================================================ */
 
+:root {
+  --c-bg:       #fafafa;
+  --c-surface:  #ffffff;
+  --c-ink:      #1a1a1a;
+  --c-ink-soft: #4a4a4a;
+  --c-ink-mute: #7a7a7a;
+  --c-line:     #e0e0e0;
+  --c-line-str: #b0b0b0;
+
+  --c-primary:  #1e5aa6;
+  --c-primary-d: #164881;
+  --c-primary-bg: #eaf2fb;
+
+  --c-good:     #0f7a5c;
+  --c-good-bg:  #e8f5ee;
+  --c-miss:     #a63d1e;
+  --c-miss-bg:  #fbe9e7;
+  --c-warn:     #b8860b;
+  --c-warn-bg:  #fdf6e3;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--c-ink);
+  background: var(--c-bg);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+}
+
+.card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-top: 5px solid var(--c-primary);
+  border-radius: 8px;
+  padding: 32px 28px;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 24px;
+  margin: 0 0 10px;
+  color: var(--c-ink);
+  line-height: 1.3;
+}
+h2 {
+  font-size: 19px;
+  margin: 0 0 12px;
+  color: var(--c-ink);
+}
+.subtitle {
+  font-size: 15px;
+  color: var(--c-ink-mute);
+  margin: 0 0 24px;
+}
+
+p { margin: 0 0 14px; }
+
+.btn {
+  background: var(--c-primary);
+  color: #ffffff;
+  border: none;
+  padding: 13px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: 5px;
+  cursor: pointer;
+  margin: 4px 8px 4px 0;
+  transition: background 0.15s;
+}
+.btn:hover  { background: var(--c-primary-d); }
+.btn:disabled { background: var(--c-line-str); cursor: not-allowed; }
+.btn.secondary {
+  background: var(--c-surface);
+  color: var(--c-primary);
+  border: 1px solid var(--c-primary);
+}
+.btn.secondary:hover { background: var(--c-primary-bg); }
+
+.instructions {
+  background: var(--c-primary-bg);
+  border-left: 4px solid var(--c-primary);
+  padding: 16px 20px;
+  margin: 18px 0 24px;
+  border-radius: 4px;
+  font-size: 15px;
+}
+.instructions ul { margin: 8px 0 0 4px; padding-left: 20px; }
+.instructions li { margin: 6px 0; }
+
+/* ---------- Header de pregunta ---------- */
+.q-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.q-counter {
+  font-size: 13px;
+  color: var(--c-ink-mute);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.q-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--c-warn-bg);
+  color: var(--c-warn);
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.q-timer.urgent {
+  background: var(--c-miss-bg);
+  color: var(--c-miss);
+  animation: pulse 0.6s ease-in-out infinite alternate;
+}
+@keyframes pulse {
+  from { transform: scale(1); }
+  to   { transform: scale(1.05); }
+}
+
+.progress-track {
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--c-primary);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* ---------- Pregunta y opciones ---------- */
+.question {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--c-ink);
+  margin: 8px 0 12px;
+  padding: 14px 0 0;
+}
+.q-svg {
+  margin: 8px 0 18px;
+  padding: 12px 8px;
+  background: var(--c-bg);
+  border: 1px solid var(--c-line);
+  border-radius: 5px;
+  text-align: center;
+}
+.q-svg svg {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+}
+
+.q-math {
+  font-family: "Cambria Math", "STIX Two Math", ui-serif, Georgia, serif;
+  font-size: 18.5px;
+  letter-spacing: 0.02em;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0 20px;
+}
+.option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--c-surface);
+  border: 2px solid var(--c-line);
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  width: 100%;
+  color: var(--c-ink);
+  transition: all 0.15s;
+}
+.option:hover:not(:disabled) {
+  border-color: var(--c-primary);
+  background: var(--c-primary-bg);
+}
+.option:disabled { cursor: not-allowed; }
+
+.option-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  color: var(--c-ink-soft);
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.option:hover:not(:disabled) .option-marker {
+  background: var(--c-primary);
+  color: #ffffff;
+}
+
+.option.correct {
+  border-color: var(--c-good);
+  background: var(--c-good-bg);
+}
+.option.correct .option-marker {
+  background: var(--c-good);
+  color: #ffffff;
+}
+.option.incorrect {
+  border-color: var(--c-miss);
+  background: var(--c-miss-bg);
+}
+.option.incorrect .option-marker {
+  background: var(--c-miss);
+  color: #ffffff;
+}
+.option.reveal-correct {
+  border-color: var(--c-good);
+  background: var(--c-good-bg);
+}
+.option.reveal-correct .option-marker {
+  background: var(--c-good);
+  color: #ffffff;
+}
+
+/* ---------- Feedback ---------- */
+.feedback {
+  padding: 16px 20px;
+  border-radius: 6px;
+  margin: 16px 0 12px;
+  font-size: 15px;
+  border-left: 4px solid;
+}
+.feedback.good {
+  background: var(--c-good-bg);
+  border-left-color: var(--c-good);
+  color: #0a5540;
+}
+.feedback.miss {
+  background: var(--c-miss-bg);
+  border-left-color: var(--c-miss);
+  color: #6e2a17;
+}
+.feedback-title {
+  font-weight: 700;
+  font-size: 16px;
+  margin: 0 0 6px;
+}
+.feedback-explanation {
+  margin: 8px 0 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+/* ---------- Pantalla final ---------- */
+.results-score {
+  text-align: center;
+  padding: 24px 0 12px;
+}
+.score-big {
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--c-primary);
+  line-height: 1;
+  margin: 0 0 8px;
+  font-variant-numeric: tabular-nums;
+}
+.score-pct {
+  font-size: 20px;
+  color: var(--c-ink-soft);
+  margin: 0 0 6px;
+}
+.score-time {
+  font-size: 14px;
+  color: var(--c-ink-mute);
+}
+
+.results-msg {
+  text-align: center;
+  padding: 16px 0;
+  font-size: 16px;
+  color: var(--c-ink-soft);
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 24px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--c-line);
+}
+.review-header h2 { margin: 0; }
+
+.review-item {
+  padding: 14px 16px;
+  margin: 10px 0;
+  background: var(--c-bg);
+  border: 1px solid var(--c-line);
+  border-left: 4px solid;
+  border-radius: 5px;
+}
+.review-item.good { border-left-color: var(--c-good); }
+.review-item.miss { border-left-color: var(--c-miss); }
+.review-item.skip { border-left-color: var(--c-warn); }
+
+.review-q {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: var(--c-ink);
+}
+.review-svg {
+  margin: 4px 0 8px;
+  text-align: center;
+}
+.review-svg svg { max-width: 100%; height: auto; }
+
+.review-meta {
+  font-size: 13.5px;
+  color: var(--c-ink-soft);
+  margin: 4px 0;
+}
+.review-meta strong { color: var(--c-ink); }
+.review-meta .mark {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 6px;
+}
+.review-meta .mark.good { background: var(--c-good-bg); color: var(--c-good); }
+.review-meta .mark.miss { background: var(--c-miss-bg); color: var(--c-miss); }
+.review-meta .mark.skip { background: var(--c-warn-bg); color: var(--c-warn); }
+
+.review-expl {
+  font-size: 13.5px;
+  color: var(--c-ink-soft);
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  background: var(--c-surface);
+  border-radius: 3px;
+  border: 1px solid var(--c-line);
+  line-height: 1.5;
+}
+
+.actions-final {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 28px 0 12px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--c-ink-mute);
+  padding: 24px 16px 0;
+  line-height: 1.6;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 600px) {
+  .wrap { padding: 16px 12px 40px; }
+  .card { padding: 22px 18px; }
+  h1 { font-size: 20px; }
+  h2 { font-size: 17px; }
+  .question { font-size: 15.5px; }
+  .q-math { font-size: 17px; }
+  .option { padding: 12px 14px; font-size: 14.5px; gap: 10px; }
+  .option-marker { width: 28px; height: 28px; font-size: 13px; }
+  .score-big { font-size: 44px; }
+  .btn { padding: 12px 22px; font-size: 15px; }
+}
+
+/* ---------- Print ---------- */
+@media print {
+  body { background: #ffffff; }
+  .wrap { max-width: none; padding: 0; }
+  .btn, .q-timer { display: none; }
+  .card { border: 1px solid #000; break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div id="screen-start" class="card">
+  <h1>Quiz de rapidez: Desigualdades lineales</h1>
+  <p class="subtitle">GED Mathematical Reasoning · A.3 · Nivel hispano-adulto</p>
+
+  <p>Este quiz mide tu <strong>fluidez</strong> resolviendo desigualdades lineales, una de las áreas donde más estudiantes tropiezan en el examen de Matemáticas del GED. El error más común es olvidar voltear el signo de la desigualdad cuando se multiplica o divide por un número negativo — lo entrenamos aquí.</p>
+
+  <div class="instructions">
+    <strong>Cómo funciona:</strong>
+    <ul>
+      <li><strong>15 preguntas</strong> con <strong>75 segundos</strong> cada una</li>
+      <li>Recibes retroalimentación inmediata después de cada respuesta</li>
+      <li>Si se acaba el tiempo, la pregunta cuenta como sin responder y pasas a la siguiente</li>
+      <li>Al final podrás revisar todas las respuestas y sus explicaciones</li>
+      <li>Hay preguntas con recta numérica — observa bien si el círculo es lleno o vacío</li>
+    </ul>
+  </div>
+
+  <p style="color: var(--c-ink-soft); font-size: 14.5px;">Recordatorio clave: <strong>círculo lleno</strong> (⬤) significa que el número SÍ se incluye (≤ o ≥). <strong>Círculo vacío</strong> (◯) significa que NO se incluye (&lt; o &gt;).</p>
+
+  <button class="btn" onclick="startQuiz()">Empezar el quiz</button>
+</div>
+
+<div id="screen-quiz" class="card" style="display:none;">
+  <div class="q-header">
+    <span class="q-counter" id="q-counter">Pregunta 1 de 15</span>
+    <span class="q-timer" id="q-timer">⏱ 1:15</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%;"></div></div>
+
+  <div class="question" id="q-text"></div>
+  <div class="q-svg" id="q-svg" style="display:none;"></div>
+  <div class="options" id="q-options"></div>
+
+  <div id="q-feedback" style="display:none;"></div>
+  <div class="actions" id="q-actions" style="display:none;">
+    <button class="btn" id="btn-next" onclick="nextQuestion()">Siguiente pregunta →</button>
+  </div>
+</div>
+
+<div id="screen-results" class="card" style="display:none;">
+  <div class="results-score">
+    <div class="score-big" id="score-big">0 / 15</div>
+    <div class="score-pct" id="score-pct">0%</div>
+    <div class="score-time" id="score-time">Tiempo total: 0:00</div>
+  </div>
+  <div class="results-msg" id="results-msg"></div>
+
+  <div class="review-header">
+    <h2>Revisión de respuestas</h2>
+  </div>
+  <div id="review-list"></div>
+
+  <div class="actions-final">
+    <button class="btn" onclick="restartQuiz()">Reintentar quiz</button>
+    <button class="btn secondary" onclick="window.print()">Imprimir revisión</button>
+  </div>
+</div>
+
+<div class="footer">
+  GEDparaHispanos.com · Prof. José M. Fernández · Harry S. Truman College (CCC)<br>
+  GED® es una marca registrada del American Council on Education.
+</div>
+
+</div>
+
+<script>
+// ===== Generador de SVG para recta numérica =====
+// highlight: valor numérico donde va el círculo (puede ser negativo o decimal)
+// filled: true (círculo lleno = incluye), false (vacío = no incluye)
+// direction: 'left' | 'right' (dirección de la flecha sombreada)
+// range: [min, max] para el eje
+function numberLine(highlight, filled, direction, range) {
+  const [min, max] = range;
+  const W = 440, H = 80;
+  const marginX = 30;
+  const axisY = 40;
+  const span = max - min;
+  const xFor = v => marginX + ((v - min) / span) * (W - 2*marginX);
+  const hx = xFor(highlight);
+
+  // Ticks enteros
+  let ticks = '';
+  for (let v = min; v <= max; v++) {
+    const x = xFor(v);
+    ticks += `<line x1="${x}" y1="${axisY - 5}" x2="${x}" y2="${axisY + 5}" stroke="#4a4a4a" stroke-width="1.5"/>`;
+    ticks += `<text x="${x}" y="${axisY + 22}" text-anchor="middle" font-family="system-ui, Arial" font-size="12" fill="#4a4a4a">${v}</text>`;
+  }
+
+  // Eje horizontal
+  const axis = `<line x1="${marginX - 10}" y1="${axisY}" x2="${W - marginX + 10}" y2="${axisY}" stroke="#1a1a1a" stroke-width="2"/>`;
+  // Puntas de flecha en los extremos del eje
+  const arrowL = `<polygon points="${marginX - 10},${axisY} ${marginX - 2},${axisY - 5} ${marginX - 2},${axisY + 5}" fill="#1a1a1a"/>`;
+  const arrowR = `<polygon points="${W - marginX + 10},${axisY} ${W - marginX + 2},${axisY - 5} ${W - marginX + 2},${axisY + 5}" fill="#1a1a1a"/>`;
+
+  // Línea sombreada del rayo solución
+  let shade = '';
+  if (direction === 'right') {
+    shade = `<line x1="${hx}" y1="${axisY}" x2="${W - marginX + 5}" y2="${axisY}" stroke="#1e5aa6" stroke-width="4" stroke-linecap="round"/>`;
+    shade += `<polygon points="${W - marginX + 12},${axisY} ${W - marginX + 2},${axisY - 6} ${W - marginX + 2},${axisY + 6}" fill="#1e5aa6"/>`;
+  } else if (direction === 'left') {
+    shade = `<line x1="${marginX - 5}" y1="${axisY}" x2="${hx}" y2="${axisY}" stroke="#1e5aa6" stroke-width="4" stroke-linecap="round"/>`;
+    shade += `<polygon points="${marginX - 12},${axisY} ${marginX - 2},${axisY - 6} ${marginX - 2},${axisY + 6}" fill="#1e5aa6"/>`;
+  }
+
+  // Círculo en highlight
+  const circle = filled
+    ? `<circle cx="${hx}" cy="${axisY}" r="7" fill="#1e5aa6" stroke="#1e5aa6" stroke-width="2"/>`
+    : `<circle cx="${hx}" cy="${axisY}" r="7" fill="#ffffff" stroke="#1e5aa6" stroke-width="2.5"/>`;
+
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Recta numérica">
+    ${axis}${arrowL}${arrowR}${ticks}${shade}${circle}
+  </svg>`;
+}
+
+// ===== Banco de preguntas =====
+const QUESTIONS = [
+  {
+    q: "Resuelve la desigualdad:",
+    math: "x + 7 &lt; 12",
+    opts: ["x &lt; 5", "x &lt; 19", "x &gt; 5", "x &gt; 19"],
+    ans: 0,
+    expl: "Resta 7 de ambos lados: x + 7 − 7 &lt; 12 − 7, entonces x &lt; 5. Como solo restaste (no multiplicaste por negativo), el signo no cambia.",
+    tag: "A.3.a · Desigualdad simple"
+  },
+  {
+    q: "Resuelve la desigualdad:",
+    math: "3x ≥ 21",
+    opts: ["x ≥ 6", "x ≥ 7", "x ≤ 7", "x ≥ 24"],
+    ans: 1,
+    expl: "Divide ambos lados entre 3: x ≥ 21 ÷ 3 = 7. Como 3 es positivo, el signo ≥ no cambia.",
+    tag: "A.3.a · División por positivo"
+  },
+  {
+    q: "Resuelve la desigualdad (¡ojo con el signo!):",
+    math: "−4x &gt; 20",
+    opts: ["x &lt; −5", "x &gt; −5", "x &lt; 5", "x &gt; 5"],
+    ans: 0,
+    expl: "Divide ambos lados entre −4. <strong>Cuando multiplicas o divides por un número negativo, el signo de la desigualdad se VOLTEA:</strong> &gt; se vuelve &lt;. Resultado: x &lt; −5. Este es el error más común en el examen.",
+    tag: "A.3.a · Volteo de signo"
+  },
+  {
+    q: "Resuelve la desigualdad:",
+    math: "2(x − 3) ≤ 10",
+    opts: ["x ≤ 2", "x ≤ 5", "x ≤ 8", "x ≤ 13"],
+    ans: 2,
+    expl: "Primero distribuye el 2: 2x − 6 ≤ 10. Suma 6: 2x ≤ 16. Divide entre 2: x ≤ 8. Por positivo, el signo ≤ no cambia.",
+    tag: "A.3.a · Con paréntesis"
+  },
+  {
+    q: "Resuelve la desigualdad:",
+    math: "5x − 3 &gt; 2x + 12",
+    opts: ["x &gt; 3", "x &gt; 4", "x &gt; 5", "x &gt; 9"],
+    ans: 2,
+    expl: "Resta 2x de ambos lados: 3x − 3 &gt; 12. Suma 3: 3x &gt; 15. Divide entre 3: x &gt; 5.",
+    tag: "A.3.a · Variables en ambos lados"
+  },
+  {
+    q: "¿Qué desigualdad representa la siguiente recta numérica?",
+    svg: numberLine(3, false, 'right', [-2, 8]),
+    opts: ["x ≤ 3", "x &lt; 3", "x ≥ 3", "x &gt; 3"],
+    ans: 3,
+    expl: "El círculo es <strong>vacío</strong> en 3, así que el 3 NO se incluye (usamos &lt; o &gt;). La flecha va hacia la <strong>derecha</strong>, entonces son valores mayores: x &gt; 3.",
+    tag: "A.3.b · Recta numérica"
+  },
+  {
+    q: "¿Qué desigualdad representa la siguiente recta numérica?",
+    svg: numberLine(-2, true, 'left', [-6, 4]),
+    opts: ["x &lt; −2", "x ≤ −2", "x &gt; −2", "x ≥ −2"],
+    ans: 1,
+    expl: "El círculo está <strong>lleno</strong> en −2, así que el −2 SÍ se incluye (usamos ≤ o ≥). La flecha va hacia la <strong>izquierda</strong>, entonces son valores menores: x ≤ −2.",
+    tag: "A.3.b · Recta numérica"
+  },
+  {
+    q: "¿Cuáles son los números enteros que satisfacen la desigualdad compuesta?",
+    math: "−3 &lt; x ≤ 2",
+    opts: ["−3, −2, −1, 0, 1, 2", "−2, −1, 0, 1, 2", "−3, −2, −1, 0, 1", "−2, −1, 0, 1"],
+    ans: 1,
+    expl: "−3 &lt; x significa x es MAYOR que −3 (no incluye −3). x ≤ 2 significa x es menor o igual a 2 (sí incluye 2). Enteros válidos: −2, −1, 0, 1, 2.",
+    tag: "A.3.c · Desigualdad compuesta"
+  },
+  {
+    q: "María tiene $50 para el parque de diversiones. La entrada cuesta $12 y cada juego $3.50. Si x es el número de juegos, ¿qué desigualdad modela la situación?",
+    opts: [
+      "12 + 3.50x ≤ 50",
+      "12 + 3.50x ≥ 50",
+      "12 + 3.50x &lt; 50",
+      "12 + 3.50x &gt; 50"
+    ],
+    ans: 0,
+    expl: "El gasto total (entrada + juegos) debe ser MENOR O IGUAL a lo que tiene. Como puede gastar exactamente $50, usamos ≤. El gasto es 12 + 3.50x.",
+    tag: "A.3.d · Modelar con contexto"
+  },
+  {
+    q: "Carlos necesita ganar al menos $600 esta semana. Gana $15 por hora. ¿Cuál es el menor número de horas que debe trabajar?",
+    opts: ["38", "39", "40", "41"],
+    ans: 2,
+    expl: "Plantea: 15h ≥ 600. Divide entre 15: h ≥ 40. La frase \"al menos\" se traduce como ≥. Debe trabajar al menos 40 horas, así que el menor número es 40.",
+    tag: "A.3.d · Al menos / a lo más"
+  },
+  {
+    q: "Un ascensor soporta máximo 800 kg. Ya hay 5 personas con peso total de 380 kg. Si p es el número adicional de personas de 75 kg cada una, ¿cuántas como máximo pueden subir?",
+    opts: ["4", "5", "6", "7"],
+    ans: 1,
+    expl: "Plantea: 380 + 75p ≤ 800. Resta 380: 75p ≤ 420. Divide entre 75: p ≤ 5.6. Como no se puede entrar \"media persona\", el mayor entero que cumple es 5.",
+    tag: "A.3.d · Con redondeo práctico"
+  },
+  {
+    q: "Resuelve la desigualdad:",
+    math: "x/3 + 2 &gt; 5",
+    opts: ["x &gt; 3", "x &gt; 7", "x &gt; 9", "x &gt; 15"],
+    ans: 2,
+    expl: "Resta 2 de ambos lados: x/3 &gt; 3. Multiplica ambos lados por 3 (positivo, el signo no cambia): x &gt; 9.",
+    tag: "A.3.a · Con fracción"
+  },
+  {
+    q: "La temperatura de un refrigerador debe mantenerse entre 2°C y 4°C, inclusive. Si t es la temperatura, ¿cuál expresión lo representa?",
+    opts: [
+      "t &lt; 2 o t &gt; 4",
+      "2 &lt; t &lt; 4",
+      "2 ≤ t ≤ 4",
+      "t ≤ 2 o t ≥ 4"
+    ],
+    ans: 2,
+    expl: "\"Entre 2 y 4, inclusive\" significa que t puede ser igual a 2, igual a 4, o cualquier valor intermedio. Se escribe con ≤ en ambos extremos: 2 ≤ t ≤ 4.",
+    tag: "A.3.c · Compuesta contextual"
+  },
+  {
+    q: "Resuelve la desigualdad (¡cuidado con el signo escondido!):",
+    math: "5 − 2x ≥ 11",
+    opts: ["x ≥ −3", "x ≤ −3", "x ≥ 3", "x ≤ 3"],
+    ans: 1,
+    expl: "Resta 5 de ambos lados: −2x ≥ 6. Divide entre −2 (¡negativo! → <strong>voltea el signo</strong>): x ≤ −3. Dos trampas: el coeficiente negativo disfrazado detrás del \"5 −\" y el volteo obligatorio.",
+    tag: "A.3.a · Coeficiente negativo"
+  },
+  {
+    q: "Una fábrica produce como máximo 500 unidades al día. Si ya produjo 180 esta mañana, ¿cuál desigualdad representa las unidades x que puede producir en la tarde?",
+    opts: [
+      "x + 180 &gt; 500",
+      "x + 180 &lt; 500",
+      "x + 180 ≥ 500",
+      "x + 180 ≤ 500"
+    ],
+    ans: 3,
+    expl: "\"Como máximo\" significa que el total no puede exceder 500. Usa ≤. La producción total es 180 (mañana) + x (tarde), que debe ser ≤ 500.",
+    tag: "A.3.d · Modelar con máximo"
+  }
+];
+
+// ===== Estado =====
+const TIME_PER_QUESTION = 75;
+let currentIdx = 0;
+let score = 0;
+let answers = [];
+let timerInterval = null;
+let timeLeft = TIME_PER_QUESTION;
+let quizStartTime = 0;
+let questionStartTime = 0;
+
+// ===== Navegación de pantallas =====
+function showScreen(id) {
+  ['screen-start', 'screen-quiz', 'screen-results'].forEach(s => {
+    document.getElementById(s).style.display = 'none';
+  });
+  document.getElementById(id).style.display = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== Inicio =====
+function startQuiz() {
+  currentIdx = 0;
+  score = 0;
+  answers = [];
+  quizStartTime = Date.now();
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+// ===== Render de pregunta =====
+function renderQuestion() {
+  const q = QUESTIONS[currentIdx];
+  document.getElementById('q-counter').textContent = `Pregunta ${currentIdx + 1} de ${QUESTIONS.length}`;
+
+  // Pregunta (texto + opcional fórmula matemática grande)
+  let qHtml = q.q;
+  if (q.math) {
+    qHtml += `<div style="margin-top:14px; text-align:center;"><span class="q-math">${q.math}</span></div>`;
+  }
+  document.getElementById('q-text').innerHTML = qHtml;
+
+  // SVG opcional (recta numérica)
+  const svgEl = document.getElementById('q-svg');
+  if (q.svg) {
+    svgEl.innerHTML = q.svg;
+    svgEl.style.display = 'block';
+  } else {
+    svgEl.innerHTML = '';
+    svgEl.style.display = 'none';
+  }
+
+  // Opciones
+  const optsContainer = document.getElementById('q-options');
+  optsContainer.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.setAttribute('data-idx', i);
+    btn.innerHTML = `<span class="option-marker">${letters[i]}</span><span class="q-math" style="font-size:16px;">${opt}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    optsContainer.appendChild(btn);
+  });
+
+  // Reset feedback + actions
+  document.getElementById('q-feedback').style.display = 'none';
+  document.getElementById('q-feedback').innerHTML = '';
+  document.getElementById('q-actions').style.display = 'none';
+  document.getElementById('btn-next').textContent =
+    (currentIdx === QUESTIONS.length - 1) ? 'Ver resultados →' : 'Siguiente pregunta →';
+
+  // Progress bar
+  const pctProgress = (currentIdx / QUESTIONS.length) * 100;
+  document.getElementById('progress-fill').style.width = pctProgress + '%';
+
+  // Timer
+  timeLeft = TIME_PER_QUESTION;
+  questionStartTime = Date.now();
+  updateTimerDisplay();
+  startTimer();
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timeLeft / 60);
+  const s = timeLeft % 60;
+  const tEl = document.getElementById('q-timer');
+  tEl.textContent = `⏱ ${m}:${s < 10 ? '0' : ''}${s}`;
+  if (timeLeft <= 15) { tEl.classList.add('urgent'); }
+  else { tEl.classList.remove('urgent'); }
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      timeout();
+    }
+  }, 1000);
+}
+
+function timeout() {
+  const q = QUESTIONS[currentIdx];
+  answers.push({ chosen: null, correct: false, timedOut: true, timeSpent: TIME_PER_QUESTION });
+
+  document.querySelectorAll('.option').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.ans) { btn.classList.add('reveal-correct'); }
+  });
+
+  showFeedback(false, true);
+}
+
+function selectAnswer(idx) {
+  clearInterval(timerInterval);
+  const q = QUESTIONS[currentIdx];
+  const isCorrect = (idx === q.ans);
+  const timeSpent = Math.min(TIME_PER_QUESTION, Math.round((Date.now() - questionStartTime) / 1000));
+  if (isCorrect) score++;
+  answers.push({ chosen: idx, correct: isCorrect, timedOut: false, timeSpent });
+
+  document.querySelectorAll('.option').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.ans) { btn.classList.add('correct'); }
+    else if (i === idx) { btn.classList.add('incorrect'); }
+  });
+
+  showFeedback(isCorrect, false);
+}
+
+function showFeedback(isCorrect, timedOut) {
+  const q = QUESTIONS[currentIdx];
+  const fbEl = document.getElementById('q-feedback');
+  fbEl.className = 'feedback ' + (isCorrect ? 'good' : 'miss');
+  let title;
+  if (isCorrect) { title = '¡Correcto!'; }
+  else if (timedOut) { title = '⏱ Se acabó el tiempo'; }
+  else { title = 'No es correcto'; }
+  fbEl.innerHTML = `
+    <p class="feedback-title">${title}</p>
+    <p class="feedback-explanation"><strong>Explicación:</strong> ${q.expl}</p>
+    <p class="feedback-explanation" style="margin-top:6px; font-size:13px; color:var(--c-ink-mute);">
+      <em>Target GED: ${q.tag}</em>
+    </p>
+  `;
+  fbEl.style.display = 'block';
+  document.getElementById('q-actions').style.display = 'flex';
+}
+
+function nextQuestion() {
+  currentIdx++;
+  if (currentIdx >= QUESTIONS.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+// ===== Pantalla final =====
+function showResults() {
+  clearInterval(timerInterval);
+  const totalSec = Math.round((Date.now() - quizStartTime) / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  const pct = Math.round((score / QUESTIONS.length) * 100);
+
+  document.getElementById('score-big').textContent = `${score} / ${QUESTIONS.length}`;
+  document.getElementById('score-pct').textContent = `${pct}% de aciertos`;
+  document.getElementById('score-time').textContent =
+    `Tiempo total: ${m}:${s < 10 ? '0' : ''}${s}`;
+
+  let msg = '';
+  if (pct >= 90) {
+    msg = '¡Excelente! Dominas las desigualdades, incluyendo las trampas del volteo de signo. Listo para esta parte del GED.';
+  } else if (pct >= 75) {
+    msg = 'Buen trabajo. Revisa las pocas preguntas erradas — fíjate especialmente en las que tienen coeficientes negativos.';
+  } else if (pct >= 60) {
+    msg = 'Vas por buen camino. Practica de nuevo poniendo atención al signo cuando multiplicas o divides por negativo, y a la diferencia entre círculo lleno y vacío.';
+  } else {
+    msg = 'Este tema necesita más práctica. Revisa cada explicación con calma. Después vuelve a la guía de desigualdades y reintenta.';
+  }
+  document.getElementById('results-msg').innerHTML = `<p>${msg}</p>`;
+
+  const reviewEl = document.getElementById('review-list');
+  reviewEl.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  QUESTIONS.forEach((q, i) => {
+    const a = answers[i];
+    const cls = a.correct ? 'good' : (a.timedOut ? 'skip' : 'miss');
+    const markText = a.correct ? 'Correcta' : (a.timedOut ? 'Sin responder' : 'Incorrecta');
+
+    let chosenText;
+    if (a.timedOut) {
+      chosenText = '<em>Se acabó el tiempo</em>';
+    } else {
+      chosenText = `${letters[a.chosen]}. ${q.opts[a.chosen]}`;
+    }
+    const correctText = `${letters[q.ans]}. ${q.opts[q.ans]}`;
+
+    let qDisplay = q.q;
+    if (q.math) {
+      qDisplay += ` <span class="q-math">${q.math}</span>`;
+    }
+
+    const item = document.createElement('div');
+    item.className = 'review-item ' + cls;
+    let inner = `<p class="review-q">${i+1}. ${qDisplay}</p>`;
+    if (q.svg) {
+      inner += `<div class="review-svg">${q.svg}</div>`;
+    }
+    inner += `
+      <p class="review-meta"><span class="mark ${cls}">${markText}</span> <strong>Tu respuesta:</strong> <span class="q-math">${chosenText}</span></p>
+      ${a.correct ? '' : `<p class="review-meta"><strong>Respuesta correcta:</strong> <span class="q-math">${correctText}</span></p>`}
+      <p class="review-meta"><strong>Tiempo:</strong> ${a.timeSpent}s</p>
+      <p class="review-expl">${q.expl}</p>
+    `;
+    item.innerHTML = inner;
+    reviewEl.appendChild(item);
+  });
+
+  showScreen('screen-results');
+}
+
+function restartQuiz() {
+  startQuiz();
+}
+</script>
+</body>
+</html>
