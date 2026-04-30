@@ -1,1 +1,741 @@
+<!DOCTYPE html>
+<html lang="es"><head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Interactivo: Área de polígonos regulares</title> 
+  <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #ebffe3;
+        margin: 0;
+        padding: 20px; /* Add padding around the container */
+        display: flex; /* Center container */
+        justify-content: center; /* Center container */
+        align-items: flex-start; /* Align container to top */
+        min-height: 100vh; /* Ensure body takes full height */
+      }
 
+      .container {
+        width: 500px;
+        /* height: auto; /* Let height adjust based on content */
+        margin: 0 auto;
+        padding: 15px;
+        border: 1px solid #ccc; /* Add a subtle border */
+        border-radius: 8px; /* Rounded corners for the container */
+        background-color: #f8fff4; /* Slightly different background for container */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 15px; /* Increased margin */
+      }
+
+      .header h1 {
+        color: #008000;
+        margin: 0;
+        font-size: 1.4em; /* Slightly larger title */
+      }
+
+      .units-display {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px; /* Added margin */
+        padding-bottom: 5px; /* Space below units */
+        border-bottom: 1px solid #eee; /* Separator line */
+      }
+
+      .units-display-flex {
+        display: flex;
+        align-items: center;
+      }
+
+      .units-display .title {
+        font-weight: bold;
+        font-size: 1.1em; /* Adjusted size */
+        color: #333; /* Darker color */
+        margin-right: 10px;
+      }
+
+      .units-display .unit {
+        color: red;
+        font-weight: bold;
+        font-size: 1.1em; /* Adjusted size */
+      }
+
+      .canvas-container {
+        position: relative;
+        height: 440px; /* Fixed height for the canvas area */
+        width: 100%; /* Ensure it takes full width of container */
+        margin-bottom: 15px; /* Space below canvas */
+        border: 1px solid #ddd; /* Border around canvas area */
+        border-radius: 5px; /* Rounded corners */
+        background-color: #fff; /* White background for canvas area */
+        overflow: hidden; /* Clip content if needed */
+      }
+
+      canvas {
+        cursor: pointer;
+        display: block;
+        /* Ensure canvas fits its container */
+        max-width: 100%;
+        height: auto;
+      }
+
+      .legend {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: rgba(255, 255, 255, 0.85); /* Slightly more opaque */
+        padding: 8px; /* Increased padding */
+        border: 1px solid #008000;
+        border-radius: 5px;
+        font-size: 0.9em; /* Adjust font size */
+        z-index: 10; /* Ensure legend is above canvas drawings */
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+      }
+      .legend-item:last-child {
+          margin-bottom: 0; /* Remove margin from last item */
+      }
+
+      .legend-color {
+        width: 15px;
+        height: 15px;
+        display: inline-block;
+        margin-right: 5px;
+        border: 1px solid rgba(0,0,0,0.2); /* Subtle border for colors */
+      }
+
+      .measurements {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        text-align: left;
+        background-color: rgba(255, 255, 255, 0.85); /* Background for readability */
+        padding: 8px;
+        border-radius: 5px;
+        z-index: 10; /* Ensure measurements are above canvas drawings */
+      }
+
+      .measurement-group {
+        margin-bottom: 8px; /* Adjusted spacing */
+      }
+       .measurement-group:last-child {
+          margin-bottom: 0; /* Remove margin from last item */
+      }
+
+      .measurement-label {
+        font-weight: bold;
+        font-size: 1em; /* Adjusted size */
+        color: #555; /* Slightly muted color */
+        display: inline-block; /* Align label and value better */
+        min-width: 80px; /* Ensure labels align */
+      }
+
+      .measurement-value {
+        color: blue;
+        font-weight: bold;
+        font-size: 1em; /* Adjusted size */
+        display: inline-block;
+      }
+
+      /* Area for controls below the canvas */
+      .controls-area {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-top: 15px; /* Space above controls */
+          padding-top: 15px; /* Space inside controls area */
+          border-top: 1px solid #eee; /* Separator line */
+          width: 100%; /* Take full width */
+      }
+
+      .instruction {
+        /* Removed absolute positioning */
+        text-align: center;
+        color: #008000;
+        font-weight: bold;
+        font-size: 1.1em;
+        margin-bottom: 10px; /* Space below instruction */
+      }
+
+      .success-message {
+         /* Removed absolute positioning */
+        text-align: center;
+        color: #008000;
+        font-weight: bold;
+        font-size: 1.1em; /* Adjusted size */
+        display: none; /* Initially hidden */
+        width: 90%; /* Limit width */
+        margin: 0 auto 15px auto; /* Center and add space below */
+        padding: 10px;
+        background-color: #dff0d8; /* Light green background */
+        border: 1px solid #d6e9c6; /* Green border */
+        border-radius: 4px;
+      }
+      .success-message span { /* Ensure spans inside inherit color/weight */
+          color: blue;
+          font-weight: bold;
+      }
+
+      .ruler-type-selector {
+         /* Removed absolute positioning */
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px; /* Space below ruler selector */
+      }
+
+      .ruler-type-selector label {
+        margin-right: 10px;
+        font-weight: bold;
+        color: #008000;
+      }
+
+      /* Common button styles */
+      .controls-area button {
+          color: white;
+          border: none;
+          border-radius: 5px; /* Rounded corners */
+          padding: 6px 12px; /* Adjusted padding */
+          cursor: pointer;
+          font-weight: bold;
+          font-size: 0.9em;
+          transition: background-color 0.2s ease; /* Smooth hover effect */
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow */
+      }
+       .controls-area button:hover {
+            opacity: 0.9; /* Slight fade on hover */
+       }
+
+      /* Botón para medir lado (azul) */
+      #measure-side {
+        margin-left: 5px;
+        background-color: #007bff; /* Standard blue */
+      }
+      #measure-side:hover {
+        background-color: #0056b3; /* Darker blue */
+      }
+
+      /* Botón para medir apotema (rojo) */
+      #measure-apothem {
+        margin-left: 5px;
+        background-color: #dc3545; /* Standard red */
+      }
+       #measure-apothem:hover {
+        background-color: #c82333; /* Darker red */
+      }
+
+      /* Estilos para botones activos */
+      #measure-side.active {
+        box-shadow: 0 0 8px 2px rgba(0, 123, 255, 0.5); /* Adjusted glow */
+      }
+
+      #measure-apothem.active {
+        box-shadow: 0 0 8px 2px rgba(220, 53, 69, 0.5); /* Adjusted glow */
+      }
+
+      /* Botón Nuevo Ejercicio */
+      #new-exercise {
+         /* Removed absolute positioning */
+        background-color: #28a745; /* Standard green */
+        padding: 8px 18px; /* Larger padding */
+        font-size: 1em;
+      }
+      #new-exercise:hover {
+        background-color: #218838; /* Darker green */
+      }
+
+    </style> 
+ </head><body><div class="container">
+<div class="header">
+<h1>Área de Polígonos Regulares</h1>
+</div>
+<div class="units-display">
+<div class="units-display-flex">
+<div class="title">UNIDADES</div>
+<div class="unit" id="unit-display" style="color: #920000;">cm</div>
+</div>
+</div>
+<div class="canvas-container"><canvas id="polygon-canvas" width="500" height="440"></canvas>
+<div class="legend">
+<div class="legend-item">
+<div class="legend-color" style="background-color: blue;"></div>
+<span>Lado</span></div>
+<div class="legend-item">
+<div class="legend-color" style="background-color: red;"></div>
+<span>Apotema</span></div>
+</div>
+<div class="measurements">
+<div class="measurement-group">
+<div class="measurement-label">Nº de lados:</div>
+<div class="measurement-value">N = <span id="num-sides"></span></div>
+</div>
+<div class="measurement-group">
+<div class="measurement-label">Lado:</div>
+<div class="measurement-value">l = <span id="side-length"></span> <span id="side-unit"></span></div>
+</div>
+<div class="measurement-group">
+<div class="measurement-label">Perímetro:</div>
+<div class="measurement-value">P = <span id="perimeter"></span> <span id="perimeter-unit"></span></div>
+</div>
+<div class="measurement-group">
+<div class="measurement-label">Apotema:</div>
+<div class="measurement-value">a = <span id="apothem"></span> <span id="apothem-unit"></span></div>
+</div>
+<div class="measurement-group">
+<div class="measurement-label">Área:</div>
+<div class="measurement-value">A = <span id="area"></span> <span id="area-unit"></span>²</div>
+</div>
+</div>
+</div>
+<div class="controls-area">
+<div class="instruction" id="instruction-text">Mida el lado y la apotema con la regla</div>
+<div class="success-message" id="success-message"></div>
+<div class="ruler-type-selector"><label>Medir:</label> <button id="measure-side" class="active" style="color: #000000;">Lado</button> <button id="measure-apothem">Apotema</button></div>
+<button id="new-exercise" style="color: #000000;">OTRO ejercicio</button></div>
+</div>
+<p><script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // DOM elements
+        const canvas = document.getElementById("polygon-canvas");
+        const ctx = canvas.getContext("2d");
+        const unitDisplay = document.getElementById("unit-display");
+        const numSidesElement = document.getElementById("num-sides");
+        const sideLengthElement = document.getElementById("side-length");
+        const perimeterElement = document.getElementById("perimeter");
+        const apothemElement = document.getElementById("apothem");
+        const areaElement = document.getElementById("area");
+        const sideUnitElement = document.getElementById("side-unit");
+        const perimeterUnitElement = document.getElementById("perimeter-unit");
+        const apothemUnitElement = document.getElementById("apothem-unit");
+        const areaUnitElement = document.getElementById("area-unit");
+        const successMessage = document.getElementById("success-message");
+        const instructionText = document.getElementById("instruction-text");
+        const newExerciseButton = document.getElementById("new-exercise");
+        const measureSideButton = document.getElementById("measure-side");
+        const measureApothemButton = document.getElementById("measure-apothem");
+
+        // Global variables
+        let numSides = 5;
+        let sideLength = 3;
+        let apothemLength = 0;
+        let perimeter = 0;
+        let area = 0;
+        let unitType = "cm";
+        let polygonVertices = [];
+        let centerPoint = { x: 0, y: 0 };
+        let rulerStartPos = { x: 100, y: 380 };
+        let rulerEndPos = { x: 200, y: 380 };
+        let isDraggingStart = false;
+        let isDraggingEnd = false;
+        let instructionVisible = true;
+        let sideCorrect = false;
+        let apothemCorrect = false;
+        let currentRulerType = "side";
+
+        // Canvas constants
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const centerX = canvasWidth / 2;
+        const centerY = canvasHeight / 2; // True vertical center
+        const pixelsPerUnit = 30;
+
+        // *** MODIFIED: Calculate max radius based on available space ***
+        const measurementsWidthEstimate = 150; // Estimated width of the measurements block + padding
+        const legendWidthEstimate = 90;       // Estimated width of the legend block + padding
+        const horizontalPadding = 15;         // Desired horizontal space between polygon and fixed blocks
+        const verticalPadding = 15;           // Desired vertical space between polygon and top/bottom edges
+
+        // Calculate available radius horizontally and vertically
+        const availableRadiusX = Math.min(
+            centerX - (measurementsWidthEstimate + horizontalPadding), // Space to the left
+            canvasWidth - centerX - (legendWidthEstimate + horizontalPadding) // Space to the right
+        );
+        const availableRadiusY = Math.min(
+            centerY - verticalPadding, // Space to the top
+            canvasHeight - centerY - verticalPadding // Space to the bottom
+        );
+
+        // Use the smaller of the two available radii
+        const maxDisplayRadius = Math.max(10, Math.min(availableRadiusX, availableRadiusY)); // Ensure radius is at least 10
+
+        // Generate a new polygon configuration
+        function generateNewPolygon() {
+          numSides = Math.floor(Math.random() * 6) + 3;
+          numSidesElement.textContent = numSides;
+
+          const units = ["mm", "cm", "dm", "m"];
+          unitType = units[Math.floor(Math.random() * units.length)];
+          unitDisplay.textContent = unitType;
+
+          sideLength = Math.floor(Math.random() * 5) + 2;
+          perimeter = numSides * sideLength;
+          apothemLength =
+            Math.round((sideLength / (2 * Math.tan(Math.PI / numSides))) * 10) / 10;
+          area = Math.round(((perimeter * apothemLength) / 2) * 10) / 10;
+
+          sideCorrect = false;
+          apothemCorrect = false;
+          sideLengthElement.textContent = "??";
+          perimeterElement.textContent = "??";
+          apothemElement.textContent = "??";
+          areaElement.textContent = "??";
+          sideUnitElement.textContent = unitType;
+          perimeterUnitElement.textContent = unitType;
+          apothemUnitElement.textContent = unitType;
+          areaUnitElement.textContent = unitType;
+
+          // Reset ruler to be centered horizontally near the bottom
+          rulerStartPos = { x: centerX - 50, y: canvasHeight - 60 };
+          rulerEndPos = { x: centerX + 50, y: canvasHeight - 60 };
+
+          currentRulerType = "side";
+          measureSideButton.classList.add("active");
+          measureApothemButton.classList.remove("active");
+
+          instructionText.style.display = "block";
+          instructionVisible = true;
+          successMessage.style.display = "none";
+          successMessage.innerHTML = "";
+
+          calculatePolygonVertices();
+          drawScene();
+
+          console.log("New polygon generated:", {
+            numSides, sideLength, perimeter, apothemLength, area, unitType, maxDisplayRadius
+          });
+        }
+
+        // Calculate polygon vertices, scaling if necessary
+        function calculatePolygonVertices() {
+          polygonVertices = [];
+          centerPoint = { x: centerX, y: centerY }; // Uses true center
+
+          let displayRadius =
+            (sideLength * pixelsPerUnit) / (2 * Math.sin(Math.PI / numSides));
+
+          // Scale down if needed using the calculated maxDisplayRadius
+          if (displayRadius > maxDisplayRadius) {
+              const scaleFactor = maxDisplayRadius / displayRadius;
+              displayRadius = maxDisplayRadius;
+              console.warn(`Polygon scaled down to radius ${displayRadius.toFixed(1)} to fit canvas. Scale factor: ${scaleFactor.toFixed(2)}`);
+          }
+
+          for (let i = 0; i < numSides; i++) {
+            const angle = (2 * Math.PI * i) / numSides - Math.PI / 2 + (numSides % 2 === 0 ? Math.PI / numSides : 0) ;
+            const x = centerX + displayRadius * Math.cos(angle);
+            const y = centerY + displayRadius * Math.sin(angle); // Uses true center
+            polygonVertices.push({ x, y });
+          }
+        }
+
+        // Draw the scene
+        function drawScene() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // Draw Polygon
+          ctx.beginPath();
+          if (polygonVertices.length > 0) {
+            ctx.moveTo(polygonVertices[0].x, polygonVertices[0].y);
+            for (let i = 1; i < polygonVertices.length; i++) {
+              ctx.lineTo(polygonVertices[i].x, polygonVertices[i].y);
+            }
+            ctx.closePath();
+          }
+          ctx.fillStyle = "#b3ee3d";
+          ctx.fill();
+          ctx.strokeStyle = "blue";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Draw Center Point
+          ctx.beginPath();
+          ctx.arc(centerPoint.x, centerPoint.y, 4, 0, 2 * Math.PI);
+          ctx.fillStyle = "#000000";
+          ctx.fill();
+
+          // Draw Apothem Lines
+          if (currentRulerType === "apothem" && !apothemCorrect && polygonVertices.length > 1) {
+            const midX = (polygonVertices[0].x + polygonVertices[1].x) / 2;
+            const midY = (polygonVertices[0].y + polygonVertices[1].y) / 2;
+            ctx.beginPath();
+            ctx.moveTo(centerPoint.x, centerPoint.y);
+            ctx.lineTo(midX, midY);
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          } else if (apothemCorrect) {
+            for (let i = 0; i < numSides; i++) {
+              const j = (i + 1) % numSides;
+              const midX = (polygonVertices[i].x + polygonVertices[j].x) / 2;
+              const midY = (polygonVertices[i].y + polygonVertices[j].y) / 2;
+              ctx.beginPath();
+              ctx.moveTo(centerPoint.x, centerPoint.y);
+              ctx.lineTo(midX, midY);
+              ctx.strokeStyle = "red";
+              ctx.lineWidth = 1.5;
+              ctx.stroke();
+            }
+          }
+
+          // Draw Ruler
+          const rulerColor = currentRulerType === "side" ? "blue" : "red";
+          const rulerDarkColor = currentRulerType === "side" ? "darkblue" : "darkred";
+          ctx.beginPath();
+          ctx.moveTo(rulerStartPos.x, rulerStartPos.y);
+          ctx.lineTo(rulerEndPos.x, rulerEndPos.y);
+          ctx.strokeStyle = rulerColor;
+          ctx.lineWidth = 3;
+          ctx.stroke();
+
+          // Draw ruler handles
+          ctx.beginPath();
+          ctx.arc(rulerStartPos.x, rulerStartPos.y, 8, 0, 2 * Math.PI);
+          ctx.fillStyle = isDraggingStart ? rulerDarkColor : rulerColor;
+          ctx.fill();
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(rulerEndPos.x, rulerEndPos.y, 8, 0, 2 * Math.PI);
+          ctx.fillStyle = isDraggingEnd ? rulerDarkColor : rulerColor;
+          ctx.fill();
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+
+          // Draw Ruler Ticks and Numbers
+          const rulerVector = { x: rulerEndPos.x - rulerStartPos.x, y: rulerEndPos.y - rulerStartPos.y };
+          const rulerLengthPixels = Math.hypot(rulerVector.x, rulerVector.y);
+          const rulerAngle = Math.atan2(rulerVector.y, rulerVector.x);
+          const normalX = -rulerVector.y / (rulerLengthPixels || 1);
+          const normalY = rulerVector.x / (rulerLengthPixels || 1);
+          const rulerLengthUnits = rulerLengthPixels / pixelsPerUnit;
+          const numTicks = Math.floor(rulerLengthUnits) + 1;
+
+          ctx.strokeStyle = rulerColor;
+          ctx.fillStyle = "black";
+          ctx.font = "10px Arial";
+
+          for (let i = 0; i < numTicks; i++) {
+            const tickDistPixels = i * pixelsPerUnit;
+            if (tickDistPixels > rulerLengthPixels + 2) break;
+
+            const tickX = rulerStartPos.x + Math.cos(rulerAngle) * tickDistPixels;
+            const tickY = rulerStartPos.y + Math.sin(rulerAngle) * tickDistPixels;
+            let tickDrawLength = (i % 5 === 0) ? 10 : 5;
+            const tickStartX = tickX - normalX * (tickDrawLength / 2);
+            const tickStartY = tickY - normalY * (tickDrawLength / 2);
+            const tickEndX = tickX + normalX * (tickDrawLength / 2);
+            const tickEndY = tickY + normalY * (tickDrawLength / 2);
+
+            ctx.beginPath();
+            ctx.moveTo(tickStartX, tickStartY);
+            ctx.lineTo(tickEndX, tickEndY);
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+             if (i % 1 === 0) {
+                const numberX = tickX + normalX * (tickDrawLength + 5);
+                const numberY = tickY + normalY * (tickDrawLength + 5);
+                ctx.textAlign = (normalX > 0.1) ? 'left' : (normalX < -0.1) ? 'right' : 'center';
+                ctx.textBaseline = (normalY > 0.1) ? 'top' : (normalY < -0.1) ? 'bottom' : 'middle';
+                ctx.fillText(i.toString(), numberX, numberY);
+             }
+          }
+           ctx.textAlign = 'start';
+           ctx.textBaseline = 'alphabetic';
+
+          checkResults();
+        }
+
+        // Check results and display success message
+        function checkResults() {
+          if (sideCorrect && apothemCorrect) {
+            sideLengthElement.textContent = sideLength;
+            perimeterElement.textContent = perimeter;
+            apothemElement.textContent = apothemLength;
+            areaElement.textContent = area;
+
+            successMessage.innerHTML = `
+              <strong>CORRECTO</strong><br />
+              A = (P &times; a) / 2 <br/>
+              A = (${{perimeter}} ${{unitType}} &times; ${{apothemLength}} ${{unitType}}) / 2 <br/>
+              A = ${{area}} ${{unitType}}²
+            `;
+            successMessage.style.display = "block";
+            instructionText.style.display = 'none';
+            instructionVisible = false;
+
+          } else {
+              successMessage.style.display = "none";
+              if (!isDraggingStart && !isDraggingEnd) {
+                 instructionText.style.display = 'block';
+                 instructionVisible = true;
+              }
+          }
+        }
+
+        // Handle ruler type switching
+        measureSideButton.addEventListener("click", function () {
+          currentRulerType = "side";
+          measureSideButton.classList.add("active");
+          measureApothemButton.classList.remove("active");
+          drawScene();
+        });
+
+        measureApothemButton.addEventListener("click", function () {
+          currentRulerType = "apothem";
+          measureApothemButton.classList.add("active");
+          measureSideButton.classList.remove("active");
+          drawScene();
+        });
+
+        // Mouse Event Handlers
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        }
+
+        function handleMouseDown(e) {
+          const mousePos = getMousePos(e);
+          const distToStart = Math.hypot(mousePos.x - rulerStartPos.x, mousePos.y - rulerStartPos.y);
+          const distToEnd = Math.hypot(mousePos.x - rulerEndPos.x, mousePos.y - rulerEndPos.y);
+          const handleRadius = 15;
+
+          isDraggingStart = distToStart < handleRadius;
+          isDraggingEnd = !isDraggingStart && (distToEnd < handleRadius);
+
+          if (isDraggingStart || isDraggingEnd) {
+              if (instructionVisible) {
+                  instructionText.style.display = "none";
+                  instructionVisible = false;
+              }
+              successMessage.style.display = "none";
+              drawScene();
+          }
+        }
+
+        function handleMouseMove(e) {
+          if (!isDraggingStart && !isDraggingEnd) return;
+          const mousePos = getMousePos(e);
+
+          if (isDraggingStart) rulerStartPos = { x: mousePos.x, y: mousePos.y };
+          else if (isDraggingEnd) rulerEndPos = { x: mousePos.x, y: mousePos.y };
+
+          if (currentRulerType === "side") checkSideMeasurement();
+          else checkApothemMeasurement();
+
+          drawScene();
+        }
+
+        function handleMouseUp() {
+          if (isDraggingStart || isDraggingEnd) {
+              isDraggingStart = false;
+              isDraggingEnd = false;
+              if (currentRulerType === "side") checkSideMeasurement();
+              else checkApothemMeasurement();
+              drawScene();
+          }
+        }
+
+        // Measurement Check Logic
+        function checkSideMeasurement() {
+          if (polygonVertices.length < 2) return;
+          const snapThreshold = 15;
+          let placementCorrect = false;
+
+          for (let i = 0; i < polygonVertices.length; i++) {
+            const v1 = polygonVertices[i];
+            const v2 = polygonVertices[(i + 1) % polygonVertices.length];
+            const distStartV1 = Math.hypot(rulerStartPos.x - v1.x, rulerStartPos.y - v1.y);
+            const distEndV2 = Math.hypot(rulerEndPos.x - v2.x, rulerEndPos.y - v2.y);
+            const distStartV2 = Math.hypot(rulerStartPos.x - v2.x, rulerStartPos.y - v2.y);
+            const distEndV1 = Math.hypot(rulerEndPos.x - v1.x, rulerEndPos.y - v1.y);
+
+            if ( (distStartV1 < snapThreshold && distEndV2 < snapThreshold) ||
+                 (distStartV2 < snapThreshold && distEndV1 < snapThreshold) ) {
+              placementCorrect = true;
+              // Snap ruler
+              if (distStartV1 < snapThreshold && distEndV2 < snapThreshold) {
+                  rulerStartPos = { x: v1.x, y: v1.y }; rulerEndPos = { x: v2.x, y: v2.y };
+              } else {
+                   rulerStartPos = { x: v2.x, y: v2.y }; rulerEndPos = { x: v1.x, y: v1.y };
+              }
+              break;
+            }
+          }
+
+          if (placementCorrect !== sideCorrect) {
+            sideCorrect = placementCorrect;
+            console.log("Side measurement correct:", sideCorrect);
+            if (sideCorrect) {
+                sideLengthElement.textContent = sideLength; perimeterElement.textContent = perimeter;
+            } else {
+                sideLengthElement.textContent = "??"; perimeterElement.textContent = "??";
+            }
+          }
+        }
+
+        function checkApothemMeasurement() {
+            if (polygonVertices.length < 2) return;
+            const snapThreshold = 15;
+            let placementCorrect = false;
+            const distStartCenter = Math.hypot(rulerStartPos.x - centerPoint.x, rulerStartPos.y - centerPoint.y);
+            const distEndCenter = Math.hypot(rulerEndPos.x - centerPoint.x, rulerEndPos.y - centerPoint.y);
+
+            for (let i = 0; i < numSides; i++) {
+                const j = (i + 1) % numSides;
+                const midX = (polygonVertices[i].x + polygonVertices[j].x) / 2;
+                const midY = (polygonVertices[i].y + polygonVertices[j].y) / 2;
+                const distStartMid = Math.hypot(rulerStartPos.x - midX, rulerStartPos.y - midY);
+                const distEndMid = Math.hypot(rulerEndPos.x - midX, rulerEndPos.y - midY);
+
+                if ( (distStartCenter < snapThreshold && distEndMid < snapThreshold) ||
+                     (distEndCenter < snapThreshold && distStartMid < snapThreshold) ) {
+                    placementCorrect = true;
+                    // Snap ruler
+                     if (distStartCenter < snapThreshold && distEndMid < snapThreshold) {
+                         rulerStartPos = { x: centerPoint.x, y: centerPoint.y }; rulerEndPos = { x: midX, y: midY };
+                     } else {
+                         rulerStartPos = { x: midX, y: midY }; rulerEndPos = { x: centerPoint.x, y: centerPoint.y };
+                     }
+                    break;
+                }
+            }
+
+            if (placementCorrect !== apothemCorrect) {
+                apothemCorrect = placementCorrect;
+                console.log("Apothem measurement correct:", apothemCorrect);
+                 if (apothemCorrect) {
+                    apothemElement.textContent = apothemLength; areaElement.textContent = area;
+                 } else {
+                    apothemElement.textContent = "??"; areaElement.textContent = "??";
+                 }
+            }
+        }
+
+        // Add event listeners
+        canvas.addEventListener("mousedown", handleMouseDown);
+        canvas.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mouseup", handleMouseUp);
+        newExerciseButton.addEventListener("click", generateNewPolygon);
+
+        // Initialize
+        generateNewPolygon();
+      });
+    </script></p></body></html>
