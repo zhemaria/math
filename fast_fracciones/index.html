@@ -1,1 +1,908 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rapidez en fracciones — GED</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+    :root {
+      --cp: #0089cd; --cs: #005f8f; --ch: #00a8fc;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0; padding: 10px;
+      background: linear-gradient(135deg, #0089cd, #002d4d);
+      display: flex; justify-content: center; align-items: flex-start;
+      min-height: 90vh; flex-direction: column; gap: 10px;
+    }
+    #quiz-container {
+      background: #fff; border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      overflow: hidden; width: clamp(300px, 95%, 820px);
+      margin: 0 auto;
+    }
+    .quiz-progress-header {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      padding: 16px 22px; border-bottom: 3px solid var(--cp);
+    }
+    .progress-text {
+      text-align: center; font-weight: 700;
+      font-size: clamp(0.95em, 2.5vw, 1.1em);
+      color: var(--cp); margin-bottom: 10px;
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+    .progress-container {
+      background: #e0e0e0; height: 12px; border-radius: 6px;
+      overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+    }
+    .progress-bar {
+      height: 100%; width: 5%;
+      background: linear-gradient(90deg, var(--cp), var(--ch));
+      transition: width 0.5s cubic-bezier(0.4,0,0.2,1); border-radius: 6px;
+    }
+    .question-meta {
+      display: flex; align-items: center; justify-content: center;
+      padding: 14px 20px 0; gap: 10px; flex-wrap: wrap;
+    }
+    .cat-badge {
+      padding: 5px 15px; border-radius: 20px;
+      font-size: 0.8em; font-weight: 700; color: #fff;
+      letter-spacing: 0.4px;
+    }
+    .time-badge {
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 0.78em; font-weight: 600;
+      background: #e8f4f8; color: #444;
+      border: 1px solid #ccc;
+    }
+    .question-header {
+      padding: 16px 22px 8px;
+      font-size: clamp(1em, 2.6vw, 1.2em);
+      font-weight: 700; text-align: center;
+      color: #1a1a2e; line-height: 1.55;
+    }
+    .math-box {
+      background: linear-gradient(135deg, #f0f7ff, #e4effc);
+      border: 2px solid var(--cp); border-radius: 10px;
+      margin: 0 22px 14px; padding: 16px 18px;
+      font-size: clamp(1.1em, 2.8vw, 1.35em);
+      font-weight: 700; text-align: center;
+      color: #003366;
+      line-height: 1.5;
+    }
+    /* Fracciones apiladas */
+    .frac {
+      display: inline-block;
+      vertical-align: middle;
+      text-align: center;
+      margin: 0 3px;
+      line-height: 1;
+    }
+    .frac .num {
+      display: block;
+      border-bottom: 2px solid currentColor;
+      padding: 1px 6px;
+      font-size: 0.92em;
+    }
+    .frac .den {
+      display: block;
+      padding: 2px 6px 0;
+      font-size: 0.92em;
+    }
+    .math-box .frac { font-size: 1em; margin: 0 5px; }
+    .option-item .frac { font-size: 0.95em; }
+    .question-header .frac { font-size: 0.95em; }
 
+    .options { padding: 0 18px; }
+    .option-item {
+      display: block; padding: 12px 16px; margin-bottom: 11px;
+      background: #f0f4f8; color: #333;
+      border: 2px solid #e0e0e0; border-radius: 8px;
+      cursor: pointer; transition: all 0.25s ease;
+      font-size: clamp(0.92em, 2.4vw, 1.05em);
+      font-weight: 600; line-height: 1.4; user-select: none;
+    }
+    .option-item:hover:not(.disabled) {
+      background: #dff0ff; border-color: var(--ch);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .option-item.correct  { background: #4caf50!important; color:#fff!important; border-color:#4caf50!important; }
+    .option-item.incorrect{ background: #f44336!important; color:#fff!important; border-color:#f44336!important; }
+    .option-item.disabled { cursor: not-allowed; opacity: 0.85; }
+    .btn-container { padding: 4px 18px 18px; }
+    .primary-btn {
+      display: block; width: 100%; padding: 13px;
+      color: #fff; border: none; border-radius: 8px;
+      font-size: 1.05em; font-weight: 700; cursor: pointer;
+      transition: all 0.25s ease; text-transform: uppercase;
+      letter-spacing: 1px; background: var(--cp);
+      text-align: center; user-select: none; box-sizing: border-box;
+    }
+    .primary-btn:hover {
+      background: var(--ch); transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .timer-container {
+      background: linear-gradient(135deg, #fff8e1, #ffecb3);
+      padding: 11px 18px; border-top: 2px solid #f39c12;
+    }
+    .timer-text {
+      text-align: center; font-weight: 700;
+      font-size: clamp(0.88em, 2.2vw, 1em);
+      color: #c77a00; margin-bottom: 7px;
+    }
+    .timer-bar-container {
+      background: #f0d0d0; height: 8px; border-radius: 4px; overflow: hidden;
+    }
+    .timer-bar {
+      height: 100%; width: 100%;
+      background: linear-gradient(90deg,#28a745,#ffc107,#dc3545);
+      transition: width 0.1s linear; border-radius: 4px;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.65} }
+    .timer-warning { animation: pulse 0.9s infinite; }
+    .result-screen { padding: 35px 28px; text-align: center; }
+    .result-screen.hidden { display: none; }
+    .result-screen h2 { color: var(--cp); font-size: clamp(1.4em,4vw,1.9em); margin-bottom: 10px; }
+    .result-score {
+      font-size: clamp(2em,6vw,2.8em)!important;
+      font-weight: 800; color: var(--cp)!important; margin: 12px 0!important;
+    }
+    .result-msg { font-size: clamp(1em,2.8vw,1.2em); color:#333; margin:8px 0; }
+    .cat-results { margin: 18px 0; text-align: left; }
+    .cat-results h3 { color: var(--cp); font-size: 0.95em; margin-bottom: 10px; }
+    .cat-row { display:flex; align-items:center; gap:8px; margin:7px 0; }
+    .cat-lbl { flex:1.3; font-size:0.78em; font-weight:600; }
+    .cat-bar-out { flex:2; background:#eee; border-radius:4px; height:10px; }
+    .cat-bar-in { height:100%; border-radius:4px; background:var(--cp); transition:width 0.6s; }
+    .cat-sc { font-weight:700; color:var(--cp); font-size:0.82em; min-width:38px; text-align:right; }
+    .tip-box {
+      background:#e8f5e9; border-left:4px solid #43a047;
+      border-radius:6px; padding:10px 14px; margin:14px 0 4px;
+      font-size:0.82em; color:#2e7d32; text-align:left; line-height:1.5;
+    }
+  </style>
+</head>
+<body>
+<div id="quiz-container">
+
+  <div class="quiz-progress-header">
+    <div class="progress-text" id="progress-text">Pregunta 1 de 20</div>
+    <div class="progress-container">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+  </div>
+
+  <div id="question-area"></div>
+
+  <div class="timer-container" id="timer-container">
+    <div class="timer-text" id="timer-text">⏱ Tiempo: 60s</div>
+    <div class="timer-bar-container">
+      <div class="timer-bar" id="timer-bar"></div>
+    </div>
+  </div>
+
+  <div class="result-screen hidden" id="result-screen">
+    <h2>🎯 ¡Cuestionario completado!</h2>
+    <p class="result-score" id="final-score"></p>
+    <p class="result-msg" id="final-msg"></p>
+    <div class="cat-results" id="cat-results"></div>
+    <div class="tip-box" id="tip-box"></div>
+    <div class="btn-container" style="padding-top:14px">
+      <div class="primary-btn" id="restart-btn">🔄 Nuevas preguntas (reiniciar)</div>
+    </div>
+  </div>
+ <p style="text-align: center">Creado Por José M. Fernández con Claude Opus 4.7</p>
+</div>
+
+<script>
+(function(){
+  if(window.quizFraccionesIniciado) return;
+  window.quizFraccionesIniciado = true;
+
+  /* ─── UTILIDADES ─── */
+  const M = '\u2212'; // signo menos tipográfico
+
+  function rand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+
+  function shuffle(arr){
+    const a=arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  function gcd(a,b){
+    a=Math.abs(a); b=Math.abs(b);
+    while(b){ const t=a%b; a=b; b=t; }
+    return a||1;
+  }
+
+  // Forma canónica simplificada (impropia si num>=den)
+  function canon(n,d){
+    if(n===0) return '0';
+    const sign=(n<0)!==(d<0);
+    const an=Math.abs(n), ad=Math.abs(d);
+    const g=gcd(an,ad);
+    const sn=an/g, sd=ad/g;
+    if(sd===1) return (sign?'-':'')+sn;
+    return (sign?'-':'')+sn+'/'+sd;
+  }
+
+  // Forma canónica simplificada, mixto si es impropia
+  function canonMixed(n,d){
+    if(n===0) return '0';
+    const sign=(n<0)!==(d<0);
+    const an=Math.abs(n), ad=Math.abs(d);
+    const g=gcd(an,ad);
+    const sn=an/g, sd=ad/g;
+    if(sd===1) return (sign?'-':'')+sn;
+    if(sn>=sd){
+      const w=Math.floor(sn/sd);
+      const r=sn%sd;
+      if(r===0) return (sign?'-':'')+w;
+      return (sign?'-':'')+w+'_'+r+'/'+sd;
+    }
+    return (sign?'-':'')+sn+'/'+sd;
+  }
+
+  // Renderiza fracción como HTML apilada (sin simplificar)
+  function rawFrac(n,d){
+    return '<span class="frac"><span class="num">'+n+'</span><span class="den">'+d+'</span></span>';
+  }
+
+  // Convierte string canónico (e.g. "3/4", "1_2/3", "5", "-3/5") a HTML
+  function formatAns(s){
+    s=String(s);
+    let neg=false;
+    if(s.charAt(0)==='-'){ neg=true; s=s.substring(1); }
+    const sign=neg?(M+' '):'';
+    if(s.indexOf('_')>=0){
+      const parts=s.split('_');
+      const fr=parts[1].split('/');
+      return sign+parts[0]+' '+rawFrac(fr[0],fr[1]);
+    }
+    if(s.indexOf('/')>=0){
+      const fr=s.split('/');
+      if(fr[0]==='0') return '0';
+      return sign+rawFrac(fr[0],fr[1]);
+    }
+    return sign+s;
+  }
+
+  function makeOpts(correct, distractors){
+    const cs=String(correct), seen=new Set([cs]), uniq=[];
+    for(const d of distractors){
+      if(d==null) continue;
+      const ds=String(d);
+      if(ds==='NaN' || ds.indexOf('NaN')>=0 || ds==='undefined') continue;
+      if(!seen.has(ds) && uniq.length<3){ seen.add(ds); uniq.push(ds); }
+    }
+    let attempts=0;
+    while(uniq.length<3 && attempts<30){
+      attempts++;
+      let fake;
+      if(cs.indexOf('_')>=0){
+        const parts=cs.split('_');
+        const w=parseInt(parts[0]);
+        fake=(w+rand(1,3))+'_'+parts[1];
+      } else if(cs.indexOf('/')>=0){
+        const fr=cs.split('/');
+        fake=(parseInt(fr[0])+rand(1,3))+'/'+fr[1];
+      } else if(cs==='>'||cs==='<'||cs==='='){
+        const opts=['>','<','=','No se puede determinar'].filter(x=>x!==cs && !seen.has(x));
+        fake=opts[0];
+      } else {
+        const num=parseInt(cs);
+        fake=isNaN(num)?'?'+attempts:String(num+rand(1,5));
+      }
+      if(fake && !seen.has(fake)){ seen.add(fake); uniq.push(fake); }
+    }
+    while(uniq.length<3){ uniq.push('?'+uniq.length); }
+    const all=shuffle([cs, ...uniq]);
+    const L=['a','b','c','d'];
+    return {
+      opciones: all.map((v,i)=>({valor:L[i], texto:L[i].toUpperCase()+'. '+formatAns(v)})),
+      correcta: L[all.indexOf(cs)]
+    };
+  }
+
+  /* ─── CATEGORÍAS ─── */
+  const CC={
+    'Fracciones homogéneas':'#1a6ba0',
+    'Fracciones heterogéneas':'#7b2d8b',
+    'Multiplicación':'#c0522a',
+    'División':'#a01c1c',
+    'Números mixtos':'#0e7a60',
+    'Simplificación y comparación':'#2a7a40'
+  };
+  const CI={
+    'Fracciones homogéneas':'➕',
+    'Fracciones heterogéneas':'⚖️',
+    'Multiplicación':'✖️',
+    'División':'➗',
+    'Números mixtos':'🔢',
+    'Simplificación y comparación':'✂️'
+  };
+  const TIPS={
+    'Fracciones homogéneas':'Consejo: cuando los denominadores son iguales, suma o resta solo los numeradores y mantén el denominador.',
+    'Fracciones heterogéneas':'Consejo: encuentra el mínimo común denominador (MCD) antes de sumar o restar.',
+    'Multiplicación':'Consejo: multiplica numerador por numerador y denominador por denominador. Simplifica al final.',
+    'División':'Consejo: para dividir fracciones, invierte la segunda y multiplica (multiplicación cruzada).',
+    'Números mixtos':'Consejo: para operar con mixtos, conviértelos primero a fracciones impropias.',
+    'Simplificación y comparación':'Consejo: divide numerador y denominador por su máximo común divisor (MCD) hasta que sean coprimos.'
+  };
+
+  /* ─── GENERADORES (20) ─── */
+  const GEN=[
+
+    /* 1 · Suma homogénea propia (sin simplificación) · 30s */
+    ()=>{
+      let d,a,b,sumN, tries=0;
+      do{
+        d=rand(5,9);
+        a=rand(1,d-2);
+        b=rand(1,d-2);
+        sumN=a+b;
+        tries++;
+      } while((sumN>=d || sumN<2 || gcd(sumN,d)>1) && tries<50);
+      const correct=sumN+'/'+d;
+      const w1=sumN+'/'+(2*d);
+      const w2=sumN+'/'+(d*d);
+      const w3=(sumN+1)+'/'+d;
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Fracciones homogéneas', t:30,
+        q:'Calcula:',
+        math:`${rawFrac(a,d)} + ${rawFrac(b,d)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 2 · Resta homogénea propia · 30s */
+    ()=>{
+      let d,a,b,diffN, tries=0;
+      do{
+        d=rand(5,9);
+        a=rand(2,d-1);
+        b=rand(1,a-1);
+        diffN=a-b;
+        tries++;
+      } while((diffN<1 || gcd(diffN,d)>1) && tries<50);
+      const correct=diffN+'/'+d;
+      const w1=diffN+'/'+(2*d);
+      const w2=(a+b)+'/'+d;
+      const w3=(diffN+1)+'/'+d;
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Fracciones homogéneas', t:30,
+        q:'Calcula:',
+        math:`${rawFrac(a,d)} ${M} ${rawFrac(b,d)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 3 · Suma homogénea impropia → mixto · 45s */
+    ()=>{
+      let d,a,b, tries=0;
+      do{
+        d=rand(4,7);
+        a=rand(2,d-1);
+        b=rand(2,d-1);
+        tries++;
+      } while(a+b<=d && tries<50);
+      const sumN=a+b;
+      const correct=canonMixed(sumN,d);
+      const w1=canon(sumN,d);
+      const w2=sumN+'/'+(2*d);
+      const w3=canonMixed(sumN+1,d);
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Fracciones homogéneas', t:45,
+        q:'Calcula y expresa como número mixto:',
+        math:`${rawFrac(a,d)} + ${rawFrac(b,d)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 4 · Suma homogénea con simplificación · 45s */
+    ()=>{
+      const choices=[
+        {d:6, sumN:4},
+        {d:8, sumN:4}, {d:8, sumN:6},
+        {d:9, sumN:3}, {d:9, sumN:6},
+        {d:10, sumN:4}, {d:10, sumN:6}, {d:10, sumN:8},
+        {d:12, sumN:3}, {d:12, sumN:4}, {d:12, sumN:8}, {d:12, sumN:9}
+      ];
+      const c=choices[rand(0,choices.length-1)];
+      const d=c.d, sumN=c.sumN;
+      const a=rand(1,Math.floor((sumN-1)/2));
+      const b=sumN-a;
+      const correct=canon(sumN,d);
+      const w1=sumN+'/'+d;
+      const w2=sumN+'/'+(2*d);
+      const w3=Math.abs(b-a)+'/'+d;
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Fracciones homogéneas', t:45,
+        q:'Calcula y simplifica a su mínima expresión:',
+        math:`${rawFrac(a,d)} + ${rawFrac(b,d)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 5 · Suma heterogénea (un denominador es múltiplo del otro) · 60s */
+    ()=>{
+      const d1=rand(2,5);
+      const k=rand(2,4);
+      const d2=d1*k;
+      const a=rand(1,d1-1);
+      const b=rand(1,d2-1);
+      const num=a*k+b;
+      const correct=canonMixed(num,d2);
+      const w1=(a+b)+'/'+(d1+d2);
+      const w2=canonMixed(a+b,d2);
+      const w3=canonMixed(num+1,d2);
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Fracciones heterogéneas', t:60,
+        q:'Calcula:',
+        math:`${rawFrac(a,d1)} + ${rawFrac(b,d2)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 6 · Resta heterogénea (un denominador es múltiplo del otro) · 60s */
+    ()=>{
+      const d1=rand(2,5);
+      const k=rand(2,4);
+      const d2=d1*k;
+      let a,b,num, tries=0;
+      do{
+        a=rand(1,d1-1);
+        b=rand(1,d2-1);
+        num=a*k-b;
+        tries++;
+      } while(num<1 && tries<50);
+      const correct=canon(num,d2);
+      const ab=Math.abs(a-b);
+      const w1=ab===0?'0':(ab+'/'+(d2-d1));
+      const w2=ab===0?'0':(ab+'/'+d2);
+      const w3=canon(num+1,d2);
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Fracciones heterogéneas', t:60,
+        q:'Calcula:',
+        math:`${rawFrac(a,d1)} ${M} ${rawFrac(b,d2)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 7 · Suma heterogénea (denominadores coprimos) · 75s */
+    ()=>{
+      const pairs=[[2,3],[2,5],[2,7],[3,4],[3,5],[3,7],[4,5],[4,7],[5,6]];
+      const pr=pairs[rand(0,pairs.length-1)];
+      const d1=pr[0], d2=pr[1];
+      const a=rand(1,d1-1);
+      const b=rand(1,d2-1);
+      const lcd=d1*d2;
+      const num=a*d2+b*d1;
+      const correct=canonMixed(num,lcd);
+      const w1=(a+b)+'/'+(d1+d2);
+      const w2=canonMixed(a+b,lcd);
+      const w3=canonMixed(num+1,lcd);
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Fracciones heterogéneas', t:75,
+        q:'Calcula:',
+        math:`${rawFrac(a,d1)} + ${rawFrac(b,d2)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 8 · Resta heterogénea (denominadores coprimos) · 75s */
+    ()=>{
+      const pairs=[[2,3],[2,5],[3,4],[3,5],[3,7],[4,5],[4,7],[5,6]];
+      let d1,d2,a,b,num,tries=0;
+      do{
+        const pr=pairs[rand(0,pairs.length-1)];
+        d1=pr[0]; d2=pr[1];
+        a=rand(1,d1-1);
+        b=rand(1,d2-1);
+        num=a*d2-b*d1;
+        tries++;
+      } while(num<=0 && tries<60);
+      const lcd=d1*d2;
+      const correct=canon(num,lcd);
+      const ab=Math.abs(a-b);
+      const w1=ab===0?'0':(ab+'/'+Math.abs(d2-d1));
+      const w2=ab===0?'0':(ab+'/'+lcd);
+      const w3=canon(num+1,lcd);
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Fracciones heterogéneas', t:75,
+        q:'Calcula:',
+        math:`${rawFrac(a,d1)} ${M} ${rawFrac(b,d2)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 9 · Multiplicación de fracciones simples · 45s */
+    ()=>{
+      let a,b,c,d, tries=0;
+      do{
+        b=rand(3,7); a=rand(1,b-1);
+        d=rand(3,7); c=rand(1,d-1);
+        tries++;
+      } while((gcd(a,d)>1 || gcd(c,b)>1) && tries<60);
+      const num=a*c, den=b*d;
+      const correct=canon(num,den);
+      const w1=(a+c)+'/'+(b+d);
+      const w2=(a*c)+'/'+(b+d);
+      const w3=canon(a*d+c*b,b*d);
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Multiplicación', t:45,
+        q:'Calcula:',
+        math:`${rawFrac(a,b)} \u00D7 ${rawFrac(c,d)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 10 · Multiplicación con simplificación · 60s */
+    ()=>{
+      const choices=[
+        {a:2,b:3,c:5,d:8},   // 10/24 = 5/12
+        {a:3,b:4,c:2,d:9},   // 6/36 = 1/6
+        {a:4,b:5,c:3,d:8},   // 12/40 = 3/10
+        {a:3,b:5,c:5,d:6},   // 15/30 = 1/2
+        {a:2,b:7,c:7,d:8},   // 14/56 = 1/4
+        {a:5,b:6,c:3,d:10},  // 15/60 = 1/4
+        {a:3,b:8,c:4,d:9},   // 12/72 = 1/6
+        {a:4,b:9,c:3,d:8},   // 12/72 = 1/6
+        {a:5,b:8,c:2,d:5}    // 10/40 = 1/4
+      ];
+      const ch=choices[rand(0,choices.length-1)];
+      const a=ch.a, b=ch.b, c=ch.c, d=ch.d;
+      const num=a*c, den=b*d;
+      const correct=canon(num,den);
+      const w1=num+'/'+den;
+      const w2=(a+c)+'/'+(b+d);
+      const w3=canon(num+1,den);
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Multiplicación', t:60,
+        q:'Calcula y simplifica:',
+        math:`${rawFrac(a,b)} \u00D7 ${rawFrac(c,d)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 11 · Multiplicación de fracción por entero · 45s */
+    ()=>{
+      const b=rand(3,8);
+      const a=rand(1,b-1);
+      const k=rand(2,7);
+      const num=a*k;
+      const correct=canonMixed(num,b);
+      const w1=(a+k)+'/'+b;
+      const w2=a+'/'+(b*k);
+      const w3=canonMixed(num+1,b);
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Multiplicación', t:45,
+        q:'Calcula:',
+        math:`${k} \u00D7 ${rawFrac(a,b)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 12 · División de fracciones simples · 60s */
+    ()=>{
+      let a,b,c,d, tries=0;
+      do{
+        b=rand(3,7); a=rand(1,b-1);
+        d=rand(3,7); c=rand(1,d-1);
+        tries++;
+      } while(((a===c && b===d) || gcd(a*d,b*c)===a*d) && tries<60);
+      const num=a*d, den=b*c;
+      const correct=canonMixed(num,den);
+      const w1=canon(a*c,b*d);
+      const w2=canon(b*d,a*c);
+      const w3=canonMixed(num+1,den);
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'División', t:60,
+        q:'Calcula:',
+        math:`${rawFrac(a,b)} \u00F7 ${rawFrac(c,d)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 13 · División de entero entre fracción · 60s */
+    ()=>{
+      const b=rand(3,7);
+      const a=rand(1,b-1);
+      const k=rand(2,6);
+      const num=k*b, den=a;
+      const correct=canonMixed(num,den);
+      const w1=canon(k*a,b);
+      const w2=canonMixed(k,a*b);
+      const w3=canonMixed(num+1,den);
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'División', t:60,
+        q:'Calcula:',
+        math:`${k} \u00F7 ${rawFrac(a,b)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 14 · División que da resultado mixto · 75s */
+    ()=>{
+      let a,b,c,d,num,den, tries=0;
+      do{
+        b=rand(3,6); a=rand(2,b-1);
+        d=rand(4,8); c=rand(1,2);
+        num=a*d; den=b*c;
+        tries++;
+      } while((num<=den || gcd(num,den)===num) && tries<60);
+      const correct=canonMixed(num,den);
+      const w1=canon(a*c,b*d);
+      const w2=num+'/'+den;
+      const w3=canonMixed(num-1,den);
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'División', t:75,
+        q:'Calcula y expresa como número mixto si aplica:',
+        math:`${rawFrac(a,b)} \u00F7 ${rawFrac(c,d)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 15 · Convertir mixto → impropia · 30s */
+    ()=>{
+      const w=rand(2,6);
+      const d=rand(3,8);
+      let n, tries=0;
+      do{ n=rand(1,d-1); tries++; } while(gcd(n,d)>1 && tries<20);
+      const num=w*d+n;
+      const correct=num+'/'+d;
+      const w1=(w+n)+'/'+d;
+      const w2=(w*d)+'/'+d;
+      const w3=(w*n)+'/'+d;
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Números mixtos', t:30,
+        q:'Convierte a fracción impropia:',
+        math:`${w} ${rawFrac(n,d)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 16 · Convertir impropia → mixto · 30s */
+    ()=>{
+      const d=rand(3,8);
+      const w=rand(2,5);
+      let r, tries=0;
+      do{ r=rand(1,d-1); tries++; } while(gcd(r,d)>1 && tries<20);
+      const num=w*d+r;
+      const correct=w+'_'+r+'/'+d;
+      const w1=num+'/'+d;
+      const w2=(w-1)+'_'+r+'/'+d;
+      const w3=w+'_'+(r+1)+'/'+d;
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Números mixtos', t:30,
+        q:'Convierte a número mixto:',
+        math:`${rawFrac(num,d)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 17 · Suma de números mixtos · 90s */
+    ()=>{
+      const d=rand(4,7);
+      const w1n=rand(1,4), w2n=rand(1,4);
+      let n1, n2, tries=0;
+      do{
+        n1=rand(1,d-1);
+        n2=rand(1,d-1);
+        tries++;
+      } while((gcd(n1,d)>1 || gcd(n2,d)>1) && tries<30);
+      const totalNum=(w1n+w2n)*d+(n1+n2);
+      const correct=canonMixed(totalNum,d);
+      const w1raw=(w1n+w2n)+'_'+(n1+n2)+'/'+d;
+      const w1 = w1raw===correct ? null : w1raw;
+      const w2=(w1n+w2n)+'_'+(n1+n2)+'/'+(2*d);
+      const w3=canonMixed(totalNum+1,d);
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Números mixtos', t:90,
+        q:'Calcula:',
+        math:`${w1n} ${rawFrac(n1,d)} + ${w2n} ${rawFrac(n2,d)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 18 · Resta de números mixtos · 90s */
+    ()=>{
+      const d=rand(4,7);
+      let w1n, w2n, n1, n2, tries=0;
+      do{
+        w1n=rand(2,5); w2n=rand(1,w1n-1);
+        n1=rand(1,d-1); n2=rand(1,d-1);
+        tries++;
+      } while((gcd(n1,d)>1 || gcd(n2,d)>1) && tries<30);
+      const num1=w1n*d+n1, num2=w2n*d+n2;
+      const diff=num1-num2;
+      const correct=canonMixed(diff,d);
+      const w1raw=(w1n-w2n)+'_'+Math.abs(n1-n2)+'/'+d;
+      const w1 = w1raw===correct ? null : w1raw;
+      const w2=(w1n-w2n)+'/'+d;
+      const w3=canonMixed(diff+1,d);
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Números mixtos', t:90,
+        q:'Calcula:',
+        math:`${w1n} ${rawFrac(n1,d)} ${M} ${w2n} ${rawFrac(n2,d)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 19 · Simplificar fracción · 30s */
+    ()=>{
+      const cases=[
+        {n:6, d:8}, {n:9, d:12}, {n:8, d:12}, {n:6, d:9}, {n:10, d:15},
+        {n:4, d:10}, {n:6, d:10}, {n:8, d:10}, {n:9, d:15}, {n:8, d:14},
+        {n:10, d:25}, {n:12, d:18}, {n:14, d:21}, {n:15, d:25},
+        {n:12, d:20}, {n:16, d:24}, {n:18, d:24}
+      ];
+      const c=cases[rand(0,cases.length-1)];
+      const correct=canon(c.n,c.d);
+      const w1=c.n+'/'+c.d;
+      const g=gcd(c.n,c.d);
+      const w2 = (g>2 && c.n%2===0 && c.d%2===0) ? (c.n/2)+'/'+(c.d/2) : (c.n+1)+'/'+c.d;
+      const w3=(c.n-1)+'/'+(c.d-1);
+      const {opciones,correcta}=makeOpts(correct,[w1,w2,w3]);
+      return{ cat:'Simplificación y comparación', t:30,
+        q:'Simplifica a su mínima expresión:',
+        math:`${rawFrac(c.n,c.d)} = ?`,
+        opciones, correcta };
+    },
+
+    /* 20 · Comparar dos fracciones · 45s */
+    ()=>{
+      let a,b,c,d, tries=0;
+      do{
+        b=rand(3,8); a=rand(1,b-1);
+        d=rand(3,8); c=rand(1,d-1);
+        tries++;
+      } while(b===d && tries<30);
+      const lhs=a*d, rhs=c*b;
+      let correct;
+      if(lhs>rhs) correct='>';
+      else if(lhs<rhs) correct='<';
+      else correct='=';
+      const distractors=['>','<','=','No se puede determinar'].filter(x=>x!==correct);
+      const {opciones,correcta}=makeOpts(correct,distractors);
+      return{ cat:'Simplificación y comparación', t:45,
+        q:'Compara las fracciones (selecciona el signo correcto):',
+        math:`${rawFrac(a,b)} <span style="margin:0 12px;color:#888">___</span> ${rawFrac(c,d)}`,
+        opciones, correcta };
+    }
+
+  ]; // fin GEN
+
+  /* ─── GENERAR Y MEZCLAR PREGUNTAS ─── */
+  const preguntas=shuffle(GEN.map(g=>g()));
+  const total=preguntas.length;
+  let actual=0, puntos=0, respondida=false, reloj=null, segs=0;
+  const catPts={}, catTot={};
+  preguntas.forEach(p=>{ catTot[p.cat]=(catTot[p.cat]||0)+1; catPts[p.cat]=catPts[p.cat]||0; });
+
+  const qArea=document.getElementById('question-area');
+  const barP=document.getElementById('progress-bar');
+  const txtP=document.getElementById('progress-text');
+
+  /* ─── RENDERIZAR PREGUNTA ─── */
+  function render(i){
+    const p=preguntas[i];
+    const col=CC[p.cat]||'#0089cd';
+    const icon=CI[p.cat]||'📝';
+    const tLabel= p.t<=45?'⚡ Rápida': p.t<=75?'🕐 Media':'⏳ Difícil';
+    const opHtml=p.opciones.map(o=>
+      `<div class="option-item" data-val="${o.valor}" onclick="window.__qClick(this)">${o.texto}</div>`
+    ).join('');
+    const mathBlock=p.math?`<div class="math-box">${p.math}</div>`:'';
+    const btnLbl=i===total-1?'Ver resultados':'Siguiente ›';
+    qArea.innerHTML=`
+      <div class="question-meta">
+        <span class="cat-badge" style="background:${col}">${icon} ${p.cat}</span>
+        <span class="time-badge">${tLabel} · ${p.t}s</span>
+      </div>
+      <div class="question-header">${p.q}</div>
+      ${mathBlock}
+      <div class="options">${opHtml}</div>
+      <div class="btn-container">
+        <div class="primary-btn" onclick="window.__qNext()">${btnLbl}</div>
+      </div>`;
+    if(barP) barP.style.width=((i+1)/total*100)+'%';
+    if(txtP) txtP.textContent=`Pregunta ${i+1} de ${total}`;
+    iniciarReloj(p.t);
+  }
+
+  /* ─── CLICK OPCIÓN ─── */
+  window.__qClick=function(el){
+    if(respondida) return;
+    pararReloj(); respondida=true;
+    const p=preguntas[actual];
+    const elegida=el.getAttribute('data-val');
+    if(elegida===p.correcta){
+      el.className='option-item correct disabled';
+      puntos++; catPts[p.cat]++;
+    } else {
+      el.className='option-item incorrect disabled';
+      const ok=qArea.querySelector(`.option-item[data-val="${p.correcta}"]`);
+      if(ok) ok.className='option-item correct disabled';
+    }
+    qArea.querySelectorAll('.option-item').forEach(o=>{
+      if(!o.className.includes('disabled')) o.className+=' disabled';
+    });
+  };
+
+  /* ─── SIGUIENTE ─── */
+  window.__qNext=function(){
+    pararReloj(); actual++; respondida=false;
+    if(actual<total) render(actual);
+    else mostrarResultados();
+  };
+
+  /* ─── TEMPORIZADOR ─── */
+  function iniciarReloj(s){
+    pararReloj(); segs=s; actualizarReloj();
+    reloj=setInterval(()=>{ segs--; actualizarReloj(); if(segs<=0) tiempoAgotado(); },1000);
+  }
+  function pararReloj(){ if(reloj){clearInterval(reloj);reloj=null;} }
+  function actualizarReloj(){
+    const p=preguntas[actual]||{t:60};
+    const tt=document.getElementById('timer-text');
+    const tb=document.getElementById('timer-bar');
+    const tc=document.getElementById('timer-container');
+    if(tt) tt.textContent=`⏱ Tiempo: ${segs}s`;
+    const pct=(segs/p.t)*100;
+    if(tb){
+      tb.style.width=pct+'%';
+      if(pct<=25){ tb.style.background='#dc3545'; if(tc) tc.className='timer-container timer-warning'; }
+      else if(pct<=50){ tb.style.background='linear-gradient(90deg,#ffc107,#dc3545)'; if(tc) tc.className='timer-container'; }
+      else{ tb.style.background='linear-gradient(90deg,#28a745,#ffc107,#dc3545)'; if(tc) tc.className='timer-container'; }
+    }
+  }
+  function tiempoAgotado(){
+    pararReloj(); respondida=true;
+    const p=preguntas[actual];
+    const ok=qArea.querySelector(`.option-item[data-val="${p.correcta}"]`);
+    if(ok) ok.className='option-item correct disabled';
+    qArea.querySelectorAll('.option-item').forEach(o=>{ if(!o.className.includes('disabled')) o.className+=' disabled'; });
+    const tt=document.getElementById('timer-text');
+    if(tt) tt.textContent='⏰ ¡Tiempo agotado!';
+    const tc=document.getElementById('timer-container');
+    if(tc) tc.className='timer-container timer-warning';
+  }
+
+  /* ─── RESULTADOS ─── */
+  function mostrarResultados(){
+    pararReloj();
+    qArea.innerHTML='';
+    document.getElementById('timer-container').style.display='none';
+    const pct=Math.round(puntos/total*100);
+    document.getElementById('final-score').textContent=`${puntos} / ${total}  (${pct}%)`;
+    let msg='', emoji='';
+    if(pct>=85){ emoji='🏆'; msg='¡Excelente! Dominas las fracciones GED. ¡Estás listo!'; }
+    else if(pct>=70){ emoji='👍'; msg='¡Muy bien! Un poco más de práctica y lo logras.'; }
+    else if(pct>=50){ emoji='💪'; msg='Buen intento. Repasa las categorías en rojo y vuelve a intentarlo.'; }
+    else { emoji='📚'; msg='Sigue practicando. Identifica las categorías débiles y trabaja en ellas primero.'; }
+    document.getElementById('final-msg').textContent=emoji+' '+msg;
+
+    let html='<h3>Resultados por categoría:</h3>';
+    for(const cat of Object.keys(catTot)){
+      const s=catPts[cat]||0, t2=catTot[cat];
+      const p2=Math.round(s/t2*100);
+      const col=CC[cat]||'#0089cd';
+      const barCol=p2>=70?col:'#e53935';
+      html+=`<div class="cat-row">
+        <span class="cat-lbl">${CI[cat]} ${cat}</span>
+        <div class="cat-bar-out"><div class="cat-bar-in" style="width:${p2}%;background:${barCol}"></div></div>
+        <span class="cat-sc">${s}/${t2}</span>
+      </div>`;
+    }
+    document.getElementById('cat-results').innerHTML=html;
+
+    let minCat='', minPct=999;
+    for(const cat of Object.keys(catTot)){
+      const s=catPts[cat]||0, t2=catTot[cat], pp=s/t2;
+      if(pp<minPct){ minPct=pp; minCat=cat; }
+    }
+    document.getElementById('tip-box').textContent=
+      minPct<1 ? (TIPS[minCat]||'') : '✅ ¡Sin categorías con puntuación 0! Sigue practicando para mejorar los tiempos.';
+
+    document.getElementById('result-screen').className='result-screen';
+    document.querySelector('.quiz-progress-header').style.display='none';
+    document.getElementById('restart-btn').onclick=()=>window.location.reload();
+  }
+
+  /* ─── ARRANQUE ─── */
+  render(0);
+
+})();
+</script>
+</body>
+</html>
