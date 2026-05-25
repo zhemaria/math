@@ -1,1 +1,1527 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patrones aritméticos - Interactivo GED</title>
+    <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [
+            ['$', '$'],
+            ['\\(', '\\)']
+          ]
+        },
+        svg: { fontCache: 'global' }
+      };
+    </script>
+    <style>
+      :root {
+        --azul: #4f46e5;
+        --azul-osc: #4338ca;
+        --azul-claro: #eef2ff;
+        --verde: #16a34a;
+        --verde-osc: #15803d;
+        --verde-claro: #dcfce7;
+        --naranja: #ea580c;
+        --naranja-claro: #ffedd5;
+        --rojo: #dc2626;
+        --rojo-claro: #fee2e2;
+        --amarillo: #ca8a04;
+        --amarillo-claro: #fef9c3;
+        --gris-texto: #475569;
+        --gris-osc: #1e293b;
+        --borde: #e2e8f0;
+      }
 
+      * { box-sizing: border-box; }
+
+      body {
+        font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+        background-color: #f1f5f9;
+        margin: 0;
+        padding: 20px;
+        color: var(--gris-texto);
+        line-height: 1.6;
+      }
+
+      #module-container {
+        background-color: #ffffff;
+        border-radius: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        width: 100%;
+        max-width: 860px;
+        margin: 0 auto;
+        overflow: hidden;
+      }
+
+      /* ===== Encabezado ===== */
+      #header {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        color: #ffffff;
+        padding: 1.75rem 1.5rem;
+        text-align: center;
+      }
+
+      #header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0 0 0.35rem;
+      }
+
+      #header p {
+        margin: 0;
+        opacity: 0.92;
+        font-size: 1rem;
+      }
+
+      /* ===== Barra superior con botón volver ===== */
+      #topbar {
+        display: none;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.85rem 1.5rem;
+        background-color: var(--azul-claro);
+        border-bottom: 1px solid var(--borde);
+      }
+
+      #topbar.visible { display: flex; }
+
+      #home-btn {
+        background-color: var(--azul);
+        color: #fff;
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.55rem 1rem;
+        font-size: 0.92rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.15s, transform 0.1s;
+      }
+
+      #home-btn:hover { background-color: var(--azul-osc); transform: translateY(-2px); }
+
+      #topbar-title {
+        font-weight: 700;
+        color: var(--gris-osc);
+        font-size: 1.05rem;
+      }
+
+      /* ===== Área de contenido ===== */
+      #content-area { padding: 1.75rem 1.5rem 2.25rem; }
+
+      .view { display: none; animation: fadeIn 0.35s ease-out; }
+      .view.active { display: block; }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* ===== Menú de inicio (hub) ===== */
+      .hub-intro {
+        background-color: var(--azul-claro);
+        border-left: 5px solid var(--azul);
+        border-radius: 0.6rem;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .hub-intro p { margin: 0.4rem 0; }
+
+      .menu-label {
+        font-weight: 700;
+        color: var(--gris-osc);
+        font-size: 1.1rem;
+        margin: 1.25rem 0 0.85rem;
+      }
+
+      .menu-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.9rem;
+      }
+
+      .menu-card {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        text-align: left;
+        background-color: #ffffff;
+        border: 2px solid var(--borde);
+        border-radius: 0.8rem;
+        padding: 1rem 1.1rem;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 1rem;
+        transition: border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+      }
+
+      .menu-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        border-color: var(--azul);
+      }
+
+      .menu-emoji {
+        font-size: 1.9rem;
+        flex-shrink: 0;
+        width: 2.6rem;
+        height: 2.6rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--azul-claro);
+        border-radius: 0.6rem;
+      }
+
+      .menu-card-text { display: flex; flex-direction: column; }
+
+      .menu-card-title {
+        font-weight: 700;
+        color: var(--gris-osc);
+        font-size: 1rem;
+      }
+
+      .menu-card-sub {
+        font-size: 0.82rem;
+        color: var(--gris-texto);
+      }
+
+      /* ===== Acordeón ===== */
+      .acordeon-controles {
+        display: flex;
+        gap: 0.6rem;
+        margin-bottom: 1rem;
+      }
+
+      .mini-btn {
+        background-color: #fff;
+        border: 1px solid var(--borde);
+        border-radius: 0.45rem;
+        padding: 0.45rem 0.85rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--azul);
+        cursor: pointer;
+        transition: background-color 0.15s;
+      }
+
+      .mini-btn:hover { background-color: var(--azul-claro); }
+
+      details.acordeon {
+        border: 1px solid var(--borde);
+        border-radius: 0.7rem;
+        margin-bottom: 0.85rem;
+        overflow: hidden;
+        background-color: #fff;
+      }
+
+      details.acordeon[open] {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      }
+
+      details.acordeon > summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 1rem 1.2rem;
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: var(--gris-osc);
+        background-color: #f8fafc;
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        user-select: none;
+      }
+
+      details.acordeon > summary::-webkit-details-marker { display: none; }
+
+      .sum-num {
+        flex-shrink: 0;
+        width: 1.9rem;
+        height: 1.9rem;
+        background-color: var(--azul);
+        color: #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+      }
+
+      .sum-flecha {
+        margin-left: auto;
+        font-size: 0.9rem;
+        color: var(--azul);
+        transition: transform 0.2s;
+      }
+
+      details.acordeon[open] > summary .sum-flecha { transform: rotate(180deg); }
+
+      .acordeon-cuerpo { padding: 1.1rem 1.3rem 1.4rem; }
+
+      /* ===== Texto general ===== */
+      h2.tema-titulo {
+        font-size: 1.6rem;
+        color: var(--gris-osc);
+        margin: 0 0 1rem;
+      }
+
+      .acordeon-cuerpo p { margin: 0.7rem 0; }
+      .acordeon-cuerpo ul { margin: 0.6rem 0 0.9rem 1.4rem; }
+      .acordeon-cuerpo li { margin-bottom: 0.4rem; }
+
+      strong { color: var(--gris-osc); }
+
+      /* ===== Caja de ejemplo de la vida real ===== */
+      .caja-vida {
+        background-color: var(--naranja-claro);
+        border-left: 5px solid var(--naranja);
+        border-radius: 0.6rem;
+        padding: 0.95rem 1.15rem;
+        margin: 1.1rem 0;
+      }
+
+      .caja-vida .etiqueta {
+        font-weight: 700;
+        color: var(--naranja);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-bottom: 0.4rem;
+      }
+
+      .caja-vida p { margin: 0.45rem 0; }
+
+      /* ===== Caja de fórmula / dato clave ===== */
+      .caja-clave {
+        background-color: var(--azul-claro);
+        border: 1px dashed var(--azul);
+        border-radius: 0.6rem;
+        padding: 0.9rem 1.15rem;
+        margin: 1.1rem 0;
+        text-align: center;
+      }
+
+      .caja-clave .formula-grande { font-size: 1.25rem; }
+
+      /* ===== Caja de pista ===== */
+      .caja-pista {
+        background-color: var(--amarillo-claro);
+        border-left: 5px solid var(--amarillo);
+        border-radius: 0.5rem;
+        padding: 0.65rem 1rem;
+        margin-top: 0.7rem;
+        font-size: 0.92rem;
+      }
+
+      /* ===== Formularios ===== */
+      .form-group { margin-bottom: 1.1rem; }
+
+      .campo-label {
+        display: block;
+        margin-bottom: 0.4rem;
+        font-weight: 600;
+        color: var(--gris-osc);
+      }
+
+      input[type='number'] {
+        width: 100%;
+        max-width: 240px;
+        padding: 0.65rem 0.75rem;
+        border: 1px solid #cbd5e0;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        font-family: inherit;
+      }
+
+      input[type='number']:focus {
+        outline: none;
+        border-color: var(--azul);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18);
+      }
+
+      .action-button {
+        background-color: var(--azul);
+        color: #fff;
+        padding: 0.7rem 1.4rem;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: background-color 0.15s, transform 0.1s;
+        margin-top: 0.6rem;
+      }
+
+      .action-button:hover { background-color: var(--azul-osc); transform: translateY(-2px); }
+
+      .check-btn {
+        background-color: var(--verde);
+        color: #fff;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: background-color 0.15s, transform 0.1s;
+        margin-top: 0.6rem;
+      }
+
+      .check-btn:hover { background-color: var(--verde-osc); transform: translateY(-2px); }
+
+      /* ===== Explorador de secuencias ===== */
+      #sequence-box {
+        background-color: #f8fafc;
+        border: 1px solid var(--borde);
+        border-radius: 0.7rem;
+        padding: 1.2rem;
+        margin-top: 1.3rem;
+      }
+
+      #sequence-box h3 { margin: 0 0 0.8rem; color: var(--gris-osc); }
+
+      #sequence-display {
+        display: flex;
+        flex-wrap: wrap;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        gap: 0.55rem;
+      }
+
+      #sequence-display li {
+        background-color: #fff;
+        padding: 0.6rem 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #cbd5e0;
+        font-weight: 700;
+        color: var(--azul-osc);
+      }
+
+      #sequence-display li.primero {
+        background-color: var(--azul);
+        color: #fff;
+        border-color: var(--azul);
+      }
+
+      #sequence-explanation {
+        margin-top: 0.85rem;
+        font-style: italic;
+        color: var(--azul);
+      }
+
+      /* ===== Problemas de práctica ===== */
+      .problem {
+        background-color: #f8fafc;
+        border: 1px solid var(--borde);
+        border-radius: 0.7rem;
+        padding: 1.15rem 1.25rem;
+        margin-bottom: 1.1rem;
+      }
+
+      .problem .enunciado { font-weight: 600; color: var(--gris-osc); margin: 0 0 0.6rem; }
+
+      .problem .campo-label { display: block; margin: 0.7rem 0 0.35rem; font-weight: 600; }
+
+      .feedback {
+        margin-top: 0.8rem;
+        font-weight: 600;
+        padding: 0.6rem 0.85rem;
+        border-radius: 0.5rem;
+        display: none;
+      }
+
+      .feedback.show { display: block; }
+
+      .feedback.correct {
+        background-color: var(--verde-claro);
+        color: var(--verde-osc);
+        border: 1px solid #86efac;
+      }
+
+      .feedback.incorrect {
+        background-color: var(--rojo-claro);
+        color: var(--rojo);
+        border: 1px solid #fca5a5;
+      }
+
+      /* ===== Cuestionario ===== */
+      .quiz-question {
+        background-color: #f8fafc;
+        border: 1px solid var(--borde);
+        border-radius: 0.7rem;
+        padding: 1.1rem 1.25rem;
+        margin-bottom: 1rem;
+      }
+
+      .quiz-question .pregunta {
+        font-weight: 700;
+        color: var(--gris-osc);
+        margin: 0 0 0.75rem;
+      }
+
+      .opcion {
+        display: block;
+        padding: 0.55rem 0.7rem;
+        border-radius: 0.45rem;
+        border: 1px solid var(--borde);
+        margin-bottom: 0.4rem;
+        cursor: pointer;
+        transition: background-color 0.12s, border-color 0.12s;
+        user-select: none;
+      }
+
+      .opcion:hover { background-color: var(--azul-claro); }
+
+      .opcion.elegida {
+        background-color: var(--azul-claro);
+        border-color: var(--azul);
+        font-weight: 600;
+      }
+
+      .opcion input { margin-right: 0.55rem; pointer-events: none; }
+
+      #quiz-score {
+        font-size: 1.35rem;
+        font-weight: 700;
+        text-align: center;
+        color: var(--gris-osc);
+        background-color: var(--azul-claro);
+        border-radius: 0.6rem;
+        padding: 1rem;
+        margin-bottom: 1.2rem;
+      }
+
+      .feedback-item {
+        border-radius: 0.55rem;
+        padding: 0.85rem 1rem;
+        margin-bottom: 0.7rem;
+        font-size: 0.95rem;
+      }
+
+      .feedback-item.correct {
+        background-color: var(--verde-claro);
+        border: 1px solid #86efac;
+      }
+
+      .feedback-item.incorrect {
+        background-color: var(--rojo-claro);
+        border: 1px solid #fca5a5;
+      }
+
+      .feedback-item strong { display: block; margin-bottom: 0.3rem; }
+
+      /* ===== Tabla didáctica ===== */
+      table.tabla-didactica {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        font-size: 0.95rem;
+      }
+
+      table.tabla-didactica th,
+      table.tabla-didactica td {
+        border: 1px solid var(--borde);
+        padding: 0.6rem 0.8rem;
+        text-align: center;
+      }
+
+      table.tabla-didactica th {
+        background-color: var(--azul);
+        color: #fff;
+        font-weight: 600;
+      }
+
+      table.tabla-didactica tr:nth-child(even) td { background-color: #f8fafc; }
+
+      /* ===== Botón volver al final del tema ===== */
+      .volver-final {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--borde);
+      }
+
+      .volver-final-btn {
+        background-color: var(--amarillo);
+        color: #fff;
+        padding: 0.75rem 1.6rem;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: background-color 0.15s, transform 0.1s;
+      }
+
+      .volver-final-btn:hover { background-color: #a16207; transform: translateY(-2px); }
+
+      /* ===== Responsivo ===== */
+      @media (max-width: 620px) {
+        body { padding: 10px; }
+        #header h1 { font-size: 1.55rem; }
+        #content-area { padding: 1.25rem 1rem 2rem; }
+        .menu-grid { grid-template-columns: 1fr; }
+        h2.tema-titulo { font-size: 1.35rem; }
+        details.acordeon > summary { font-size: 0.98rem; padding: 0.85rem 1rem; }
+        .action-button, .check-btn { width: 100%; }
+        input[type='number'] { max-width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="module-container">
+      <header id="header">
+        <h1>Patrones aritméticos</h1>
+        <p>Módulo interactivo de matemáticas &middot; Preparación GED</p>
+      </header>
+
+      <div id="topbar">
+        <button id="home-btn" type="button">&#8592; Volver al inicio</button>
+        <span id="topbar-title"></span>
+      </div>
+
+      <main id="content-area">
+        <!-- ============================================ -->
+        <!-- VISTA: MENÚ DE INICIO (HUB)                  -->
+        <!-- ============================================ -->
+        <section id="view-hub" class="view active">
+          <div class="hub-intro">
+            <p>
+              &iexcl;Bienvenido! Una <strong>secuencia aritm&eacute;tica</strong> es una lista de
+              n&uacute;meros donde siempre sumas (o restas) la misma cantidad para pasar de un
+              n&uacute;mero al siguiente.
+            </p>
+            <p>
+              En este m&oacute;dulo aprender&aacute;s a reconocerlas y a trabajar con ellas usando
+              ejemplos de la vida diaria: ahorros, salarios, taxis, escaleras y m&aacute;s.
+            </p>
+          </div>
+
+          <p class="menu-label">Elige por d&oacute;nde quieres empezar:</p>
+          <div class="menu-grid">
+            <button class="menu-card" data-target="view-concepto" type="button">
+              <span class="menu-emoji">&#128214;</span>
+              <span class="menu-card-text">
+                <span class="menu-card-title">1. &iquest;Qu&eacute; son?</span>
+                <span class="menu-card-sub">Concepto y vocabulario b&aacute;sico</span>
+              </span>
+            </button>
+            <button class="menu-card" data-target="view-explorador" type="button">
+              <span class="menu-emoji">&#128302;</span>
+              <span class="menu-card-text">
+                <span class="menu-card-title">2. Explorador</span>
+                <span class="menu-card-sub">Genera tus propias secuencias</span>
+              </span>
+            </button>
+            <button class="menu-card" data-target="view-diferencia" type="button">
+              <span class="menu-emoji">&#10134;</span>
+              <span class="menu-card-text">
+                <span class="menu-card-title">3. La diferencia com&uacute;n</span>
+                <span class="menu-card-sub">C&oacute;mo encontrar el valor de $d$</span>
+              </span>
+            </button>
+            <button class="menu-card" data-target="view-siguiente" type="button">
+              <span class="menu-emoji">&#10145;</span>
+              <span class="menu-card-text">
+                <span class="menu-card-title">4. El siguiente t&eacute;rmino</span>
+                <span class="menu-card-sub">Continuar una secuencia</span>
+              </span>
+            </button>
+            <button class="menu-card" data-target="view-formula" type="button">
+              <span class="menu-emoji">&#129518;</span>
+              <span class="menu-card-text">
+                <span class="menu-card-title">5. La f&oacute;rmula del t&eacute;rmino $n$</span>
+                <span class="menu-card-sub">Saltar a cualquier t&eacute;rmino</span>
+              </span>
+            </button>
+            <button class="menu-card" data-target="view-practica" type="button">
+              <span class="menu-emoji">&#9999;&#65039;</span>
+              <span class="menu-card-text">
+                <span class="menu-card-title">6. Pr&aacute;ctica independiente</span>
+                <span class="menu-card-sub">Problemas tipo GED</span>
+              </span>
+            </button>
+            <button class="menu-card" data-target="view-quiz" type="button">
+              <span class="menu-emoji">&#127919;</span>
+              <span class="menu-card-text">
+                <span class="menu-card-title">7. Mini-cuestionario</span>
+                <span class="menu-card-sub">Comprueba lo aprendido</span>
+              </span>
+            </button>
+          </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- VISTA 1: ¿QUÉ SON?                           -->
+        <!-- ============================================ -->
+        <section id="view-concepto" class="view" data-title="1. &iquest;Qu&eacute; son los patrones aritm&eacute;ticos?">
+          <h2 class="tema-titulo">&iquest;Qu&eacute; son los patrones aritm&eacute;ticos?</h2>
+
+          <div class="acordeon-controles">
+            <button class="mini-btn abrir-todo" type="button">Abrir todo</button>
+            <button class="mini-btn cerrar-todo" type="button">Cerrar todo</button>
+          </div>
+
+          <details class="acordeon" open>
+            <summary><span class="sum-num">1</span> La idea principal <span class="sum-flecha">&#9660;</span></summary>
+            <div class="acordeon-cuerpo">
+              <p>
+                Una <strong>secuencia</strong> (o sucesi&oacute;n) es simplemente una lista ordenada
+                de n&uacute;meros. Cada n&uacute;mero de la lista se llama <strong>t&eacute;rmino</strong>.
+              </p>
+              <p>
+                Una <strong>secuencia aritm&eacute;tica</strong> es especial: la diferencia entre dos
+                t&eacute;rminos seguidos es <strong>siempre la misma</strong>. A esa diferencia
+                constante la llamamos <strong>diferencia com&uacute;n</strong>, y se escribe $d$.
+              </p>
+              <div class="caja-vida">
+                <div class="etiqueta">&#127968; En la vida real</div>
+                <p>
+                  Imagina que en tu trabajo te pagan <strong>$12 por hora</strong>. Despu&eacute;s de
+                  cada hora, tu paga crece de la misma forma:
+                </p>
+                <p style="text-align:center; font-weight:700; color:#9a3412;">
+                  12, 24, 36, 48, 60, ...
+                </p>
+                <p>
+                  Siempre se suma <strong>12</strong>. Esa es la diferencia com&uacute;n. &iexcl;Tu
+                  salario por horas es una secuencia aritm&eacute;tica!
+                </p>
+              </div>
+            </div>
+          </details>
+
+          <details class="acordeon">
+            <summary><span class="sum-num">2</span> El vocabulario que necesitas <span class="sum-flecha">&#9660;</span></summary>
+            <div class="acordeon-cuerpo">
+              <p>Solo hay dos palabras clave. Si las dominas, dominas el tema:</p>
+              <ul>
+                <li>
+                  <strong>Primer t&eacute;rmino ($a_1$):</strong> el n&uacute;mero con el que
+                  <em>empieza</em> la secuencia.
+                </li>
+                <li>
+                  <strong>Diferencia com&uacute;n ($d$):</strong> el n&uacute;mero constante que
+                  <em>sumas</em> (si es positivo) o <em>restas</em> (si es negativo) para llegar al
+                  siguiente t&eacute;rmino.
+                </li>
+              </ul>
+              <p><strong>Ejemplo:</strong> en la secuencia 2, 5, 8, 11, 14, ...</p>
+              <ul>
+                <li>El primer t&eacute;rmino es $a_1 = 2$.</li>
+                <li>La diferencia com&uacute;n es $d = 3$ (porque $5-2=3$, $8-5=3$, ...).</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="acordeon">
+            <summary><span class="sum-num">3</span> &iquest;Sube o baja? <span class="sum-flecha">&#9660;</span></summary>
+            <div class="acordeon-cuerpo">
+              <p>
+                La diferencia com&uacute;n nos dice si la secuencia <strong>crece</strong> o
+                <strong>decrece</strong>:
+              </p>
+              <ul>
+                <li>
+                  Si $d$ es <strong>positivo</strong>, los n&uacute;meros suben.
+                  Ejemplo: 3, 7, 11, 15, ... ($d = 4$).
+                </li>
+                <li>
+                  Si $d$ es <strong>negativo</strong>, los n&uacute;meros bajan.
+                  Ejemplo: 20, 15, 10, 5, 0, ... ($d = -5$).
+                </li>
+              </ul>
+              <div class="caja-vida">
+                <div class="etiqueta">&#9989; En la vida real</div>
+                <p>
+                  Compras un tel&eacute;fono en pagos. Debes <strong>$600</strong> y cada mes pagas
+                  <strong>$100</strong>. Tu deuda baja as&iacute;:
+                </p>
+                <p style="text-align:center; font-weight:700; color:#9a3412;">
+                  600, 500, 400, 300, 200, 100, 0
+                </p>
+                <p>Aqu&iacute; $d = -100$, porque la deuda <em>disminuye</em> cada mes.</p>
+              </div>
+            </div>
+          </details>
+
+          <details class="acordeon">
+            <summary><span class="sum-num">4</span> Conexi&oacute;n con las funciones lineales <span class="sum-flecha">&#9660;</span></summary>
+            <div class="acordeon-cuerpo">
+              <p>
+                Un dato &uacute;til para el GED: una secuencia aritm&eacute;tica es, en el fondo,
+                <strong>una funci&oacute;n lineal</strong>.
+              </p>
+              <p>
+                La diferencia com&uacute;n $d$ funciona igual que la <strong>pendiente $m$</strong>
+                de una recta: indica cu&aacute;nto cambia el valor en cada paso. El primer
+                t&eacute;rmino $a_1$ se parece al punto de partida.
+              </p>
+              <p>
+                Por eso, si dibujas los t&eacute;rminos de una secuencia aritm&eacute;tica en una
+                gr&aacute;fica, todos quedan alineados formando una <strong>l&iacute;nea recta</strong>.
+              </p>
+            </div>
+          </details>
+
+          <div class="volver-final">
+            <button class="volver-final-btn" type="button">&#127968; Volver al men&uacute; de inicio</button>
+          </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- VISTA 2: EXPLORADOR                          -->
+        <!-- ============================================ -->
+        <section id="view-explorador" class="view" data-title="2. Explorador de secuencias">
+          <h2 class="tema-titulo">Explorador de secuencias</h2>
+
+          <div class="acordeon-controles">
+            <button class="mini-btn abrir-todo" type="button">Abrir todo</button>
+            <button class="mini-btn cerrar-todo" type="button">Cerrar todo</button>
+          </div>
+
+          <details class="acordeon" open>
+            <summary><span class="sum-num">1</span> Crea tu propia secuencia <span class="sum-flecha">&#9660;</span></summary>
+            <div class="acordeon-cuerpo">
+              <p>
+                Escribe un primer t&eacute;rmino ($a_1$) y una diferencia com&uacute;n ($d$). El
+                programa generar&aacute; los primeros 10 t&eacute;rminos para que veas el patr&oacute;n.
+              </p>
+              <div class="form-group">
+                <div class="campo-label">Primer t&eacute;rmino ($a_1$):</div>
+                <input type="number" id="exp-a1" value="3" />
+              </div>
+              <div class="form-group">
+                <div class="campo-label">Diferencia com&uacute;n ($d$):</div>
+                <input type="number" id="exp-d" value="4" />
+              </div>
+              <button id="generate-sequence-btn" class="action-button" type="button">
+                Generar secuencia
+              </button>
+              <div id="sequence-box">
+                <h3>Secuencia generada:</h3>
+                <ul id="sequence-display"></ul>
+                <p id="sequence-explanation"></p>
+              </div>
+              <div class="caja-pista">
+                &#128161; <strong>Prueba esto:</strong> pon $a_1 = 100$ y $d = -7$ para ver una
+                secuencia que baja. Luego prueba $d = 0$: &iquest;qu&eacute; ocurre?
+              </div>
+            </div>
+          </details>
+
+          <details class="acordeon">
+            <summary><span class="sum-num">2</span> &iquest;Por qu&eacute; sirve esto? <span class="sum-flecha">&#9660;</span></summary>
+            <div class="acordeon-cuerpo">
+              <div class="caja-vida">
+                <div class="etiqueta">&#128176; En la vida real</div>
+                <p>
+                  El explorador es como una calculadora de ahorros. Si decides empezar con
+                  <strong>$50</strong> y guardar <strong>$25</strong> cada semana, pon $a_1 = 50$ y
+                  $d = 25$. La lista te muestra cu&aacute;nto tendr&aacute;s semana tras semana.
+                </p>
+              </div>
+              <p>
+                Jugar con distintos valores te ayuda a <em>ver</em> el patr&oacute;n antes de
+                aprender las f&oacute;rmulas. Observa siempre dos cosas: con qu&eacute; n&uacute;mero
+                <em>empieza</em> y cu&aacute;nto <em>cambia</em> en cada paso.
+              </p>
+            </div>
+          </details>
+
+          <div class="volver-final">
+            <button class="volver-final-btn" type="button">&#127968; Volver al men&uacute; de inicio</button>
+          </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- VISTA 3: LA DIFERENCIA COMÚN                 -->
+        <!-- ============================================ -->
+        <section id="view-diferencia" class="view" data-title="3. La diferencia com&uacute;n ($d$)">
+          <h2 class="tema-titulo">La diferencia com&uacute;n ($d$)</h2>
+
+          <div class="acordeon-controles">
+            <button class="mini-btn abrir-todo" type="button">Abrir todo</button>
+            <button class="mini-btn cerrar-todo" type="button">Cerrar todo</button>
+          </div>
+
+          <details class="acordeon" open>
+            <summary><span class="sum-num">1</span> C&oacute;mo encontrarla <span class="sum-flecha">&#9660;</span></summary>
+            <div class="acordeon-cuerpo">
+              <p>
+                Para hallar la diferencia com&uacute;n, <strong>resta un t&eacute;rmino del que le
+                sigue</strong>. En s&iacute;mbolos: $d = a_2 - a_1$.
+              </p>
+              <div class="caja-clave">
+                <span class="formula-grande">$d = a_2 - a_1$</span>
+              </div>
+              <p>
+                Truco para no equivocarte: siempre haz <strong>"el que sigue menos el de
+                antes"</strong>. Si lo haces al rev&eacute;s, el signo te saldr&aacute; cambiado.
+              </p>
+              <div class="caja-vida">
+                <div class="etiqueta">&#9978; En la vida real</div>
+                <p>
+                  Un taxi cobra y vas mirando el tax&iacute;metro: $4, $7, $10, $13 dollars. Para saber
+                  cu&aacute;nto sube por tramo, restas: $7 - 4 = 3$. La diferencia com&uacute;n es
+                  $d = 3$ dollars por tramo.
+                </p>
+              </div>
+            </div>
+          </details>
+
+          <details class="acordeon">
+            <summary><span class="sum-num">2</span> Pr&aacute;ctica guiada <span class="sum-flecha">&#9660;</span></summary>
+            <div class="acordeon-cuerpo">
+              <p>Observa cada secuencia y calcula su diferencia com&uacute;n.</p>
+
+              <div class="problem">
+                <p class="enunciado">Secuencia 1: &nbsp; 5, 9, 13, 17, 21</p>
+                <div class="campo-label">&iquest;Cu&aacute;l es la diferencia com&uacute;n $d$?</div>
+                <input type="number" id="d1" />
+                <br />
+                <button class="check-btn" data-input="d1" data-answer="4" data-feedback="fb-d1" type="button">
+                  Comprobar
+                </button>
+                <div class="feedback" id="fb-d1"></div>
+              </div>
+
+              <div class="problem">
+                <p class="enunciado">Secuencia 2: &nbsp; 20, 15, 10, 5, 0</p>
+                <div class="campo-label">&iquest;Cu&aacute;l es la diferencia com&uacute;n $d$?</div>
+                <input type="number" id="d2" />
+                <br />
+                <button class="check-btn" data-input="d2" data-answer="-5" data-feedback="fb-d2" type="button">
+                  Comprobar
+                </button>
+                <div class="feedback" id="fb-d2"></div>
+                <div class="caja-pista">
+                  &#128161; Recuerda: si los n&uacute;meros bajan, la diferencia es negativa.
+                </div>
+              </div>
+
+              <div class="problem">
+                <p class="enunciado">
+                  Secuencia 3 (vida real): un tinaco pierde agua. Tiene 90, 84, 78, 72 litros.
+                </p>
+                <div class="campo-label">&iquest;Cu&aacute;ntos litros pierde por hora? ($d$)</div>
+                <input type="number" id="d3" />
+                <br />
+                <button class="check-btn" data-input="d3" data-answer="-6" data-feedback="fb-d3" type="button">
+                  Comprobar
+                </button>
+                <div class="feedback" id="fb-d3"></div>
+              </div>
+            </div>
+          </details>
+
+          <div class="volver-final">
+            <button class="volver-final-btn" type="button">&#127968; Volver al men&uacute; de inicio</button>
+          </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- VISTA 4: EL SIGUIENTE TÉRMINO                -->
+        <!-- ============================================ -->
+        <section id="view-siguiente" class="view" data-title="4. Encontrar el siguiente t&eacute;rmino">
+          <h2 class="tema-titulo">Encontrar el siguiente t&eacute;rmino</h2>
+
+          <div class="acordeon-controles">
+            <button class="mini-btn abrir-todo" type="button">Abrir todo</button>
+            <button class="mini-btn cerrar-todo" type="button">Cerrar todo</button>
+          </div>
+
+          <details class="acordeon" open>
+            <summary><span class="sum-num">1</span> La regla es muy sencilla <span class="sum-flecha">&#9660;</span></summary>
+            <div class="acordeon-cuerpo">
+              <p>
+                Para obtener el siguiente t&eacute;rmino de una secuencia, solo
+                <strong>suma la diferencia com&uacute;n $d$ al &uacute;ltimo t&eacute;rmino que
+                conoces</strong>.
+              </p>
+              <div class="caja-clave">
+                <span class="formula-grande">siguiente t&eacute;rmino $=$ &uacute;ltimo t&eacute;rmino $+\ d$</span>
+              </div>
+              <div class="caja-vida">
+                <div class="etiqueta">&#127909; En la vida real</div>
+                <p>
+                  Una sala de cine llena sus filas: 8 sillas en la primera fila, 12 en la segunda,
+                  16 en la tercera... La diferencia es $d = 4$. &iquest;Cu&aacute;ntas sillas tiene
+                  la cuarta fila? Solo suma: $16 + 4 = 20$ sillas.
+                </p>
+              </div>
+            </div>
+          </details>
+
+          <details class="acordeon">
+            <summary><span class="sum-num">2</span> Pr&aacute;ctica guiada <span class="sum-flecha">&#9660;</span></summary>
+            <div class="acordeon-cuerpo">
+              <div class="problem">
+                <p class="enunciado">Secuencia 1: &nbsp; 3, 7, 11, 15, ... &nbsp;&nbsp;($d = 4$)</p>
+                <div class="campo-label">&iquest;Cu&aacute;l es el siguiente t&eacute;rmino?</div>
+                <input type="number" id="s1" />
+                <br />
+                <button class="check-btn" data-input="s1" data-answer="19" data-feedback="fb-s1" type="button">
+                  Comprobar
+                </button>
+                <div class="feedback" id="fb-s1"></div>
+              </div>
+
+              <div class="problem">
+                <p class="enunciado">Secuencia 2: &nbsp; 50, 40, 30, 20, ... &nbsp;&nbsp;($d = -10$)</p>
+                <div class="campo-label">&iquest;Cu&aacute;l es el siguiente t&eacute;rmino?</div>
+                <input type="number" id="s2" />
+                <br />
+                <button class="check-btn" data-input="s2" data-answer="10" data-feedback="fb-s2" type="button">
+                  Comprobar
+                </button>
+                <div class="feedback" id="fb-s2"></div>
+              </div>
+
+              <div class="problem">
+                <p class="enunciado">
+                  Secuencia 3 (vida real): Pedro corre cada d&iacute;a un poco m&aacute;s: 10, 14,
+                  18, 22 minutos. Si sigue el patr&oacute;n, &iquest;cu&aacute;ntos minutos
+                  correr&aacute; el quinto d&iacute;a?
+                </p>
+                <div class="campo-label">Minutos del quinto d&iacute;a:</div>
+                <input type="number" id="s3" />
+                <br />
+                <button class="check-btn" data-input="s3" data-answer="26" data-feedback="fb-s3" type="button">
+                  Comprobar
+                </button>
+                <div class="feedback" id="fb-s3"></div>
+              </div>
+            </div>
+          </details>
+
+          <div class="volver-final">
+            <button class="volver-final-btn" type="button">&#127968; Volver al men&uacute; de inicio</button>
+          </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- VISTA 5: LA FÓRMULA DEL TÉRMINO N            -->
+        <!-- ============================================ -->
+        <section id="view-formula" class="view" data-title="5. La f&oacute;rmula del t&eacute;rmino $n$">
+          <h2 class="tema-titulo">La f&oacute;rmula del t&eacute;rmino $n$</h2>
+
+          <div class="acordeon-controles">
+            <button class="mini-btn abrir-todo" type="button">Abrir todo</button>
+            <button class="mini-btn cerrar-todo" type="button">Cerrar todo</button>
+          </div>
+
+          <details class="acordeon" open>
+            <summary><span class="sum-num">1</span> &iquest;Para qu&eacute; sirve? <span class="sum-flecha">&#9660;</span></summary>
+            <div class="acordeon-cuerpo">
+              <p>
+                Sumar de uno en uno funciona bien para t&eacute;rminos cercanos. Pero, &iquest;y si te
+                preguntan el t&eacute;rmino n&uacute;mero <strong>100</strong>? Sumar 99 veces
+                ser&iacute;a agotador.
+              </p>
+              <p>
+                Para eso existe la <strong>f&oacute;rmula del t&eacute;rmino general</strong> (o
+                f&oacute;rmula expl&iacute;cita). Te permite saltar directamente a cualquier
+                t&eacute;rmino:
+              </p>
+              <div class="caja-clave">
+                <span class="formula-grande">$a_n = a_1 + (n - 1)\,d$</span>
+              </div>
+            </div>
+          </details>
+
+          <details class="acordeon">
+            <summary><span class="sum-num">2</span> Qu&eacute; significa cada letra <span class="sum-flecha">&#9660;</span></summary>
+            <div class="acordeon-cuerpo">
+              <ul>
+                <li>$a_n$ &rarr; el t&eacute;rmino que <strong>quieres encontrar</strong>.</li>
+                <li>$a_1$ &rarr; el <strong>primer t&eacute;rmino</strong>.</li>
+                <li>$n$ &rarr; la <strong>posici&oacute;n</strong> del t&eacute;rmino que buscas.</li>
+                <li>$d$ &rarr; la <strong>diferencia com&uacute;n</strong>.</li>
+              </ul>
+              <p>
+                La idea: empieza en $a_1$ y suma la diferencia com&uacute;n exactamente
+                <strong>$(n-1)$ veces</strong>. &iquest;Por qu&eacute; $n-1$? Porque para llegar al
+                t&eacute;rmino 5 desde el t&eacute;rmino 1, das solo 4 saltos.
+              </p>
+            </div>
+          </details>
+
+          <details class="acordeon">
+            <summary><span class="sum-num">3</span> Ejemplo resuelto paso a paso <span class="sum-flecha">&#9660;</span></summary>
+            <div class="acordeon-cuerpo">
+              <div class="caja-vida">
+                <div class="etiqueta">&#128176; En la vida real</div>
+                <p>
+                  Abres una cuenta de ahorros con <strong>$200</strong> y depositas <strong>$75</strong>
+                  cada mes. &iquest;Cu&aacute;nto tendr&aacute;s en el <strong>mes 12</strong>?
+                </p>
+              </div>
+              <p>Datos: $a_1 = 200$, &nbsp; $d = 75$, &nbsp; $n = 12$.</p>
+              <table class="tabla-didactica">
+                <tr><th>Paso</th><th>Qu&eacute; hago</th><th>Resultado</th></tr>
+                <tr><td>1</td><td>Escribo la f&oacute;rmula</td><td>$a_{12} = a_1 + (n-1)d$</td></tr>
+                <tr><td>2</td><td>Sustituyo los valores</td><td>$a_{12} = 200 + (12-1)\cdot 75$</td></tr>
+                <tr><td>3</td><td>Resuelvo el par&eacute;ntesis</td><td>$a_{12} = 200 + 11 \cdot 75$</td></tr>
+                <tr><td>4</td><td>Multiplico</td><td>$a_{12} = 200 + 825$</td></tr>
+                <tr><td>5</td><td>Sumo</td><td>$a_{12} = 1025$</td></tr>
+              </table>
+              <p>
+                En el mes 12 tendr&aacute;s <strong>$1,025 dollars</strong>. &iexcl;Sin sumar 11 veces a mano!
+              </p>
+            </div>
+          </details>
+
+          <details class="acordeon">
+            <summary><span class="sum-num">4</span> Pr&aacute;ctica guiada <span class="sum-flecha">&#9660;</span></summary>
+            <div class="acordeon-cuerpo">
+              <div class="problem">
+                <p class="enunciado">
+                  Problema 1: Encuentra el 5&ordm; t&eacute;rmino ($a_5$) si $a_1 = 2$ y $d = 5$.
+                </p>
+                <p>Pista de c&aacute;lculo: $a_5 = 2 + (5 - 1)\cdot 5$</p>
+                <div class="campo-label">&iquest;Cu&aacute;l es el valor de $a_5$?</div>
+                <input type="number" id="f1" />
+                <br />
+                <button class="check-btn" data-input="f1" data-answer="22" data-feedback="fb-f1" type="button">
+                  Comprobar
+                </button>
+                <div class="feedback" id="fb-f1"></div>
+              </div>
+
+              <div class="problem">
+                <p class="enunciado">
+                  Problema 2: Encuentra el 7&ordm; t&eacute;rmino ($a_7$) si $a_1 = 10$ y $d = -3$.
+                </p>
+                <p>Pista de c&aacute;lculo: $a_7 = 10 + (7 - 1)\cdot(-3)$</p>
+                <div class="campo-label">&iquest;Cu&aacute;l es el valor de $a_7$?</div>
+                <input type="number" id="f2" />
+                <br />
+                <button class="check-btn" data-input="f2" data-answer="-8" data-feedback="fb-f2" type="button">
+                  Comprobar
+                </button>
+                <div class="feedback" id="fb-f2"></div>
+              </div>
+            </div>
+          </details>
+
+          <div class="volver-final">
+            <button class="volver-final-btn" type="button">&#127968; Volver al men&uacute; de inicio</button>
+          </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- VISTA 6: PRÁCTICA INDEPENDIENTE              -->
+        <!-- ============================================ -->
+        <section id="view-practica" class="view" data-title="6. Pr&aacute;ctica independiente">
+          <h2 class="tema-titulo">Pr&aacute;ctica independiente</h2>
+
+          <div class="acordeon-controles">
+            <button class="mini-btn abrir-todo" type="button">Abrir todo</button>
+            <button class="mini-btn cerrar-todo" type="button">Cerrar todo</button>
+          </div>
+
+          <details class="acordeon" open>
+            <summary><span class="sum-num">1</span> Problemas tipo GED <span class="sum-flecha">&#9660;</span></summary>
+            <div class="acordeon-cuerpo">
+              <p>
+                &iexcl;Pon a prueba tus habilidades! Estos problemas se parecen a los del examen GED.
+              </p>
+
+              <div class="problem">
+                <p class="enunciado">
+                  Pregunta 1: Completa el t&eacute;rmino que falta: &nbsp; 6, 11, ___, 21, 26
+                </p>
+                <div class="campo-label">T&eacute;rmino faltante:</div>
+                <input type="number" id="p1" />
+                <br />
+                <button class="check-btn" data-input="p1" data-answer="16" data-feedback="fb-p1" type="button">
+                  Comprobar
+                </button>
+                <div class="feedback" id="fb-p1"></div>
+              </div>
+
+              <div class="problem">
+                <p class="enunciado">
+                  Pregunta 2: &iquest;Cu&aacute;l es el 8&ordm; t&eacute;rmino si $a_1 = 1$ y $d = 6$?
+                </p>
+                <div class="campo-label">8&ordm; t&eacute;rmino:</div>
+                <input type="number" id="p2" />
+                <br />
+                <button class="check-btn" data-input="p2" data-answer="43" data-feedback="fb-p2" type="button">
+                  Comprobar
+                </button>
+                <div class="feedback" id="fb-p2"></div>
+              </div>
+
+              <div class="problem">
+                <p class="enunciado">
+                  Pregunta 3: Mar&iacute;a ahorra $15 dollars la primera semana y $5 dollars adicionales
+                  cada semana siguiente. &iquest;Cu&aacute;nto ahorrar&aacute; en la semana 6?
+                </p>
+                <div class="campo-label">Ahorro en la semana 6 ($):</div>
+                <input type="number" id="p3" />
+                <br />
+                <button class="check-btn" data-input="p3" data-answer="40" data-feedback="fb-p3" type="button">
+                  Comprobar
+                </button>
+                <div class="feedback" id="fb-p3"></div>
+                <div class="caja-pista">
+                  &#128161; Es una secuencia aritm&eacute;tica: $a_1 = 15$, $d = 5$. Busca el 6&ordm;
+                  t&eacute;rmino, $a_6$.
+                </div>
+              </div>
+
+              <div class="problem">
+                <p class="enunciado">
+                  Pregunta 4: Un teatro tiene 18 asientos en la fila 1 y aumenta 3 por fila.
+                  &iquest;Cu&aacute;ntos asientos hay en la fila 10?
+                </p>
+                <div class="campo-label">Asientos en la fila 10:</div>
+                <input type="number" id="p4" />
+                <br />
+                <button class="check-btn" data-input="p4" data-answer="45" data-feedback="fb-p4" type="button">
+                  Comprobar
+                </button>
+                <div class="feedback" id="fb-p4"></div>
+                <div class="caja-pista">
+                  &#128161; $a_1 = 18$, $d = 3$, $n = 10$. Usa $a_n = a_1 + (n-1)d$.
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <div class="volver-final">
+            <button class="volver-final-btn" type="button">&#127968; Volver al men&uacute; de inicio</button>
+          </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- VISTA 7: MINI-CUESTIONARIO                   -->
+        <!-- ============================================ -->
+        <section id="view-quiz" class="view" data-title="7. Mini-cuestionario">
+          <h2 class="tema-titulo">Mini-cuestionario</h2>
+
+          <!-- Sub-vista: preguntas -->
+          <div id="quiz-preguntas">
+            <p>Veamos cu&aacute;nto has aprendido. Responde las 5 preguntas y env&iacute;a.</p>
+
+            <div class="quiz-question">
+              <p class="pregunta" id="q1-label">
+                1. &iquest;Cu&aacute;l es la diferencia com&uacute;n $d$ en la secuencia 4, 1, -2, -5, ...?
+              </p>
+              <div class="opcion"><input type="radio" name="q1" value="-3" /> -3</div>
+              <div class="opcion"><input type="radio" name="q1" value="3" /> 3</div>
+              <div class="opcion"><input type="radio" name="q1" value="4" /> 4</div>
+              <div class="opcion"><input type="radio" name="q1" value="-4" /> -4</div>
+            </div>
+
+            <div class="quiz-question">
+              <p class="pregunta" id="q2-label">
+                2. &iquest;Cu&aacute;l es el siguiente t&eacute;rmino en la secuencia 10, 16, 22, 28, ...?
+              </p>
+              <div class="opcion"><input type="radio" name="q2" value="30" /> 30</div>
+              <div class="opcion"><input type="radio" name="q2" value="32" /> 32</div>
+              <div class="opcion"><input type="radio" name="q2" value="34" /> 34</div>
+              <div class="opcion"><input type="radio" name="q2" value="36" /> 36</div>
+            </div>
+
+            <div class="quiz-question">
+              <p class="pregunta" id="q3-label">
+                3. Encuentra el 6&ordm; t&eacute;rmino $a_6$ si $a_1 = 5$ y $d = 2$.
+              </p>
+              <div class="opcion"><input type="radio" name="q3" value="15" /> 15</div>
+              <div class="opcion"><input type="radio" name="q3" value="13" /> 13</div>
+              <div class="opcion"><input type="radio" name="q3" value="17" /> 17</div>
+              <div class="opcion"><input type="radio" name="q3" value="11" /> 11</div>
+            </div>
+
+            <div class="quiz-question">
+              <p class="pregunta" id="q4-label">
+                4. &iquest;Cu&aacute;l t&eacute;rmino falta en la secuencia -8, -4, ___, 4, 8?
+              </p>
+              <div class="opcion"><input type="radio" name="q4" value="-2" /> -2</div>
+              <div class="opcion"><input type="radio" name="q4" value="0" /> 0</div>
+              <div class="opcion"><input type="radio" name="q4" value="2" /> 2</div>
+              <div class="opcion"><input type="radio" name="q4" value="-1" /> -1</div>
+            </div>
+
+            <div class="quiz-question">
+              <p class="pregunta" id="q5-label">
+                5. Un empleado gana $30,000 dollars el primer a&ntilde;o y le suben $2,000 dollars cada
+                a&ntilde;o. &iquest;Cu&aacute;nto ganar&aacute; en su 5&ordm; a&ntilde;o?
+              </p>
+              <div class="opcion"><input type="radio" name="q5" value="36000" /> $36,000</div>
+              <div class="opcion"><input type="radio" name="q5" value="38000" /> $38,000</div>
+              <div class="opcion"><input type="radio" name="q5" value="40000" /> $40,000</div>
+              <div class="opcion"><input type="radio" name="q5" value="42000" /> $42,000</div>
+            </div>
+
+            <button id="submit-quiz-btn" class="action-button" type="button">
+              Enviar cuestionario
+            </button>
+          </div>
+
+          <!-- Sub-vista: resultados -->
+          <div id="quiz-resultados" style="display:none;">
+            <div id="quiz-score"></div>
+            <div id="quiz-feedback"></div>
+            <button id="retry-quiz-btn" class="action-button" type="button" style="margin-right:0.5rem;">
+              Intentar de nuevo
+            </button>
+          </div>
+
+          <div class="volver-final">
+            <button class="volver-final-btn" type="button">&#127968; Volver al men&uacute; de inicio</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      (function () {
+        'use strict';
+
+        var views = document.querySelectorAll('.view');
+        var topbar = document.getElementById('topbar');
+        var topbarTitle = document.getElementById('topbar-title');
+        var homeBtn = document.getElementById('home-btn');
+
+        // ----- Navegación entre vistas -----
+        function mostrarVista(id) {
+          var i;
+          for (i = 0; i < views.length; i++) {
+            views[i].classList.remove('active');
+          }
+          var destino = document.getElementById(id);
+          if (!destino) { destino = document.getElementById('view-hub'); }
+          destino.classList.add('active');
+
+          if (id === 'view-hub') {
+            topbar.classList.remove('visible');
+          } else {
+            topbar.classList.add('visible');
+            var titulo = destino.getAttribute('data-title') || '';
+            topbarTitle.innerHTML = titulo;
+          }
+
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          if (window.MathJax && MathJax.typesetPromise) {
+            MathJax.typesetPromise();
+          }
+        }
+
+        // Tarjetas del menú de inicio
+        var cards = document.querySelectorAll('.menu-card');
+        for (var c = 0; c < cards.length; c++) {
+          cards[c].addEventListener('click', function () {
+            mostrarVista(this.getAttribute('data-target'));
+          });
+        }
+
+        // Botón "Volver al inicio" de la barra superior
+        homeBtn.addEventListener('click', function () {
+          mostrarVista('view-hub');
+        });
+
+        // Botones "Volver al menú" al final de cada tema
+        var volverBtns = document.querySelectorAll('.volver-final-btn');
+        for (var v = 0; v < volverBtns.length; v++) {
+          volverBtns[v].addEventListener('click', function () {
+            mostrarVista('view-hub');
+          });
+        }
+
+        // ----- Controles abrir / cerrar todo del acordeón -----
+        var abrirBtns = document.querySelectorAll('.abrir-todo');
+        for (var a = 0; a < abrirBtns.length; a++) {
+          abrirBtns[a].addEventListener('click', function () {
+            var seccion = this.closest('.view');
+            var dets = seccion.querySelectorAll('details.acordeon');
+            for (var k = 0; k < dets.length; k++) { dets[k].open = true; }
+            if (window.MathJax && MathJax.typesetPromise) { MathJax.typesetPromise(); }
+          });
+        }
+        var cerrarBtns = document.querySelectorAll('.cerrar-todo');
+        for (var ce = 0; ce < cerrarBtns.length; ce++) {
+          cerrarBtns[ce].addEventListener('click', function () {
+            var seccion = this.closest('.view');
+            var dets = seccion.querySelectorAll('details.acordeon');
+            for (var k = 0; k < dets.length; k++) { dets[k].open = false; }
+          });
+        }
+
+        // Re-renderizar MathJax al abrir un acordeón
+        var todosDetails = document.querySelectorAll('details.acordeon');
+        for (var t = 0; t < todosDetails.length; t++) {
+          todosDetails[t].addEventListener('toggle', function () {
+            if (this.open && window.MathJax && MathJax.typesetPromise) {
+              MathJax.typesetPromise([this]);
+            }
+          });
+        }
+
+        // ----- Explorador de secuencias -----
+        var genBtn = document.getElementById('generate-sequence-btn');
+        if (genBtn) {
+          genBtn.addEventListener('click', function () {
+            var a1Input = document.getElementById('exp-a1');
+            var dInput = document.getElementById('exp-d');
+            var display = document.getElementById('sequence-display');
+            var explanation = document.getElementById('sequence-explanation');
+
+            if (a1Input.value === '' || dInput.value === '') {
+              explanation.style.color = '#dc2626';
+              explanation.textContent =
+                'Por favor, introduce un valor para el primer término y para la diferencia común.';
+              display.innerHTML = '';
+              return;
+            }
+
+            var a1 = parseInt(a1Input.value, 10);
+            var d = parseInt(dInput.value, 10);
+            var html = '';
+            var actual = a1;
+            for (var i = 0; i < 10; i++) {
+              var clase = i === 0 ? ' class="primero"' : '';
+              html += '<li' + clase + '>' + actual + '</li>';
+              actual += d;
+            }
+            display.innerHTML = html;
+
+            var tendencia;
+            if (d > 0) { tendencia = 'crece'; }
+            else if (d < 0) { tendencia = 'decrece'; }
+            else { tendencia = 'se mantiene constante'; }
+
+            explanation.style.color = '#4f46e5';
+            explanation.innerHTML =
+              'La secuencia empieza en $a_1 = ' + a1 + '$, tiene diferencia común $d = ' +
+              d + '$ y por eso ' + tendencia + '.';
+            if (window.MathJax && MathJax.typesetPromise) {
+              MathJax.typesetPromise([explanation]);
+            }
+          });
+        }
+
+        // ----- Comprobar respuestas de práctica -----
+        var checkBtns = document.querySelectorAll('.check-btn');
+        for (var b = 0; b < checkBtns.length; b++) {
+          checkBtns[b].addEventListener('click', function () {
+            var input = document.getElementById(this.getAttribute('data-input'));
+            var correcta = parseInt(this.getAttribute('data-answer'), 10);
+            var fb = document.getElementById(this.getAttribute('data-feedback'));
+
+            fb.classList.add('show');
+            if (input.value === '') {
+              fb.className = 'feedback show incorrect';
+              fb.textContent = 'Por favor, escribe tu respuesta.';
+              return;
+            }
+            var resp = parseInt(input.value, 10);
+            if (resp === correcta) {
+              fb.className = 'feedback show correct';
+              fb.textContent = '¡Correcto! Muy bien hecho.';
+            } else {
+              fb.className = 'feedback show incorrect';
+              fb.textContent = 'Aún no. La respuesta correcta es ' + correcta + '. ¡Inténtalo otra vez!';
+            }
+          });
+        }
+
+        // ----- Opciones del cuestionario clicables (sin <label>) -----
+        var opciones = document.querySelectorAll('.opcion');
+        for (var o = 0; o < opciones.length; o++) {
+          opciones[o].addEventListener('click', function () {
+            var radio = this.querySelector('input[type="radio"]');
+            if (!radio) { return; }
+            radio.checked = true;
+            // Quita el resaltado de las demás opciones del mismo grupo
+            var grupo = document.querySelectorAll('.opcion input[name="' + radio.name + '"]');
+            for (var g = 0; g < grupo.length; g++) {
+              grupo[g].parentNode.classList.remove('elegida');
+            }
+            this.classList.add('elegida');
+          });
+        }
+
+        // ----- Mini-cuestionario -----
+        var correctas = { q1: '-3', q2: '34', q3: '15', q4: '0', q5: '38000' };
+        var submitBtn = document.getElementById('submit-quiz-btn');
+        var retryBtn = document.getElementById('retry-quiz-btn');
+        var preguntasDiv = document.getElementById('quiz-preguntas');
+        var resultadosDiv = document.getElementById('quiz-resultados');
+        var scoreDiv = document.getElementById('quiz-score');
+        var feedbackDiv = document.getElementById('quiz-feedback');
+
+        if (submitBtn) {
+          submitBtn.addEventListener('click', function () {
+            var score = 0;
+            var total = 5;
+            feedbackDiv.innerHTML = '';
+
+            for (var i = 1; i <= total; i++) {
+              var nombre = 'q' + i;
+              var elegida = document.querySelector('input[name="' + nombre + '"]:checked');
+              var etiqueta = document.getElementById(nombre + '-label').textContent;
+              var item = document.createElement('div');
+              item.className = 'feedback-item';
+
+              if (elegida && elegida.value === correctas[nombre]) {
+                score++;
+                item.className = 'feedback-item correct';
+                item.innerHTML = '<strong>' + etiqueta + '</strong>Tu respuesta: ' +
+                  elegida.value + '. ¡Correcto!';
+              } else if (elegida) {
+                item.className = 'feedback-item incorrect';
+                item.innerHTML = '<strong>' + etiqueta + '</strong>Tu respuesta: ' +
+                  elegida.value + '. Incorrecto. La respuesta correcta es ' +
+                  correctas[nombre] + '.';
+              } else {
+                item.className = 'feedback-item incorrect';
+                item.innerHTML = '<strong>' + etiqueta + '</strong>No respondiste. La respuesta correcta es ' +
+                  correctas[nombre] + '.';
+              }
+              feedbackDiv.appendChild(item);
+            }
+
+            var mensaje;
+            if (score === total) { mensaje = '¡Excelente! Dominaste el tema.'; }
+            else if (score >= 3) { mensaje = '¡Bien! Vas por buen camino.'; }
+            else { mensaje = 'Repasa los temas y vuelve a intentarlo.'; }
+
+            scoreDiv.textContent = 'Obtuviste ' + score + ' de ' + total + ' correctas. ' + mensaje;
+
+            preguntasDiv.style.display = 'none';
+            resultadosDiv.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+        }
+
+        if (retryBtn) {
+          retryBtn.addEventListener('click', function () {
+            var radios = document.querySelectorAll('#quiz-preguntas input[type="radio"]');
+            for (var r = 0; r < radios.length; r++) { radios[r].checked = false; }
+            var opcs = document.querySelectorAll('#quiz-preguntas .opcion');
+            for (var op = 0; op < opcs.length; op++) { opcs[op].classList.remove('elegida'); }
+            feedbackDiv.innerHTML = '';
+            resultadosDiv.style.display = 'none';
+            preguntasDiv.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+        }
+
+        // Vista inicial
+        mostrarVista('view-hub');
+      })();
+    </script>
+  </body>
+</html>
