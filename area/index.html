@@ -1,1 +1,752 @@
+<!DOCTYPE html>
+<html lang="es">
+<head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Interactivo: Área de Figuras Básicas</title> 
+  <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f6f8; /* Fondo neutro de bajo estímulo */
+        color: #212529; /* Texto de alto contraste */
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+      }
 
+      .container {
+        width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .header h1 {
+        color: #1a1a1a;
+        margin: 0;
+        font-size: 1.5em;
+      }
+
+      .units-display {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #eeeeee;
+      }
+
+      .units-display-flex {
+        display: flex;
+        align-items: center;
+      }
+
+      .units-display .title {
+        font-weight: 700;
+        font-size: 1.1em;
+        margin-right: 10px;
+      }
+
+      .units-display .unit {
+        color: #495057;
+        font-weight: bold;
+        font-size: 1.1em;
+        background-color: #e9ecef;
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+
+      .canvas-container {
+        position: relative;
+        height: 440px;
+        width: 100%;
+        margin-bottom: 15px;
+        border: 2px solid #cfd8dc;
+        border-radius: 8px;
+        background-color: #fdfdfd;
+        overflow: hidden;
+      }
+
+      canvas {
+        cursor: pointer;
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+
+      .legend {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: rgba(255, 255, 255, 0.95);
+        padding: 10px;
+        border: 2px solid #cfd8dc;
+        border-radius: 6px;
+        font-size: 0.95em;
+        font-weight: 600;
+        z-index: 10;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .legend-item:last-child {
+          margin-bottom: 0;
+      }
+
+      .legend-color {
+        width: 18px;
+        height: 18px;
+        display: inline-block;
+        margin-right: 8px;
+        border-radius: 3px;
+      }
+      
+      /* Colores DUA: Azul para Base/Lado, Naranja para Altura */
+      .color-base { background-color: #0056b3; }
+      .color-height { background-color: #d95f02; }
+
+      .legend-line {
+        width: 18px;
+        height: 0px;
+        display: inline-block;
+        margin-right: 8px;
+        border-top: 3px dashed #d95f02;
+      }
+
+      .measurements {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        text-align: left;
+        background-color: rgba(255, 255, 255, 0.95);
+        padding: 12px;
+        border: 2px solid #cfd8dc;
+        border-radius: 6px;
+        z-index: 10;
+      }
+
+      .measurement-group {
+        margin-bottom: 10px;
+      }
+       .measurement-group:last-child {
+          margin-bottom: 0;
+      }
+
+      .measurement-label {
+        font-weight: 700;
+        font-size: 1em;
+        color: #495057;
+        display: inline-block;
+        min-width: 100px;
+      }
+
+      .measurement-value {
+        color: #212529;
+        font-weight: 700;
+        font-size: 1em;
+        display: inline-block;
+      }
+
+      .controls-area {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-top: 15px;
+          padding-top: 15px;
+          border-top: 2px solid #eeeeee;
+          width: 100%;
+      }
+
+      .instruction {
+        text-align: center;
+        color: #333;
+        font-weight: bold;
+        font-size: 1.1em;
+        margin-bottom: 15px;
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        padding: 8px 16px;
+        border-radius: 6px;
+      }
+
+      .success-message {
+        text-align: center;
+        color: #155724;
+        font-weight: 500;
+        font-size: 1.1em;
+        display: none;
+        width: 90%;
+        margin: 0 auto 15px auto;
+        padding: 12px;
+        background-color: #d4edda;
+        border: 2px solid #c3e6cb;
+        border-radius: 6px;
+      }
+      .success-message strong {
+          font-size: 1.2em;
+          display: block;
+          margin-bottom: 5px;
+      }
+
+      .ruler-type-selector {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        gap: 10px;
+      }
+
+      .ruler-type-selector label {
+        font-weight: bold;
+        color: #333;
+      }
+
+      .controls-area button {
+          color: white;
+          border: none;
+          border-radius: 6px;
+          padding: 8px 16px;
+          cursor: pointer;
+          font-weight: bold;
+          font-size: 1em;
+          transition: all 0.2s ease;
+      }
+
+      #measure-side {
+        background-color: #0056b3; 
+      }
+      #measure-side:hover {
+        background-color: #004494; 
+      }
+
+      #measure-height {
+        background-color: #d95f02; 
+      }
+       #measure-height:hover {
+        background-color: #b34e02; 
+      }
+
+      #measure-side.active {
+        box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.3);
+        transform: scale(1.05);
+      }
+
+      #measure-height.active {
+        box-shadow: 0 0 0 4px rgba(217, 95, 2, 0.3);
+        transform: scale(1.05);
+      }
+
+      #new-exercise {
+        background-color: #212529; 
+        padding: 12px 24px;
+        font-size: 1.1em;
+        width: 80%;
+      }
+      #new-exercise:hover {
+        background-color: #343a40; 
+      }
+
+  </style> 
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Cálculo de Área</h1>
+  </div>
+  
+  <div class="units-display">
+    <div class="units-display-flex">
+      <div class="title">UNIDADES</div>
+      <div class="unit" id="unit-display">cm</div>
+    </div>
+  </div>
+
+  <div class="canvas-container">
+    <canvas id="polygon-canvas" width="500" height="440"></canvas>
+    
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color color-base"></div>
+        <span>Base / Lado</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-line"></div>
+        <span>Altura</span>
+      </div>
+    </div>
+
+    <div class="measurements">
+      <div class="measurement-group">
+        <div class="measurement-label">Figura:</div>
+        <div class="measurement-value" id="shape-name"></div>
+      </div>
+      <div class="measurement-group">
+        <div class="measurement-label">Base / Lado:</div>
+        <div class="measurement-value">b = <span id="side-length">??</span> <span id="side-unit"></span></div>
+      </div>
+      <div class="measurement-group">
+        <div class="measurement-label">Altura:</div>
+        <div class="measurement-value">h = <span id="height-length">??</span> <span id="height-unit"></span></div>
+      </div>
+      <div class="measurement-group">
+        <div class="measurement-label">Área:</div>
+        <div class="measurement-value">A = <span id="area">??</span> <span id="area-unit"></span>²</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls-area">
+    <div class="instruction" id="instruction-text">Mide la base y la altura con la regla</div>
+    <div class="success-message" id="success-message"></div>
+    
+    <div class="ruler-type-selector">
+      <label>Medir:</label> 
+      <button id="measure-side" class="active">Base / Lado</button> 
+      <button id="measure-height">Altura</button>
+    </div>
+    
+    <button id="new-exercise">Generar Otro Ejercicio</button>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Elementos del DOM
+    const canvas = document.getElementById("polygon-canvas");
+    const ctx = canvas.getContext("2d");
+    
+    const unitDisplay = document.getElementById("unit-display");
+    const shapeNameElement = document.getElementById("shape-name");
+    const sideLengthElement = document.getElementById("side-length");
+    const heightLengthElement = document.getElementById("height-length");
+    const areaElement = document.getElementById("area");
+    
+    const sideUnitElement = document.getElementById("side-unit");
+    const heightUnitElement = document.getElementById("height-unit");
+    const areaUnitElement = document.getElementById("area-unit");
+    
+    const successMessage = document.getElementById("success-message");
+    const instructionText = document.getElementById("instruction-text");
+    const newExerciseButton = document.getElementById("new-exercise");
+    const measureSideButton = document.getElementById("measure-side");
+    const measureHeightButton = document.getElementById("measure-height");
+
+    // Variables globales
+    let currentShape = "triangle"; // triangle, square, rectangle
+    let baseLength = 0;
+    let heightLength = 0;
+    let area = 0;
+    let unitType = "cm";
+    
+    let rulerStartPos = { x: 100, y: 380 };
+    let rulerEndPos = { x: 200, y: 380 };
+    let isDraggingStart = false;
+    let isDraggingEnd = false;
+    let instructionVisible = true;
+    
+    let sideCorrect = false;
+    let heightCorrect = false;
+    let currentRulerType = "side"; // "side" o "height"
+
+    // Constantes del Canvas
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+    const centerX = canvasWidth / 2;
+    const centerY = canvasHeight / 2; 
+    const pixelsPerUnit = 35; // Escala ajustada para formas simples
+
+    // Generar nuevo ejercicio
+    function generateNewExercise() {
+      const shapes = ["triangle", "square", "rectangle"];
+      currentShape = shapes[Math.floor(Math.random() * shapes.length)];
+      
+      const units = ["mm", "cm", "dm", "m"];
+      unitType = units[Math.floor(Math.random() * units.length)];
+      unitDisplay.textContent = unitType;
+
+      if (currentShape === "square") {
+          baseLength = Math.floor(Math.random() * 5) + 3;
+          heightLength = baseLength;
+          area = baseLength * heightLength;
+          shapeNameElement.textContent = "Cuadrado";
+      } else if (currentShape === "rectangle") {
+          baseLength = Math.floor(Math.random() * 6) + 4;
+          heightLength = Math.floor(Math.random() * 4) + 2;
+          if (baseLength === heightLength) heightLength += 1; // Evitar que sea cuadrado
+          area = baseLength * heightLength;
+          shapeNameElement.textContent = "Rectángulo";
+      } else {
+          // Triángulo
+          baseLength = Math.floor(Math.random() * 6) + 4;
+          heightLength = Math.floor(Math.random() * 5) + 3;
+          area = (baseLength * heightLength) / 2;
+          shapeNameElement.textContent = "Triángulo";
+      }
+
+      // Reiniciar estado
+      sideCorrect = false;
+      heightCorrect = false;
+      sideLengthElement.textContent = "??";
+      heightLengthElement.textContent = "??";
+      areaElement.textContent = "??";
+      
+      sideUnitElement.textContent = unitType;
+      heightUnitElement.textContent = unitType;
+      areaUnitElement.textContent = unitType;
+
+      // Reiniciar la regla abajo al centro
+      rulerStartPos = { x: centerX - 60, y: canvasHeight - 50 };
+      rulerEndPos = { x: centerX + 60, y: canvasHeight - 50 };
+
+      currentRulerType = "side";
+      measureSideButton.classList.add("active");
+      measureHeightButton.classList.remove("active");
+
+      instructionText.style.display = "block";
+      instructionVisible = true;
+      successMessage.style.display = "none";
+      successMessage.innerHTML = "";
+
+      drawScene();
+    }
+
+    // Dibujar escena principal
+    function drawScene() {
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      const w = baseLength * pixelsPerUnit;
+      const h = heightLength * pixelsPerUnit;
+      
+      // Coordenadas base
+      const bottomY = centerY + h/2;
+      const topY = centerY - h/2;
+      const leftX = centerX - w/2;
+      const rightX = centerX + w/2;
+
+      // 1. Dibujar la Figura
+      ctx.beginPath();
+      if (currentShape === "triangle") {
+          ctx.moveTo(leftX, bottomY);
+          ctx.lineTo(rightX, bottomY);
+          ctx.lineTo(centerX, topY);
+      } else {
+          // Cuadrado o Rectángulo
+          ctx.moveTo(leftX, bottomY);
+          ctx.lineTo(rightX, bottomY);
+          ctx.lineTo(rightX, topY);
+          ctx.lineTo(leftX, topY);
+      }
+      ctx.closePath();
+      
+      ctx.fillStyle = "#e0f7fa"; // Cian claro (DUA)
+      ctx.fill();
+      ctx.strokeStyle = "#006064"; // Borde oscuro para contraste
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // 2. Dibujar línea de Altura
+      if (currentRulerType === "height" && !heightCorrect) {
+          ctx.beginPath();
+          ctx.moveTo(centerX, bottomY);
+          ctx.lineTo(centerX, topY);
+          ctx.strokeStyle = "#d95f02"; // Naranja DUA
+          ctx.lineWidth = 2;
+          ctx.setLineDash([6, 6]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+      } else if (heightCorrect) {
+          ctx.beginPath();
+          ctx.moveTo(centerX, bottomY);
+          ctx.lineTo(centerX, topY);
+          ctx.strokeStyle = "#d95f02";
+          ctx.lineWidth = 2.5;
+          ctx.setLineDash([6, 6]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+      }
+
+      // 3. Dibujar Regla Interactiva
+      const rulerColor = currentRulerType === "side" ? "#0056b3" : "#d95f02";
+      const rulerDarkColor = currentRulerType === "side" ? "#003366" : "#994300";
+      
+      ctx.beginPath();
+      ctx.moveTo(rulerStartPos.x, rulerStartPos.y);
+      ctx.lineTo(rulerEndPos.x, rulerEndPos.y);
+      ctx.strokeStyle = rulerColor;
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      // Tiradores de la regla
+      ctx.beginPath();
+      ctx.arc(rulerStartPos.x, rulerStartPos.y, 10, 0, 2 * Math.PI);
+      ctx.fillStyle = isDraggingStart ? rulerDarkColor : rulerColor;
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.arc(rulerEndPos.x, rulerEndPos.y, 10, 0, 2 * Math.PI);
+      ctx.fillStyle = isDraggingEnd ? rulerDarkColor : rulerColor;
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Marcas y números de la regla
+      const rulerVector = { x: rulerEndPos.x - rulerStartPos.x, y: rulerEndPos.y - rulerStartPos.y };
+      const rulerLengthPixels = Math.hypot(rulerVector.x, rulerVector.y);
+      const rulerAngle = Math.atan2(rulerVector.y, rulerVector.x);
+      const normalX = -rulerVector.y / (rulerLengthPixels || 1);
+      const normalY = rulerVector.x / (rulerLengthPixels || 1);
+      const rulerLengthUnits = rulerLengthPixels / pixelsPerUnit;
+      const numTicks = Math.floor(rulerLengthUnits) + 1;
+
+      ctx.strokeStyle = rulerColor;
+      ctx.fillStyle = "#212529";
+      ctx.font = "bold 12px 'Segoe UI', Arial";
+
+      for (let i = 0; i < numTicks; i++) {
+        const tickDistPixels = i * pixelsPerUnit;
+        if (tickDistPixels > rulerLengthPixels + 2) break;
+
+        const tickX = rulerStartPos.x + Math.cos(rulerAngle) * tickDistPixels;
+        const tickY = rulerStartPos.y + Math.sin(rulerAngle) * tickDistPixels;
+        let tickDrawLength = (i % 5 === 0) ? 14 : 7;
+        const tickStartX = tickX - normalX * (tickDrawLength / 2);
+        const tickStartY = tickY - normalY * (tickDrawLength / 2);
+        const tickEndX = tickX + normalX * (tickDrawLength / 2);
+        const tickEndY = tickY + normalY * (tickDrawLength / 2);
+
+        ctx.beginPath();
+        ctx.moveTo(tickStartX, tickStartY);
+        ctx.lineTo(tickEndX, tickEndY);
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        if (i % 1 === 0) {
+          const numberX = tickX + normalX * (tickDrawLength + 8);
+          const numberY = tickY + normalY * (tickDrawLength + 8);
+          ctx.textAlign = (normalX > 0.1) ? 'left' : (normalX < -0.1) ? 'right' : 'center';
+          ctx.textBaseline = (normalY > 0.1) ? 'top' : (normalY < -0.1) ? 'bottom' : 'middle';
+          ctx.fillText(i.toString(), numberX, numberY);
+        }
+      }
+      ctx.textAlign = 'start';
+      ctx.textBaseline = 'alphabetic';
+
+      checkResults();
+    }
+
+    // Verificar si las medidas son correctas
+    function checkResults() {
+      if (sideCorrect && heightCorrect) {
+        sideLengthElement.textContent = baseLength;
+        heightLengthElement.textContent = heightLength;
+        areaElement.textContent = area;
+
+        let formulaHtml = "";
+        if (currentShape === "triangle") {
+            formulaHtml = `
+              A = (b &times; h) / 2 <br/>
+              A = (${baseLength} ${unitType} &times; ${heightLength} ${unitType}) / 2 <br/>
+              A = ${area} ${unitType}²
+            `;
+        } else {
+            formulaHtml = `
+              A = b &times; h <br/>
+              A = ${baseLength} ${unitType} &times; ${heightLength} ${unitType} <br/>
+              A = ${area} ${unitType}²
+            `;
+        }
+
+        successMessage.innerHTML = `<strong>¡CORRECTO!</strong> ${formulaHtml}`;
+        successMessage.style.display = "block";
+        instructionText.style.display = 'none';
+        instructionVisible = false;
+
+      } else {
+          successMessage.style.display = "none";
+          if (!isDraggingStart && !isDraggingEnd) {
+             instructionText.style.display = 'block';
+             instructionVisible = true;
+          }
+      }
+    }
+
+    // Cambiar tipo de regla
+    measureSideButton.addEventListener("click", function () {
+      currentRulerType = "side";
+      measureSideButton.classList.add("active");
+      measureHeightButton.classList.remove("active");
+      drawScene();
+    });
+
+    measureHeightButton.addEventListener("click", function () {
+      currentRulerType = "height";
+      measureHeightButton.classList.add("active");
+      measureSideButton.classList.remove("active");
+      drawScene();
+    });
+
+    // Eventos del Mouse
+    function getMousePos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return {
+            x: (e.clientX - rect.left) * scaleX,
+            y: (e.clientY - rect.top) * scaleY
+        };
+    }
+
+    function handleMouseDown(e) {
+      const mousePos = getMousePos(e);
+      const distToStart = Math.hypot(mousePos.x - rulerStartPos.x, mousePos.y - rulerStartPos.y);
+      const distToEnd = Math.hypot(mousePos.x - rulerEndPos.x, mousePos.y - rulerEndPos.y);
+      const handleRadius = 20; // Hitbox más grande para facilitar el uso
+
+      isDraggingStart = distToStart < handleRadius;
+      isDraggingEnd = !isDraggingStart && (distToEnd < handleRadius);
+
+      if (isDraggingStart || isDraggingEnd) {
+          if (instructionVisible) {
+              instructionText.style.display = "none";
+              instructionVisible = false;
+          }
+          successMessage.style.display = "none";
+          drawScene();
+      }
+    }
+
+    function handleMouseMove(e) {
+      if (!isDraggingStart && !isDraggingEnd) return;
+      const mousePos = getMousePos(e);
+
+      if (isDraggingStart) rulerStartPos = { x: mousePos.x, y: mousePos.y };
+      else if (isDraggingEnd) rulerEndPos = { x: mousePos.x, y: mousePos.y };
+
+      if (currentRulerType === "side") checkSideMeasurement();
+      else checkHeightMeasurement();
+
+      drawScene();
+    }
+
+    function handleMouseUp() {
+      if (isDraggingStart || isDraggingEnd) {
+          isDraggingStart = false;
+          isDraggingEnd = false;
+          if (currentRulerType === "side") checkSideMeasurement();
+          else checkHeightMeasurement();
+          drawScene();
+      }
+    }
+
+    // Lógica de acoplamiento (Snapping)
+    function checkSideMeasurement() {
+      const snapThreshold = 20;
+      let placementCorrect = false;
+      
+      const w = baseLength * pixelsPerUnit;
+      const h = heightLength * pixelsPerUnit;
+      
+      // Puntos de la base inferior
+      const v1 = { x: centerX - w/2, y: centerY + h/2 };
+      const v2 = { x: centerX + w/2, y: centerY + h/2 };
+
+      const distStartV1 = Math.hypot(rulerStartPos.x - v1.x, rulerStartPos.y - v1.y);
+      const distEndV2 = Math.hypot(rulerEndPos.x - v2.x, rulerEndPos.y - v2.y);
+      const distStartV2 = Math.hypot(rulerStartPos.x - v2.x, rulerStartPos.y - v2.y);
+      const distEndV1 = Math.hypot(rulerEndPos.x - v1.x, rulerEndPos.y - v1.y);
+
+      if ( (distStartV1 < snapThreshold && distEndV2 < snapThreshold) ||
+           (distStartV2 < snapThreshold && distEndV1 < snapThreshold) ) {
+        placementCorrect = true;
+        // Acoplar la regla
+        if (distStartV1 < snapThreshold && distEndV2 < snapThreshold) {
+            rulerStartPos = { x: v1.x, y: v1.y }; rulerEndPos = { x: v2.x, y: v2.y };
+        } else {
+            rulerStartPos = { x: v2.x, y: v2.y }; rulerEndPos = { x: v1.x, y: v1.y };
+        }
+      }
+
+      if (placementCorrect !== sideCorrect) {
+        sideCorrect = placementCorrect;
+        sideLengthElement.textContent = sideCorrect ? baseLength : "??";
+      }
+    }
+
+    function checkHeightMeasurement() {
+      const snapThreshold = 20;
+      let placementCorrect = false;
+      
+      const h = heightLength * pixelsPerUnit;
+      
+      // Puntos de la altura (Centro base a Centro superior)
+      const hBottom = { x: centerX, y: centerY + h/2 };
+      const hTop = { x: centerX, y: centerY - h/2 };
+
+      const distStartBottom = Math.hypot(rulerStartPos.x - hBottom.x, rulerStartPos.y - hBottom.y);
+      const distEndTop = Math.hypot(rulerEndPos.x - hTop.x, rulerEndPos.y - hTop.y);
+      const distStartTop = Math.hypot(rulerStartPos.x - hTop.x, rulerStartPos.y - hTop.y);
+      const distEndBottom = Math.hypot(rulerEndPos.x - hBottom.x, rulerEndPos.y - hBottom.y);
+
+      if ( (distStartBottom < snapThreshold && distEndTop < snapThreshold) ||
+           (distStartTop < snapThreshold && distEndBottom < snapThreshold) ) {
+          placementCorrect = true;
+          // Acoplar la regla
+          if (distStartBottom < snapThreshold && distEndTop < snapThreshold) {
+              rulerStartPos = { x: hBottom.x, y: hBottom.y }; rulerEndPos = { x: hTop.x, y: hTop.y };
+          } else {
+              rulerStartPos = { x: hTop.x, y: hTop.y }; rulerEndPos = { x: hBottom.x, y: hBottom.y };
+          }
+      }
+
+      if (placementCorrect !== heightCorrect) {
+          heightCorrect = placementCorrect;
+          heightLengthElement.textContent = heightCorrect ? heightLength : "??";
+      }
+    }
+
+    // Listeners
+    canvas.addEventListener("mousedown", handleMouseDown);
+    canvas.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+    
+    // Soporte táctil básico
+    canvas.addEventListener("touchstart", function(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        handleMouseDown({ clientX: touch.clientX, clientY: touch.clientY });
+    }, {passive: false});
+    
+    canvas.addEventListener("touchmove", function(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
+    }, {passive: false});
+    
+    window.addEventListener("touchend", handleMouseUp);
+
+    newExerciseButton.addEventListener("click", generateNewExercise);
+
+    // Inicializar
+    generateNewExercise();
+  });
+</script>
+</body>
+</html>
