@@ -1,1 +1,695 @@
+<!doctype html>
+<!--
+  Rapidez en lenguaje algebraico - GED
+  Autor: Jose M. Fernandez, ABE/ASE Math Master Teacher, Harry S. Truman College - City Colleges of Chicago.
+  (c) 2026. Licencia: CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+  Resumen: cuestionario interactivo de rapidez para practicar la traduccion entre el lenguaje
+  verbal y el algebraico (sumas y restas, productos y cocientes, expresiones con parentesis,
+  de expresion a palabras y planteamiento de ecuaciones), con generacion aleatoria,
+  cronometro y desglose por categoria.
+-->
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago" />
+    <meta name="license" content="CC BY-NC-SA 4.0" />
+    <link rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" />
+    <title>Rapidez en lenguaje algebraico &mdash; GED</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+      :root {
+        --cp: #1565c0;  /* primario: 5.9:1 con blanco (DUA OK) */
+        --ch: #1976d2;  /* hover */
+      }
+      body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 10px;
+        background: linear-gradient(135deg, #0f2a43, #1b3a5c);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 90vh;
+        flex-direction: column;
+        gap: 10px;
+      }
+      #quiz-container {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 0 22px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        width: clamp(300px, 95%, 860px);
+        margin: 0 auto;
+      }
+      .quiz-progress-header {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 16px 22px;
+        border-bottom: 3px solid var(--cp);
+      }
+      .progress-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.95em, 2.5vw, 1.1em);
+        color: var(--cp);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      .progress-container {
+        background: #e0e0e0;
+        height: 12px;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+      }
+      .progress-bar {
+        height: 100%;
+        width: 5%;
+        background: linear-gradient(90deg, var(--cp), var(--ch));
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 6px;
+      }
+      .question-meta {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 20px 0;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .cat-badge {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 700;
+        color: #fff;
+      }
+      .time-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78em;
+        font-weight: 600;
+        background: #e8f4f8;
+        color: #444;
+        border: 1px solid #ccc;
+      }
+      .question-header {
+        padding: 16px 22px 10px;
+        font-size: clamp(0.95em, 2.4vw, 1.15em);
+        font-weight: 700;
+        text-align: center;
+        color: #1a1a2e;
+        line-height: 1.55;
+      }
+      .data-box {
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        border: 2px solid var(--cp);
+        border-radius: 12px;
+        margin: 0 22px 12px;
+        padding: 14px 18px;
+        text-align: center;
+      }
+      .expr-grande {
+        font-size: clamp(1.4em, 5vw, 2em);
+        font-weight: 800;
+        color: #0f2a43;
+        letter-spacing: 1px;
+      }
+      .options { padding: 0 18px; }
+      .option-item {
+        display: block;
+        padding: 11px 16px;
+        margin-bottom: 10px;
+        background: #f0f4f8;
+        color: #333;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        font-size: clamp(0.95em, 2.4vw, 1.05em);
+        font-weight: 700;
+        line-height: 1.4;
+        user-select: none;
+      }
+      .option-item:hover:not(.disabled) {
+        background: #dbeafe;
+        border-color: var(--cp);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .option-item.correct {
+        background: #2e7d32 !important;
+        color: #fff !important;
+        border-color: #2e7d32 !important;
+      }
+      .option-item.incorrect {
+        background: #c62828 !important;
+        color: #fff !important;
+        border-color: #c62828 !important;
+      }
+      .option-item.disabled { cursor: not-allowed; opacity: 0.9; }
+      .btn-container { padding: 4px 18px 18px; }
+      .primary-btn {
+        display: block;
+        width: 100%;
+        padding: 13px;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.05em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: var(--cp);
+        text-align: center;
+        user-select: none;
+        box-sizing: border-box;
+      }
+      .primary-btn:hover {
+        background: var(--ch);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      .timer-container {
+        background: linear-gradient(135deg, #fff8e1, #ffecb3);
+        padding: 11px 18px;
+        border-top: 2px solid #f39c12;
+      }
+      .timer-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.88em, 2.2vw, 1em);
+        color: #8a5a00;
+        margin-bottom: 7px;
+      }
+      .timer-bar-container {
+        background: #f0d0d0;
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .timer-bar {
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+        transition: width 0.1s linear;
+        border-radius: 4px;
+      }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+      .timer-warning { animation: pulse 0.9s infinite; }
+      .result-screen { padding: 35px 28px; text-align: center; }
+      .result-screen.hidden { display: none; }
+      .result-screen h2 {
+        color: var(--cp);
+        font-size: clamp(1.4em, 4vw, 1.9em);
+        margin-bottom: 10px;
+      }
+      .result-score {
+        font-size: clamp(2em, 6vw, 2.8em) !important;
+        font-weight: 800;
+        color: var(--cp) !important;
+        margin: 12px 0 !important;
+      }
+      .result-msg {
+        font-size: clamp(1em, 2.8vw, 1.2em);
+        color: #333;
+        margin: 8px 0;
+      }
+      .cat-results { margin: 18px 0; text-align: left; }
+      .cat-results h3 { color: var(--cp); font-size: 0.95em; margin-bottom: 10px; }
+      .cat-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+      .cat-lbl { flex: 1.4; font-size: 0.78em; font-weight: 600; color: #333; }
+      .cat-bar-out { flex: 2; background: #eee; border-radius: 4px; height: 11px; }
+      .cat-bar-in { height: 100%; border-radius: 4px; transition: width 0.6s; }
+      .cat-sc { font-weight: 700; color: var(--cp); font-size: 0.82em; min-width: 55px; text-align: right; }
+      .tip-box {
+        background: #eff6ff;
+        border-left: 4px solid var(--cp);
+        border-radius: 6px;
+        padding: 10px 14px;
+        margin: 14px 0 4px;
+        font-size: 0.82em;
+        color: #1e3a5f;
+        text-align: left;
+        line-height: 1.6;
+      }
+      .creditos {
+        text-align: center; font-size: 0.78em; color: #555;
+        padding: 6px 14px 12px; line-height: 1.5;
+      }
+      .creditos a { color: var(--cp); text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <div id="quiz-container">
+      <div class="quiz-progress-header">
+        <div class="progress-text" id="progress-text">Pregunta 1 de 20</div>
+        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+      </div>
+      <div id="question-area"></div>
+      <div class="timer-container" id="timer-container">
+        <div class="timer-text" id="timer-text">&#9201; Tiempo: 40s</div>
+        <div class="timer-bar-container"><div class="timer-bar" id="timer-bar"></div></div>
+      </div>
+      <div class="result-screen hidden" id="result-screen">
+        <h2>&#127919; &iexcl;Cuestionario completado!</h2>
+        <p class="result-score" id="final-score"></p>
+        <p class="result-msg" id="final-msg"></p>
+        <div class="cat-results" id="cat-results"></div>
+        <div class="tip-box" id="tip-box"></div>
+        <div class="btn-container" style="padding-top:14px">
+          <div class="primary-btn" id="restart-btn">&#128260; Nuevas preguntas (reiniciar)</div>
+        </div>
+      </div>
+      <p class="creditos">
+        Creado por Jos&eacute; M. Fern&aacute;ndez, ABE/ASE Math Master Teacher, Harry S. Truman College &mdash; City Colleges of Chicago.<br>
+        Licencia <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.
+      </p>
+    </div>
 
+    <script>
+    (function () {
+      if (window.quizLenguajeAlgIniciado) return;
+      window.quizLenguajeAlgIniciado = true;
+
+      /* ── UTILS ── */
+      function rand(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      const VARS = ['n', 'x', 'y'];
+      function vv() { return VARS[rand(0, VARS.length - 1)]; }
+      const M2 = '\u2212';   /* signo menos */
+      const SQ = '\u00b2';   /* al cuadrado */
+      const CU = '\u00b3';   /* al cubo */
+
+      /* ── OPCIONES DE TEXTO (expresiones o frases) ──
+         Cada generador debe entregar al menos 3 distractores distintos de la
+         respuesta correcta; si no, makeOptsText devolveria menos de 4 opciones. */
+      function makeOptsText(ok, dist) {
+        const seen = new Set([ok]), uniq = [];
+        for (const d of dist) { if (!seen.has(d) && uniq.length < 3) { seen.add(d); uniq.push(d); } }
+        const all = shuffle([ok, ...uniq]);
+        const L = ['a', 'b', 'c', 'd'];
+        return { opciones: all.map((v, i) => ({ valor: L[i], texto: L[i].toUpperCase() + '. ' + v })), correcta: L[all.indexOf(ok)] };
+      }
+
+      /* ── caja con la expresion grande (de expresion a palabras) ── */
+      function cajaExpr(txt) {
+        return '<div class="data-box"><span class="expr-grande">' + txt + '</span></div>';
+      }
+
+      /* ══════════════════════════════════════
+         CATEGORIAS
+         ══════════════════════════════════════ */
+      const CC = {
+        'Suma y resta':     '#1565c0',
+        'Producto y cociente': '#0e7490',
+        'Con par\u00e9ntesis': '#6d28d9',
+        'De expresi\u00f3n a palabras': '#b45309',
+        'Ecuaciones':       '#166534'
+      };
+      const CI = {
+        'Suma y resta':     '+',
+        'Producto y cociente': '\u00d7',
+        'Con par\u00e9ntesis': '( )',
+        'De expresi\u00f3n a palabras': '\u201c\u201d',
+        'Ecuaciones':       '='
+      };
+      const TIPS = {
+        'Suma y resta':
+          'El orden importa con la resta. \u00ab' + '5 menos que un n\u00famero\u00bb es x ' + M2 + ' 5 (no 5 ' + M2 + ' x): lo que va DESPU\u00c9S de \u00abmenos que\u00bb se resta. \u00abAumentado en\u00bb y \u00abla suma de\u00bb dan +.',
+        'Producto y cociente':
+          '\u00abEl doble\u00bb es 2x (un coeficiente), NO x' + SQ + ' (eso es \u00abal cuadrado\u00bb). En la divisi\u00f3n se conserva el orden de la frase: \u00abx dividido entre 5\u00bb es x/5, no 5/x.',
+        'Con par\u00e9ntesis':
+          'Cuando una operaci\u00f3n act\u00faa sobre TODA una suma o diferencia, usa par\u00e9ntesis: \u00abel doble de la suma de x y 3\u00bb es 2(x + 3), no 2x + 3. \u00abLa suma al cuadrado\u00bb (x + 3)' + SQ + ' no es la suma de cuadrados x' + SQ + ' + 3' + SQ + '.',
+        'De expresi\u00f3n a palabras':
+          'Lee la expresi\u00f3n de adentro hacia afuera y fíjate en los par\u00e9ntesis: 2(x + 3) es \u00abel doble de la suma\u00bb, mientras que 2x + 3 es \u00abel doble de un n\u00famero, m\u00e1s 3\u00bb.',
+        'Ecuaciones':
+          'Las palabras \u00abes\u00bb, \u00abes igual a\u00bb, \u00abda\u00bb o \u00abresulta\u00bb marcan el signo =. Traduce por separado lo que va antes y despu\u00e9s del verbo y \u00fanelo con =.'
+      };
+
+      /* ══════════════════════════════════════
+         GENERADORES — 20 preguntas (4 por categoria)
+         ══════════════════════════════════════ */
+      const GEN = [
+
+        /* ───────── SUMA Y RESTA ───────── */
+        /* 1: aumentado en */
+        () => {
+          const x = vv(), N = rand(2, 12);
+          const o = makeOptsText(x + ' + ' + N, [x + ' ' + M2 + ' ' + N, N + ' ' + M2 + ' ' + x, '' + N + x]);
+          return { cat: 'Suma y resta', t: 30,
+            q: 'Un n\u00famero <strong>' + x + '</strong> <strong>aumentado en ' + N + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+        /* 2: N menos que x  (trampa clasica del orden) */
+        () => {
+          const x = vv(), N = rand(2, 12);
+          const o = makeOptsText(x + ' ' + M2 + ' ' + N, [N + ' ' + M2 + ' ' + x, x + ' + ' + N, x + '/' + N]);
+          return { cat: 'Suma y resta', t: 30,
+            q: '<strong>' + N + ' menos que</strong> un n\u00famero <strong>' + x + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+        /* 3: la suma de x y N */
+        () => {
+          const x = vv(), N = rand(2, 12);
+          const o = makeOptsText(x + ' + ' + N, [x + ' ' + M2 + ' ' + N, '' + N + x, x + '/' + N]);
+          return { cat: 'Suma y resta', t: 30,
+            q: 'La <strong>suma</strong> de un n\u00famero <strong>' + x + '</strong> y <strong>' + N + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+        /* 4: x disminuido en N */
+        () => {
+          const x = vv(), N = rand(2, 12);
+          const o = makeOptsText(x + ' ' + M2 + ' ' + N, [N + ' ' + M2 + ' ' + x, x + ' + ' + N, '' + N + x]);
+          return { cat: 'Suma y resta', t: 30,
+            q: 'Un n\u00famero <strong>' + x + '</strong> <strong>disminuido en ' + N + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+
+        /* ───────── PRODUCTO Y COCIENTE ───────── */
+        /* 5: el doble  (trampa doble vs cuadrado) */
+        () => {
+          const x = vv();
+          const o = makeOptsText('2' + x, [x + SQ, x + ' + 2', x + '/2']);
+          return { cat: 'Producto y cociente', t: 30,
+            q: 'El <strong>doble</strong> de un n\u00famero <strong>' + x + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+        /* 6: el triple */
+        () => {
+          const x = vv();
+          const o = makeOptsText('3' + x, [x + CU, x + ' + 3', x + '/3']);
+          return { cat: 'Producto y cociente', t: 30,
+            q: 'El <strong>triple</strong> de un n\u00famero <strong>' + x + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+        /* 7: dividido entre  (trampa del orden) */
+        () => {
+          const x = vv(), N = rand(2, 9);
+          const o = makeOptsText(x + '/' + N, [N + '/' + x, '' + N + x, x + ' ' + M2 + ' ' + N]);
+          return { cat: 'Producto y cociente', t: 30,
+            q: 'Un n\u00famero <strong>' + x + '</strong> <strong>dividido entre ' + N + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+        /* 8: el producto de N y x */
+        () => {
+          const x = vv(), N = rand(2, 9);
+          const o = makeOptsText('' + N + x, [N + ' + ' + x, x + '/' + N, x + ' ' + M2 + ' ' + N]);
+          return { cat: 'Producto y cociente', t: 30,
+            q: 'El <strong>producto</strong> de <strong>' + N + '</strong> y un n\u00famero <strong>' + x + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+
+        /* ───────── CON PARENTESIS ───────── */
+        /* 9: el doble de la suma */
+        () => {
+          const x = vv(), N = rand(2, 9);
+          const o = makeOptsText('2(' + x + ' + ' + N + ')',
+            ['2' + x + ' + ' + N, x + ' + ' + N, '2 + ' + x + ' + ' + N]);
+          return { cat: 'Con par\u00e9ntesis', t: 45,
+            q: 'El <strong>doble de la suma</strong> de un n\u00famero <strong>' + x + '</strong> y <strong>' + N + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+        /* 10: el cuadrado de la suma  (trampa (x+N)^2 vs x^2+N^2) */
+        () => {
+          const x = vv(), N = rand(2, 9);
+          const o = makeOptsText('(' + x + ' + ' + N + ')' + SQ,
+            [x + SQ + ' + ' + N + SQ, x + SQ + ' + ' + N, x + ' + ' + N + SQ]);
+          return { cat: 'Con par\u00e9ntesis', t: 50,
+            q: 'El <strong>cuadrado de la suma</strong> de un n\u00famero <strong>' + x + '</strong> y <strong>' + N + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+        /* 11: N veces la diferencia */
+        () => {
+          const x = vv(), N = rand(2, 6), Mn = rand(1, 9);
+          const o = makeOptsText('' + N + '(' + x + ' ' + M2 + ' ' + Mn + ')',
+            ['' + N + x + ' ' + M2 + ' ' + Mn, '' + N + '(' + Mn + ' ' + M2 + ' ' + x + ')', x + ' ' + M2 + ' ' + Mn]);
+          return { cat: 'Con par\u00e9ntesis', t: 50,
+            q: '<strong>' + N + ' veces la diferencia</strong> de un n\u00famero <strong>' + x + '</strong> y <strong>' + Mn + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+        /* 12: la mitad de la suma */
+        () => {
+          const x = vv(), N = rand(2, 9);
+          const o = makeOptsText('(' + x + ' + ' + N + ')/2',
+            [x + '/2 + ' + N, x + ' + ' + N + '/2', '2(' + x + ' + ' + N + ')']);
+          return { cat: 'Con par\u00e9ntesis', t: 45,
+            q: 'La <strong>mitad de la suma</strong> de un n\u00famero <strong>' + x + '</strong> y <strong>' + N + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+
+        /* ───────── DE EXPRESION A PALABRAS ───────── */
+        /* 13: 2x + N */
+        () => {
+          const x = vv(), N = rand(2, 9);
+          const o = makeOptsText('El doble de un n\u00famero, m\u00e1s ' + N,
+            ['El doble de la suma de un n\u00famero y ' + N,
+             'El doble de un n\u00famero, menos ' + N,
+             'Dos m\u00e1s ' + N + ' veces un n\u00famero']);
+          return { cat: 'De expresi\u00f3n a palabras', t: 40,
+            q: 'La expresi\u00f3n se lee:', data: cajaExpr('2' + x + ' + ' + N),
+            opciones: o.opciones, correcta: o.correcta };
+        },
+        /* 14: x - N */
+        () => {
+          const x = vv(), N = rand(2, 9);
+          const o = makeOptsText('Un n\u00famero disminuido en ' + N,
+            ['' + N + ' disminuido en un n\u00famero',
+             '' + N + ' menos un n\u00famero',
+             'Un n\u00famero menos que ' + N]);
+          return { cat: 'De expresi\u00f3n a palabras', t: 40,
+            q: 'La expresi\u00f3n se lee:', data: cajaExpr(x + ' ' + M2 + ' ' + N),
+            opciones: o.opciones, correcta: o.correcta };
+        },
+        /* 15: x / N  (trampa del orden) */
+        () => {
+          const x = vv(), N = rand(2, 9);
+          const o = makeOptsText('Un n\u00famero dividido entre ' + N,
+            ['' + N + ' dividido entre un n\u00famero',
+             'Un n\u00famero multiplicado por ' + N,
+             'Un n\u00famero menos ' + N]);
+          return { cat: 'De expresi\u00f3n a palabras', t: 40,
+            q: 'La expresi\u00f3n se lee:', data: cajaExpr(x + '/' + N),
+            opciones: o.opciones, correcta: o.correcta };
+        },
+        /* 16: 3(x + N) */
+        () => {
+          const x = vv(), N = rand(2, 9);
+          const o = makeOptsText('El triple de la suma de un n\u00famero y ' + N,
+            ['El triple de un n\u00famero, m\u00e1s ' + N,
+             'Tres veces un n\u00famero, por ' + N,
+             'La suma del triple de un n\u00famero y ' + N]);
+          return { cat: 'De expresi\u00f3n a palabras', t: 45,
+            q: 'La expresi\u00f3n se lee:', data: cajaExpr('3(' + x + ' + ' + N + ')'),
+            opciones: o.opciones, correcta: o.correcta };
+        },
+
+        /* ───────── ECUACIONES ───────── */
+        /* 17: aumentado en N es M */
+        () => {
+          const x = vv(), N = rand(2, 12), Mn = rand(15, 40);
+          const o = makeOptsText(x + ' + ' + N + ' = ' + Mn,
+            [x + ' ' + M2 + ' ' + N + ' = ' + Mn,
+             x + ' + ' + Mn + ' = ' + N,
+             '' + N + x + ' = ' + Mn]);
+          return { cat: 'Ecuaciones', t: 45,
+            q: 'Un n\u00famero <strong>' + x + '</strong> <strong>aumentado en ' + N + '</strong> es <strong>' + Mn + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+        /* 18: el doble menos N es M */
+        () => {
+          const x = vv(), N = rand(2, 9), Mn = rand(10, 30);
+          const o = makeOptsText('2' + x + ' ' + M2 + ' ' + N + ' = ' + Mn,
+            ['2' + x + ' + ' + N + ' = ' + Mn,
+             x + SQ + ' ' + M2 + ' ' + N + ' = ' + Mn,
+             '2(' + x + ' ' + M2 + ' ' + N + ') = ' + Mn]);
+          return { cat: 'Ecuaciones', t: 50,
+            q: 'El <strong>doble</strong> de un n\u00famero <strong>' + x + '</strong>, <strong>menos ' + N + '</strong>, es <strong>' + Mn + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+        /* 19: el triple es N */
+        () => {
+          const x = vv(), N = rand(12, 36);
+          const o = makeOptsText('3' + x + ' = ' + N,
+            [x + CU + ' = ' + N, x + ' + 3 = ' + N, x + '/3 = ' + N]);
+          return { cat: 'Ecuaciones', t: 40,
+            q: 'El <strong>triple</strong> de un n\u00famero <strong>' + x + '</strong> es <strong>' + N + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+        /* 20: suma de un numero y su consecutivo */
+        () => {
+          const x = vv(), N = rand(15, 45);
+          const o = makeOptsText(x + ' + (' + x + ' + 1) = ' + N,
+            ['2' + x + ' = ' + N,
+             x + ' + 1 = ' + N,
+             x + '(' + x + ' + 1) = ' + N]);
+          return { cat: 'Ecuaciones', t: 50,
+            q: 'La <strong>suma</strong> de un n\u00famero <strong>' + x + '</strong> y su <strong>consecutivo</strong> es <strong>' + N + '</strong>:',
+            opciones: o.opciones, correcta: o.correcta };
+        }
+
+      ]; // fin GEN
+
+      /* ── MOTOR ── */
+      const preguntas = shuffle(GEN.map(g => g()));
+      const total = preguntas.length;
+      let actual = 0, puntos = 0, respondida = false, reloj = null, segs = 0;
+      const catPts = {}, catTot = {};
+      preguntas.forEach(p => {
+        catTot[p.cat] = (catTot[p.cat] || 0) + 1;
+        catPts[p.cat] = catPts[p.cat] || 0;
+      });
+
+      const qArea = document.getElementById('question-area');
+      const barP = document.getElementById('progress-bar');
+      const txtP = document.getElementById('progress-text');
+
+      function render(i) {
+        const p = preguntas[i];
+        const col = CC[p.cat] || '#1565c0';
+        const icon = CI[p.cat] || '';
+        const tLbl = p.t <= 40 ? '&#9889; R\u00e1pida' : p.t <= 48 ? '&#128336; Media' : '&#9203; Compleja';
+        const opHtml = p.opciones.map(o =>
+          '<div class="option-item" data-val="' + o.valor + '" onclick="window.__lalgClick(this)">' + o.texto + '</div>'
+        ).join('');
+        const dH = p.data ? p.data : '';
+        const btn = i === total - 1 ? 'Ver resultados' : 'Siguiente &rsaquo;';
+        qArea.innerHTML =
+          '<div class="question-meta">' +
+            '<span class="cat-badge" style="background:' + col + '"><span aria-hidden="true">' + icon + '</span> ' + p.cat + '</span>' +
+            '<span class="time-badge">' + tLbl + ' &middot; ' + p.t + 's</span>' +
+          '</div>' +
+          '<div class="question-header">' + p.q + '</div>' +
+          dH +
+          '<div class="options">' + opHtml + '</div>' +
+          '<div class="btn-container"><div class="primary-btn" onclick="window.__lalgNext()">' + btn + '</div></div>';
+        if (barP) barP.style.width = ((i + 1) / total) * 100 + '%';
+        if (txtP) txtP.textContent = 'Pregunta ' + (i + 1) + ' de ' + total;
+        iniciarReloj(p.t);
+      }
+
+      window.__lalgClick = function (el) {
+        if (respondida) return;
+        pararReloj();
+        respondida = true;
+        const p = preguntas[actual];
+        const elegida = el.getAttribute('data-val');
+        if (elegida === p.correcta) {
+          el.className = 'option-item correct disabled';
+          puntos++;
+          catPts[p.cat]++;
+        } else {
+          el.className = 'option-item incorrect disabled';
+          const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+          if (ok) ok.className = 'option-item correct disabled';
+        }
+        qArea.querySelectorAll('.option-item').forEach(o => {
+          if (!o.className.includes('disabled')) o.className += ' disabled';
+        });
+      };
+
+      window.__lalgNext = function () {
+        pararReloj();
+        actual++;
+        respondida = false;
+        if (actual < total) render(actual);
+        else mostrarRes();
+      };
+
+      function iniciarReloj(s) {
+        pararReloj();
+        segs = s;
+        updReloj();
+        reloj = setInterval(() => { segs--; updReloj(); if (segs <= 0) tAgotado(); }, 1000);
+      }
+      function pararReloj() { if (reloj) { clearInterval(reloj); reloj = null; } }
+      function updReloj() {
+        const p = preguntas[actual] || { t: 40 };
+        const tt = document.getElementById('timer-text');
+        const tb = document.getElementById('timer-bar');
+        const tc = document.getElementById('timer-container');
+        if (tt) tt.textContent = '\u23F1 Tiempo: ' + segs + 's';
+        const pct = (segs / p.t) * 100;
+        if (tb) {
+          tb.style.width = pct + '%';
+          if (pct <= 25) {
+            tb.style.background = '#dc3545';
+            if (tc) tc.className = 'timer-container timer-warning';
+          } else if (pct <= 50) {
+            tb.style.background = 'linear-gradient(90deg,#ffc107,#dc3545)';
+            if (tc) tc.className = 'timer-container';
+          } else {
+            tb.style.background = 'linear-gradient(90deg,#28a745,#ffc107,#dc3545)';
+            if (tc) tc.className = 'timer-container';
+          }
+        }
+      }
+      function tAgotado() {
+        pararReloj();
+        respondida = true;
+        const p = preguntas[actual];
+        const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+        if (ok) ok.className = 'option-item correct disabled';
+        qArea.querySelectorAll('.option-item').forEach(o => {
+          if (!o.className.includes('disabled')) o.className += ' disabled';
+        });
+        const tt = document.getElementById('timer-text');
+        if (tt) tt.textContent = '\u23F0 \u00a1Tiempo agotado!';
+        const tc = document.getElementById('timer-container');
+        if (tc) tc.className = 'timer-container timer-warning';
+      }
+
+      function mostrarRes() {
+        pararReloj();
+        qArea.innerHTML = '';
+        document.getElementById('timer-container').style.display = 'none';
+        const pct = Math.round((puntos / total) * 100);
+        document.getElementById('final-score').textContent = puntos + ' / ' + total + '  (' + pct + '%)';
+        let msg = pct >= 85 ? '\u{1F3C6} \u00a1Excelente! Traduces el lenguaje verbal al algebraico con soltura para el GED.'
+                : pct >= 70 ? '\u{1F44D} \u00a1Muy bien! Repasa las categor\u00edas marcadas en rojo.'
+                : pct >= 50 ? '\u{1F4AA} Buen intento. Pon atenci\u00f3n al ORDEN de la resta y la divisi\u00f3n, y a cu\u00e1ndo usar par\u00e9ntesis.'
+                : '\u{1F4DA} Sigue practicando: subraya el verbo (\u00abes\u00bb = igual) y traduce parte por parte.';
+        document.getElementById('final-msg').textContent = msg;
+
+        let html = '<h3>Desglose por categor\u00eda</h3>';
+        for (const cat of Object.keys(catTot)) {
+          const s = catPts[cat] || 0;
+          const t2 = catTot[cat];
+          const p2 = Math.round((s / t2) * 100);
+          const col = CC[cat] || '#1565c0';
+          html +=
+            '<div class="cat-row">' +
+              '<span class="cat-lbl"><span aria-hidden="true">' + CI[cat] + '</span> ' + cat + '</span>' +
+              '<div class="cat-bar-out"><div class="cat-bar-in" style="width:' + p2 + '%;background:' + col + '"></div></div>' +
+              '<span class="cat-sc">' + s + '/' + t2 + ' \u2713</span>' +
+            '</div>';
+        }
+        document.getElementById('cat-results').innerHTML = html;
+        let minCat = '', minPct = 999;
+        for (const cat of Object.keys(catTot)) {
+          const pp = (catPts[cat] || 0) / catTot[cat];
+          if (pp < minPct) { minPct = pp; minCat = cat; }
+        }
+        document.getElementById('tip-box').innerHTML = minPct < 1
+          ? '<strong>\u{1F4CC} Para mejorar en \u00ab' + minCat + '\u00bb:</strong><br>' + (TIPS[minCat] || '')
+          : '\u2705 \u00a1Sin categor\u00edas con cero! Ahora intenta mejorar tus tiempos.';
+        document.getElementById('result-screen').className = 'result-screen';
+        document.querySelector('.quiz-progress-header').style.display = 'none';
+        document.getElementById('restart-btn').onclick = () => window.location.reload();
+      }
+
+      render(0);
+    })();
+    </script>
+  </body>
+</html>
