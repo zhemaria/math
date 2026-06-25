@@ -1,1 +1,844 @@
+<!doctype html>
+<!--
+  Rapidez en el teorema de Pitagoras - GED
+  Autor: Jose M. Fernandez, ABE/ASE Math Master Teacher, Harry S. Truman College - City Colleges of Chicago.
+  (c) 2026. Licencia: CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+  Resumen: cuestionario interactivo de rapidez para practicar el teorema de Pitagoras
+  (hipotenusa, cateto, verificacion de triangulos rectangulos, diagonales/distancias y
+  aplicaciones), con generacion aleatoria, cronometro y desglose por categoria.
+-->
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago" />
+    <meta name="license" content="CC BY-NC-SA 4.0" />
+    <link rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" />
+    <title>Rapidez en el teorema de Pit&aacute;goras &mdash; GED</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+      :root {
+        --cp: #1565c0;  /* primario: 5.9:1 con blanco (DUA OK) */
+        --ch: #1976d2;  /* hover */
+      }
+      body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 10px;
+        background: linear-gradient(135deg, #0f2a43, #1b3a5c);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 90vh;
+        flex-direction: column;
+        gap: 10px;
+      }
+      #quiz-container {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 0 22px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        width: clamp(300px, 95%, 860px);
+        margin: 0 auto;
+      }
+      .quiz-progress-header {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 16px 22px;
+        border-bottom: 3px solid var(--cp);
+      }
+      .progress-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.95em, 2.5vw, 1.1em);
+        color: var(--cp);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      .progress-container {
+        background: #e0e0e0;
+        height: 12px;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+      }
+      .progress-bar {
+        height: 100%;
+        width: 5%;
+        background: linear-gradient(90deg, var(--cp), var(--ch));
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 6px;
+      }
+      .question-meta {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 20px 0;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .cat-badge {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 700;
+        color: #fff;
+      }
+      .time-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78em;
+        font-weight: 600;
+        background: #e8f4f8;
+        color: #444;
+        border: 1px solid #ccc;
+      }
+      .question-header {
+        padding: 16px 22px 10px;
+        font-size: clamp(0.95em, 2.4vw, 1.15em);
+        font-weight: 700;
+        text-align: center;
+        color: #1a1a2e;
+        line-height: 1.55;
+      }
+      .data-box {
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        border: 2px solid var(--cp);
+        border-radius: 12px;
+        margin: 0 22px 12px;
+        padding: 14px 18px;
+        text-align: center;
+      }
+      .data-box svg { display: block; margin: 0 auto; }
+      .stat-table {
+        width: auto;
+        margin: 0 auto;
+        border-collapse: collapse;
+        font-size: clamp(0.85em, 2.2vw, 0.95em);
+      }
+      .stat-table caption {
+        position: absolute; width: 1px; height: 1px;
+        overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+      }
+      .stat-table th {
+        background: var(--cp);
+        color: #fff;
+        padding: 7px 14px;
+        font-weight: 700;
+      }
+      .stat-table td {
+        padding: 6px 14px;
+        border: 1px solid #ccd;
+        text-align: center;
+        font-weight: 600;
+        color: #1a1a2e;
+      }
+      .stat-table tr:nth-child(even) td { background: #e8f4fb; }
+      .options { padding: 0 18px; }
+      .option-item {
+        display: block;
+        padding: 11px 16px;
+        margin-bottom: 10px;
+        background: #f0f4f8;
+        color: #333;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        font-size: clamp(0.95em, 2.4vw, 1.05em);
+        font-weight: 700;
+        line-height: 1.4;
+        user-select: none;
+      }
+      .option-item:hover:not(.disabled) {
+        background: #dbeafe;
+        border-color: var(--cp);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .option-item.correct {
+        background: #2e7d32 !important;
+        color: #fff !important;
+        border-color: #2e7d32 !important;
+      }
+      .option-item.incorrect {
+        background: #c62828 !important;
+        color: #fff !important;
+        border-color: #c62828 !important;
+      }
+      .option-item.disabled { cursor: not-allowed; opacity: 0.9; }
+      .btn-container { padding: 4px 18px 18px; }
+      .primary-btn {
+        display: block;
+        width: 100%;
+        padding: 13px;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.05em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: var(--cp);
+        text-align: center;
+        user-select: none;
+        box-sizing: border-box;
+      }
+      .primary-btn:hover {
+        background: var(--ch);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      .timer-container {
+        background: linear-gradient(135deg, #fff8e1, #ffecb3);
+        padding: 11px 18px;
+        border-top: 2px solid #f39c12;
+      }
+      .timer-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.88em, 2.2vw, 1em);
+        color: #8a5a00;
+        margin-bottom: 7px;
+      }
+      .timer-bar-container {
+        background: #f0d0d0;
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .timer-bar {
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+        transition: width 0.1s linear;
+        border-radius: 4px;
+      }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+      .timer-warning { animation: pulse 0.9s infinite; }
+      .result-screen { padding: 35px 28px; text-align: center; }
+      .result-screen.hidden { display: none; }
+      .result-screen h2 {
+        color: var(--cp);
+        font-size: clamp(1.4em, 4vw, 1.9em);
+        margin-bottom: 10px;
+      }
+      .result-score {
+        font-size: clamp(2em, 6vw, 2.8em) !important;
+        font-weight: 800;
+        color: var(--cp) !important;
+        margin: 12px 0 !important;
+      }
+      .result-msg {
+        font-size: clamp(1em, 2.8vw, 1.2em);
+        color: #333;
+        margin: 8px 0;
+      }
+      .cat-results { margin: 18px 0; text-align: left; }
+      .cat-results h3 { color: var(--cp); font-size: 0.95em; margin-bottom: 10px; }
+      .cat-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+      .cat-lbl { flex: 1.4; font-size: 0.78em; font-weight: 600; color: #333; }
+      .cat-bar-out { flex: 2; background: #eee; border-radius: 4px; height: 11px; }
+      .cat-bar-in { height: 100%; border-radius: 4px; transition: width 0.6s; }
+      .cat-sc { font-weight: 700; color: var(--cp); font-size: 0.82em; min-width: 55px; text-align: right; }
+      .tip-box {
+        background: #eff6ff;
+        border-left: 4px solid var(--cp);
+        border-radius: 6px;
+        padding: 10px 14px;
+        margin: 14px 0 4px;
+        font-size: 0.82em;
+        color: #1e3a5f;
+        text-align: left;
+        line-height: 1.6;
+      }
+      .creditos {
+        text-align: center; font-size: 0.78em; color: #555;
+        padding: 6px 14px 12px; line-height: 1.5;
+      }
+      .creditos a { color: var(--cp); text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <div id="quiz-container">
+      <div class="quiz-progress-header">
+        <div class="progress-text" id="progress-text">Pregunta 1 de 20</div>
+        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+      </div>
+      <div id="question-area"></div>
+      <div class="timer-container" id="timer-container">
+        <div class="timer-text" id="timer-text">&#9201; Tiempo: 60s</div>
+        <div class="timer-bar-container"><div class="timer-bar" id="timer-bar"></div></div>
+      </div>
+      <div class="result-screen hidden" id="result-screen">
+        <h2>&#127919; &iexcl;Cuestionario completado!</h2>
+        <p class="result-score" id="final-score"></p>
+        <p class="result-msg" id="final-msg"></p>
+        <div class="cat-results" id="cat-results"></div>
+        <div class="tip-box" id="tip-box"></div>
+        <div class="btn-container" style="padding-top:14px">
+          <div class="primary-btn" id="restart-btn">&#128260; Nuevas preguntas (reiniciar)</div>
+        </div>
+      </div>
+      <p class="creditos">
+        Creado por Jos&eacute; M. Fern&aacute;ndez, ABE/ASE Math Master Teacher, Harry S. Truman College &mdash; City Colleges of Chicago.<br>
+        Licencia <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.
+      </p>
+    </div>
 
+    <script>
+    (function () {
+      if (window.quizPitagorasIniciado) return;
+      window.quizPitagorasIniciado = true;
+
+      /* ── MATH UTILS ── */
+      function rand(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      function r2(n) { return Math.round(n * 100) / 100; }
+
+      /* ── OPCIONES NUMÉRICAS ── */
+      function makeOpts(correct, dist) {
+        const cs = String(correct), seen = new Set([cs]), uniq = [];
+        for (const d of dist) {
+          const ds = String(d);
+          if (!seen.has(ds) && uniq.length < 3) { seen.add(ds); uniq.push(ds); }
+        }
+        let ex = (parseFloat(cs) || 0) + 7;
+        while (uniq.length < 3) {
+          const c2 = String(r2(ex)); ex += 5;
+          if (!seen.has(c2)) { seen.add(c2); uniq.push(c2); }
+        }
+        const all = shuffle([cs, ...uniq]);
+        const L = ['a', 'b', 'c', 'd'];
+        return { opciones: all.map((v, i) => ({ valor: L[i], texto: L[i].toUpperCase() + '. ' + v })), correcta: L[all.indexOf(cs)] };
+      }
+
+      /* ── OPCIONES DE TEXTO ── */
+      function makeOptsText(ok, dist) {
+        const seen = new Set([ok]), uniq = [];
+        for (const d of dist) { if (!seen.has(d) && uniq.length < 3) { seen.add(d); uniq.push(d); } }
+        const all = shuffle([ok, ...uniq]);
+        const L = ['a', 'b', 'c', 'd'];
+        return { opciones: all.map((v, i) => ({ valor: L[i], texto: L[i].toUpperCase() + '. ' + v })), correcta: L[all.indexOf(ok)] };
+      }
+
+      /* ── SVG: triángulo rectángulo (ángulo recto abajo-izquierda) ── */
+      function svgTri(aL, bL, cL, unk) {
+        const ca = unk === 'a' ? '#c62828' : '#1e3a8a';
+        const cb = unk === 'b' ? '#c62828' : '#1e3a8a';
+        const cc = unk === 'c' ? '#c62828' : '#1e3a8a';
+        return '<svg viewBox="0 0 250 195" style="width:min(250px,100%)" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tri\u00e1ngulo rect\u00e1ngulo con catetos e hipotenusa">' +
+          '<polygon points="62,160 222,160 62,50" fill="#dbeafe" stroke="#1565c0" stroke-width="2.5" stroke-linejoin="round"/>' +
+          '<polyline points="62,140 82,140 82,160" fill="none" stroke="#1565c0" stroke-width="1.8"/>' +
+          '<text x="44" y="108" text-anchor="middle" font-size="14" font-weight="bold" fill="' + ca + '" transform="rotate(-90 44 108)">' + aL + '</text>' +
+          '<text x="142" y="183" text-anchor="middle" font-size="14" font-weight="bold" fill="' + cb + '">' + bL + '</text>' +
+          '<text x="160" y="95" text-anchor="middle" font-size="14" font-weight="bold" fill="' + cc + '">' + cL + '</text>' +
+          '</svg>';
+      }
+
+      /* ── SVG: rectángulo con diagonal ── */
+      function svgRect(lL, wL, dL) {
+        return '<svg viewBox="0 0 255 175" style="width:min(255px,100%)" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rect\u00e1ngulo con su diagonal">' +
+          '<rect x="44" y="35" width="170" height="100" fill="#dbeafe" stroke="#1565c0" stroke-width="2.5"/>' +
+          '<line x1="44" y1="135" x2="214" y2="35" stroke="#c62828" stroke-width="2.5"/>' +
+          '<text x="129" y="28" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e3a8a">' + lL + '</text>' +
+          '<text x="232" y="85" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e3a8a" transform="rotate(-90 232 85)">' + wL + '</text>' +
+          '<text x="150" y="78" text-anchor="middle" font-size="14" font-weight="bold" fill="#b91c1c">' + dL + '</text>' +
+          '</svg>';
+      }
+
+      /* ── Tabla informativa (Ally: caption + scope) ── */
+      function tbl(headers, rows) {
+        const TH = 'background:var(--cp);color:#fff;padding:7px 14px;font-weight:700';
+        const TD = 'padding:6px 14px;border:1px solid #ccd;text-align:center;font-weight:600;color:#1a1a2e';
+        const TDE = 'padding:6px 14px;border:1px solid #ccd;text-align:center;font-weight:600;color:#1a1a2e;background:#e8f4fb';
+        let h = '<table class="stat-table"><caption>Datos del problema</caption><tr>' +
+          headers.map(hh => '<th scope="col" style="' + TH + '">' + hh + '</th>').join('') + '</tr>';
+        rows.forEach((r, i) => {
+          h += '<tr>' + r.map(c => '<td style="' + (i % 2 === 1 ? TDE : TD) + '">' + c + '</td>').join('') + '</tr>';
+        });
+        return h + '</table>';
+      }
+
+      /* ── TRIPLES PITAGÓRICOS (a, b, c) con c = hipotenusa ── */
+      const TRI = [
+        [3,4,5],[6,8,10],[5,12,13],[9,12,15],[8,15,17],[7,24,25],
+        [10,24,26],[20,21,29],[12,16,20],[9,40,41],[15,20,25],[18,24,30]
+      ];
+      const TRI_CHICO = [[3,4,5],[6,8,10],[5,12,13],[9,12,15],[8,15,17],[12,16,20],[15,20,25]];
+      function pickT(pool) { const p = pool || TRI; return p[rand(0, p.length - 1)]; }
+      const UNID = ['cm', 'm', 'ft'];
+      function unidad() { return UNID[rand(0, UNID.length - 1)]; }
+
+      /* Conjuntos que NO son triángulos rectángulos */
+      const NO_TRI = [[4,5,6],[5,6,8],[7,8,9],[6,7,9],[5,7,8],[8,9,12],[4,6,7],[10,11,13],[6,9,11]];
+
+      /* ── CATEGORÍAS ── */
+      const CC = {
+        'Hipotenusa':  '#1565c0',
+        'Cateto':      '#0e7490',
+        'Verificar':   '#166534',
+        'Diagonal':    '#6d28d9',
+        'Aplicaci\u00f3n': '#b45309'
+      };
+      const CI = {
+        'Hipotenusa':  '\u25b3',
+        'Cateto':      '\u221f',
+        'Verificar':   '\u2713',
+        'Diagonal':    '\u25b1',
+        'Aplicaci\u00f3n': '\u2605'
+      };
+      const TIPS = {
+        'Hipotenusa':
+          'La hipotenusa es el lado m\u00e1s largo y est\u00e1 frente al \u00e1ngulo recto: c = \u221a(a\u00b2 + b\u00b2). Eleva al cuadrado cada cateto, suma y saca la ra\u00edz. No sumes los catetos sin elevarlos al cuadrado.',
+        'Cateto':
+          'Para hallar un cateto se despeja: a = \u221a(c\u00b2 \u2212 b\u00b2). Se RESTA, porque la hipotenusa (c) es siempre la mayor. Si sumas, obtendr\u00e1s un valor demasiado grande.',
+        'Verificar':
+          'Un tri\u00e1ngulo es rect\u00e1ngulo solo si a\u00b2 + b\u00b2 = c\u00b2, donde c es el lado m\u00e1s largo. Identifica primero el lado mayor y compru\u00e9balo como hipotenusa.',
+        'Diagonal':
+          'La diagonal de un rect\u00e1ngulo y la distancia entre dos puntos se hallan igual: d = \u221a(base\u00b2 + altura\u00b2). Los catetos son los lados del rect\u00e1ngulo o las diferencias \u0394x y \u0394y.',
+        'Aplicaci\u00f3n':
+          'Dibuja siempre el tri\u00e1ngulo. La escalera, el cable o la rampa suelen ser la HIPOTENUSA; la pared y el suelo son los catetos. Identifica qu\u00e9 lado te piden antes de calcular.'
+      };
+
+      /* ══════════════════════════════════════
+         GENERADORES — 20 preguntas (4 por categoría)
+      ══════════════════════════════════════ */
+      const GEN = [
+
+        /* ── HIPOTENUSA 1: gráfico ── */
+        () => {
+          const [a, b, c] = pickT(); const u = unidad();
+          const { opciones, correcta } = makeOpts(c, [a + b, a * a + b * b, Math.abs(b - a)]);
+          return {
+            cat: 'Hipotenusa', t: 45,
+            q: 'En el tri\u00e1ngulo rect\u00e1ngulo, &iquest;cu\u00e1nto mide la <strong>hipotenusa</strong> (c)? &nbsp;c = &radic;(a&sup2; + b&sup2;)',
+            data: svgTri('a=' + a + ' ' + u, 'b=' + b + ' ' + u, 'c=?', 'c'),
+            opciones, correcta
+          };
+        },
+
+        /* ── HIPOTENUSA 2: tabla ── */
+        () => {
+          const [a, b, c] = pickT(); const u = unidad();
+          const { opciones, correcta } = makeOpts(c, [a + b, a * a + b * b, c + 2]);
+          return {
+            cat: 'Hipotenusa', t: 45,
+            q: 'Los dos catetos de un tri\u00e1ngulo rect\u00e1ngulo miden los valores de la tabla. &iquest;Cu\u00e1nto mide la <strong>hipotenusa</strong>?',
+            data: tbl(['Lado', 'Medida'], [
+              ['Cateto a', a + ' ' + u],
+              ['Cateto b', b + ' ' + u],
+              ['Hipotenusa c', '?']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── HIPOTENUSA 3: rampa (verbal + gráfico) ── */
+        () => {
+          const [a, b, c] = pickT(TRI_CHICO); const u = 'm';
+          const { opciones, correcta } = makeOpts(c, [a + b, a * a + b * b, Math.abs(b - a)]);
+          return {
+            cat: 'Hipotenusa', t: 50,
+            q: 'Una rampa sube ' + a + ' ' + u + ' de altura y avanza ' + b + ' ' + u + ' en horizontal. &iquest;Cu\u00e1nto mide la <strong>rampa</strong> (la parte inclinada)?',
+            data: svgTri('a=' + a + ' ' + u, 'b=' + b + ' ' + u, 'rampa=?', 'c'),
+            opciones, correcta
+          };
+        },
+
+        /* ── HIPOTENUSA 4: gráfico (triples grandes) ── */
+        () => {
+          const [a, b, c] = pickT(); const u = unidad();
+          const { opciones, correcta } = makeOpts(c, [a + b, Math.round(Math.sqrt(c * c + b * b)), a * a + b * b]);
+          return {
+            cat: 'Hipotenusa', t: 45,
+            q: '&iquest;Cu\u00e1l es la longitud de la <strong>hipotenusa</strong> del tri\u00e1ngulo?',
+            data: svgTri('a=' + a + ' ' + u, 'b=' + b + ' ' + u, 'c=?', 'c'),
+            opciones, correcta
+          };
+        },
+
+        /* ── CATETO 5: gráfico ── */
+        () => {
+          const [a, b, c] = pickT(); const u = unidad();
+          const { opciones, correcta } = makeOpts(a, [Math.round(Math.sqrt(c * c + b * b)), c - b, c + b]);
+          return {
+            cat: 'Cateto', t: 50,
+            q: 'Conoces la hipotenusa (c) y un cateto (b). &iquest;Cu\u00e1nto mide el <strong>otro cateto</strong> (a)? &nbsp;a = &radic;(c&sup2; &minus; b&sup2;)',
+            data: svgTri('a=?', 'b=' + b + ' ' + u, 'c=' + c + ' ' + u, 'a'),
+            opciones, correcta
+          };
+        },
+
+        /* ── CATETO 6: tabla ── */
+        () => {
+          const [a, b, c] = pickT(); const u = unidad();
+          const { opciones, correcta } = makeOpts(b, [Math.round(Math.sqrt(c * c + a * a)), c - a, c + a]);
+          return {
+            cat: 'Cateto', t: 50,
+            q: 'En un tri\u00e1ngulo rect\u00e1ngulo conoces la hipotenusa y un cateto. &iquest;Cu\u00e1nto mide el <strong>cateto que falta</strong>?',
+            data: tbl(['Lado', 'Medida'], [
+              ['Hipotenusa c', c + ' ' + u],
+              ['Cateto a', a + ' ' + u],
+              ['Cateto b', '?']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── CATETO 7: escalera (verbal) ── */
+        () => {
+          const [a, b, c] = pickT(TRI_CHICO);
+          // escalera = hipotenusa (c), base = b, altura en pared = a (desconocida)
+          const { opciones, correcta } = makeOpts(a, [Math.round(Math.sqrt(c * c + b * b)), c - b, c + b]);
+          return {
+            cat: 'Cateto', t: 55,
+            q: 'Una escalera de <strong>' + c + ' m</strong> se apoya en una pared. La base est\u00e1 a <strong>' + b + ' m</strong> del muro. &iquest;A qu\u00e9 <strong>altura</strong> llega la escalera en la pared?',
+            data: svgTri('altura=?', 'base=' + b + ' m', 'escalera=' + c + ' m', 'a'),
+            opciones, correcta
+          };
+        },
+
+        /* ── CATETO 8: gráfico variante ── */
+        () => {
+          const [a, b, c] = pickT(); const u = unidad();
+          const { opciones, correcta } = makeOpts(a, [c - b, Math.round(Math.sqrt(c * c + b * b)), c + b]);
+          return {
+            cat: 'Cateto', t: 50,
+            q: 'Calcula la longitud del <strong>cateto desconocido</strong> (a).',
+            data: svgTri('a=?', 'b=' + b + ' ' + u, 'c=' + c + ' ' + u, 'a'),
+            opciones, correcta
+          };
+        },
+
+        /* ── VERIFICAR 9: ¿cuál conjunto es rectángulo? ── */
+        () => {
+          const [a, b, c] = pickT();
+          const okStr = a + ', ' + b + ', ' + c + ' cm';
+          const fakes = shuffle(NO_TRI).slice(0, 3).map(s => s[0] + ', ' + s[1] + ', ' + s[2] + ' cm');
+          const { opciones, correcta } = makeOptsText(okStr, fakes);
+          return {
+            cat: 'Verificar', t: 45,
+            q: '&iquest;Cu\u00e1l de estos conjuntos de lados forma un <strong>tri\u00e1ngulo rect\u00e1ngulo</strong>? (Cumple a&sup2; + b&sup2; = c&sup2;)',
+            data: null, opciones, correcta
+          };
+        },
+
+        /* ── VERIFICAR 10: ¿cuál conjunto es rectángulo? (variante) ── */
+        () => {
+          const [a, b, c] = pickT();
+          const okStr = a + ', ' + b + ', ' + c;
+          const fakes = shuffle(NO_TRI).slice(0, 3).map(s => s[0] + ', ' + s[1] + ', ' + s[2]);
+          const { opciones, correcta } = makeOptsText(okStr, fakes);
+          return {
+            cat: 'Verificar', t: 45,
+            q: 'Tres de estos conjuntos NO forman un tri\u00e1ngulo rect\u00e1ngulo. &iquest;Cu\u00e1l <strong>S\u00cd</strong> lo forma?',
+            data: null, opciones, correcta
+          };
+        },
+
+        /* ── VERIFICAR 11: condición ── */
+        () => {
+          const ok = 'a\u00b2 + b\u00b2 = c\u00b2';
+          const { opciones, correcta } = makeOptsText(ok, ['a + b = c', 'a\u00b2 + b\u00b2 = c', 'a\u00b2 \u2212 b\u00b2 = c\u00b2']);
+          return {
+            cat: 'Verificar', t: 40,
+            q: 'Un tri\u00e1ngulo tiene lados a, b y c, donde c es el <strong>mayor</strong>. Es rect\u00e1ngulo solo cuando se cumple:',
+            data: null, opciones, correcta
+          };
+        },
+
+        /* ── VERIFICAR 12: clasificar (no rectángulo) ── */
+        () => {
+          const s = NO_TRI[rand(0, NO_TRI.length - 1)];
+          const a = s[0], b = s[1], c = s[2];
+          const ok = 'No, porque ' + a + '\u00b2 + ' + b + '\u00b2 \u2260 ' + c + '\u00b2';
+          const { opciones, correcta } = makeOptsText(ok, [
+            'S\u00ed, porque ' + a + '\u00b2 + ' + b + '\u00b2 = ' + c + '\u00b2',
+            'S\u00ed, siempre es rect\u00e1ngulo',
+            'No se puede determinar'
+          ]);
+          return {
+            cat: 'Verificar', t: 50,
+            q: 'Un tri\u00e1ngulo tiene lados <strong>' + a + ', ' + b + ' y ' + c + '</strong>. &iquest;Es un tri\u00e1ngulo rect\u00e1ngulo?',
+            data: tbl(['C\u00e1lculo', 'Resultado'], [
+              [a + '\u00b2 + ' + b + '\u00b2', (a * a + b * b)],
+              [c + '\u00b2', (c * c)]
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── DIAGONAL 13: rectángulo gráfico ── */
+        () => {
+          const [a, b, c] = pickT(); const u = unidad();
+          const { opciones, correcta } = makeOpts(c, [a + b, a * a + b * b, Math.abs(b - a)]);
+          return {
+            cat: 'Diagonal', t: 50,
+            q: '&iquest;Cu\u00e1nto mide la <strong>diagonal</strong> (d) del rect\u00e1ngulo? &nbsp;d = &radic;(largo&sup2; + ancho&sup2;)',
+            data: svgRect('largo=' + b + ' ' + u, 'ancho=' + a + ' ' + u, 'd=?'),
+            opciones, correcta
+          };
+        },
+
+        /* ── DIAGONAL 14: rectángulo tabla ── */
+        () => {
+          const [a, b, c] = pickT(); const u = unidad();
+          const { opciones, correcta } = makeOpts(c, [a + b, a * a + b * b, c + 3]);
+          return {
+            cat: 'Diagonal', t: 50,
+            q: 'Un rect\u00e1ngulo mide ' + b + ' ' + u + ' de largo y ' + a + ' ' + u + ' de ancho. &iquest;Cu\u00e1nto mide su <strong>diagonal</strong>?',
+            data: tbl(['Dato', 'Valor'], [
+              ['Largo', b + ' ' + u],
+              ['Ancho', a + ' ' + u],
+              ['Diagonal', '?']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── DIAGONAL 15: distancia entre dos puntos ── */
+        () => {
+          const [dx, dy, c] = pickT(TRI_CHICO);
+          const x1 = rand(0, 4), y1 = rand(0, 4);
+          const x2 = x1 + dx, y2 = y1 + dy;
+          const { opciones, correcta } = makeOpts(c, [dx + dy, dx * dx + dy * dy, Math.abs(dy - dx)]);
+          return {
+            cat: 'Diagonal', t: 55,
+            q: '&iquest;Cu\u00e1l es la <strong>distancia</strong> entre los puntos A y B del plano? &nbsp;d = &radic;(&Delta;x&sup2; + &Delta;y&sup2;)',
+            data: tbl(['Punto', 'Coordenadas'], [
+              ['A', '(' + x1 + ', ' + y1 + ')'],
+              ['B', '(' + x2 + ', ' + y2 + ')'],
+              ['&Delta;x , &Delta;y', dx + ' , ' + dy]
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── DIAGONAL 16: pantalla / TV ── */
+        () => {
+          const [a, b, c] = pickT(TRI_CHICO);
+          const { opciones, correcta } = makeOpts(c, [a + b, a * a + b * b, Math.abs(b - a)]);
+          return {
+            cat: 'Diagonal', t: 50,
+            q: 'Una pantalla rectangular mide <strong>' + b + ' pulg</strong> de ancho y <strong>' + a + ' pulg</strong> de alto. El tama\u00f1o de una pantalla es su <strong>diagonal</strong>. &iquest;De cu\u00e1ntas pulgadas es?',
+            data: svgRect('ancho=' + b + '"', 'alto=' + a + '"', 'd=?'),
+            opciones, correcta
+          };
+        },
+
+        /* ── APLICACIÓN 17: poste y cable ── */
+        () => {
+          const [a, b, c] = pickT(TRI_CHICO);
+          const { opciones, correcta } = makeOpts(c, [a + b, a * a + b * b, Math.abs(b - a)]);
+          return {
+            cat: 'Aplicaci\u00f3n', t: 60,
+            q: 'Un cable sujeta un poste. Va desde lo alto del poste (<strong>' + a + ' m</strong>) hasta un anclaje en el suelo a <strong>' + b + ' m</strong> de la base. &iquest;Cu\u00e1nto mide el <strong>cable</strong>?',
+            data: svgTri('poste=' + a + ' m', 'suelo=' + b + ' m', 'cable=?', 'c'),
+            opciones, correcta
+          };
+        },
+
+        /* ── APLICACIÓN 18: desplazamiento (norte/este) ── */
+        () => {
+          const [a, b, c] = pickT(TRI_CHICO);
+          const { opciones, correcta } = makeOpts(c, [a + b, a * a + b * b, Math.abs(b - a)]);
+          return {
+            cat: 'Aplicaci\u00f3n', t: 60,
+            q: 'Una persona camina <strong>' + a + ' km</strong> hacia el norte y luego <strong>' + b + ' km</strong> hacia el este. &iquest;A qu\u00e9 <strong>distancia en l\u00ednea recta</strong> est\u00e1 de su punto de partida?',
+            data: tbl(['Tramo', 'Distancia'], [
+              ['Hacia el norte', a + ' km'],
+              ['Hacia el este', b + ' km'],
+              ['L\u00ednea recta', '?']
+            ]),
+            opciones, correcta
+          };
+        },
+
+        /* ── APLICACIÓN 19: altura con escalera (cateto) ── */
+        () => {
+          const [a, b, c] = pickT(TRI_CHICO);
+          const { opciones, correcta } = makeOpts(b, [Math.round(Math.sqrt(c * c + a * a)), c - a, c + a]);
+          return {
+            cat: 'Aplicaci\u00f3n', t: 60,
+            q: 'Un tobog\u00e1n de <strong>' + c + ' m</strong> conecta una plataforma de <strong>' + a + ' m</strong> de alto con el suelo. &iquest;Qu\u00e9 <strong>distancia horizontal</strong> cubre el tobog\u00e1n?',
+            data: svgTri('alto=' + a + ' m', 'horizontal=?', 'tobog\u00e1n=' + c + ' m', 'b'),
+            opciones, correcta
+          };
+        },
+
+        /* ── APLICACIÓN 20: campo / diagonal de béisbol ── */
+        () => {
+          const [a, b, c] = pickT(TRI_CHICO);
+          const { opciones, correcta } = makeOpts(c, [a + b, a * a + b * b, Math.abs(b - a)]);
+          return {
+            cat: 'Aplicaci\u00f3n', t: 60,
+            q: 'Un parque rectangular mide <strong>' + b + ' m</strong> por <strong>' + a + ' m</strong>. Para cruzarlo en diagonal, &iquest;cu\u00e1ntos metros se recorren?',
+            data: svgRect('largo=' + b + ' m', 'ancho=' + a + ' m', 'd=?'),
+            opciones, correcta
+          };
+        }
+
+      ]; // fin GEN
+
+      /* ── MOTOR ── */
+      const preguntas = shuffle(GEN.map(g => g()));
+      const total = preguntas.length;
+      let actual = 0, puntos = 0, respondida = false, reloj = null, segs = 0;
+      const catPts = {}, catTot = {};
+      preguntas.forEach(p => {
+        catTot[p.cat] = (catTot[p.cat] || 0) + 1;
+        catPts[p.cat] = catPts[p.cat] || 0;
+      });
+
+      const qArea = document.getElementById('question-area');
+      const barP = document.getElementById('progress-bar');
+      const txtP = document.getElementById('progress-text');
+
+      function render(i) {
+        const p = preguntas[i];
+        const col = CC[p.cat] || '#1565c0';
+        const icon = CI[p.cat] || '';
+        const tLbl = p.t <= 45 ? '&#9889; R\u00e1pida' : p.t <= 55 ? '&#128336; Media' : '&#9203; Compleja';
+        const opHtml = p.opciones.map(o =>
+          '<div class="option-item" data-val="' + o.valor + '" onclick="window.__pitClick(this)">' + o.texto + '</div>'
+        ).join('');
+        const dH = p.data ? '<div class="data-box">' + p.data + '</div>' : '';
+        const btn = i === total - 1 ? 'Ver resultados' : 'Siguiente &rsaquo;';
+        qArea.innerHTML =
+          '<div class="question-meta">' +
+            '<span class="cat-badge" style="background:' + col + '"><span aria-hidden="true">' + icon + '</span> ' + p.cat + '</span>' +
+            '<span class="time-badge">' + tLbl + ' &middot; ' + p.t + 's</span>' +
+          '</div>' +
+          '<div class="question-header">' + p.q + '</div>' +
+          dH +
+          '<div class="options">' + opHtml + '</div>' +
+          '<div class="btn-container"><div class="primary-btn" onclick="window.__pitNext()">' + btn + '</div></div>';
+        if (barP) barP.style.width = ((i + 1) / total) * 100 + '%';
+        if (txtP) txtP.textContent = 'Pregunta ' + (i + 1) + ' de ' + total;
+        iniciarReloj(p.t);
+      }
+
+      window.__pitClick = function (el) {
+        if (respondida) return;
+        pararReloj();
+        respondida = true;
+        const p = preguntas[actual];
+        const elegida = el.getAttribute('data-val');
+        if (elegida === p.correcta) {
+          el.className = 'option-item correct disabled';
+          puntos++;
+          catPts[p.cat]++;
+        } else {
+          el.className = 'option-item incorrect disabled';
+          const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+          if (ok) ok.className = 'option-item correct disabled';
+        }
+        qArea.querySelectorAll('.option-item').forEach(o => {
+          if (!o.className.includes('disabled')) o.className += ' disabled';
+        });
+      };
+
+      window.__pitNext = function () {
+        pararReloj();
+        actual++;
+        respondida = false;
+        if (actual < total) render(actual);
+        else mostrarRes();
+      };
+
+      function iniciarReloj(s) {
+        pararReloj();
+        segs = s;
+        updReloj();
+        reloj = setInterval(() => { segs--; updReloj(); if (segs <= 0) tAgotado(); }, 1000);
+      }
+      function pararReloj() { if (reloj) { clearInterval(reloj); reloj = null; } }
+      function updReloj() {
+        const p = preguntas[actual] || { t: 60 };
+        const tt = document.getElementById('timer-text');
+        const tb = document.getElementById('timer-bar');
+        const tc = document.getElementById('timer-container');
+        if (tt) tt.textContent = '\u23F1 Tiempo: ' + segs + 's';
+        const pct = (segs / p.t) * 100;
+        if (tb) {
+          tb.style.width = pct + '%';
+          if (pct <= 25) {
+            tb.style.background = '#dc3545';
+            if (tc) tc.className = 'timer-container timer-warning';
+          } else if (pct <= 50) {
+            tb.style.background = 'linear-gradient(90deg,#ffc107,#dc3545)';
+            if (tc) tc.className = 'timer-container';
+          } else {
+            tb.style.background = 'linear-gradient(90deg,#28a745,#ffc107,#dc3545)';
+            if (tc) tc.className = 'timer-container';
+          }
+        }
+      }
+      function tAgotado() {
+        pararReloj();
+        respondida = true;
+        const p = preguntas[actual];
+        const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+        if (ok) ok.className = 'option-item correct disabled';
+        qArea.querySelectorAll('.option-item').forEach(o => {
+          if (!o.className.includes('disabled')) o.className += ' disabled';
+        });
+        const tt = document.getElementById('timer-text');
+        if (tt) tt.textContent = '\u23F0 \u00a1Tiempo agotado!';
+        const tc = document.getElementById('timer-container');
+        if (tc) tc.className = 'timer-container timer-warning';
+      }
+
+      function mostrarRes() {
+        pararReloj();
+        qArea.innerHTML = '';
+        document.getElementById('timer-container').style.display = 'none';
+        const pct = Math.round((puntos / total) * 100);
+        document.getElementById('final-score').textContent = puntos + ' / ' + total + '  (' + pct + '%)';
+        let msg = pct >= 85 ? '\u{1F3C6} \u00a1Excelente! Dominas el teorema de Pit\u00e1goras para el GED.'
+                : pct >= 70 ? '\u{1F44D} \u00a1Muy bien! Repasa las categor\u00edas marcadas en rojo.'
+                : pct >= 50 ? '\u{1F4AA} Buen intento. Refuerza la diferencia entre hallar la hipotenusa y hallar un cateto.'
+                : '\u{1F4DA} Empieza por la f\u00f3rmula base: c\u00b2 = a\u00b2 + b\u00b2. Practica primero la hipotenusa.';
+        document.getElementById('final-msg').textContent = msg;
+        let html = '<h3>Resultados por categor\u00eda:</h3>';
+        for (const cat of Object.keys(catTot)) {
+          const s = catPts[cat] || 0;
+          const t2 = catTot[cat];
+          const p2 = Math.round((s / t2) * 100);
+          const col = CC[cat] || '#1565c0';
+          html +=
+            '<div class="cat-row">' +
+              '<span class="cat-lbl"><span aria-hidden="true">' + CI[cat] + '</span> ' + cat + '</span>' +
+              '<div class="cat-bar-out"><div class="cat-bar-in" style="width:' + p2 + '%;background:' + col + '"></div></div>' +
+              '<span class="cat-sc">' + s + '/' + t2 + ' \u2713</span>' +
+            '</div>';
+        }
+        document.getElementById('cat-results').innerHTML = html;
+        let minCat = '', minPct = 999;
+        for (const cat of Object.keys(catTot)) {
+          const pp = (catPts[cat] || 0) / catTot[cat];
+          if (pp < minPct) { minPct = pp; minCat = cat; }
+        }
+        document.getElementById('tip-box').innerHTML = minPct < 1
+          ? '<strong>\u{1F4CC} Para mejorar en \u00ab' + minCat + '\u00bb:</strong><br>' + (TIPS[minCat] || '')
+          : '\u2705 \u00a1Sin categor\u00edas con cero! Ahora intenta mejorar tus tiempos.';
+        document.getElementById('result-screen').className = 'result-screen';
+        document.querySelector('.quiz-progress-header').style.display = 'none';
+        document.getElementById('restart-btn').onclick = () => window.location.reload();
+      }
+
+      render(0);
+    })();
+    </script>
+  </body>
+</html>
