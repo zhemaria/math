@@ -1,1 +1,958 @@
+<!DOCTYPE html>
+<!--
+  Denominador común: entender y practicar
+  © José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago
+  Licencia: CC BY-NC-SA 4.0 — https://creativecommons.org/licenses/by-nc-sa/4.0/
+-->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago">
+  <meta name="license" content="CC BY-NC-SA 4.0">
+  <meta name="description" content="Interactivo para comprender y practicar el denominador común y el mínimo común denominador.">
+  <link rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+  <title>Denominador común: entender y practicar</title>
+  <style>
+    :root {
+      --azul-profundo: #1e3a8a;
+      --azul: #1d4ed8;
+      --azul-claro: #dbe4fb;
+      --teal: #0f766e;
+      --teal-claro: #d3efe9;
+      --tinta: #1f2937;
+      --apagado: #555555;
+      --exito: #166534;
+      --exito-fondo: #dcfce7;
+      --error: #b91c1c;
+      --error-fondo: #fee2e2;
+      --papel: #ffffff;
+      --lienzo: #f4f6fb;
+      --borde: #cbd5e1;
+      --ambar: #5C3900;
+      --ambar-fondo: #fef3e2;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--tinta);
+      background: var(--lienzo);
+      line-height: 1.6;
+      font-size: 17px;
+    }
+
+    .contenedor { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+
+    header {
+      background: var(--azul-profundo);
+      color: #fff;
+      padding: 40px 20px 34px;
+      text-align: center;
+    }
+    header h1 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 2rem;
+      margin: 0 0 8px;
+      line-height: 1.25;
+      font-weight: 700;
+    }
+    header p { margin: 0; color: #e2e8f0; font-size: 1.05rem; }
+
+    main { padding: 34px 0 60px; }
+
+    section {
+      background: var(--papel);
+      border: 1px solid var(--borde);
+      border-radius: 14px;
+      padding: 26px 26px 30px;
+      margin-bottom: 26px;
+    }
+
+    h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--azul-profundo);
+      font-size: 1.5rem;
+      margin: 0 0 4px;
+      padding-bottom: 10px;
+      border-bottom: 3px solid var(--azul-claro);
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--azul);
+      margin-bottom: 6px;
+    }
+    h3 { font-size: 1.15rem; color: var(--azul-profundo); margin: 26px 0 10px; }
+
+    p, li { color: var(--tinta); }
+    .apagado { color: var(--apagado); }
+
+    .caja-objetivos {
+      background: var(--azul-claro);
+      border-left: 6px solid var(--azul);
+      border-radius: 8px;
+      padding: 18px 22px;
+      margin: 0 0 26px;
+    }
+    .caja-objetivos h2 {
+      border: none;
+      padding: 0;
+      margin: 0 0 8px;
+      font-size: 1.2rem;
+    }
+    .caja-objetivos ul { margin: 0; padding-left: 22px; }
+    .caja-objetivos li { margin-bottom: 4px; }
+
+    /* Fracciones tipográficas */
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      margin: 0 3px;
+      line-height: 1.05;
+      font-weight: 700;
+    }
+    .frac .num { padding: 0 6px; }
+    .frac .den { padding: 2px 6px 0; border-top: 2px solid currentColor; }
+
+    /* Barras de fracción */
+    .barra-envoltorio { margin: 14px 0; }
+    .barra-titulo { font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .barra {
+      display: flex;
+      width: 100%;
+      max-width: 560px;
+      height: 46px;
+      border: 2px solid var(--tinta);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .segmento { flex: 1 1 0; border-right: 1px solid rgba(0,0,0,0.28); }
+    .segmento:last-child { border-right: none; }
+    .segmento.gruesa { border-right: 3px solid var(--tinta); }
+    .segmento.lleno-a { background: var(--azul); }
+    .segmento.lleno-b { background: var(--teal); }
+    .segmento.vacio { background: #eef2f9; }
+
+    /* Controles */
+    .stepper { display: inline-flex; align-items: center; gap: 6px; }
+    .stepper .valor {
+      min-width: 44px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.15rem;
+      background: var(--lienzo);
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      padding: 6px 4px;
+    }
+    button, .boton {
+      font-family: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      background: var(--azul);
+      color: #fff;
+      font-weight: 700;
+      transition: background 0.15s;
+    }
+    button:hover, .boton:hover { background: var(--azul-profundo); }
+    button.secundario { background: #e2e8f0; color: var(--tinta); }
+    button.secundario:hover { background: #cbd5e1; }
+    button.mini {
+      background: var(--azul-profundo);
+      width: 38px; height: 38px;
+      padding: 0; font-size: 1.3rem; line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    button:focus-visible, .opcion:focus-visible, .valor:focus-visible {
+      outline: 3px solid var(--ambar);
+      outline-offset: 2px;
+    }
+
+    .controles-fila {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 26px;
+      align-items: flex-end;
+      margin-bottom: 8px;
+    }
+    .control-bloque { display: flex; flex-direction: column; gap: 6px; }
+    .control-etiqueta { font-weight: 700; font-size: 0.95rem; }
+
+    .acciones { margin: 18px 0 4px; display: flex; flex-wrap: wrap; gap: 12px; }
+
+    /* Paneles de resultado */
+    .panel {
+      background: var(--lienzo);
+      border: 1px dashed var(--borde);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-top: 16px;
+    }
+    .panel[hidden] { display: none; }
+
+    .multiplos { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 4px; }
+    .chip {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #eef2f9;
+      border: 1px solid var(--borde);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+    .chip.a { background: var(--azul-claro); }
+    .chip.b { background: #d3efe9; }
+    .chip.comun {
+      background: var(--exito-fondo);
+      border: 2px solid var(--exito);
+      color: var(--exito);
+    }
+
+    .resaltado { color: var(--azul-profundo); font-weight: 700; }
+    .paso { margin: 10px 0; }
+    .paso .n {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--azul-profundo); color: #fff;
+      font-size: 0.85rem; font-weight: 700; margin-right: 8px;
+      flex: none;
+    }
+
+    /* Entradas de práctica */
+    input[type="number"] {
+      font-family: inherit;
+      font-size: 1.1rem;
+      font-weight: 700;
+      width: 74px;
+      padding: 8px;
+      border: 2px solid var(--borde);
+      border-radius: 8px;
+      text-align: center;
+    }
+    input[type="number"]:focus-visible { outline: 3px solid var(--ambar); outline-offset: 1px; border-color: var(--azul); }
+    .entrada-frac {
+      display: inline-flex; flex-direction: column; align-items: center; gap: 4px;
+      vertical-align: middle; margin: 4px 6px;
+    }
+    .entrada-frac .barra-div { width: 74px; height: 2px; background: var(--tinta); }
+
+    .retro { margin-top: 14px; padding: 14px 18px; border-radius: 10px; font-weight: 600; }
+    .retro.ok { background: var(--exito-fondo); border-left: 6px solid var(--exito); color: var(--exito); }
+    .retro.mal { background: var(--error-fondo); border-left: 6px solid var(--error); color: var(--error); }
+    .retro.pista { background: var(--ambar-fondo); border-left: 6px solid var(--ambar); color: var(--ambar); }
+    .retro[hidden] { display: none; }
+
+    .enunciado { font-size: 1.3rem; margin: 6px 0 16px; }
+    .marcador { font-weight: 700; color: var(--azul-profundo); }
+
+    /* Quiz */
+    .pregunta { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--azul-claro); }
+    .pregunta:last-of-type { border-bottom: none; }
+    .pregunta .texto { font-weight: 700; margin-bottom: 12px; font-size: 1.1rem; }
+    .opciones { display: flex; flex-direction: column; gap: 10px; }
+    .opcion {
+      border: 2px solid var(--borde);
+      border-radius: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      background: #fff;
+      font-weight: 600;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .opcion:hover { border-color: var(--azul); background: var(--lienzo); }
+    .opcion[aria-pressed="true"] { border-color: var(--azul); background: var(--azul-claro); }
+    .opcion.correcta { border-color: var(--exito); background: var(--exito-fondo); color: var(--exito); }
+    .opcion.incorrecta { border-color: var(--error); background: var(--error-fondo); color: var(--error); }
+
+    .marcador-quiz {
+      font-size: 1.25rem; font-weight: 700; text-align: center;
+      padding: 16px; border-radius: 10px; margin-top: 8px;
+      background: var(--azul-claro); color: var(--azul-profundo);
+    }
+
+    footer {
+      background: var(--azul-profundo);
+      color: #e2e8f0;
+      text-align: center;
+      padding: 26px 20px;
+      font-size: 0.9rem;
+    }
+    footer a { color: #fff; }
+
+    .visualmente-oculto {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); border: 0;
+    }
+
+    @media (max-width: 560px) {
+      header h1 { font-size: 1.55rem; }
+      section { padding: 20px 18px 24px; }
+      .barra { height: 40px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="contenedor">
+      <h1>Denominador común: entender y practicar</h1>
+      <p>Por qué lo necesitamos, cómo hallarlo y cómo usarlo para sumar y restar fracciones</p>
+    </div>
+  </header>
+
+  <main class="contenedor">
+
+    <div class="caja-objetivos">
+      <h2>¿Qué logrará en esta actividad?</h2>
+      <ul>
+        <li>Comprenderá <strong>por qué</strong> dos fracciones deben tener el mismo denominador para sumarse o restarse.</li>
+        <li>Aprenderá a hallar el <strong>mínimo común denominador</strong> con la lista de múltiplos.</li>
+        <li>Practicará la conversión de fracciones a un denominador común, paso a paso.</li>
+        <li>Comprobará lo aprendido con un breve cuestionario de repaso.</li>
+      </ul>
+    </div>
+
+    <!-- ============ SECCIÓN 1: CONCEPTO ============ -->
+    <section aria-labelledby="s1-titulo">
+      <span class="eyebrow">Idea clave</span>
+      <h2 id="s1-titulo">1. ¿Por qué necesitamos un denominador común?</h2>
+      <p>
+        Solo podemos sumar o restar cosas que tienen <strong>el mismo tamaño</strong>. Con las fracciones ocurre igual:
+        el denominador indica en cuántas partes iguales se dividió el entero. Si los denominadores son distintos,
+        los pedazos <strong>no son del mismo tamaño</strong> y todavía no se pueden juntar.
+      </p>
+      <p>
+        Buscar un <strong>denominador común</strong> es <em>volver a cortar</em> las dos fracciones para que sus pedazos
+        queden del mismo tamaño. La cantidad sombreada no cambia; solo cambia en cuántas partes está dividida.
+        Mueva los controles y observe.
+      </p>
+
+      <div class="controles-fila">
+        <div class="control-bloque">
+          <span class="control-etiqueta" id="lbl-f1">Primera fracción</span>
+          <div aria-labelledby="lbl-f1" style="display:flex; gap:18px; flex-wrap:wrap;">
+            <div class="stepper" role="group" aria-label="Numerador de la primera fracción">
+              <button type="button" class="mini" data-step="num1" data-dir="-1" aria-label="Disminuir numerador de la primera fracción">−</button>
+              <span class="valor" id="v-num1">1</span>
+              <button type="button" class="mini" data-step="num1" data-dir="1" aria-label="Aumentar numerador de la primera fracción">+</button>
+              <span class="apagado" aria-hidden="true">/ numerador</span>
+            </div>
+            <div class="stepper" role="group" aria-label="Denominador de la primera fracción">
+              <button type="button" class="mini" data-step="den1" data-dir="-1" aria-label="Disminuir denominador de la primera fracción">−</button>
+              <span class="valor" id="v-den1">2</span>
+              <button type="button" class="mini" data-step="den1" data-dir="1" aria-label="Aumentar denominador de la primera fracción">+</button>
+              <span class="apagado" aria-hidden="true">/ denominador</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controles-fila">
+        <div class="control-bloque">
+          <span class="control-etiqueta" id="lbl-f2">Segunda fracción</span>
+          <div aria-labelledby="lbl-f2" style="display:flex; gap:18px; flex-wrap:wrap;">
+            <div class="stepper" role="group" aria-label="Numerador de la segunda fracción">
+              <button type="button" class="mini" data-step="num2" data-dir="-1" aria-label="Disminuir numerador de la segunda fracción">−</button>
+              <span class="valor" id="v-num2">1</span>
+              <button type="button" class="mini" data-step="num2" data-dir="1" aria-label="Aumentar numerador de la segunda fracción">+</button>
+              <span class="apagado" aria-hidden="true">/ numerador</span>
+            </div>
+            <div class="stepper" role="group" aria-label="Denominador de la segunda fracción">
+              <button type="button" class="mini" data-step="den2" data-dir="-1" aria-label="Disminuir denominador de la segunda fracción">−</button>
+              <span class="valor" id="v-den2">3</span>
+              <button type="button" class="mini" data-step="den2" data-dir="1" aria-label="Aumentar denominador de la segunda fracción">+</button>
+              <span class="apagado" aria-hidden="true">/ denominador</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button type="button" id="btn-igualar">Igualar los pedazos</button>
+        <button type="button" class="secundario" id="btn-original">Ver por separado</button>
+      </div>
+
+      <div id="visual-original">
+        <div class="barra-envoltorio">
+          <div class="barra-titulo"><span id="etq-barra1" class="resaltado">Primera fracción</span></div>
+          <div class="barra" id="barra1" role="img" aria-label=""></div>
+        </div>
+        <div class="barra-envoltorio">
+          <div class="barra-titulo"><span id="etq-barra2" style="color:var(--teal); font-weight:700;">Segunda fracción</span></div>
+          <div class="barra" id="barra2" role="img" aria-label=""></div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-igualado" hidden>
+        <p id="texto-igualado"></p>
+        <div class="barra-envoltorio">
+          <div class="barra-titulo"><span class="resaltado" id="etq-ig1"></span></div>
+          <div class="barra" id="barra-ig1" role="img" aria-label=""></div>
+        </div>
+        <div class="barra-envoltorio">
+          <div class="barra-titulo"><span style="color:var(--teal); font-weight:700;" id="etq-ig2"></span></div>
+          <div class="barra" id="barra-ig2" role="img" aria-label=""></div>
+        </div>
+        <p class="apagado" style="margin-bottom:0;">
+          Los pedazos ahora son del mismo tamaño. Las líneas más gruesas muestran cómo quedaban divididas
+          las fracciones antes de volver a cortarlas.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ SECCIÓN 2: HALLAR EL MCD ============ -->
+    <section aria-labelledby="s2-titulo">
+      <span class="eyebrow">Procedimiento</span>
+      <h2 id="s2-titulo">2. Cómo hallar el mínimo común denominador</h2>
+      <p>
+        El <strong>mínimo común denominador (m. c. d.)</strong> es el número más pequeño que sirve como denominador
+        para ambas fracciones. Es el <strong>mínimo común múltiplo</strong> de los dos denominadores. Una forma segura
+        de hallarlo es escribir los múltiplos de cada denominador y buscar el <strong>primero que aparece en las dos listas</strong>.
+      </p>
+
+      <div class="controles-fila">
+        <div class="control-bloque">
+          <span class="control-etiqueta" id="lbl-d1">Primer denominador</span>
+          <div class="stepper" aria-labelledby="lbl-d1">
+            <button type="button" class="mini" data-step="md1" data-dir="-1" aria-label="Disminuir primer denominador">−</button>
+            <span class="valor" id="v-md1">4</span>
+            <button type="button" class="mini" data-step="md1" data-dir="1" aria-label="Aumentar primer denominador">+</button>
+          </div>
+        </div>
+        <div class="control-bloque">
+          <span class="control-etiqueta" id="lbl-d2">Segundo denominador</span>
+          <div class="stepper" aria-labelledby="lbl-d2">
+            <button type="button" class="mini" data-step="md2" data-dir="-1" aria-label="Disminuir segundo denominador">−</button>
+            <span class="valor" id="v-md2">6</span>
+            <button type="button" class="mini" data-step="md2" data-dir="1" aria-label="Aumentar segundo denominador">+</button>
+          </div>
+        </div>
+        <button type="button" id="btn-multiplos">Mostrar los múltiplos</button>
+      </div>
+
+      <div class="panel" id="panel-multiplos" hidden aria-live="polite">
+        <h3 style="margin-top:0;">Múltiplos del primer denominador</h3>
+        <div class="multiplos" id="lista-m1"></div>
+        <h3>Múltiplos del segundo denominador</h3>
+        <div class="multiplos" id="lista-m2"></div>
+        <p id="conclusion-mcd" style="margin-bottom:0;"></p>
+      </div>
+
+      <div class="panel" style="background:var(--ambar-fondo); border-color:var(--ambar);">
+        <p style="margin:0;"><strong>Atajo útil:</strong> si un denominador es múltiplo del otro
+        (por ejemplo, 3 y 6), el mayor ya <em>es</em> el mínimo común denominador. Y si no comparten factores
+        (por ejemplo, 3 y 5), basta con multiplicarlos.</p>
+      </div>
+    </section>
+
+    <!-- ============ SECCIÓN 3: PRÁCTICA GUIADA ============ -->
+    <section aria-labelledby="s3-titulo">
+      <span class="eyebrow">Práctica paso a paso</span>
+      <h2 id="s3-titulo">3. Practique la conversión y la suma o resta</h2>
+      <p>Resuelva la operación siguiente. Vaya escribiendo cada parte y compruebe con el botón correspondiente.</p>
+
+      <p class="enunciado" id="p3-enunciado"></p>
+
+      <div class="paso">
+        <p><span class="n">1</span><strong>Escriba el mínimo común denominador (m. c. d.) de los dos denominadores:</strong></p>
+        <div style="margin-left:34px;">
+          m. c. d. =
+          <input type="number" id="in-mcd" min="1" step="1" aria-label="Mínimo común denominador">
+          <button type="button" id="btn-comprobar-mcd">Comprobar</button>
+          <div class="retro" id="retro-mcd" hidden aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <p><span class="n">2</span><strong>Convierta cada fracción a ese denominador (escriba los numeradores nuevos):</strong></p>
+        <div style="margin-left:34px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+          <span id="conv-f1" class="frac"></span>
+          <span aria-hidden="true">=</span>
+          <span class="entrada-frac">
+            <input type="number" id="in-num1" step="1" aria-label="Numerador nuevo de la primera fracción">
+            <span class="barra-div" aria-hidden="true"></span>
+            <span class="marcador" id="conv-den1" aria-label="denominador común"></span>
+          </span>
+          <span aria-hidden="true" style="font-size:1.4rem;">&nbsp;&nbsp;y&nbsp;&nbsp;</span>
+          <span id="conv-f2" class="frac"></span>
+          <span aria-hidden="true">=</span>
+          <span class="entrada-frac">
+            <input type="number" id="in-num2" step="1" aria-label="Numerador nuevo de la segunda fracción">
+            <span class="barra-div" aria-hidden="true"></span>
+            <span class="marcador" id="conv-den2" aria-label="denominador común"></span>
+          </span>
+        </div>
+        <div style="margin-left:34px; margin-top:10px;">
+          <button type="button" id="btn-comprobar-conv">Comprobar conversión</button>
+          <div class="retro" id="retro-conv" hidden aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="paso">
+        <p><span class="n">3</span><strong>Realice la operación y escriba el resultado (numerador sobre el denominador común):</strong></p>
+        <div style="margin-left:34px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <span id="p3-op-texto"></span>
+          <span aria-hidden="true">=</span>
+          <span class="entrada-frac">
+            <input type="number" id="in-res" step="1" aria-label="Numerador del resultado">
+            <span class="barra-div" aria-hidden="true"></span>
+            <span class="marcador" id="res-den" aria-label="denominador común"></span>
+          </span>
+          <button type="button" id="btn-comprobar-res">Comprobar resultado</button>
+        </div>
+        <div style="margin-left:34px;">
+          <div class="retro" id="retro-res" hidden aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button type="button" class="secundario" id="btn-otro">Otro ejercicio</button>
+        <span class="apagado" style="align-self:center;">Ejercicios resueltos: <strong id="contador-ok" class="marcador">0</strong></span>
+      </div>
+    </section>
+
+    <!-- ============ SECCIÓN 4: CUESTIONARIO ============ -->
+    <section aria-labelledby="s4-titulo">
+      <span class="eyebrow">Repaso</span>
+      <h2 id="s4-titulo">4. Cuestionario de repaso</h2>
+      <p>Elija la respuesta correcta en cada pregunta. Al terminar, pulse <strong>Corregir</strong>.</p>
+
+      <div id="quiz-contenedor"></div>
+
+      <div class="acciones">
+        <button type="button" id="btn-corregir">Corregir</button>
+        <button type="button" class="secundario" id="btn-reintentar">Reintentar con preguntas nuevas</button>
+      </div>
+      <div class="marcador-quiz" id="marcador-quiz" hidden aria-live="polite"></div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Denominador común: entender y practicar</p>
+    <p>© José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago.<br>
+    Bajo licencia <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="license">CC BY-NC-SA 4.0</a>.</p>
+  </footer>
+
+  <script>
+    "use strict";
+
+    /* ---------- Utilidades ---------- */
+    function mcd(a, b) { while (b) { [a, b] = [b, a % b]; } return a; }
+    function mcm(a, b) { return a / mcd(a, b) * b; }
+    function id(x) { return document.getElementById(x); }
+    function aleatorio(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+    /* Fracción tipográfica dentro de un elemento */
+    function fracHTML(n, d) {
+      return '<span class="num">' + n + '</span><span class="den">' + d + '</span>';
+    }
+
+    /* ========================================================= */
+    /* SECCIÓN 1: barras y concepto                              */
+    /* ========================================================= */
+    var estado = { num1: 1, den1: 2, num2: 1, den2: 3 };
+
+    function dibujarBarra(elemento, numerador, denominador, clase, subdiv) {
+      // subdiv: si se indica, cada parte original se divide en (subdiv/denominador) sub-partes
+      elemento.innerHTML = "";
+      var total = subdiv || denominador;
+      var factor = total / denominador;
+      var llenos = numerador * factor;
+      for (var i = 0; i < total; i++) {
+        var seg = document.createElement("div");
+        seg.className = "segmento " + (i < llenos ? ("lleno-" + clase) : "vacio");
+        // línea gruesa donde terminaba una parte original
+        if (subdiv && ((i + 1) % factor === 0) && (i + 1) !== total) {
+          seg.classList.add("gruesa");
+        }
+        elemento.appendChild(seg);
+      }
+      elemento.setAttribute("aria-label",
+        "Fracción " + numerador + " sobre " + denominador +
+        ": " + numerador + " de " + denominador + " partes sombreadas.");
+    }
+
+    function actualizarBarras() {
+      dibujarBarra(id("barra1"), estado.num1, estado.den1, "a");
+      dibujarBarra(id("barra2"), estado.num2, estado.den2, "b");
+      id("etq-barra1").innerHTML = 'Primera fracción: <span class="frac">' + fracHTML(estado.num1, estado.den1) + '</span>';
+      id("etq-barra2").innerHTML = 'Segunda fracción: <span class="frac">' + fracHTML(estado.num2, estado.den2) + '</span>';
+    }
+
+    function mostrarIgualado() {
+      var comun = mcm(estado.den1, estado.den2);
+      var f1 = comun / estado.den1, f2 = comun / estado.den2;
+      var n1 = estado.num1 * f1, n2 = estado.num2 * f2;
+
+      id("texto-igualado").innerHTML =
+        'El mínimo común denominador de ' + estado.den1 + ' y ' + estado.den2 + ' es <span class="resaltado">' + comun + '</span>. ' +
+        'Volvemos a cortar cada barra en <strong>' + comun + '</strong> partes iguales: ' +
+        '<span class="frac">' + fracHTML(estado.num1, estado.den1) + '</span> = ' +
+        '<span class="frac">' + fracHTML(n1, comun) + '</span> &nbsp;y&nbsp; ' +
+        '<span class="frac">' + fracHTML(estado.num2, estado.den2) + '</span> = ' +
+        '<span class="frac">' + fracHTML(n2, comun) + '</span>.';
+
+      dibujarBarra(id("barra-ig1"), estado.num1, estado.den1, "a", comun);
+      dibujarBarra(id("barra-ig2"), estado.num2, estado.den2, "b", comun);
+      id("etq-ig1").innerHTML = 'Primera fracción: <span class="frac">' + fracHTML(n1, comun) + '</span>';
+      id("etq-ig2").innerHTML = 'Segunda fracción: <span class="frac">' + fracHTML(n2, comun) + '</span>';
+
+      id("panel-igualado").hidden = false;
+    }
+
+    function actualizarValoresVista() {
+      id("v-num1").textContent = estado.num1;
+      id("v-den1").textContent = estado.den1;
+      id("v-num2").textContent = estado.num2;
+      id("v-den2").textContent = estado.den2;
+      actualizarBarras();
+      id("panel-igualado").hidden = true;
+    }
+
+    /* Steppers de la sección 1 */
+    var limites = { num1: [1, 11], den1: [2, 12], num2: [1, 11], den2: [2, 12] };
+    document.querySelectorAll('[data-step]').forEach(function (btn) {
+      var clave = btn.getAttribute("data-step");
+      if (limites[clave]) {
+        btn.addEventListener("click", function () {
+          var dir = parseInt(btn.getAttribute("data-dir"), 10);
+          var nuevo = estado[clave] + dir;
+          var lim = limites[clave];
+          if (nuevo < lim[0]) nuevo = lim[0];
+          if (nuevo > lim[1]) nuevo = lim[1];
+          estado[clave] = nuevo;
+          // el numerador no debe superar al denominador (fracción propia, más clara visualmente)
+          if (estado.num1 > estado.den1) estado.num1 = estado.den1;
+          if (estado.num2 > estado.den2) estado.num2 = estado.den2;
+          actualizarValoresVista();
+        });
+      }
+    });
+
+    id("btn-igualar").addEventListener("click", mostrarIgualado);
+    id("btn-original").addEventListener("click", function () { id("panel-igualado").hidden = true; });
+
+    /* ========================================================= */
+    /* SECCIÓN 2: múltiplos                                       */
+    /* ========================================================= */
+    var estadoM = { md1: 4, md2: 6 };
+    var limitesM = { md1: [2, 12], md2: [2, 12] };
+
+    document.querySelectorAll('[data-step]').forEach(function (btn) {
+      var clave = btn.getAttribute("data-step");
+      if (limitesM[clave]) {
+        btn.addEventListener("click", function () {
+          var dir = parseInt(btn.getAttribute("data-dir"), 10);
+          var nuevo = estadoM[clave] + dir;
+          var lim = limitesM[clave];
+          if (nuevo < lim[0]) nuevo = lim[0];
+          if (nuevo > lim[1]) nuevo = lim[1];
+          estadoM[clave] = nuevo;
+          id("v-" + clave).textContent = estadoM[clave];
+          id("panel-multiplos").hidden = true;
+        });
+      }
+    });
+
+    id("btn-multiplos").addEventListener("click", function () {
+      var d1 = estadoM.md1, d2 = estadoM.md2;
+      var comun = mcm(d1, d2);
+      var cont1 = id("lista-m1"), cont2 = id("lista-m2");
+      cont1.innerHTML = ""; cont2.innerHTML = "";
+      for (var k = d1; k <= comun; k += d1) {
+        var c1 = document.createElement("span");
+        c1.className = "chip " + (k === comun ? "comun" : "a");
+        c1.textContent = k;
+        cont1.appendChild(c1);
+      }
+      for (var j = d2; j <= comun; j += d2) {
+        var c2 = document.createElement("span");
+        c2.className = "chip " + (j === comun ? "comun" : "b");
+        c2.textContent = j;
+        cont2.appendChild(c2);
+      }
+      id("conclusion-mcd").innerHTML =
+        'El primer número que aparece en <strong>las dos listas</strong> es <span class="resaltado">' + comun +
+        '</span>. Ese es el mínimo común denominador de ' + d1 + ' y ' + d2 + '.';
+      id("panel-multiplos").hidden = false;
+    });
+
+    /* ========================================================= */
+    /* SECCIÓN 3: práctica guiada                                 */
+    /* ========================================================= */
+    var ejercicio = null;
+
+    function nuevoEjercicio() {
+      var d1 = aleatorio(2, 9), d2 = aleatorio(2, 9);
+      while (d2 === d1) d2 = aleatorio(2, 9);
+      var n1 = aleatorio(1, d1 - 1), n2 = aleatorio(1, d2 - 1);
+      var comun = mcm(d1, d2);
+      var f1 = comun / d1, f2 = comun / d2;
+      var nn1 = n1 * f1, nn2 = n2 * f2;
+
+      // elegir operación; si resta, garantizar resultado no negativo
+      var op = Math.random() < 0.5 ? "+" : "−";
+      if (op === "−" && nn1 < nn2) {
+        // intercambiar para que la primera sea mayor
+        [n1, n2] = [n2, n1];
+        [d1, d2] = [d2, d1];
+        [nn1, nn2] = [nn2, nn1];
+      }
+      var resultado = (op === "+") ? (nn1 + nn2) : (nn1 - nn2);
+
+      ejercicio = { n1: n1, d1: d1, n2: n2, d2: d2, comun: comun, nn1: nn1, nn2: nn2, op: op, res: resultado };
+
+      id("p3-enunciado").innerHTML =
+        '<span class="frac">' + fracHTML(n1, d1) + '</span> ' + op +
+        ' <span class="frac">' + fracHTML(n2, d2) + '</span>';
+      id("conv-f1").innerHTML = fracHTML(n1, d1);
+      id("conv-f2").innerHTML = fracHTML(n2, d2);
+      id("p3-op-texto").innerHTML =
+        '<span class="frac">' + fracHTML('?', comun) + '</span> ' + op +
+        ' <span class="frac">' + fracHTML('?', comun) + '</span>';
+
+      // reiniciar entradas y retroalimentación
+      ["in-mcd", "in-num1", "in-num2", "in-res"].forEach(function (x) { id(x).value = ""; });
+      ["retro-mcd", "retro-conv", "retro-res"].forEach(function (x) { id(x).hidden = true; });
+      id("conv-den1").textContent = "?";
+      id("conv-den2").textContent = "?";
+      id("res-den").textContent = "?";
+    }
+
+    function retro(elem, tipo, texto) {
+      elem.className = "retro " + tipo;
+      elem.innerHTML = texto;
+      elem.hidden = false;
+    }
+
+    id("btn-comprobar-mcd").addEventListener("click", function () {
+      var v = parseInt(id("in-mcd").value, 10);
+      if (isNaN(v)) { retro(id("retro-mcd"), "pista", "Escriba un número antes de comprobar."); return; }
+      if (v === ejercicio.comun) {
+        retro(id("retro-mcd"), "ok", "Correcto. El mínimo común denominador es " + ejercicio.comun + ". Úselo en el paso 2.");
+        id("conv-den1").textContent = ejercicio.comun;
+        id("conv-den2").textContent = ejercicio.comun;
+        id("res-den").textContent = ejercicio.comun;
+      } else if (v % ejercicio.d1 === 0 && v % ejercicio.d2 === 0) {
+        retro(id("retro-mcd"), "pista", "Ese número sí es un denominador común, pero no el <em>menor</em>. Busque el múltiplo común más pequeño de " + ejercicio.d1 + " y " + ejercicio.d2 + ".");
+      } else {
+        retro(id("retro-mcd"), "mal", "Todavía no. Busque el número más pequeño que sea múltiplo de " + ejercicio.d1 + " y de " + ejercicio.d2 + " a la vez.");
+      }
+    });
+
+    id("btn-comprobar-conv").addEventListener("click", function () {
+      var a = parseInt(id("in-num1").value, 10);
+      var b = parseInt(id("in-num2").value, 10);
+      if (isNaN(a) || isNaN(b)) { retro(id("retro-conv"), "pista", "Escriba los dos numeradores antes de comprobar."); return; }
+      // asegurar que el denominador común se muestre
+      id("conv-den1").textContent = ejercicio.comun;
+      id("conv-den2").textContent = ejercicio.comun;
+      id("res-den").textContent = ejercicio.comun;
+      if (a === ejercicio.nn1 && b === ejercicio.nn2) {
+        retro(id("retro-conv"), "ok",
+          "Correcto. " +
+          '<span class="frac">' + fracHTML(ejercicio.n1, ejercicio.d1) + '</span> = <span class="frac">' + fracHTML(ejercicio.nn1, ejercicio.comun) + '</span> ' +
+          'y <span class="frac">' + fracHTML(ejercicio.n2, ejercicio.d2) + '</span> = <span class="frac">' + fracHTML(ejercicio.nn2, ejercicio.comun) + '</span>.');
+      } else {
+        var f1 = ejercicio.comun / ejercicio.d1, f2 = ejercicio.comun / ejercicio.d2;
+        retro(id("retro-conv"), "mal",
+          "Revise. Para la primera, multiplique arriba y abajo por " + f1 + " (porque " + ejercicio.d1 + " × " + f1 + " = " + ejercicio.comun + "). " +
+          "Para la segunda, por " + f2 + " (porque " + ejercicio.d2 + " × " + f2 + " = " + ejercicio.comun + ").");
+      }
+    });
+
+    id("btn-comprobar-res").addEventListener("click", function () {
+      var r = parseInt(id("in-res").value, 10);
+      if (isNaN(r)) { retro(id("retro-res"), "pista", "Escriba el numerador del resultado antes de comprobar."); return; }
+      id("res-den").textContent = ejercicio.comun;
+      if (r === ejercicio.res) {
+        var g = mcd(Math.abs(ejercicio.res), ejercicio.comun);
+        var extra = "";
+        if (g > 1 && ejercicio.res !== 0) {
+          extra = ' Además, se puede simplificar dividiendo entre ' + g + ': <span class="frac">' +
+                  fracHTML(ejercicio.res / g, ejercicio.comun / g) + '</span>.';
+        }
+        retro(id("retro-res"), "ok",
+          "¡Muy bien! El resultado es <span class=\"frac\">" + fracHTML(ejercicio.res, ejercicio.comun) + "</span>." + extra);
+        var c = id("contador-ok");
+        c.textContent = parseInt(c.textContent, 10) + 1;
+      } else {
+        retro(id("retro-res"), "mal",
+          "Con el mismo denominador, solo se " + (ejercicio.op === "+" ? "suman" : "restan") + " los numeradores: " +
+          ejercicio.nn1 + " " + ejercicio.op + " " + ejercicio.nn2 + ". El denominador queda igual en " + ejercicio.comun + ".");
+      }
+    });
+
+    id("btn-otro").addEventListener("click", nuevoEjercicio);
+
+    /* ========================================================= */
+    /* SECCIÓN 4: cuestionario                                    */
+    /* ========================================================= */
+    var preguntasActuales = [];
+
+    function generarPreguntas() {
+      var preguntas = [];
+
+      // Tipo 1: ¿cuál es el mínimo común denominador?
+      function pregMCD() {
+        var d1 = aleatorio(2, 8), d2 = aleatorio(2, 8);
+        while (d2 === d1) d2 = aleatorio(2, 8);
+        var correcto = mcm(d1, d2);
+        var opciones = new Set([correcto, d1 * d2, d1 + d2, Math.max(d1, d2)]);
+        return construir(
+          "¿Cuál es el mínimo común denominador de " + d1 + " y " + d2 + "?",
+          correcto, Array.from(opciones));
+      }
+
+      // Tipo 2: ¿por cuánto se multiplica un numerador?
+      function pregFactor() {
+        var d = aleatorio(2, 6);
+        var factor = aleatorio(2, 4);
+        var comun = d * factor;
+        var n = aleatorio(1, d - 1);
+        var correcto = n * factor;
+        var opciones = new Set([correcto, n, n + factor, n * (factor + 1)]);
+        return construir(
+          "Al convertir " + n + "/" + d + " a denominador " + comun + ", ¿qué numerador nuevo se obtiene?",
+          correcto, Array.from(opciones));
+      }
+
+      // Tipo 3: identificar el enunciado verdadero
+      function pregConcepto() {
+        var correcta = "Se vuelven a cortar las fracciones para que sus partes tengan el mismo tamaño.";
+        var opciones = [
+          correcta,
+          "Se suman los denominadores para obtener el nuevo denominador.",
+          "Se cambia solo el numerador y se deja el denominador distinto.",
+          "Se multiplican los numeradores entre sí."
+        ];
+        return { texto: "¿Qué significa hallar un denominador común?", correcto: correcta, opciones: barajar(opciones.slice()) };
+      }
+
+      function construir(texto, correcto, listaOpciones) {
+        var set = new Set(listaOpciones);
+        var extra = 2;
+        while (set.size < 4) { set.add(correcto + extra); extra++; }
+        var arr = Array.from(set).slice(0, 4);
+        if (arr.indexOf(correcto) === -1) arr[3] = correcto;
+        return { texto: texto, correcto: String(correcto), opciones: barajar(arr.map(String)) };
+      }
+
+      function barajar(a) {
+        for (var i = a.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      preguntas.push(pregMCD());
+      preguntas.push(pregFactor());
+      preguntas.push(pregConcepto());
+      preguntas.push(pregMCD());
+      preguntas.push(pregFactor());
+      return preguntas;
+    }
+
+    function pintarQuiz() {
+      preguntasActuales = generarPreguntas();
+      var cont = id("quiz-contenedor");
+      cont.innerHTML = "";
+      id("marcador-quiz").hidden = true;
+
+      preguntasActuales.forEach(function (p, indice) {
+        var div = document.createElement("div");
+        div.className = "pregunta";
+        div.setAttribute("data-indice", indice);
+
+        var textoP = document.createElement("p");
+        textoP.className = "texto";
+        textoP.innerHTML = '<span class="marcador" aria-hidden="true">' + (indice + 1) + '. </span>' + p.texto;
+        div.appendChild(textoP);
+
+        var grupo = document.createElement("div");
+        grupo.className = "opciones";
+        grupo.setAttribute("role", "radiogroup");
+        grupo.setAttribute("aria-label", "Pregunta " + (indice + 1));
+
+        p.opciones.forEach(function (op) {
+          var b = document.createElement("div");
+          b.className = "opcion";
+          b.setAttribute("role", "radio");
+          b.setAttribute("tabindex", "0");
+          b.setAttribute("aria-checked", "false");
+          b.setAttribute("aria-pressed", "false");
+          b.setAttribute("data-valor", op);
+          b.textContent = op;
+
+          function seleccionar() {
+            grupo.querySelectorAll(".opcion").forEach(function (o) {
+              o.setAttribute("aria-pressed", "false");
+              o.setAttribute("aria-checked", "false");
+            });
+            b.setAttribute("aria-pressed", "true");
+            b.setAttribute("aria-checked", "true");
+          }
+          b.addEventListener("click", seleccionar);
+          b.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); seleccionar(); }
+          });
+          grupo.appendChild(b);
+        });
+
+        div.appendChild(grupo);
+        cont.appendChild(div);
+      });
+    }
+
+    id("btn-corregir").addEventListener("click", function () {
+      var bloques = id("quiz-contenedor").querySelectorAll(".pregunta");
+      var aciertos = 0, sinResponder = 0;
+      bloques.forEach(function (bloque) {
+        var idx = parseInt(bloque.getAttribute("data-indice"), 10);
+        var correcto = preguntasActuales[idx].correcto;
+        var elegido = bloque.querySelector('.opcion[aria-pressed="true"]');
+        bloque.querySelectorAll(".opcion").forEach(function (o) {
+          o.classList.remove("correcta", "incorrecta");
+          if (o.getAttribute("data-valor") === correcto) o.classList.add("correcta");
+        });
+        if (!elegido) { sinResponder++; return; }
+        if (elegido.getAttribute("data-valor") === correcto) { aciertos++; }
+        else { elegido.classList.add("incorrecta"); }
+      });
+      var m = id("marcador-quiz");
+      var msg = "Aciertos: " + aciertos + " de " + preguntasActuales.length + ".";
+      if (sinResponder > 0) msg += " Quedan " + sinResponder + " sin responder.";
+      if (aciertos === preguntasActuales.length) msg += " ¡Excelente dominio del tema!";
+      else if (aciertos >= 3) msg += " Buen trabajo; repase las que falló.";
+      else msg += " Repase las secciones 1 y 2 y vuelva a intentarlo.";
+      m.textContent = msg;
+      m.hidden = false;
+    });
+
+    id("btn-reintentar").addEventListener("click", pintarQuiz);
+
+    /* ---------- Inicio ---------- */
+    actualizarValoresVista();
+    nuevoEjercicio();
+    pintarQuiz();
+  </script>
+</body>
+</html>
 
