@@ -1,1 +1,1367 @@
+<!doctype html>
+<!--
+  Rapidez con razones y proporciones - GED
+  Autor: Jose M. Fernandez, ABE/ASE Math Master Teacher, Harry S. Truman College - City Colleges of Chicago.
+  (c) 2026. Licencia: CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+  Resumen: cuestionario interactivo de rapidez para practicar razones, proporciones,
+  variacion directa, variacion inversa y la identificacion del tipo de variacion.
+-->
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago" />
+    <meta name="license" content="CC BY-NC-SA 4.0" />
+    <link rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" />
+    <title>Rapidez con razones y proporciones &mdash; GED</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+      :root {
+        --cp: #0089cd;
+        --ch: #00a8fc;
+      }
+      body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 10px;
+        background: linear-gradient(135deg, #3b1f00, #0d2b4a);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 90vh;
+        flex-direction: column;
+        gap: 10px;
+      }
+      #quiz-container {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 0 22px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        width: clamp(300px, 95%, 860px);
+        margin: 0 auto;
+      }
+      .quiz-progress-header {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 16px 22px;
+        border-bottom: 3px solid var(--cp);
+      }
+      .progress-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.95em, 2.5vw, 1.1em);
+        color: var(--cp);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      .progress-container {
+        background: #e0e0e0;
+        height: 12px;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+      }
+      .progress-bar {
+        height: 100%;
+        width: 5%;
+        background: linear-gradient(90deg, var(--cp), var(--ch));
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 6px;
+      }
+      .question-meta {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 20px 0;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .cat-badge {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 700;
+        color: #fff;
+      }
+      .time-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78em;
+        font-weight: 600;
+        background: #e8f4f8;
+        color: #444;
+        border: 1px solid #ccc;
+      }
+      .question-header {
+        padding: 16px 22px 10px;
+        font-size: clamp(0.95em, 2.4vw, 1.15em);
+        font-weight: 700;
+        text-align: center;
+        color: #1a1a2e;
+        line-height: 1.55;
+      }
+      .data-box {
+        background: linear-gradient(135deg, #fff7ed, #ffedd5);
+        border: 2px solid #f97316;
+        border-radius: 12px;
+        margin: 0 22px 12px;
+        padding: 14px 18px;
+        text-align: center;
+      }
+      .stat-table {
+        width: auto;
+        margin: 0 auto;
+        border-collapse: collapse;
+        font-size: clamp(0.85em, 2.2vw, 0.95em);
+      }
+      .stat-table th {
+        background: var(--cp);
+        color: #fff;
+        padding: 7px 14px;
+        font-weight: 700;
+      }
+      .stat-table td {
+        padding: 6px 14px;
+        border: 1px solid #ccd;
+        text-align: center;
+        font-weight: 600;
+        color: #1a1a2e;
+      }
+      .stat-table tr:nth-child(even) td {
+        background: #e8f4fb;
+      }
+      .options {
+        padding: 0 18px;
+      }
+      .option-item {
+        display: block;
+        padding: 11px 16px;
+        margin-bottom: 10px;
+        background: #f0f4f8;
+        color: #333;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        font-size: clamp(0.95em, 2.4vw, 1.05em);
+        font-weight: 700;
+        line-height: 1.4;
+        user-select: none;
+      }
+      .option-item:hover:not(.disabled) {
+        background: #fff7ed;
+        border-color: #f97316;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .option-item.correct {
+        background: #4caf50 !important;
+        color: #fff !important;
+        border-color: #4caf50 !important;
+      }
+      .option-item.incorrect {
+        background: #f44336 !important;
+        color: #fff !important;
+        border-color: #f44336 !important;
+      }
+      .option-item.disabled {
+        cursor: not-allowed;
+        opacity: 0.85;
+      }
+      .btn-container {
+        padding: 4px 18px 18px;
+      }
+      .primary-btn {
+        display: block;
+        width: 100%;
+        padding: 13px;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.05em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: var(--cp);
+        text-align: center;
+        user-select: none;
+        box-sizing: border-box;
+      }
+      .primary-btn:hover {
+        background: var(--ch);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      .timer-container {
+        background: linear-gradient(135deg, #fff8e1, #ffecb3);
+        padding: 11px 18px;
+        border-top: 2px solid #f39c12;
+      }
+      .timer-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.88em, 2.2vw, 1em);
+        color: #c77a00;
+        margin-bottom: 7px;
+      }
+      .timer-bar-container {
+        background: #f0d0d0;
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .timer-bar {
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+        transition: width 0.1s linear;
+        border-radius: 4px;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+      }
+      .timer-warning {
+        animation: pulse 0.9s infinite;
+      }
+      .result-screen {
+        padding: 35px 28px;
+        text-align: center;
+      }
+      .result-screen.hidden {
+        display: none;
+      }
+      .result-screen h2 {
+        color: var(--cp);
+        font-size: clamp(1.4em, 4vw, 1.9em);
+        margin-bottom: 10px;
+      }
+      .result-score {
+        font-size: clamp(2em, 6vw, 2.8em) !important;
+        font-weight: 800;
+        color: var(--cp) !important;
+        margin: 12px 0 !important;
+      }
+      .result-msg {
+        font-size: clamp(1em, 2.8vw, 1.2em);
+        color: #333;
+        margin: 8px 0;
+      }
+      .cat-results {
+        margin: 18px 0;
+        text-align: left;
+      }
+      .cat-results h3 {
+        color: var(--cp);
+        font-size: 0.95em;
+        margin-bottom: 10px;
+      }
+      .cat-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 8px 0;
+      }
+      .cat-lbl {
+        flex: 1.4;
+        font-size: 0.78em;
+        font-weight: 600;
+      }
+      .cat-bar-out {
+        flex: 2;
+        background: #eee;
+        border-radius: 4px;
+        height: 11px;
+      }
+      .cat-bar-in {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.6s;
+      }
+      .cat-sc {
+        font-weight: 700;
+        color: var(--cp);
+        font-size: 0.82em;
+        min-width: 55px;
+        text-align: right;
+      }
+      .tip-box {
+        background: #fff7ed;
+        border-left: 4px solid #f97316;
+        border-radius: 6px;
+        padding: 10px 14px;
+        margin: 14px 0 4px;
+        font-size: 0.82em;
+        color: #7c2d12;
+        text-align: left;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="quiz-container">
+      <div class="quiz-progress-header">
+        <div class="progress-text" id="progress-text">Pregunta 1 de 20</div>
+        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+      </div>
+      <div id="question-area"></div>
+      <div class="timer-container" id="timer-container">
+        <div class="timer-text" id="timer-text">&#9201; Tiempo: 60s</div>
+        <div class="timer-bar-container"><div class="timer-bar" id="timer-bar"></div></div>
+      </div>
+      <div class="result-screen hidden" id="result-screen">
+        <h2>&#127919; &iexcl;Cuestionario completado!</h2>
+        <p class="result-score" id="final-score"></p>
+        <p class="result-msg" id="final-msg"></p>
+        <div class="cat-results" id="cat-results"></div>
+        <div class="tip-box" id="tip-box"></div>
+        <div class="btn-container" style="padding-top: 14px">
+          <div class="primary-btn" id="restart-btn">&#128260; Nuevas preguntas (reiniciar)</div>
+        </div>
+      </div>
+      <p style="text-align: center; font-size: 0.78em; color: #555; padding: 6px 14px 12px; line-height: 1.5">
+        Creado por Jos&eacute; M. Fern&aacute;ndez, ABE/ASE Math Master Teacher, Harry S. Truman College &mdash; City Colleges of Chicago.
+        <br />
+        Licencia
+        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener" style="color: #0089cd; text-decoration: underline">CC BY-NC-SA 4.0</a>
+        .
+      </p>
+    </div>
+
+    <script>
+      (function () {
+        if (window.quizRPPIniciado) return;
+        window.quizRPPIniciado = true;
+
+        /* ── UTILS ── */
+        function rand(a, b) {
+          return Math.floor(Math.random() * (b - a + 1)) + a;
+        }
+        function shuffle(arr) {
+          const a = arr.slice();
+          for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+          }
+          return a;
+        }
+        function r1(n) {
+          return Math.round(n * 10) / 10;
+        }
+        function r2(n) {
+          return Math.round(n * 100) / 100;
+        }
+
+        /* ── OPCIONES ── */
+        function makeOpts(correct, dist) {
+          const cs = String(correct),
+            seen = new Set([cs]),
+            uniq = [];
+          for (const d of dist) {
+            const ds = String(d);
+            if (!seen.has(ds) && uniq.length < 3) {
+              seen.add(ds);
+              uniq.push(ds);
+            }
+          }
+          let ex = (parseFloat(cs) || 0) + 17;
+          while (uniq.length < 3) {
+            const c2 = String(Math.round(ex));
+            ex += 7;
+            if (!seen.has(c2)) {
+              seen.add(c2);
+              uniq.push(c2);
+            }
+          }
+          const all = shuffle([cs, ...uniq]);
+          const L = ['a', 'b', 'c', 'd'];
+          return {opciones: all.map((v, i) => ({valor: L[i], texto: L[i].toUpperCase() + '. ' + v})), correcta: L[all.indexOf(cs)]};
+        }
+
+        /* ── DISPLAY HELPERS ── */
+        function tbl(headers, rows) {
+          const TH = 'background:var(--cp);color:#fff;padding:7px 14px;font-weight:700';
+          const TD = 'padding:6px 14px;border:1px solid #ccd;text-align:center;font-weight:600;color:#1a1a2e';
+          const TDE = 'padding:6px 14px;border:1px solid #ccd;text-align:center;font-weight:600;color:#1a1a2e;background:#e8f4fb';
+          let h = '<table class="stat-table"><caption>Datos del problema</caption><tr>' + headers.map(hh => '<th scope="col" style="' + TH + '">' + hh + '</th>').join('') + '</tr>';
+          rows.forEach((r, i) => {
+            h += '<tr>' + r.map(c => '<td style="' + (i % 2 === 1 ? TDE : TD) + '">' + c + '</td>').join('') + '</tr>';
+          });
+          return h + '</table>';
+        }
+
+        // MCD y factor de escala en forma reducida
+        function mcdN(a, b) {
+          while (b) {
+            const t = a % b;
+            a = b;
+            b = t;
+          }
+          return a;
+        }
+        function factorStr(num, den) {
+          const g = mcdN(num, den),
+            pN = num / g,
+            qN = den / g;
+          return qN === 1 ? '\u00d7' + pN : '\u00d7' + pN + '/' + qN;
+        }
+
+        // Diagrama de proporción tipo balanza
+        function svgProp(a, b, c, xL) {
+          const box = (x, y, val, col, w) =>
+            '<rect x="' +
+            x +
+            '" y="' +
+            y +
+            '" width="' +
+            w +
+            '" height="34" rx="6" fill="' +
+            col +
+            '" stroke="none"/>' +
+            '<text x="' +
+            (x + w / 2) +
+            '" y="' +
+            (y + 22) +
+            '" text-anchor="middle" font-size="16" font-weight="bold" fill="#fff">' +
+            val +
+            '</text>';
+          return (
+            '<svg viewBox="0 0 260 90" style="width:min(260px,100%)" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Proporci\u00f3n ' +
+            a +
+            ' entre ' +
+            b +
+            ' igual a ' +
+            c +
+            ' entre ' +
+            xL +
+            '">' +
+            box(12, 10, a, '#1565c0', 50) +
+            '<text x="72" y="32" text-anchor="middle" font-size="20" font-weight="bold" fill="#555">/</text>' +
+            box(85, 10, b, '#1565c0', 50) +
+            '<text x="148" y="32" text-anchor="middle" font-size="18" font-weight="bold" fill="#555">=</text>' +
+            box(162, 10, c, '#1b7a3e', 50) +
+            '<text x="220" y="32" text-anchor="middle" font-size="20" font-weight="bold" fill="#555">/</text>' +
+            box(228, 10, xL, '#dc2626', 24) +
+            '<text x="130" y="78" text-anchor="middle" font-size="12" font-weight="bold" fill="#555">Productos cruzados: ' +
+            a +
+            ' \u00d7 x = ' +
+            b +
+            ' \u00d7 ' +
+            c +
+            '</text>' +
+            '</svg>'
+          );
+        }
+
+        // Barras de razón
+        function svgRazonBars(a, b, lblA, lblB) {
+          const total = a + b,
+            W = 200;
+          const wa = Math.round((a / total) * W),
+            wb = W - wa;
+          return (
+            '<svg viewBox="0 0 240 80" style="width:min(240px,100%)" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Barras de la raz\u00f3n ' +
+            lblA +
+            ' a ' +
+            lblB +
+            ', ' +
+            a +
+            ' a ' +
+            b +
+            '">' +
+            '<rect x="20" y="16" width="' +
+            wa +
+            '" height="32" fill="#1565c0" rx="4"/>' +
+            '<rect x="' +
+            (20 + wa) +
+            '" y="16" width="' +
+            wb +
+            '" height="32" fill="#f97316" rx="4"/>' +
+            '<text x="' +
+            (20 + wa / 2) +
+            '" y="37" text-anchor="middle" font-size="13" font-weight="bold" fill="#fff">' +
+            lblA +
+            '</text>' +
+            '<text x="' +
+            (20 + wa + wb / 2) +
+            '" y="37" text-anchor="middle" font-size="13" font-weight="bold" fill="#fff">' +
+            lblB +
+            '</text>' +
+            '<text x="20" y="70" font-size="12" font-weight="600" fill="#1a1a2e">Raz\u00f3n ' +
+            lblA +
+            ' : ' +
+            lblB +
+            ' = ' +
+            a +
+            ' : ' +
+            b +
+            '</text>' +
+            '</svg>'
+          );
+        }
+
+        // Tabla de variacion (directa o inversa) con flechas
+        function svgVar(colA, colB, a1, b1, a2, b2, fA, fB, tipo) {
+          const col = tipo === 'dir' ? '#166534' : '#92400e';
+          const nota = tipo === 'dir' ? 'Directa: las dos cantidades suben juntas' : 'Inversa: si una sube, la otra baja';
+          const flecha = (x, y1, y2) =>
+            '<line x1="' +
+            x +
+            '" y1="' +
+            y1 +
+            '" x2="' +
+            x +
+            '" y2="' +
+            (y2 - 7) +
+            '" stroke="' +
+            col +
+            '" stroke-width="2.5"/>' +
+            '<polygon points="' +
+            (x - 5) +
+            ',' +
+            (y2 - 8) +
+            ' ' +
+            (x + 5) +
+            ',' +
+            (y2 - 8) +
+            ' ' +
+            x +
+            ',' +
+            y2 +
+            '" fill="' +
+            col +
+            '"/>';
+          const celda = (x, y, v, c) => '<text x="' + x + '" y="' + y + '" text-anchor="middle" font-size="17" font-weight="bold" fill="' + c + '">' + v + '</text>';
+          return (
+            '<svg viewBox="0 0 320 172" style="width:min(320px,100%)" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tabla de variaci\u00f3n entre ' +
+            colA +
+            ' y ' +
+            colB +
+            '">' +
+            '<rect x="10" y="8" width="300" height="134" rx="8" fill="#ffffff" stroke="#1565c0" stroke-width="2"/>' +
+            '<line x1="10" y1="42" x2="310" y2="42" stroke="#1565c0" stroke-width="2"/>' +
+            '<line x1="160" y1="8" x2="160" y2="142" stroke="#1565c0" stroke-width="2"/>' +
+            '<text x="85" y="31" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e3a8a">' +
+            colA +
+            '</text>' +
+            '<text x="235" y="31" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e3a8a">' +
+            colB +
+            '</text>' +
+            celda(85, 74, a1, '#1a1a2e') +
+            celda(235, 74, b1, '#1a1a2e') +
+            flecha(85, 84, 114) +
+            flecha(235, 84, 114) +
+            '<text x="112" y="105" font-size="13" font-weight="bold" fill="' +
+            col +
+            '">' +
+            fA +
+            '</text>' +
+            '<text x="262" y="105" font-size="13" font-weight="bold" fill="' +
+            col +
+            '">' +
+            fB +
+            '</text>' +
+            celda(85, 134, a2, '#1a1a2e') +
+            celda(235, 134, b2, '#b91c1c') +
+            '<text x="160" y="162" text-anchor="middle" font-size="12" font-weight="bold" fill="#555">' +
+            nota +
+            '</text>' +
+            '</svg>'
+          );
+        }
+
+        /* ── Opciones de texto ── */
+        function makeOptsTexto(ok, dist) {
+          const seen = new Set([ok]),
+            uniq = [];
+          for (const d of dist) {
+            if (!seen.has(d) && uniq.length < 3) {
+              seen.add(d);
+              uniq.push(d);
+            }
+          }
+          let k = 2;
+          while (uniq.length < 3) {
+            const c2 = ok + ' (' + k + ')';
+            k++;
+            if (!seen.has(c2)) {
+              seen.add(c2);
+              uniq.push(c2);
+            }
+          }
+          const all = shuffle([ok, ...uniq]);
+          const L = ['a', 'b', 'c', 'd'];
+          return {opciones: all.map((v, i) => ({valor: L[i], texto: L[i].toUpperCase() + '. ' + v})), correcta: L[all.indexOf(ok)]};
+        }
+
+        /* ── Par de valores en variación inversa (producto constante) ── */
+        const INV_K = [24, 36, 48, 60, 72, 90, 120];
+        function divisoresDe(n) {
+          const d = [];
+          for (let i = 2; i <= n / 2; i++) {
+            if (n % i === 0) d.push(i);
+          }
+          return d;
+        }
+        function parInv(minA, maxA) {
+          for (let t = 0; t < 60; t++) {
+            const K = INV_K[rand(0, INV_K.length - 1)];
+            const D = divisoresDe(K).filter(v => v >= minA && v <= maxA && K / v >= 2);
+            if (D.length < 2) continue;
+            const S = shuffle(D),
+              a1 = S[0],
+              a2 = S[1];
+            if (a1 === a2) continue;
+            return {k: K, a1, b1: K / a1, a2, b2: K / a2};
+          }
+          return {k: 60, a1: 6, b1: 10, a2: 12, b2: 5};
+        }
+
+        /* ── Contextos para identificar el tipo de variación ── */
+        const CTX_DIR = [
+          ['las horas trabajadas', 'el salario ganado'],
+          ['los galones de gasolina cargados', 'las millas que se pueden recorrer'],
+          ['el n\u00famero de camisetas compradas', 'el precio total pagado'],
+          ['las tazas de harina usadas', 'el n\u00famero de panes horneados'],
+          ['los metros de tela comprados', 'el costo total de la tela']
+        ];
+        const CTX_INV = [
+          ['el n\u00famero de obreros', 'los d\u00edas que tardan en terminar la obra'],
+          ['la velocidad del auto', 'el tiempo que dura el viaje'],
+          ['el n\u00famero de personas que comparten la comida', 'los d\u00edas que duran las provisiones'],
+          ['el n\u00famero de m\u00e1quinas que trabajan', 'las horas para empacar el pedido'],
+          ['el n\u00famero de amigos que se reparten la cuenta', 'lo que paga cada uno']
+        ];
+        function identificar(tipo) {
+          const P = tipo === 'dir' ? CTX_DIR : CTX_INV;
+          const [x, y] = P[rand(0, P.length - 1)];
+          const DIR = 'Variaci\u00f3n directa: si una aumenta, la otra aumenta';
+          const INV = 'Variaci\u00f3n inversa: si una aumenta, la otra disminuye';
+          const OK = tipo === 'dir' ? DIR : INV;
+          const {opciones, correcta} = makeOptsTexto(OK, [tipo === 'dir' ? INV : DIR, 'No hay ninguna relaci\u00f3n entre las dos cantidades', 'Las dos cantidades son siempre iguales']);
+          return {
+            cat: 'Identificar',
+            t: 55,
+            q: '&iquest;Qu\u00e9 tipo de variaci\u00f3n hay entre <strong>' + x + '</strong> y <strong>' + y + '</strong>?',
+            data: null,
+            opciones,
+            correcta
+          };
+        }
+
+        /* ── CATEGORÍAS ── */
+        const CC = {
+          Razones: '#1565c0',
+          Proporciones: '#1b7a3e',
+          Directa: '#0e7490',
+          Inversa: '#92400e',
+          Identificar: '#9d174d'
+        };
+        const CI = {
+          Razones: '\u2237',
+          Proporciones: '\u2696',
+          Directa: '\u2197',
+          Inversa: '\u21c5',
+          Identificar: '\u21c4'
+        };
+        const TIPS = {
+          Razones:
+            'La raz\u00f3n a:b significa "por cada a unidades hay b". Para repartir un total, suma las partes (a+b), divide el total entre esa suma y multiplica por las partes de cada grupo. El precio unitario es precio total \u00f7 cantidad.',
+          Proporciones:
+            'Una proporci\u00f3n es la igualdad de dos razones: a/b = c/x. Se resuelve con productos cruzados: a \u00d7 x = b \u00d7 c, y de ah\u00ed x = (b \u00d7 c) \u00f7 a. Para comprobar si dos razones forman proporci\u00f3n, multiplica en cruz: si los dos productos son iguales, s\u00ed la forman.',
+          Directa:
+            'En la variaci\u00f3n directa, si una cantidad se multiplica por un n\u00famero, la otra se multiplica por el MISMO n\u00famero. El cociente se mantiene constante: a\u2081/b\u2081 = a\u2082/b\u2082. Ejemplos: horas trabajadas y salario, galones y millas, tazas de harina y panes.',
+          Inversa:
+            'En la variaci\u00f3n inversa, si una cantidad se multiplica por un n\u00famero, la otra se DIVIDE entre ese mismo n\u00famero. El producto se mantiene constante: a\u2081 \u00d7 b\u2081 = a\u2082 \u00d7 b\u2082. Ejemplos: m\u00e1s obreros, menos d\u00edas; m\u00e1s velocidad, menos tiempo.',
+          Identificar:
+            'Preg\u00fantate: si la primera cantidad AUMENTA, \u00bfla segunda aumenta o disminuye? Si aumenta, es directa (se multiplica). Si disminuye, es inversa (se divide). Trabajadores, velocidad y raciones repartidas casi siempre dan variaci\u00f3n inversa.'
+        };
+
+        /* ══════════════════════════════════════
+           GENERADORES — 20 preguntas
+      ══════════════════════════════════════ */
+        const GEN = [
+          /* ── RAZONES 1: Razón a:b → partes de un total ── */
+          () => {
+            const pares = [
+              [2, 3],
+              [3, 5],
+              [1, 4],
+              [2, 5],
+              [3, 7],
+              [1, 3],
+              [3, 4],
+              [2, 7]
+            ];
+            const [a, b] = pares[rand(0, pares.length - 1)];
+            const mult = rand(3, 8);
+            const total = (a + b) * mult,
+              r = a * mult;
+            const {opciones, correcta} = makeOpts(
+              r,
+              [b * mult, total - a, mult * (a + b) - r, r + mult].filter(v => v !== r)
+            );
+            return {
+              cat: 'Razones',
+              t: 60,
+              q:
+                'La raz\u00f3n de ni\u00f1as a ni\u00f1os en un sal\u00f3n es <strong>' +
+                a +
+                ':' +
+                b +
+                '</strong>. Si hay <strong>' +
+                total +
+                ' estudiantes en total</strong>, \u00bfcu\u00e1ntas ni\u00f1as hay?',
+              data:
+                svgRazonBars(a, b, 'Ni\u00f1as', 'Ni\u00f1os') +
+                '<div style="font-size:.82em;color:#555;margin-top:6px">Partes totales: ' +
+                a +
+                '+' +
+                b +
+                ' = ' +
+                (a + b) +
+                ' &nbsp;|&nbsp; Valor de cada parte: ' +
+                total +
+                '&divide;' +
+                (a + b) +
+                ' = ' +
+                mult +
+                '</div>',
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── RAZONES 2: Dado primer grupo → hallar segundo ── */
+          () => {
+            const pares = [
+              [2, 3],
+              [3, 5],
+              [1, 4],
+              [2, 5],
+              [3, 4]
+            ];
+            const [a, b] = pares[rand(0, pares.length - 1)];
+            const n1 = rand(2, 7) * a;
+            const r = (n1 / a) * b;
+            const {opciones, correcta} = makeOpts(
+              r,
+              [n1 + b, n1 * b, r + a, (n1 / a) * (a + b)].filter(v => v !== r)
+            );
+            return {
+              cat: 'Razones',
+              t: 60,
+              q: 'La raz\u00f3n de jugo a agua en una mezcla es <strong>' + a + ':' + b + '</strong>. Si se usan <strong>' + n1 + ' oz de jugo</strong>, \u00bfcu\u00e1ntas oz de agua se necesitan?',
+              data: tbl(
+                ['Ingrediente', 'Raz\u00f3n', 'Cantidad real'],
+                [
+                  ['Jugo', a + ' partes', n1 + ' oz'],
+                  ['Agua', b + ' partes', '?']
+                ]
+              ),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── RAZONES 3: Precio unitario ── */
+          () => {
+            const precio = rand(3, 12),
+              qty = rand(4, 9);
+            const total = precio * qty,
+              r = precio;
+            const {opciones, correcta} = makeOpts(
+              r,
+              [total, total + precio, r + 1, qty + precio].filter(v => v !== r)
+            );
+            return {
+              cat: 'Razones',
+              t: 45,
+              q: 'Un paquete de <strong>' + qty + ' cuadernos cuesta $' + total + '</strong>. \u00bfCu\u00e1l es el <strong>precio por cuaderno</strong>?',
+              data: tbl(['Cuadernos', 'Precio total', 'Precio unitario'], [[qty, '$' + total, '?']]),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── RAZONES 4: Receta proporcional (razón directa) ── */
+          () => {
+            const [a, b] = [
+              [2, 3],
+              [1, 4],
+              [3, 5],
+              [2, 5],
+              [1, 3]
+            ][rand(0, 4)];
+            const mult = rand(2, 5);
+            const dado = a * mult,
+              r = b * mult;
+            const {opciones, correcta} = makeOpts(
+              r,
+              [r + 1, dado + b, dado * b, r - a].filter(v => v !== r && v > 0)
+            );
+            return {
+              cat: 'Razones',
+              t: 60,
+              q:
+                'Una receta usa <strong>' +
+                a +
+                ' tazas de az\u00facar por cada ' +
+                b +
+                ' tazas de harina</strong>. Si se usan <strong>' +
+                dado +
+                ' tazas de az\u00facar</strong>, \u00bfcu\u00e1ntas de harina se necesitan?',
+              data: tbl(
+                ['Ingrediente', 'Receta base', 'Con ' + dado + ' tazas az\u00facar'],
+                [
+                  ['Az\u00facar', a + ' tazas', dado + ' tazas'],
+                  ['Harina', b + ' tazas', '?']
+                ]
+              ),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── PROPORCIONES 5: Resolver a/b = c/x ── */
+          () => {
+            const a = rand(2, 6),
+              b = rand(3, 8),
+              mult = rand(2, 5);
+            const c = a * mult,
+              r = b * mult;
+            const {opciones, correcta} = makeOpts(
+              r,
+              [a + b + c, c - a + b, r + b, r - a].filter(v => v !== r && v > 0)
+            );
+            return {
+              cat: 'Proporciones',
+              t: 60,
+              q: 'Resuelve la proporci\u00f3n: &nbsp;<strong>' + a + ' / ' + b + ' &nbsp;=&nbsp; ' + c + ' / x</strong>',
+              data: svgProp(a, b, c, 'x'),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── PROPORCIONES 6: incógnita en el primer término ── */
+          () => {
+            const a = rand(2, 9),
+              b = rand(3, 9),
+              m = rand(2, 5);
+            const c = a * m,
+              d = b * m,
+              r = a;
+            const {opciones, correcta} = makeOpts(
+              r,
+              [c - d + b, Math.round((b * d) / c), r + m, Math.abs(c - b)].filter(v => v !== r && v > 0)
+            );
+            return {
+              cat: 'Proporciones',
+              t: 60,
+              q: 'Resuelve la proporci\u00f3n: &nbsp;<strong>x / ' + b + ' &nbsp;=&nbsp; ' + c + ' / ' + d + '</strong>',
+              data: tbl(['Proporci\u00f3n', 'Productos cruzados'], [['x / ' + b + ' = ' + c + ' / ' + d, 'x \u00d7 ' + d + ' = ' + b + ' \u00d7 ' + c]]),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── PROPORCIONES 7: ¿cuál par forma una proporción? ── */
+          () => {
+            let a = rand(2, 6),
+              b = rand(3, 9);
+            while (a === b) {
+              b = rand(3, 9);
+            }
+            const m = rand(2, 4);
+            const ok = a + '/' + b + ' = ' + a * m + '/' + b * m;
+            const {opciones, correcta} = makeOptsTexto(ok, [a + '/' + b + ' = ' + (a + m) + '/' + (b + m), a + '/' + b + ' = ' + a * m + '/' + (b * m + 1), a + '/' + b + ' = ' + b * m + '/' + a * m]);
+            return {
+              cat: 'Proporciones',
+              t: 60,
+              q: '&iquest;Cu\u00e1l de estas igualdades <strong>s\u00ed forma una proporci\u00f3n</strong>? (Comprueba con los productos cruzados)',
+              data: null,
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── PROPORCIONES 8: término faltante en razones equivalentes ── */
+          () => {
+            const a = rand(2, 6),
+              b = rand(3, 8),
+              r = b * 3;
+            const {opciones, correcta} = makeOpts(
+              r,
+              [a * 3, b + 3, b * 2 + a, r + b].filter(v => v !== r && v > 0)
+            );
+            return {
+              cat: 'Proporciones',
+              t: 45,
+              q: 'La tabla muestra <strong>razones equivalentes</strong>. &iquest;Qu\u00e9 n\u00famero falta?',
+              data: tbl(
+                ['Primer t\u00e9rmino', 'Segundo t\u00e9rmino'],
+                [
+                  [a, b],
+                  [a * 2, b * 2],
+                  [a * 3, '?']
+                ]
+              ),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── DIRECTA 9: receta y porciones ── */
+          () => {
+            const [harina, porc] = [
+              [3, 4],
+              [2, 6],
+              [4, 8],
+              [2, 4],
+              [3, 6],
+              [5, 10]
+            ][rand(0, 5)];
+            const m = rand(2, 4);
+            const porc2 = porc * m,
+              r = harina * m;
+            const {opciones, correcta} = makeOpts(
+              r,
+              [harina * porc, r + harina, porc2 - harina, harina + m].filter(v => v !== r && v > 0)
+            );
+            return {
+              cat: 'Directa',
+              t: 60,
+              q:
+                'Una receta de pan usa <strong>' +
+                harina +
+                ' tazas de harina para ' +
+                porc +
+                ' porciones</strong>. &iquest;Cu\u00e1ntas tazas se necesitan para <strong>' +
+                porc2 +
+                ' porciones</strong>?',
+              data: svgVar('Porciones', 'Tazas', porc, harina, porc2, '?', factorStr(porc2, porc), '?', 'dir'),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── DIRECTA 10: velocidad constante y distancia ── */
+          () => {
+            const vel = [50, 55, 60, 65, 70][rand(0, 4)];
+            const horas = rand(2, 5),
+              r = vel * horas;
+            const {opciones, correcta} = makeOpts(
+              r,
+              [vel + horas, r + vel, r - horas, vel * horas + 10].filter(v => v !== r && v > 0)
+            );
+            return {
+              cat: 'Directa',
+              t: 45,
+              q: 'Un auto viaja a <strong>' + vel + ' millas por hora</strong>. Manteniendo esa velocidad, &iquest;cu\u00e1ntas millas recorrer\u00e1 en <strong>' + horas + ' horas</strong>?',
+              data: tbl(['Velocidad', 'Tiempo', 'Distancia'], [[vel + ' mi/h', horas + ' h', '?']]),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── DIRECTA 11: escala de mapa ── */
+          () => {
+            const escalas = [
+              [1, 25],
+              [1, 50],
+              [2, 60],
+              [1, 30],
+              [2, 80]
+            ];
+            const [scN, scD] = escalas[rand(0, escalas.length - 1)];
+            const dist = rand(3, 8) * scN;
+            const r = dist * (scD / scN);
+            const {opciones, correcta} = makeOpts(
+              r,
+              [dist + scD, r + scN, dist * scN, r - scD].filter(v => v !== r && v > 0)
+            );
+            return {
+              cat: 'Directa',
+              t: 75,
+              q:
+                'En un mapa, <strong>' +
+                scN +
+                ' cm representan ' +
+                scD +
+                ' km</strong> reales. Dos ciudades distan <strong>' +
+                dist +
+                ' cm en el mapa</strong>. &iquest;Cu\u00e1l es la distancia real en km?',
+              data: tbl(
+                ['Mapa (cm)', 'Real (km)'],
+                [
+                  [scN, scD],
+                  [dist, '?']
+                ]
+              ),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── DIRECTA 12: gasolina y millas ── */
+          () => {
+            const mpg = [20, 25, 30, 32][rand(0, 3)];
+            const gal1 = rand(3, 6),
+              m = rand(2, 4);
+            const mi1 = gal1 * mpg,
+              gal2 = gal1 * m,
+              mi2 = mi1 * m;
+            const r = gal2;
+            const {opciones, correcta} = makeOpts(
+              r,
+              [m, gal1 + m, Math.round(mi2 / gal1), gal2 + 1].filter(v => v !== r && v > 0)
+            );
+            return {
+              cat: 'Directa',
+              t: 60,
+              q:
+                'Un auto gasta <strong>' +
+                gal1 +
+                ' galones</strong> para recorrer <strong>' +
+                mi1 +
+                ' millas</strong>. &iquest;Cu\u00e1ntos <strong>galones</strong> necesita para recorrer <strong>' +
+                mi2 +
+                ' millas</strong>?',
+              data: svgVar('Millas', 'Galones', mi1, gal1, mi2, '?', factorStr(mi2, mi1), '?', 'dir'),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── INVERSA 13: obreros y días ── */
+          () => {
+            const {a1, b1, a2, b2} = parInv(3, 20);
+            const dir = Math.round((b1 * a2) / a1);
+            const {opciones, correcta} = makeOpts(
+              b2,
+              [dir, b1, a2, b1 + a2].filter(v => v !== b2 && v > 0)
+            );
+            return {
+              cat: 'Inversa',
+              t: 75,
+              q:
+                '<strong>' +
+                a1 +
+                ' obreros</strong> terminan una obra en <strong>' +
+                b1 +
+                ' d\u00edas</strong>. Trabajando al mismo ritmo, &iquest;en cu\u00e1ntos <strong>d\u00edas</strong> la terminar\u00e1n <strong>' +
+                a2 +
+                ' obreros</strong>?',
+              data: svgVar('Obreros', 'D\u00edas', a1, b1, a2, '?', factorStr(a2, a1), '?', 'inv'),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── INVERSA 14: velocidad y tiempo ── */
+          () => {
+            const bancos = [
+              {d: 240, v: [40, 48, 60, 80, 120]},
+              {d: 300, v: [50, 60, 75, 100]},
+              {d: 360, v: [40, 45, 60, 72, 90]},
+              {d: 480, v: [60, 80, 96, 120]},
+              {d: 180, v: [30, 45, 60, 90]}
+            ];
+            const B = bancos[rand(0, bancos.length - 1)];
+            const V = shuffle(B.v);
+            const v1 = V[0],
+              v2 = V[1];
+            const t1 = B.d / v1,
+              r = B.d / v2;
+            const dir = Math.round((t1 * v2) / v1);
+            const {opciones, correcta} = makeOpts(
+              r,
+              [dir, t1, Math.abs(v2 - v1), t1 + 1].filter(v => v !== r && v > 0)
+            );
+            return {
+              cat: 'Inversa',
+              t: 75,
+              q:
+                'Un viaje dura <strong>' +
+                t1 +
+                ' horas</strong> a <strong>' +
+                v1 +
+                ' millas por hora</strong>. Si el auto va a <strong>' +
+                v2 +
+                ' millas por hora</strong>, &iquest;cu\u00e1ntas <strong>horas</strong> durar\u00e1 el mismo viaje?',
+              data: svgVar('Velocidad', 'Horas', v1, t1, v2, '?', factorStr(v2, v1), '?', 'inv'),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── INVERSA 15: máquinas y horas ── */
+          () => {
+            const {a1, b1, a2, b2} = parInv(2, 12);
+            const dir = Math.round((b1 * a2) / a1);
+            const {opciones, correcta} = makeOpts(
+              b2,
+              [dir, b1, a2, a1 + b1].filter(v => v !== b2 && v > 0)
+            );
+            return {
+              cat: 'Inversa',
+              t: 75,
+              q:
+                '<strong>' +
+                a1 +
+                ' m\u00e1quinas</strong> empacan un pedido en <strong>' +
+                b1 +
+                ' horas</strong>. &iquest;Cu\u00e1ntas <strong>horas</strong> tardar\u00e1n <strong>' +
+                a2 +
+                ' m\u00e1quinas</strong> iguales?',
+              data: tbl(
+                ['M\u00e1quinas', 'Horas'],
+                [
+                  [a1, b1],
+                  [a2, '?'],
+                  ['Producto constante', a1 + ' \u00d7 ' + b1 + ' = ' + a1 * b1]
+                ]
+              ),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── INVERSA 16: personas y duración de las provisiones ── */
+          () => {
+            const {a1, b1, a2, b2} = parInv(4, 30);
+            const dir = Math.round((b1 * a2) / a1);
+            const {opciones, correcta} = makeOpts(
+              b2,
+              [dir, b1, a2, b1 + b2].filter(v => v !== b2 && v > 0)
+            );
+            return {
+              cat: 'Inversa',
+              t: 75,
+              q:
+                'Las provisiones de un albergue alcanzan para <strong>' +
+                a1 +
+                ' personas</strong> durante <strong>' +
+                b1 +
+                ' d\u00edas</strong>. Si llegan a ser <strong>' +
+                a2 +
+                ' personas</strong>, &iquest;para cu\u00e1ntos <strong>d\u00edas</strong> alcanzan?',
+              data: svgVar('Personas', 'D\u00edas', a1, b1, a2, '?', factorStr(a2, a1), '?', 'inv'),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── IDENTIFICAR 17 a 20: ¿directa o inversa? ── */
+          () => identificar('dir'),
+          () => identificar('inv'),
+          () => identificar('dir'),
+          () => identificar('inv')
+        ]; // fin GEN
+
+        /* ── MOTOR (idéntico al patrón de la serie) ── */
+        const preguntas = shuffle(GEN.map(g => g()));
+        const total = preguntas.length;
+        let actual = 0,
+          puntos = 0,
+          respondida = false,
+          reloj = null,
+          segs = 0;
+        const catPts = {},
+          catTot = {};
+        preguntas.forEach(p => {
+          catTot[p.cat] = (catTot[p.cat] || 0) + 1;
+          catPts[p.cat] = catPts[p.cat] || 0;
+        });
+
+        const qArea = document.getElementById('question-area');
+        const barP = document.getElementById('progress-bar');
+        const txtP = document.getElementById('progress-text');
+
+        function render(i) {
+          const p = preguntas[i];
+          const col = CC[p.cat] || '#0089cd',
+            icon = CI[p.cat] || '';
+          const tLbl = p.t <= 45 ? '&#9889; R\u00e1pida' : p.t <= 60 ? '&#128336; Media' : '&#9203; Compleja';
+          const opHtml = p.opciones.map(o => '<div class="option-item" data-val="' + o.valor + '" onclick="window.__rppClick(this)">' + o.texto + '</div>').join('');
+          const dH = p.data ? '<div class="data-box">' + p.data + '</div>' : '';
+          const btn = i === total - 1 ? 'Ver resultados' : 'Siguiente &rsaquo;';
+          qArea.innerHTML =
+            '<div class="question-meta">' +
+            '<span class="cat-badge" style="background:' +
+            col +
+            '"><span aria-hidden="true">' +
+            icon +
+            '</span> ' +
+            p.cat +
+            '</span>' +
+            '<span class="time-badge">' +
+            tLbl +
+            ' &middot; ' +
+            p.t +
+            's</span>' +
+            '</div>' +
+            '<div class="question-header">' +
+            p.q +
+            '</div>' +
+            dH +
+            '<div class="options">' +
+            opHtml +
+            '</div>' +
+            '<div class="btn-container"><div class="primary-btn" onclick="window.__rppNext()">' +
+            btn +
+            '</div></div>';
+          if (barP) barP.style.width = ((i + 1) / total) * 100 + '%';
+          if (txtP) txtP.textContent = 'Pregunta ' + (i + 1) + ' de ' + total;
+          iniciarReloj(p.t);
+        }
+
+        window.__rppClick = function (el) {
+          if (respondida) return;
+          pararReloj();
+          respondida = true;
+          const p = preguntas[actual];
+          const elegida = el.getAttribute('data-val');
+          if (elegida === p.correcta) {
+            el.className = 'option-item correct disabled';
+            puntos++;
+            catPts[p.cat]++;
+          } else {
+            el.className = 'option-item incorrect disabled';
+            const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+            if (ok) ok.className = 'option-item correct disabled';
+          }
+          qArea.querySelectorAll('.option-item').forEach(o => {
+            if (!o.className.includes('disabled')) o.className += ' disabled';
+          });
+        };
+
+        window.__rppNext = function () {
+          pararReloj();
+          actual++;
+          respondida = false;
+          if (actual < total) render(actual);
+          else mostrarRes();
+        };
+
+        function iniciarReloj(s) {
+          pararReloj();
+          segs = s;
+          updReloj();
+          reloj = setInterval(() => {
+            segs--;
+            updReloj();
+            if (segs <= 0) tAgotado();
+          }, 1000);
+        }
+        function pararReloj() {
+          if (reloj) {
+            clearInterval(reloj);
+            reloj = null;
+          }
+        }
+        function updReloj() {
+          const p = preguntas[actual] || {t: 60};
+          const tt = document.getElementById('timer-text');
+          const tb = document.getElementById('timer-bar');
+          const tc = document.getElementById('timer-container');
+          if (tt) tt.textContent = '\u23F1 Tiempo: ' + segs + 's';
+          const pct = (segs / p.t) * 100;
+          if (tb) {
+            tb.style.width = pct + '%';
+            if (pct <= 25) {
+              tb.style.background = '#dc3545';
+              if (tc) tc.className = 'timer-container timer-warning';
+            } else if (pct <= 50) {
+              tb.style.background = 'linear-gradient(90deg,#ffc107,#dc3545)';
+              if (tc) tc.className = 'timer-container';
+            } else {
+              tb.style.background = 'linear-gradient(90deg,#28a745,#ffc107,#dc3545)';
+              if (tc) tc.className = 'timer-container';
+            }
+          }
+        }
+        function tAgotado() {
+          pararReloj();
+          respondida = true;
+          const p = preguntas[actual];
+          const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+          if (ok) ok.className = 'option-item correct disabled';
+          qArea.querySelectorAll('.option-item').forEach(o => {
+            if (!o.className.includes('disabled')) o.className += ' disabled';
+          });
+          const tt = document.getElementById('timer-text');
+          if (tt) tt.textContent = '\u23F0 \u00a1Tiempo agotado!';
+          const tc = document.getElementById('timer-container');
+          if (tc) tc.className = 'timer-container timer-warning';
+        }
+
+        function mostrarRes() {
+          pararReloj();
+          qArea.innerHTML = '';
+          document.getElementById('timer-container').style.display = 'none';
+          const pct = Math.round((puntos / total) * 100);
+          document.getElementById('final-score').textContent = puntos + ' / ' + total + '  (' + pct + '%)';
+          let msg =
+            pct >= 85
+              ? '\u{1F3C6} \u00a1Excelente! Dominas las razones y las proporciones.'
+              : pct >= 70
+                ? '\u{1F44D} \u00a1Muy bien! Practica las categor\u00edas marcadas en rojo.'
+                : pct >= 50
+                  ? '\u{1F4AA} Buen intento. Refuerza la diferencia entre variaci\u00f3n directa e inversa.'
+                  : '\u{1F4DA} Empieza por los productos cruzados: son la base de toda proporci\u00f3n.';
+          document.getElementById('final-msg').textContent = msg;
+          let html = '<h3>Resultados por categor\u00eda:</h3>';
+          for (const cat of Object.keys(catTot)) {
+            const s = catPts[cat] || 0,
+              t2 = catTot[cat],
+              p2 = Math.round((s / t2) * 100),
+              col = CC[cat] || '#0089cd';
+            html +=
+              '<div class="cat-row"><span class="cat-lbl"><span aria-hidden="true">' +
+              CI[cat] +
+              '</span> ' +
+              cat +
+              '</span>' +
+              '<div class="cat-bar-out"><div class="cat-bar-in" style="width:' +
+              p2 +
+              '%;background:' +
+              col +
+              '"></div></div>' +
+              '<span class="cat-sc">' +
+              s +
+              '/' +
+              t2 +
+              ' \u2713</span></div>';
+          }
+          document.getElementById('cat-results').innerHTML = html;
+          let minCat = '',
+            minPct = 999;
+          for (const cat of Object.keys(catTot)) {
+            const pp = (catPts[cat] || 0) / catTot[cat];
+            if (pp < minPct) {
+              minPct = pp;
+              minCat = cat;
+            }
+          }
+          document.getElementById('tip-box').innerHTML =
+            minPct < 1 ? '<strong>\u{1F4CC} Para mejorar en \u00ab' + minCat + '\u00bb:</strong><br>' + (TIPS[minCat] || '') : '\u2705 \u00a1Sin categor\u00edas con cero! Mejora tus tiempos.';
+          document.getElementById('result-screen').className = 'result-screen';
+          document.querySelector('.quiz-progress-header').style.display = 'none';
+          document.getElementById('restart-btn').onclick = () => window.location.reload();
+        }
+
+        render(0);
+      })();
+    </script>
+  </body>
+</html>
 
