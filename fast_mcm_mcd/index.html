@@ -1,1 +1,1281 @@
+<!doctype html>
+<!--
+  Rapidez con el MCM y el MCD - GED
+  Autor: Jose M. Fernandez, ABE/ASE Math Master Teacher, Harry S. Truman College - City Colleges of Chicago.
+  (c) 2026. Licencia: CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+  Resumen: cuestionario interactivo de rapidez para practicar factores primos, maximo comun
+  divisor, minimo comun multiplo, la decision entre MCM y MCD, y aplicaciones, con generacion
+  aleatoria, cronometro, diagrama de Venn de factores y desglose por categoria.
+-->
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago" />
+    <meta name="license" content="CC BY-NC-SA 4.0" />
+    <link rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" />
+    <title>Rapidez con el MCM y el MCD &mdash; GED</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+      :root {
+        --cp: #5b21b6; /* primario: 8.6:1 con blanco (DUA OK) */
+        --ch: #6d28d9; /* hover: 6.3:1 con blanco (DUA OK) */
+      }
+      body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 10px;
+        background: linear-gradient(135deg, #241053, #3b1d78);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 90vh;
+        flex-direction: column;
+        gap: 10px;
+      }
+      #quiz-container {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 0 22px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        width: clamp(300px, 95%, 860px);
+        margin: 0 auto;
+      }
+      .quiz-progress-header {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 16px 22px;
+        border-bottom: 3px solid var(--cp);
+      }
+      .progress-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.95em, 2.5vw, 1.1em);
+        color: var(--cp);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      .progress-container {
+        background: #e0e0e0;
+        height: 12px;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+      }
+      .progress-bar {
+        height: 100%;
+        width: 5%;
+        background: linear-gradient(90deg, var(--cp), var(--ch));
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 6px;
+      }
+      .question-meta {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 20px 0;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .cat-badge {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 700;
+        color: #fff;
+      }
+      .time-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78em;
+        font-weight: 600;
+        background: #f0ebfb;
+        color: #444;
+        border: 1px solid #ccc;
+      }
+      .question-header {
+        padding: 16px 22px 10px;
+        font-size: clamp(0.95em, 2.4vw, 1.15em);
+        font-weight: 700;
+        text-align: center;
+        color: #1a1a2e;
+        line-height: 1.55;
+      }
+      .data-box {
+        background: linear-gradient(135deg, #faf7ff, #ede9fe);
+        border: 2px solid var(--cp);
+        border-radius: 12px;
+        margin: 0 22px 12px;
+        padding: 14px 18px;
+        text-align: center;
+      }
+      .data-box svg {
+        display: block;
+        margin: 0 auto;
+      }
+      .stat-table {
+        width: auto;
+        margin: 0 auto;
+        border-collapse: collapse;
+        font-size: clamp(0.85em, 2.2vw, 0.95em);
+      }
+      .stat-table caption {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+      .stat-table th {
+        background: var(--cp);
+        color: #fff;
+        padding: 7px 14px;
+        font-weight: 700;
+      }
+      .stat-table td {
+        padding: 6px 14px;
+        border: 1px solid #cbd;
+        text-align: center;
+        font-weight: 600;
+        color: #1a1a2e;
+      }
+      .stat-table tr:nth-child(even) td {
+        background: #f0ebfb;
+      }
+      .options {
+        padding: 0 18px;
+      }
+      .option-item {
+        display: block;
+        padding: 11px 16px;
+        margin-bottom: 10px;
+        background: #f0f4f8;
+        color: #333;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        font-size: clamp(0.95em, 2.4vw, 1.05em);
+        font-weight: 700;
+        line-height: 1.4;
+        user-select: none;
+      }
+      .option-item:hover:not(.disabled) {
+        background: #ede9fe;
+        border-color: var(--cp);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .option-item.correct {
+        background: #2e7d32 !important;
+        color: #fff !important;
+        border-color: #2e7d32 !important;
+      }
+      .option-item.incorrect {
+        background: #c62828 !important;
+        color: #fff !important;
+        border-color: #c62828 !important;
+      }
+      .option-item.disabled {
+        cursor: not-allowed;
+        opacity: 0.9;
+      }
+      .btn-container {
+        padding: 4px 18px 18px;
+      }
+      .primary-btn {
+        display: block;
+        width: 100%;
+        padding: 13px;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.05em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: var(--cp);
+        text-align: center;
+        user-select: none;
+        box-sizing: border-box;
+      }
+      .primary-btn:hover {
+        background: var(--ch);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      .timer-container {
+        background: linear-gradient(135deg, #fff8e1, #ffecb3);
+        padding: 11px 18px;
+        border-top: 2px solid #f39c12;
+      }
+      .timer-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.88em, 2.2vw, 1em);
+        color: #8a5a00;
+        margin-bottom: 7px;
+      }
+      .timer-bar-container {
+        background: #f0d0d0;
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .timer-bar {
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+        transition: width 0.1s linear;
+        border-radius: 4px;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+      }
+      .timer-warning {
+        animation: pulse 0.9s infinite;
+      }
+      .result-screen {
+        padding: 35px 28px;
+        text-align: center;
+      }
+      .result-screen.hidden {
+        display: none;
+      }
+      .result-screen h2 {
+        color: var(--cp);
+        font-size: clamp(1.4em, 4vw, 1.9em);
+        margin-bottom: 10px;
+      }
+      .result-score {
+        font-size: clamp(2em, 6vw, 2.8em) !important;
+        font-weight: 800;
+        color: var(--cp) !important;
+        margin: 12px 0 !important;
+      }
+      .result-msg {
+        font-size: clamp(1em, 2.8vw, 1.2em);
+        color: #333;
+        margin: 8px 0;
+      }
+      .cat-results {
+        margin: 18px 0;
+        text-align: left;
+      }
+      .cat-results h3 {
+        color: var(--cp);
+        font-size: 0.95em;
+        margin-bottom: 10px;
+      }
+      .cat-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 8px 0;
+      }
+      .cat-lbl {
+        flex: 1.4;
+        font-size: 0.78em;
+        font-weight: 600;
+        color: #333;
+      }
+      .cat-bar-out {
+        flex: 2;
+        background: #eee;
+        border-radius: 4px;
+        height: 11px;
+      }
+      .cat-bar-in {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.6s;
+      }
+      .cat-sc {
+        font-weight: 700;
+        color: var(--cp);
+        font-size: 0.82em;
+        min-width: 55px;
+        text-align: right;
+      }
+      .tip-box {
+        background: #faf7ff;
+        border-left: 4px solid var(--cp);
+        border-radius: 6px;
+        padding: 10px 14px;
+        margin: 14px 0 4px;
+        font-size: 0.82em;
+        color: #2e1065;
+        text-align: left;
+        line-height: 1.6;
+      }
+      .creditos {
+        text-align: center;
+        font-size: 0.78em;
+        color: #555;
+        padding: 6px 14px 12px;
+        line-height: 1.5;
+      }
+      .creditos a {
+        color: var(--cp);
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="quiz-container">
+      <div class="quiz-progress-header">
+        <div class="progress-text" id="progress-text">Pregunta 1 de 20</div>
+        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+      </div>
+      <div id="question-area"></div>
+      <div class="timer-container" id="timer-container">
+        <div class="timer-text" id="timer-text">&#9201; Tiempo: 60s</div>
+        <div class="timer-bar-container"><div class="timer-bar" id="timer-bar"></div></div>
+      </div>
+      <div class="result-screen hidden" id="result-screen">
+        <h2>&#127919; &iexcl;Cuestionario completado!</h2>
+        <p class="result-score" id="final-score"></p>
+        <p class="result-msg" id="final-msg"></p>
+        <div class="cat-results" id="cat-results"></div>
+        <div class="tip-box" id="tip-box"></div>
+        <div class="btn-container" style="padding-top: 14px">
+          <div class="primary-btn" id="restart-btn">&#128260; Nuevas preguntas (reiniciar)</div>
+        </div>
+      </div>
+      <p class="creditos">
+        Creado por Jos&eacute; M. Fern&aacute;ndez, ABE/ASE Math Master Teacher, Harry S. Truman College &mdash; City Colleges of Chicago.
+        <br />
+        Licencia
+        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>
+        .
+      </p>
+    </div>
+
+    <script>
+      (function () {
+        if (window.quizMcmMcdIniciado) return;
+        window.quizMcmMcdIniciado = true;
+
+        /* ── MATH UTILS ── */
+        function rand(a, b) {
+          return Math.floor(Math.random() * (b - a + 1)) + a;
+        }
+        function shuffle(arr) {
+          const a = arr.slice();
+          for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+          }
+          return a;
+        }
+        function mcd(a, b) {
+          while (b) {
+            const t = a % b;
+            a = b;
+            b = t;
+          }
+          return a;
+        }
+        function mcm(a, b) {
+          return (a * b) / mcd(a, b);
+        }
+        function divisores(n) {
+          const d = [];
+          for (let i = 1; i <= n; i++) {
+            if (n % i === 0) d.push(i);
+          }
+          return d;
+        }
+        function factLista(n) {
+          const f = [];
+          let d = 2,
+            x = n;
+          while (d * d <= x) {
+            while (x % d === 0) {
+              f.push(d);
+              x /= d;
+            }
+            d++;
+          }
+          if (x > 1) f.push(x);
+          return f;
+        }
+        function factMap(n) {
+          const m = {};
+          factLista(n).forEach(p => {
+            m[p] = (m[p] || 0) + 1;
+          });
+          return m;
+        }
+        function sup(e) {
+          const S = ['', '', '\u00b2', '\u00b3', '\u2074', '\u2075', '\u2076', '\u2077'];
+          return S[e] || '';
+        }
+        function mapStr(m) {
+          return Object.keys(m)
+            .map(Number)
+            .sort((a, b) => a - b)
+            .filter(p => m[p] > 0)
+            .map(p => p + sup(m[p]))
+            .join(' \u00d7 ');
+        }
+        function factStr(n) {
+          return mapStr(factMap(n));
+        }
+        /* factores exclusivos de "a" respecto de "b" (multiconjunto) */
+        function soloDe(a, b) {
+          const B = factLista(b).slice(),
+            S = [];
+          factLista(a).forEach(p => {
+            const i = B.indexOf(p);
+            if (i >= 0) {
+              B.splice(i, 1);
+            } else {
+              S.push(p);
+            }
+          });
+          return S;
+        }
+        function comunes(a, b) {
+          const B = factLista(b).slice(),
+            C = [];
+          factLista(a).forEach(p => {
+            const i = B.indexOf(p);
+            if (i >= 0) {
+              C.push(p);
+              B.splice(i, 1);
+            }
+          });
+          return C;
+        }
+
+        /* ── OPCIONES NUMÉRICAS ── */
+        function makeOpts(correct, dist) {
+          const cs = String(correct),
+            seen = new Set([cs]),
+            uniq = [];
+          for (const d of dist) {
+            const ds = String(d);
+            if (!seen.has(ds) && uniq.length < 3 && isFinite(d) && d > 0) {
+              seen.add(ds);
+              uniq.push(ds);
+            }
+          }
+          let ex = (parseFloat(cs) || 0) + 3;
+          while (uniq.length < 3) {
+            const c2 = String(ex);
+            ex += 4;
+            if (!seen.has(c2)) {
+              seen.add(c2);
+              uniq.push(c2);
+            }
+          }
+          const all = shuffle([cs, ...uniq]);
+          const L = ['a', 'b', 'c', 'd'];
+          return {opciones: all.map((v, i) => ({valor: L[i], texto: L[i].toUpperCase() + '. ' + v})), correcta: L[all.indexOf(cs)]};
+        }
+
+        /* ── OPCIONES DE TEXTO (con relleno de seguridad) ── */
+        function makeOptsText(ok, dist, relleno) {
+          const seen = new Set([ok]),
+            uniq = [];
+          for (const d of dist) {
+            if (!seen.has(d) && uniq.length < 3) {
+              seen.add(d);
+              uniq.push(d);
+            }
+          }
+          for (const d of relleno || []) {
+            if (!seen.has(d) && uniq.length < 3) {
+              seen.add(d);
+              uniq.push(d);
+            }
+          }
+          let k = 2;
+          while (uniq.length < 3) {
+            const c2 = ok + ' \u00d7 ' + k;
+            k++;
+            if (!seen.has(c2)) {
+              seen.add(c2);
+              uniq.push(c2);
+            }
+          }
+          const all = shuffle([ok, ...uniq]);
+          const L = ['a', 'b', 'c', 'd'];
+          return {opciones: all.map((v, i) => ({valor: L[i], texto: L[i].toUpperCase() + '. ' + v})), correcta: L[all.indexOf(ok)]};
+        }
+
+        /* ── Variantes erróneas de una descomposición ── */
+        function variantes(n) {
+          const m = factMap(n);
+          const pr = Object.keys(m)
+            .map(Number)
+            .sort((a, b) => a - b);
+          const p1 = pr[0],
+            pl = pr[pr.length - 1];
+          const v1 = Object.assign({}, m);
+          v1[p1] = m[p1] + 1;
+          const v2 = Object.assign({}, m);
+          v2[pl] = m[pl] - 1;
+          const v3 = Object.assign({}, m);
+          v3[pl] = m[pl] * 2;
+          return [mapStr(v1), mapStr(v2), mapStr(v3)];
+        }
+
+        /* ── SVG: diagrama de Venn de factores primos ── */
+        function svgVenn(a, b, etq) {
+          const izq = soloDe(a, b),
+            cen = comunes(a, b),
+            der = soloDe(b, a);
+          function col(x, arr) {
+            const L = arr.length ? arr : ['1'];
+            const y0 = 108 - (L.length - 1) * 9;
+            return L.map((v, i) => '<text x="' + x + '" y="' + (y0 + i * 18) + '" text-anchor="middle" font-size="15" font-weight="bold" fill="#2e1065">' + v + '</text>').join('');
+          }
+          return (
+            '<svg viewBox="0 0 350 215" style="width:min(340px,100%)" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de Venn con los factores primos de ' +
+            a +
+            ' y de ' +
+            b +
+            '. En el centro est\u00e1n los factores comunes.">' +
+            '<circle cx="130" cy="105" r="75" fill="#c4b5fd" fill-opacity="0.55" stroke="#5b21b6" stroke-width="2.5"/>' +
+            '<circle cx="220" cy="105" r="75" fill="#a5f3fc" fill-opacity="0.55" stroke="#0e7490" stroke-width="2.5"/>' +
+            '<text x="88" y="24" text-anchor="middle" font-size="16" font-weight="bold" fill="#5b21b6">' +
+            a +
+            '</text>' +
+            '<text x="262" y="24" text-anchor="middle" font-size="16" font-weight="bold" fill="#0e7490">' +
+            b +
+            '</text>' +
+            col(100, izq) +
+            col(175, cen) +
+            col(250, der) +
+            '<text x="175" y="205" text-anchor="middle" font-size="13" font-weight="bold" fill="#333">' +
+            etq +
+            '</text>' +
+            '</svg>'
+          );
+        }
+
+        /* ── Tabla informativa (Ally: caption + scope) ── */
+        function tbl(headers, rows) {
+          const TH = 'background:var(--cp);color:#fff;padding:7px 14px;font-weight:700';
+          const TD = 'padding:6px 14px;border:1px solid #cbd;text-align:center;font-weight:600;color:#1a1a2e';
+          const TDE = 'padding:6px 14px;border:1px solid #cbd;text-align:center;font-weight:600;color:#1a1a2e;background:#f0ebfb';
+          let h = '<table class="stat-table"><caption>Datos del problema</caption><tr>' + headers.map(hh => '<th scope="col" style="' + TH + '">' + hh + '</th>').join('') + '</tr>';
+          rows.forEach((r, i) => {
+            h += '<tr>' + r.map(c => '<td style="' + (i % 2 === 1 ? TDE : TD) + '">' + c + '</td>').join('') + '</tr>';
+          });
+          return h + '</table>';
+        }
+
+        /* ── BANCOS DE NÚMEROS ── */
+        const COMP = [12, 18, 20, 24, 28, 36, 40, 45, 48, 50, 54, 60, 63, 72, 75, 80, 84, 90, 96, 100];
+        const PARES = [
+          [12, 18],
+          [8, 12],
+          [15, 20],
+          [16, 24],
+          [18, 24],
+          [20, 30],
+          [24, 36],
+          [9, 12],
+          [14, 21],
+          [10, 25],
+          [27, 36],
+          [30, 45],
+          [16, 20],
+          [21, 28],
+          [12, 20],
+          [6, 15],
+          [36, 48],
+          [40, 60],
+          [25, 35],
+          [18, 30],
+          [24, 40],
+          [35, 42]
+        ];
+        const PARES_CHICO = [
+          [12, 18],
+          [8, 12],
+          [15, 20],
+          [6, 15],
+          [9, 12],
+          [12, 20],
+          [10, 25],
+          [14, 21],
+          [16, 24],
+          [18, 24],
+          [6, 8],
+          [10, 12],
+          [8, 20],
+          [9, 15],
+          [6, 10]
+        ];
+        const PRIMOS = [11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53];
+        const NO_PRIMOS = [9, 15, 21, 25, 27, 33, 35, 39, 49, 51, 55, 57, 63, 77, 87, 91];
+        function unNum() {
+          return COMP[rand(0, COMP.length - 1)];
+        }
+        function unPar(pool) {
+          const P = pool || PARES;
+          return P[rand(0, P.length - 1)];
+        }
+        const NOMB = ['Ana', 'Luis', 'Marta', 'Carlos', 'Rosa', 'Pedro', 'Elena', 'Jorge'];
+        function nombre() {
+          return NOMB[rand(0, NOMB.length - 1)];
+        }
+        function dosNombres() {
+          const n = shuffle(NOMB);
+          return [n[0], n[1]];
+        }
+
+        /* ── CATEGORÍAS ── */
+        const CC = {
+          'Factores primos': '#5b21b6',
+          MCD: '#0e7490',
+          MCM: '#166534',
+          Decidir: '#9d174d',
+          'Aplicaci\u00f3n': '#92400e'
+        };
+        const CI = {
+          'Factores primos': '\u229e',
+          MCD: '\u2229',
+          MCM: '\u222a',
+          Decidir: '\u21c4',
+          'Aplicaci\u00f3n': '\u2605'
+        };
+        const TIPS = {
+          'Factores primos':
+            'Un n\u00famero primo solo se divide entre 1 y entre s\u00ed mismo. Para descomponer, divide una y otra vez entre los primos m\u00e1s peque\u00f1os (2, 3, 5, 7, 11...) hasta llegar a 1, y escribe los repetidos como potencia: 24 = 2 \u00d7 2 \u00d7 2 \u00d7 3 = 2\u00b3 \u00d7 3.',
+          MCD: 'El MCD es el mayor n\u00famero que divide EXACTAMENTE a los dos. Siempre es menor o igual que el n\u00famero m\u00e1s peque\u00f1o. Con factores primos, se multiplican solo los factores COMUNES (la zona central del diagrama de Venn), tomando el menor exponente.',
+          MCM: 'El MCM es el menor n\u00famero que es m\u00faltiplo de los dos. Siempre es mayor o igual que el n\u00famero m\u00e1s grande. Con factores primos se multiplica TODO el diagrama (los comunes y los no comunes), tomando el mayor exponente. Multiplicar a \u00d7 b da un m\u00faltiplo com\u00fan, pero casi nunca el menor.',
+          Decidir:
+            'Palabras clave: si el problema REPARTE o CORTA en partes iguales lo m\u00e1s grandes posible, es MCD. Si algo se REPITE y buscas cu\u00e1ndo vuelve a coincidir (buses, luces, turnos), es MCM. Otra pista: si la respuesta debe ser menor que los datos, es MCD; si debe ser mayor, es MCM.',
+          'Aplicaci\u00f3n':
+            'Antes de calcular, preg\u00fantate: \u00bfla respuesta ser\u00e1 mayor o menor que los datos? Eso te dice si buscas el MCM o el MCD. Luego descompone en factores primos y usa el diagrama de Venn: el centro es el MCD y todo el diagrama es el MCM.'
+        };
+
+        /* ══════════════════════════════════════
+         GENERADORES — 20 preguntas (4 por categoría)
+      ══════════════════════════════════════ */
+        const GEN = [
+          /* ── FACTORES 1: descomposición en factores primos ── */
+          () => {
+            const n = unNum();
+            const {opciones, correcta} = makeOptsText(factStr(n), variantes(n));
+            return {
+              cat: 'Factores primos',
+              t: 50,
+              q: '&iquest;Cu\u00e1l es la <strong>descomposici\u00f3n en factores primos</strong> de <strong>' + n + '</strong>?',
+              data: tbl(['N\u00famero', 'Descomposici\u00f3n'], [[n, '?']]),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── FACTORES 2: del producto al número ── */
+          () => {
+            const n = unNum(),
+              f = factLista(n);
+            const sinExp = Object.keys(factMap(n))
+              .map(Number)
+              .reduce((x, y) => x * y, 1);
+            const {opciones, correcta} = makeOpts(n, [sinExp, f.reduce((x, y) => x + y, 0), n * 2]);
+            return {
+              cat: 'Factores primos',
+              t: 45,
+              q: 'Un n\u00famero tiene la descomposici\u00f3n <strong>' + factStr(n) + '</strong>. &iquest;Cu\u00e1l es ese <strong>n\u00famero</strong>?',
+              data: tbl(['Descomposici\u00f3n', 'N\u00famero'], [[factStr(n), '?']]),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── FACTORES 3: mayor factor primo ── */
+          () => {
+            const n = unNum(),
+              f = factLista(n);
+            const may = f[f.length - 1],
+              men = f[0];
+            const {opciones, correcta} = makeOpts(may, [men, may * men, n / may]);
+            return {
+              cat: 'Factores primos',
+              t: 45,
+              q: '&iquest;Cu\u00e1l es el <strong>mayor factor primo</strong> de <strong>' + n + '</strong>?',
+              data: tbl(['N\u00famero', 'Sus divisores'], [[n, divisores(n).join(', ')]]),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── FACTORES 4: identificar el número primo ── */
+          () => {
+            const ok = PRIMOS[rand(0, PRIMOS.length - 1)];
+            const np = shuffle(NO_PRIMOS).slice(0, 3);
+            const {opciones, correcta} = makeOptsText(String(ok), np.map(String));
+            return {
+              cat: 'Factores primos',
+              t: 45,
+              q: '&iquest;Cu\u00e1l de los siguientes n\u00fameros es <strong>primo</strong>?',
+              data: null,
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── MCD 5: con tabla de divisores ── */
+          () => {
+            const [a, b] = unPar(),
+              g = mcd(a, b);
+            const dg = divisores(g);
+            const {opciones, correcta} = makeOpts(g, [mcm(a, b), Math.min(a, b), dg[dg.length - 2]]);
+            return {
+              cat: 'MCD',
+              t: 50,
+              q: '&iquest;Cu\u00e1l es el <strong>MCD</strong> (m\u00e1ximo com\u00fan divisor) de <strong>' + a + '</strong> y <strong>' + b + '</strong>?',
+              data: tbl(
+                ['N\u00famero', 'Divisores'],
+                [
+                  [a, divisores(a).join(', ')],
+                  [b, divisores(b).join(', ')]
+                ]
+              ),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── MCD 6: con diagrama de Venn ── */
+          () => {
+            const [a, b] = unPar(),
+              g = mcd(a, b);
+            const {opciones, correcta} = makeOpts(g, [mcm(a, b), Math.min(a, b), a * b]);
+            return {
+              cat: 'MCD',
+              t: 50,
+              q: 'El diagrama muestra los factores primos de cada n\u00famero. &iquest;Cu\u00e1l es el <strong>MCD</strong> de <strong>' + a + '</strong> y <strong>' + b + '</strong>?',
+              data: svgVenn(a, b, 'El MCD es el producto de la zona central'),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── MCD 7: definición verbal ── */
+          () => {
+            const [a, b] = unPar(),
+              g = mcd(a, b);
+            const dg = divisores(g);
+            const {opciones, correcta} = makeOpts(g, [Math.min(a, b), dg[dg.length - 2], Math.abs(b - a)]);
+            return {
+              cat: 'MCD',
+              t: 55,
+              q: '&iquest;Cu\u00e1l es el <strong>mayor n\u00famero</strong> que divide de forma exacta tanto a <strong>' + a + '</strong> como a <strong>' + b + '</strong>?',
+              data: tbl(
+                ['N\u00famero', 'Factores primos'],
+                [
+                  [a, factStr(a)],
+                  [b, factStr(b)]
+                ]
+              ),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── MCD 8: simplificar una fracción ── */
+          () => {
+            const [a, b] = unPar(),
+              g = mcd(a, b);
+            const {opciones, correcta} = makeOptsText(a / g + '/' + b / g, [a + '/' + b, a - g + '/' + (b - g), b / g + '/' + a / g]);
+            return {
+              cat: 'MCD',
+              t: 55,
+              q: 'Al dividir el numerador y el denominador entre su MCD, la fracci\u00f3n <strong>' + a + '/' + b + '</strong> queda <strong>reducida a su m\u00ednima expresi\u00f3n</strong> como:',
+              data: tbl(['Fracci\u00f3n', 'MCD de ' + a + ' y ' + b], [[a + '/' + b, g]]),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── MCM 9: con tabla de múltiplos ── */
+          () => {
+            const [a, b] = unPar(PARES_CHICO),
+              l = mcm(a, b);
+            const mul = k => [1, 2, 3, 4, 5, 6].map(i => k * i).join(', ');
+            const {opciones, correcta} = makeOpts(l, [a * b, Math.max(a, b), mcd(a, b)]);
+            return {
+              cat: 'MCM',
+              t: 50,
+              q: '&iquest;Cu\u00e1l es el <strong>MCM</strong> (m\u00ednimo com\u00fan m\u00faltiplo) de <strong>' + a + '</strong> y <strong>' + b + '</strong>?',
+              data: tbl(
+                ['N\u00famero', 'Primeros m\u00faltiplos'],
+                [
+                  [a, mul(a)],
+                  [b, mul(b)]
+                ]
+              ),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── MCM 10: con diagrama de Venn ── */
+          () => {
+            const [a, b] = unPar(),
+              l = mcm(a, b);
+            const {opciones, correcta} = makeOpts(l, [a * b, mcd(a, b), Math.max(a, b)]);
+            return {
+              cat: 'MCM',
+              t: 50,
+              q: 'El diagrama muestra los factores primos de cada n\u00famero. &iquest;Cu\u00e1l es el <strong>MCM</strong> de <strong>' + a + '</strong> y <strong>' + b + '</strong>?',
+              data: svgVenn(a, b, 'El MCM es el producto de TODO el diagrama'),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── MCM 11: definición verbal ── */
+          () => {
+            const [a, b] = unPar(PARES_CHICO),
+              l = mcm(a, b);
+            const {opciones, correcta} = makeOpts(l, [a * b, a + b, Math.max(a, b)]);
+            return {
+              cat: 'MCM',
+              t: 55,
+              q: '&iquest;Cu\u00e1l es el <strong>menor n\u00famero</strong> (distinto de cero) que es m\u00faltiplo de <strong>' + a + '</strong> y tambi\u00e9n de <strong>' + b + '</strong>?',
+              data: tbl(
+                ['N\u00famero', 'Factores primos'],
+                [
+                  [a, factStr(a)],
+                  [b, factStr(b)]
+                ]
+              ),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── MCM 12: mínimo común denominador ── */
+          () => {
+            const [a, b] = unPar(PARES_CHICO),
+              l = mcm(a, b);
+            const {opciones, correcta} = makeOpts(l, [a * b, a + b, mcd(a, b)]);
+            return {
+              cat: 'MCM',
+              t: 55,
+              q: 'Para sumar <strong>1/' + a + ' + 1/' + b + '</strong> se necesita el <strong>m\u00ednimo com\u00fan denominador</strong>. &iquest;Cu\u00e1l es?',
+              data: tbl(
+                ['Fracci\u00f3n', 'Denominador'],
+                [
+                  ['1/' + a, a],
+                  ['1/' + b, b],
+                  ['Com\u00fan', '?']
+                ]
+              ),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── DECIDIR 13: buses (MCM) ── */
+          () => {
+            const [a, b] = unPar(PARES_CHICO);
+            const OK = 'El MCM (m\u00ednimo com\u00fan m\u00faltiplo)';
+            const {opciones, correcta} = makeOptsText(OK, ['El MCD (m\u00e1ximo com\u00fan divisor)', 'La suma de los dos n\u00fameros', 'El producto de los dos n\u00fameros']);
+            return {
+              cat: 'Decidir',
+              t: 55,
+              q:
+                'Un autob\u00fas sale cada <strong>' +
+                a +
+                ' minutos</strong> y otro cada <strong>' +
+                b +
+                ' minutos</strong>. Para saber dentro de cu\u00e1ntos minutos <strong>vuelven a salir juntos</strong>, &iquest;qu\u00e9 hay que calcular?',
+              data: null,
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── DECIDIR 14: cintas (MCD) ── */
+          () => {
+            const [a, b] = unPar();
+            const OK = 'El MCD (m\u00e1ximo com\u00fan divisor)';
+            const {opciones, correcta} = makeOptsText(OK, ['El MCM (m\u00ednimo com\u00fan m\u00faltiplo)', 'La suma de los dos n\u00fameros', 'El producto de los dos n\u00fameros']);
+            return {
+              cat: 'Decidir',
+              t: 55,
+              q:
+                'Se tienen dos cintas de <strong>' +
+                a +
+                ' cm</strong> y <strong>' +
+                b +
+                ' cm</strong>. Para cortarlas en pedazos iguales <strong>lo m\u00e1s largos posible</strong> y sin desperdicio, &iquest;qu\u00e9 hay que calcular?',
+              data: null,
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── DECIDIR 15: turnos de trabajo (MCM) ── */
+          () => {
+            const [a, b] = unPar(PARES_CHICO),
+              nm = dosNombres();
+            const OK = 'El MCM (m\u00ednimo com\u00fan m\u00faltiplo)';
+            const {opciones, correcta} = makeOptsText(OK, ['El MCD (m\u00e1ximo com\u00fan divisor)', 'La diferencia entre los dos n\u00fameros', 'El producto de los dos n\u00fameros']);
+            return {
+              cat: 'Decidir',
+              t: 55,
+              q:
+                nm[0] +
+                ' trabaja cada <strong>' +
+                a +
+                ' d\u00edas</strong> y ' +
+                nm[1] +
+                ' cada <strong>' +
+                b +
+                ' d\u00edas</strong>. Para saber cu\u00e1ndo <strong>coincidir\u00e1n de nuevo</strong> en el mismo turno, &iquest;qu\u00e9 hay que calcular?',
+              data: null,
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── DECIDIR 16: bolsas iguales (MCD) ── */
+          () => {
+            const [a, b] = unPar();
+            const OK = 'El MCD (m\u00e1ximo com\u00fan divisor)';
+            const {opciones, correcta} = makeOptsText(OK, ['El MCM (m\u00ednimo com\u00fan m\u00faltiplo)', 'La suma de los dos n\u00fameros', 'La diferencia entre los dos n\u00fameros']);
+            return {
+              cat: 'Decidir',
+              t: 55,
+              q:
+                'Hay <strong>' +
+                a +
+                ' l\u00e1pices</strong> y <strong>' +
+                b +
+                ' cuadernos</strong>. Para armar la <strong>mayor cantidad de bolsas id\u00e9nticas</strong> sin que sobre nada, &iquest;qu\u00e9 hay que calcular?',
+              data: null,
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── APLICACIÓN 17: luces que parpadean (MCM) ── */
+          () => {
+            const [a, b] = unPar(PARES_CHICO),
+              l = mcm(a, b);
+            const {opciones, correcta} = makeOpts(l, [a * b, mcd(a, b), a + b]);
+            return {
+              cat: 'Aplicaci\u00f3n',
+              t: 60,
+              q:
+                'Dos luces parpadean: una cada <strong>' +
+                a +
+                ' segundos</strong> y otra cada <strong>' +
+                b +
+                ' segundos</strong>. Si acaban de parpadear juntas, &iquest;dentro de cu\u00e1ntos <strong>segundos</strong> volver\u00e1n a parpadear al mismo tiempo?',
+              data: tbl(
+                ['Luz', 'Parpadea cada'],
+                [
+                  ['Luz A', a + ' s'],
+                  ['Luz B', b + ' s']
+                ]
+              ),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── APLICACIÓN 18: cortar cintas (MCD) ── */
+          () => {
+            const [a, b] = unPar(),
+              g = mcd(a, b);
+            const dg = divisores(g);
+            const {opciones, correcta} = makeOpts(g, [mcm(a, b), Math.min(a, b), dg[dg.length - 2]]);
+            return {
+              cat: 'Aplicaci\u00f3n',
+              t: 60,
+              q:
+                'Una cinta mide <strong>' +
+                a +
+                ' cm</strong> y otra <strong>' +
+                b +
+                ' cm</strong>. Se cortan en pedazos iguales, lo m\u00e1s largos posible y sin que sobre nada. &iquest;Cu\u00e1ntos <strong>cent\u00edmetros</strong> mide cada pedazo?',
+              data: tbl(
+                ['Cinta', 'Longitud'],
+                [
+                  ['Cinta 1', a + ' cm'],
+                  ['Cinta 2', b + ' cm']
+                ]
+              ),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── APLICACIÓN 19: bolsas idénticas (MCD) ── */
+          () => {
+            const [a, b] = unPar(),
+              g = mcd(a, b);
+            const {opciones, correcta} = makeOpts(g, [mcm(a, b), Math.min(a, b), a + b]);
+            return {
+              cat: 'Aplicaci\u00f3n',
+              t: 60,
+              q:
+                nombre() +
+                ' tiene <strong>' +
+                a +
+                ' l\u00e1pices</strong> y <strong>' +
+                b +
+                ' cuadernos</strong>. Quiere armar la mayor cantidad de <strong>bolsas id\u00e9nticas</strong> sin que sobre nada. &iquest;Cu\u00e1ntas <strong>bolsas</strong> puede armar?',
+              data: tbl(
+                ['Art\u00edculo', 'Cantidad'],
+                [
+                  ['L\u00e1pices', a],
+                  ['Cuadernos', b]
+                ]
+              ),
+              opciones,
+              correcta
+            };
+          },
+
+          /* ── APLICACIÓN 20: visitas que coinciden (MCM) ── */
+          () => {
+            const [a, b] = unPar(PARES_CHICO),
+              l = mcm(a, b);
+            const {opciones, correcta} = makeOpts(l, [a * b, Math.max(a, b), mcd(a, b)]);
+            return {
+              cat: 'Aplicaci\u00f3n',
+              t: 60,
+              q:
+                'Un t\u00e9cnico visita una escuela cada <strong>' +
+                a +
+                ' d\u00edas</strong> y otro cada <strong>' +
+                b +
+                ' d\u00edas</strong>. Hoy coincidieron los dos. &iquest;Dentro de cu\u00e1ntos <strong>d\u00edas</strong> volver\u00e1n a coincidir?',
+              data: tbl(
+                ['T\u00e9cnico', 'Visita cada'],
+                [
+                  ['T\u00e9cnico 1', a + ' d\u00edas'],
+                  ['T\u00e9cnico 2', b + ' d\u00edas']
+                ]
+              ),
+              opciones,
+              correcta
+            };
+          }
+        ]; // fin GEN
+
+        /* ── MOTOR ── */
+        const preguntas = shuffle(GEN.map(g => g()));
+        const total = preguntas.length;
+        let actual = 0,
+          puntos = 0,
+          respondida = false,
+          reloj = null,
+          segs = 0;
+        const catPts = {},
+          catTot = {};
+        preguntas.forEach(p => {
+          catTot[p.cat] = (catTot[p.cat] || 0) + 1;
+          catPts[p.cat] = catPts[p.cat] || 0;
+        });
+
+        const qArea = document.getElementById('question-area');
+        const barP = document.getElementById('progress-bar');
+        const txtP = document.getElementById('progress-text');
+
+        function render(i) {
+          const p = preguntas[i];
+          const col = CC[p.cat] || '#5b21b6';
+          const icon = CI[p.cat] || '';
+          const tLbl = p.t <= 45 ? '&#9889; R\u00e1pida' : p.t <= 55 ? '&#128336; Media' : '&#9203; Compleja';
+          const opHtml = p.opciones.map(o => '<div class="option-item" data-val="' + o.valor + '" onclick="window.__mmClick(this)">' + o.texto + '</div>').join('');
+          const dH = p.data ? '<div class="data-box">' + p.data + '</div>' : '';
+          const btn = i === total - 1 ? 'Ver resultados' : 'Siguiente &rsaquo;';
+          qArea.innerHTML =
+            '<div class="question-meta">' +
+            '<span class="cat-badge" style="background:' +
+            col +
+            '"><span aria-hidden="true">' +
+            icon +
+            '</span> ' +
+            p.cat +
+            '</span>' +
+            '<span class="time-badge">' +
+            tLbl +
+            ' &middot; ' +
+            p.t +
+            's</span>' +
+            '</div>' +
+            '<div class="question-header">' +
+            p.q +
+            '</div>' +
+            dH +
+            '<div class="options">' +
+            opHtml +
+            '</div>' +
+            '<div class="btn-container"><div class="primary-btn" onclick="window.__mmNext()">' +
+            btn +
+            '</div></div>';
+          if (barP) barP.style.width = ((i + 1) / total) * 100 + '%';
+          if (txtP) txtP.textContent = 'Pregunta ' + (i + 1) + ' de ' + total;
+          iniciarReloj(p.t);
+        }
+
+        window.__mmClick = function (el) {
+          if (respondida) return;
+          pararReloj();
+          respondida = true;
+          const p = preguntas[actual];
+          const elegida = el.getAttribute('data-val');
+          if (elegida === p.correcta) {
+            el.className = 'option-item correct disabled';
+            puntos++;
+            catPts[p.cat]++;
+          } else {
+            el.className = 'option-item incorrect disabled';
+            const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+            if (ok) ok.className = 'option-item correct disabled';
+          }
+          qArea.querySelectorAll('.option-item').forEach(o => {
+            if (!o.className.includes('disabled')) o.className += ' disabled';
+          });
+        };
+
+        window.__mmNext = function () {
+          pararReloj();
+          actual++;
+          respondida = false;
+          if (actual < total) render(actual);
+          else mostrarRes();
+        };
+
+        function iniciarReloj(s) {
+          pararReloj();
+          segs = s;
+          updReloj();
+          reloj = setInterval(() => {
+            segs--;
+            updReloj();
+            if (segs <= 0) tAgotado();
+          }, 1000);
+        }
+        function pararReloj() {
+          if (reloj) {
+            clearInterval(reloj);
+            reloj = null;
+          }
+        }
+        function updReloj() {
+          const p = preguntas[actual] || {t: 60};
+          const tt = document.getElementById('timer-text');
+          const tb = document.getElementById('timer-bar');
+          const tc = document.getElementById('timer-container');
+          if (tt) tt.textContent = '\u23F1 Tiempo: ' + segs + 's';
+          const pctT = (segs / p.t) * 100;
+          if (tb) {
+            tb.style.width = pctT + '%';
+            if (pctT <= 25) {
+              tb.style.background = '#dc3545';
+              if (tc) tc.className = 'timer-container timer-warning';
+            } else if (pctT <= 50) {
+              tb.style.background = 'linear-gradient(90deg,#ffc107,#dc3545)';
+              if (tc) tc.className = 'timer-container';
+            } else {
+              tb.style.background = 'linear-gradient(90deg,#28a745,#ffc107,#dc3545)';
+              if (tc) tc.className = 'timer-container';
+            }
+          }
+        }
+        function tAgotado() {
+          pararReloj();
+          respondida = true;
+          const p = preguntas[actual];
+          const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+          if (ok) ok.className = 'option-item correct disabled';
+          qArea.querySelectorAll('.option-item').forEach(o => {
+            if (!o.className.includes('disabled')) o.className += ' disabled';
+          });
+          const tt = document.getElementById('timer-text');
+          if (tt) tt.textContent = '\u23F0 \u00a1Tiempo agotado!';
+          const tc = document.getElementById('timer-container');
+          if (tc) tc.className = 'timer-container timer-warning';
+        }
+
+        function mostrarRes() {
+          pararReloj();
+          qArea.innerHTML = '';
+          document.getElementById('timer-container').style.display = 'none';
+          const pf = Math.round((puntos / total) * 100);
+          document.getElementById('final-score').textContent = puntos + ' / ' + total + '  (' + pf + '%)';
+          let msg =
+            pf >= 85
+              ? '\u{1F3C6} \u00a1Excelente! Dominas el MCM y el MCD para el GED.'
+              : pf >= 70
+                ? '\u{1F44D} \u00a1Muy bien! Repasa las categor\u00edas marcadas en rojo.'
+                : pf >= 50
+                  ? '\u{1F4AA} Buen intento. Refuerza la diferencia entre repartir (MCD) y coincidir (MCM).'
+                  : '\u{1F4DA} Empieza por la descomposici\u00f3n en factores primos: es la base del MCM y del MCD.';
+          document.getElementById('final-msg').textContent = msg;
+          let html = '<h3>Resultados por categor\u00eda:</h3>';
+          for (const cat of Object.keys(catTot)) {
+            const s = catPts[cat] || 0;
+            const t2 = catTot[cat];
+            const p2 = Math.round((s / t2) * 100);
+            const col = CC[cat] || '#5b21b6';
+            html +=
+              '<div class="cat-row">' +
+              '<span class="cat-lbl"><span aria-hidden="true">' +
+              CI[cat] +
+              '</span> ' +
+              cat +
+              '</span>' +
+              '<div class="cat-bar-out"><div class="cat-bar-in" style="width:' +
+              p2 +
+              '%;background:' +
+              col +
+              '"></div></div>' +
+              '<span class="cat-sc">' +
+              s +
+              '/' +
+              t2 +
+              ' \u2713</span>' +
+              '</div>';
+          }
+          document.getElementById('cat-results').innerHTML = html;
+          let minCat = '',
+            minPct = 999;
+          for (const cat of Object.keys(catTot)) {
+            const pp = (catPts[cat] || 0) / catTot[cat];
+            if (pp < minPct) {
+              minPct = pp;
+              minCat = cat;
+            }
+          }
+          document.getElementById('tip-box').innerHTML =
+            minPct < 1
+              ? '<strong>\u{1F4CC} Para mejorar en \u00ab' + minCat + '\u00bb:</strong><br>' + (TIPS[minCat] || '')
+              : '\u2705 \u00a1Sin categor\u00edas con cero! Ahora intenta mejorar tus tiempos.';
+          document.getElementById('result-screen').className = 'result-screen';
+          document.querySelector('.quiz-progress-header').style.display = 'none';
+          document.getElementById('restart-btn').onclick = () => window.location.reload();
+        }
+
+        render(0);
+      })();
+    </script>
+  </body>
+</html>
 
