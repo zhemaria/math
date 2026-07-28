@@ -1,1 +1,946 @@
+<!doctype html>
+<!--
+  Rapidez en el orden de las operaciones - GED
+  Autor: Jose M. Fernandez, ABE/ASE Math Master Teacher, Harry S. Truman College - City Colleges of Chicago.
+  (c) 2026. Licencia: CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+  Resumen: cuestionario interactivo de rapidez sobre el orden de las operaciones con nivel
+  avanzado: jerarquia, agrupaciones anidadas, exponentes y radicales, numeros con signo,
+  la barra de fraccion como agrupacion, deteccion de errores e insercion de parentesis.
+  Incluye generacion aleatoria, cronometro, explicacion paso a paso y desglose por categoria.
+-->
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago" />
+    <meta name="license" content="CC BY-NC-SA 4.0" />
+    <link rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" />
+    <title>Rapidez en el orden de las operaciones &mdash; GED</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+      :root {
+        --cp: #5b21b6;  /* primario: 8.6:1 con blanco (DUA OK) */
+        --ch: #6d28d9;  /* hover */
+      }
+      body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 10px;
+        background: linear-gradient(135deg, #1e1035, #2f1a5c);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 90vh;
+        flex-direction: column;
+        gap: 10px;
+      }
+      #quiz-container {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 0 22px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        width: clamp(300px, 95%, 860px);
+        margin: 0 auto;
+      }
+      .quiz-progress-header {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 16px 22px;
+        border-bottom: 3px solid var(--cp);
+      }
+      .progress-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.95em, 2.5vw, 1.1em);
+        color: var(--cp);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      .progress-container {
+        background: #e0e0e0;
+        height: 12px;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+      }
+      .progress-bar {
+        height: 100%;
+        width: 5%;
+        background: linear-gradient(90deg, var(--cp), var(--ch));
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 6px;
+      }
+      .question-meta {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 20px 0;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .cat-badge {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 700;
+        color: #fff;
+      }
+      .time-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78em;
+        font-weight: 600;
+        background: #f1ecfb;
+        color: #444;
+        border: 1px solid #ccc;
+      }
+      .question-header {
+        padding: 16px 22px 10px;
+        font-size: clamp(0.95em, 2.4vw, 1.15em);
+        font-weight: 700;
+        text-align: center;
+        color: #1a1a2e;
+        line-height: 1.55;
+      }
+      .data-box {
+        background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+        border: 2px solid var(--cp);
+        border-radius: 12px;
+        margin: 0 22px 12px;
+        padding: 16px 14px;
+        text-align: center;
+      }
+      .expr {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: clamp(1.25em, 5vw, 1.9em);
+        font-weight: 700;
+        color: #2b1065;
+        letter-spacing: 1px;
+        line-height: 1.5;
+      }
+      .expr-chica {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: clamp(1em, 3.6vw, 1.25em);
+        font-weight: 700;
+        color: #2b1065;
+      }
+      .frac {
+        display: inline-block;
+        vertical-align: middle;
+        text-align: center;
+        margin: 0 6px;
+      }
+      .frac .num { display: block; padding: 0 8px 3px; border-bottom: 3px solid #2b1065; }
+      .frac .den { display: block; padding: 3px 8px 0; }
+      .pasos {
+        margin: 0 auto;
+        border-collapse: collapse;
+        font-size: clamp(0.82em, 2.2vw, 0.95em);
+      }
+      .pasos caption {
+        position: absolute; width: 1px; height: 1px;
+        overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+      }
+      .pasos th {
+        background: var(--cp);
+        color: #fff;
+        padding: 7px 14px;
+        font-weight: 700;
+      }
+      .pasos td {
+        padding: 7px 14px;
+        border: 1px solid #cdc4e0;
+        font-weight: 600;
+        color: #1a1a2e;
+        font-family: 'Courier New', Courier, monospace;
+        text-align: left;
+      }
+      .pasos tr:nth-child(even) td { background: #f3efff; }
+      .options { padding: 0 18px; }
+      .option-item {
+        display: block;
+        padding: 11px 16px;
+        margin-bottom: 10px;
+        background: #f5f3fb;
+        color: #333;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        font-size: clamp(0.95em, 2.4vw, 1.05em);
+        font-weight: 700;
+        line-height: 1.45;
+        user-select: none;
+      }
+      .option-item:hover:not(.disabled) {
+        background: #e6ddfb;
+        border-color: var(--cp);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .option-item:focus-visible { outline: 3px solid #1a1a2e; outline-offset: 2px; }
+      .option-item.correct {
+        background: #1b5e20 !important;
+        color: #fff !important;
+        border-color: #1b5e20 !important;
+      }
+      .option-item.incorrect {
+        background: #b3261e !important;
+        color: #fff !important;
+        border-color: #b3261e !important;
+      }
+      .option-item.disabled { cursor: not-allowed; opacity: 0.95; }
+      .feedback-box {
+        margin: 4px 18px 10px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        border-left: 5px solid var(--cp);
+        background: #f5f3ff;
+        color: #2b1065;
+        font-size: clamp(0.85em, 2.2vw, 0.95em);
+        line-height: 1.7;
+        text-align: left;
+      }
+      .feedback-box.mal { border-left-color: #b3261e; background: #fdeceb; color: #5c1310; }
+      .feedback-box.hidden { display: none; }
+      .btn-container { padding: 4px 18px 18px; }
+      .primary-btn {
+        display: block;
+        width: 100%;
+        padding: 13px;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.05em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: var(--cp);
+        text-align: center;
+        user-select: none;
+        box-sizing: border-box;
+      }
+      .primary-btn:hover {
+        background: var(--ch);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      .primary-btn:focus-visible { outline: 3px solid #1a1a2e; outline-offset: 3px; }
+      .timer-container {
+        background: linear-gradient(135deg, #fff8e1, #ffecb3);
+        padding: 11px 18px;
+        border-top: 2px solid #b06f00;
+      }
+      .timer-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.88em, 2.2vw, 1em);
+        color: #5c3900;
+        margin-bottom: 7px;
+      }
+      .timer-bar-container {
+        background: #f0d0d0;
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .timer-bar {
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, #1b5e20, #b06f00, #b3261e);
+        transition: width 0.1s linear;
+        border-radius: 4px;
+      }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+      .timer-warning { animation: pulse 0.9s infinite; }
+      @media (prefers-reduced-motion: reduce) {
+        * { animation: none !important; transition: none !important; }
+      }
+      .result-screen { padding: 35px 28px; text-align: center; }
+      .result-screen.hidden { display: none; }
+      .result-screen h2 {
+        color: var(--cp);
+        font-size: clamp(1.4em, 4vw, 1.9em);
+        margin-bottom: 10px;
+      }
+      .result-score {
+        font-size: clamp(2em, 6vw, 2.8em) !important;
+        font-weight: 800;
+        color: var(--cp) !important;
+        margin: 12px 0 !important;
+      }
+      .result-msg {
+        font-size: clamp(1em, 2.8vw, 1.2em);
+        color: #333;
+        margin: 8px 0;
+      }
+      .cat-results { margin: 18px 0; text-align: left; }
+      .cat-results h3 { color: var(--cp); font-size: 0.95em; margin-bottom: 10px; }
+      .cat-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+      .cat-lbl { flex: 1.4; font-size: 0.78em; font-weight: 600; color: #333; }
+      .cat-bar-out { flex: 2; background: #eee; border-radius: 4px; height: 11px; }
+      .cat-bar-in { height: 100%; border-radius: 4px; transition: width 0.6s; }
+      .cat-sc { font-weight: 700; color: var(--cp); font-size: 0.82em; min-width: 55px; text-align: right; }
+      .tip-box {
+        background: #f5f3ff;
+        border-left: 4px solid var(--cp);
+        border-radius: 6px;
+        padding: 10px 14px;
+        margin: 14px 0 4px;
+        font-size: 0.82em;
+        color: #2b1065;
+        text-align: left;
+        line-height: 1.6;
+      }
+      .creditos {
+        text-align: center; font-size: 0.78em; color: #555;
+        padding: 6px 14px 12px; line-height: 1.5;
+      }
+      .creditos a { color: var(--cp); text-decoration: underline; }
+      .sr-only {
+        position: absolute; width: 1px; height: 1px;
+        overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="quiz-container">
+      <h1 class="sr-only">Cuestionario de rapidez: orden de las operaciones</h1>
+      <div class="quiz-progress-header">
+        <div class="progress-text" id="progress-text">Pregunta 1 de 20</div>
+        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+      </div>
+      <div id="question-area"></div>
+      <div class="timer-container" id="timer-container">
+        <div class="timer-text" id="timer-text">&#9201; Tiempo: 60s</div>
+        <div class="timer-bar-container"><div class="timer-bar" id="timer-bar"></div></div>
+      </div>
+      <div class="result-screen hidden" id="result-screen">
+        <h2>&#129518; &iexcl;Cuestionario completado!</h2>
+        <p class="result-score" id="final-score"></p>
+        <p class="result-msg" id="final-msg"></p>
+        <div class="cat-results" id="cat-results"></div>
+        <div class="tip-box" id="tip-box"></div>
+        <div class="btn-container" style="padding-top:14px">
+          <div class="primary-btn" id="restart-btn" role="button" tabindex="0">&#128260; Nuevas preguntas (reiniciar)</div>
+        </div>
+      </div>
+      <p class="creditos">
+        Creado por Jos&eacute; M. Fern&aacute;ndez, ABE/ASE Math Master Teacher, Harry S. Truman College &mdash; City Colleges of Chicago.<br>
+        Licencia <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.
+      </p>
+    </div>
 
+    <script>
+    (function () {
+      if (window.quizOrdenIniciado) return;
+      window.quizOrdenIniciado = true;
+
+      /* ── UTILIDADES ── */
+      function rand(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      function pick(a) { return a[rand(0, a.length - 1)]; }
+
+      /* ── SÍMBOLOS ── */
+      const X = ' &times; ';      /* multiplicación */
+      const D = ' &divide; ';     /* división */
+      const M = ' &minus; ';      /* signo menos */
+      const P = ' + ';
+      const NEG = '&minus;';      /* menos unario */
+
+      /* ── OPCIONES NUMÉRICAS ── */
+      function makeOpts(correct, dist) {
+        const cs = String(correct), seen = new Set([cs]), uniq = [];
+        for (const d of dist) {
+          const ds = String(d);
+          if (!seen.has(ds) && uniq.length < 3 && isFinite(d)) { seen.add(ds); uniq.push(ds); }
+        }
+        let ex = (parseFloat(cs) || 0) + 6;
+        while (uniq.length < 3) {
+          const c2 = String(Math.round(ex)); ex += 7;
+          if (!seen.has(c2)) { seen.add(c2); uniq.push(c2); }
+        }
+        const all = shuffle([cs, ...uniq]);
+        const L = ['a', 'b', 'c', 'd'];
+        return { opciones: all.map(function (v, i) { return { valor: L[i], texto: L[i].toUpperCase() + '. ' + fmt(v) }; }), correcta: L[all.indexOf(cs)] };
+      }
+
+      /* ── OPCIONES DE TEXTO ── */
+      function makeOptsText(ok, dist) {
+        const seen = new Set([ok]), uniq = [];
+        for (const d of dist) { if (!seen.has(d) && uniq.length < 3) { seen.add(d); uniq.push(d); } }
+        while (uniq.length < 3) { uniq.push('Ninguna de las anteriores ' + uniq.length); }
+        const all = shuffle([ok, ...uniq]);
+        const L = ['a', 'b', 'c', 'd'];
+        return { opciones: all.map(function (v, i) { return { valor: L[i], texto: L[i].toUpperCase() + '. ' + v }; }), correcta: L[all.indexOf(ok)] };
+      }
+
+      /* ── Formato de negativos con el signo menos tipográfico ── */
+      function fmt(n) {
+        const s = String(n);
+        return s.charAt(0) === '-' ? NEG + s.slice(1) : s;
+      }
+
+      /* ── Caja de expresión y tabla de pasos ── */
+      function caja(exp) { return '<div class="expr">' + exp + '</div>'; }
+      function tablaPasos(filas) {
+        let h = '<table class="pasos"><caption>Procedimiento paso a paso de un estudiante</caption>' +
+          '<tr><th scope="col">Paso</th><th scope="col">Lo que hizo</th></tr>';
+        filas.forEach(function (f, i) {
+          h += '<tr><td>Paso ' + (i + 1) + '</td><td>' + f + '</td></tr>';
+        });
+        return h + '</table>';
+      }
+
+      /* ── CATEGORÍAS ── */
+      const CC = {
+        'Jerarqu\u00eda': '#1565c0',
+        'Anidadas': '#5b21b6',
+        'Exponentes': '#0e7490',
+        'Signos': '#8a4b00',
+        'Errores': '#9d174d'
+      };
+      const CI = {
+        'Jerarqu\u00eda': '\u2261',
+        'Anidadas': '\u2261',
+        'Exponentes': '\u00b2',
+        'Signos': '\u00b1',
+        'Errores': '\u26a0'
+      };
+      const TIPS = {
+        'Jerarqu\u00eda':
+          'El orden es: (1) agrupaciones, (2) exponentes y ra\u00edces, (3) multiplicaci\u00f3n y divisi\u00f3n de IZQUIERDA A DERECHA, (4) suma y resta de izquierda a derecha. La multiplicaci\u00f3n no va antes que la divisi\u00f3n: van en el mismo nivel.',
+        'Anidadas':
+          'Con agrupaciones dentro de agrupaciones se resuelve SIEMPRE de adentro hacia afuera: primero el par\u00e9ntesis m\u00e1s interno, despu\u00e9s el corchete y por \u00faltimo la llave. Reescribe la expresi\u00f3n completa en cada paso; no intentes hacer dos niveles a la vez.',
+        'Exponentes':
+          'Ojo con el signo: \u22124\u00b2 es \u2212(4\u00b74) = \u221216, mientras que (\u22124)\u00b2 = +16. El exponente afecta solo a lo que est\u00e1 pegado a \u00e9l. Adem\u00e1s, (a + b)\u00b2 NO es a\u00b2 + b\u00b2: primero se suma dentro del par\u00e9ntesis.',
+        'Signos':
+          'Menos por menos da m\u00e1s; menos por m\u00e1s da menos. Resta un par\u00e9ntesis precedido de menos cambia TODOS los signos de adentro. La barra de fracci\u00f3n agrupa: se resuelve todo el numerador y todo el denominador antes de dividir.',
+        'Errores':
+          'Revisa el trabajo paso a paso y comp\u00e1ralo con la jerarqu\u00eda. El error m\u00e1s frecuente en el examen es operar de izquierda a derecha ignorando la multiplicaci\u00f3n, el exponente o el par\u00e9ntesis.'
+      };
+
+      /* ══════════════════════════════════════
+         GENERADORES — 20 preguntas (4 por categoría)
+      ══════════════════════════════════════ */
+      const GEN = [
+
+        /* ── JERARQUÍA 1: suma, multiplicación y resta ── */
+        function () {
+          const a = rand(5, 18), b = rand(3, 9), c = rand(3, 9), d = rand(2, 12);
+          const res = a + b * c - d;
+          const o = makeOpts(res, [(a + b) * c - d, a + b * (c - d), b * c]);
+          return {
+            cat: 'Jerarqu\u00eda', t: 55,
+            q: 'Calcula el valor de la expresi&oacute;n.',
+            data: caja(a + P + b + X + c + M + d),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Primero la multiplicaci&oacute;n: ' + b + X + c + ' = ' + (b * c) + '. Queda ' + a + P + (b * c) + M + d + ' = <strong>' + res + '</strong>. Resolver de izquierda a derecha dar&iacute;a ' + ((a + b) * c - d) + ', que es el error m&aacute;s com&uacute;n.'
+          };
+        },
+
+        /* ── JERARQUÍA 2: multiplicación y división combinadas ── */
+        function () {
+          const d = rand(2, 6), q = rand(3, 9), c = d * q;
+          const a = rand(3, 9), b = rand(3, 9), e = rand(2, 10);
+          const res = a * b + q - e;
+          const o = makeOpts(res, [a * b + c - d - e, a * (b + q) - e, res + q]);
+          return {
+            cat: 'Jerarqu\u00eda', t: 60,
+            q: 'Calcula el valor de la expresi&oacute;n.',
+            data: caja(a + X + b + P + c + D + d + M + e),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Multiplicaci&oacute;n y divisi&oacute;n van en el mismo nivel: ' + a + X + b + ' = ' + (a * b) + ' y ' + c + D + d + ' = ' + q + '. Queda ' + (a * b) + P + q + M + e + ' = <strong>' + res + '</strong>.'
+          };
+        },
+
+        /* ── JERARQUÍA 3: identificar la primera operación ── */
+        function () {
+          const a = rand(4, 15), b = rand(2, 8), c = rand(7, 14), d = rand(2, 6), e = rand(2, 5);
+          const o = makeOptsText('La resta que est&aacute; dentro del par&eacute;ntesis',
+            ['La multiplicaci&oacute;n', 'El exponente', 'La divisi&oacute;n']);
+          return {
+            cat: 'Jerarqu\u00eda', t: 45,
+            q: '&iquest;Cu&aacute;l operaci&oacute;n debe realizarse <strong>primero</strong>?',
+            data: caja(a + P + b + X + '(' + c + M + d + ')&sup2;' + D + e),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'La jerarqu&iacute;a comienza por las <strong>agrupaciones</strong>. Aunque hay exponente, multiplicaci&oacute;n y divisi&oacute;n, lo primero es siempre lo que est&aacute; dentro del par&eacute;ntesis: ' + c + M + d + ' = ' + (c - d) + '.'
+          };
+        },
+
+        /* ── JERARQUÍA 4: división y multiplicación de izquierda a derecha ── */
+        function () {
+          const b = rand(2, 5), c = rand(2, 6), m = rand(2, 6), a = b * c * m;
+          const res = (a / b) * c;
+          const o = makeOpts(res, [m, a - b * c, m * c]);
+          return {
+            cat: 'Jerarqu\u00eda', t: 55,
+            q: 'Calcula el valor de la expresi&oacute;n.',
+            data: caja(a + D + b + X + c),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Divisi&oacute;n y multiplicaci&oacute;n tienen la MISMA prioridad, as&iacute; que se resuelven de izquierda a derecha: ' + a + D + b + ' = ' + (a / b) + ', y luego ' + (a / b) + X + c + ' = <strong>' + res + '</strong>. Multiplicar primero (' + b + X + c + ') dar&iacute;a ' + m + ', que es incorrecto.'
+          };
+        },
+
+        /* ── ANIDADAS 1: corchete con exponente interno ── */
+        function () {
+          const d = rand(2, 5), p = rand(2, 4), c = d + p;
+          const b = p * p + rand(2, 9), a = rand(2, 6);
+          const dentro = b - p * p, res = a * dentro;
+          const o = makeOpts(res, [a * b - p * p, a * (b - c + d), (a * b - p) * 1 + d]);
+          return {
+            cat: 'Anidadas', t: 70,
+            q: 'Calcula el valor de la expresi&oacute;n.',
+            data: caja(a + X + '[ ' + b + M + '(' + c + M + d + ')&sup2; ]'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'De adentro hacia afuera: (' + c + M + d + ') = ' + p + '; luego ' + p + '&sup2; = ' + (p * p) + '; dentro del corchete ' + b + M + (p * p) + ' = ' + dentro + '; por &uacute;ltimo ' + a + X + dentro + ' = <strong>' + res + '</strong>.'
+          };
+        },
+
+        /* ── ANIDADAS 2: corchete completo dividido ── */
+        function () {
+          const a = rand(2, 9), b = rand(2, 9), c = rand(3, 8), e = rand(2, 6);
+          const prod = (a + b) * c;
+          const d = (prod % e) + e * rand(1, 3);
+          const num = prod - d, res = num / e;
+          const o = makeOpts(res, [num, a + b * c - d, Math.round(prod / e) - d]);
+          return {
+            cat: 'Anidadas', t: 75,
+            q: 'Calcula el valor de la expresi&oacute;n.',
+            data: caja('[ (' + a + P + b + ')' + X + c + M + d + ' ]' + D + e),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Par&eacute;ntesis interno: (' + a + P + b + ') = ' + (a + b) + '. Corchete: ' + (a + b) + X + c + ' = ' + prod + ', y ' + prod + M + d + ' = ' + num + '. Por &uacute;ltimo ' + num + D + e + ' = <strong>' + res + '</strong>. La divisi&oacute;n se aplica a TODO el corchete, no solo al &uacute;ltimo t&eacute;rmino.'
+          };
+        },
+
+        /* ── ANIDADAS 3: llaves, corchetes y signos ── */
+        function () {
+          const a = rand(20, 45), b = rand(8, 20), c = rand(6, 18), d = rand(2, 9);
+          const res = a - (b - (c - d));
+          const o = makeOpts(res, [a - b + c + d, a - b - c + d, a - b - c - d]);
+          return {
+            cat: 'Anidadas', t: 70,
+            q: 'Calcula el valor de la expresi&oacute;n.',
+            data: caja(a + M + '{ ' + b + M + '[ ' + c + M + d + ' ] }'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Corchete: ' + c + M + d + ' = ' + (c - d) + '. Llave: ' + b + M + (c - d) + ' = ' + (b - (c - d)) + '. Y finalmente ' + a + M + '(' + (b - (c - d)) + ') = <strong>' + res + '</strong>. Un menos delante de una agrupaci&oacute;n cambia el signo de todo lo que hay dentro.'
+          };
+        },
+
+        /* ── ANIDADAS 4: llave con exponente y división ── */
+        function () {
+          const s = rand(2, 5) * 2, a = rand(1, s - 1), b = s - a;
+          const c = 4, d = rand(2, 9);
+          const cuad = s * s, div = cuad / c;
+          const res = 2 * (div + d);
+          const o = makeOpts(res, [2 * div + d, div + d, 2 * ((a * a + b * b) / c + d)]);
+          return {
+            cat: 'Anidadas', t: 80,
+            q: 'Calcula el valor de la expresi&oacute;n.',
+            data: caja('2' + X + '{ (' + a + P + b + ')&sup2;' + D + c + P + d + ' }'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Par&eacute;ntesis: (' + a + P + b + ') = ' + s + '. Exponente: ' + s + '&sup2; = ' + cuad + '. Divisi&oacute;n: ' + cuad + D + c + ' = ' + div + '. Suma dentro de la llave: ' + div + P + d + ' = ' + (div + d) + '. Y por &uacute;ltimo 2' + X + (div + d) + ' = <strong>' + res + '</strong>.'
+          };
+        },
+
+        /* ── EXPONENTES 1: signo dentro y fuera de la base ── */
+        function () {
+          let a = rand(2, 7), b = rand(2, 7);
+          while (a === b) { b = rand(2, 7); }
+          const res = -(a * a) + b * b;
+          const o = makeOpts(res, [a * a + b * b, -(a * a + b * b), a * a - b * b]);
+          return {
+            cat: 'Exponentes', t: 65,
+            q: 'Calcula el valor de la expresi&oacute;n.',
+            data: caja(NEG + a + '&sup2;' + P + '(' + NEG + b + ')&sup2;'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Sin par&eacute;ntesis, el exponente afecta solo al n&uacute;mero: ' + NEG + a + '&sup2; = ' + NEG + '(' + a + X + a + ') = ' + fmt(-(a * a)) + '. Con par&eacute;ntesis, el signo tambi&eacute;n se eleva: (' + NEG + b + ')&sup2; = ' + (b * b) + '. Entonces ' + fmt(-(a * a)) + P + (b * b) + ' = <strong>' + fmt(res) + '</strong>.'
+          };
+        },
+
+        /* ── EXPONENTES 2: coeficiente y potencia ── */
+        function () {
+          const a = rand(2, 7), b = rand(3, 8), c = rand(4, 20);
+          const res = a * b * b - c;
+          const o = makeOpts(res, [(a * b) * (a * b) - c, a * b * 2 - c, a * (b - c) * b]);
+          return {
+            cat: 'Exponentes', t: 60,
+            q: 'Calcula el valor de la expresi&oacute;n.',
+            data: caja(a + X + b + '&sup2;' + M + c),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'El exponente act&uacute;a solo sobre el ' + b + ', no sobre el producto: ' + b + '&sup2; = ' + (b * b) + '. Luego ' + a + X + (b * b) + ' = ' + (a * b * b) + ', y ' + (a * b * b) + M + c + ' = <strong>' + res + '</strong>. Elevar (' + a + X + b + ')&sup2; dar&iacute;a ' + ((a * b) * (a * b) - c) + ', que es incorrecto.'
+          };
+        },
+
+        /* ── EXPONENTES 3: cuadrado de una suma ── */
+        function () {
+          const a = rand(2, 9), b = rand(2, 9);
+          const res = (a + b) * (a + b) - (a * a + b * b);
+          const o = makeOpts(res, [0, 2 * (a + b), a * b]);
+          return {
+            cat: 'Exponentes', t: 70,
+            q: 'Calcula el valor de la expresi&oacute;n.',
+            data: caja('(' + a + P + b + ')&sup2;' + M + '(' + a + '&sup2;' + P + b + '&sup2;)'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Primero cada agrupaci&oacute;n: (' + a + P + b + ')&sup2; = ' + (a + b) + '&sup2; = ' + ((a + b) * (a + b) ) + '; y (' + a + '&sup2;' + P + b + '&sup2;) = ' + (a * a) + P + (b * b) + ' = ' + (a * a + b * b) + '. Resta: <strong>' + res + '</strong>. Observa que (a + b)&sup2; NO es igual a a&sup2; + b&sup2;.'
+          };
+        },
+
+        /* ── EXPONENTES 4: radical como agrupación ── */
+        function () {
+          const t = pick([[3, 4, 5], [6, 8, 10], [5, 12, 13], [8, 15, 17], [9, 12, 15]]);
+          const a = t[0], b = t[1], h = t[2], c = rand(2, 7);
+          const res = h * c;
+          const o = makeOpts(res, [(a + b) * c, h + c, a * b * c]);
+          return {
+            cat: 'Exponentes', t: 70,
+            q: 'Calcula el valor de la expresi&oacute;n.',
+            data: caja('&radic;(' + a + '&sup2;' + P + b + '&sup2;)' + X + c),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'El radical agrupa: primero se resuelve todo lo de adentro. ' + a + '&sup2; = ' + (a * a) + ' y ' + b + '&sup2; = ' + (b * b) + '; su suma es ' + (a * a + b * b) + '. Luego &radic;' + (a * a + b * b) + ' = ' + h + ', y ' + h + X + c + ' = <strong>' + res + '</strong>. No se puede sacar la ra&iacute;z t&eacute;rmino por t&eacute;rmino.'
+          };
+        },
+
+        /* ── SIGNOS 1: resta de un producto negativo ── */
+        function () {
+          const a = rand(3, 15), b = rand(2, 9), c = rand(2, 9);
+          const res = -a + b * c;
+          const o = makeOpts(res, [-a - b * c, (-a - b) * -c, a + b * c]);
+          return {
+            cat: 'Signos', t: 60,
+            q: 'Calcula el valor de la expresi&oacute;n.',
+            data: caja(NEG + a + M + b + X + '(' + NEG + c + ')'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Primero la multiplicaci&oacute;n: ' + b + X + '(' + NEG + c + ') = ' + fmt(-(b * c)) + '. La expresi&oacute;n queda ' + NEG + a + M + '(' + fmt(-(b * c)) + '), y restar un negativo equivale a sumar: ' + NEG + a + P + (b * c) + ' = <strong>' + fmt(res) + '</strong>.'
+          };
+        },
+
+        /* ── SIGNOS 2: división negativa y producto negativo ── */
+        function () {
+          const b = rand(2, 8), k = rand(2, 9), a = b * k;
+          const c = rand(2, 8), d = rand(2, 8);
+          const res = -k - c * d;
+          const o = makeOpts(res, [-k + c * d, k - c * d, -(k + c) * d]);
+          return {
+            cat: 'Signos', t: 65,
+            q: 'Calcula el valor de la expresi&oacute;n.',
+            data: caja(a + D + '(' + NEG + b + ')' + P + c + X + '(' + NEG + d + ')'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Divisi&oacute;n: ' + a + D + '(' + NEG + b + ') = ' + fmt(-k) + ' (positivo entre negativo da negativo). Multiplicaci&oacute;n: ' + c + X + '(' + NEG + d + ') = ' + fmt(-(c * d)) + '. Suma: ' + fmt(-k) + P + '(' + fmt(-(c * d)) + ') = <strong>' + fmt(res) + '</strong>.'
+          };
+        },
+
+        /* ── SIGNOS 3: negativo por una diferencia negativa ── */
+        function () {
+          const a = rand(2, 8), b = rand(2, 9), c = b + rand(2, 9), d = rand(2, 12);
+          const dentro = b - c, res = -a * dentro - d;
+          const o = makeOpts(res, [-a * (c - b) - d, a * (c - b) + d, -a * b - c - d]);
+          return {
+            cat: 'Signos', t: 70,
+            q: 'Calcula el valor de la expresi&oacute;n.',
+            data: caja('(' + NEG + a + ')' + X + '(' + b + M + c + ')' + M + d),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Par&eacute;ntesis: ' + b + M + c + ' = ' + fmt(dentro) + '. Producto de dos negativos: (' + NEG + a + ')' + X + '(' + fmt(dentro) + ') = ' + (a * (c - b)) + '. Finalmente ' + (a * (c - b)) + M + d + ' = <strong>' + fmt(res) + '</strong>.'
+          };
+        },
+
+        /* ── SIGNOS 4: la barra de fracción como agrupación ── */
+        function () {
+          const b = rand(2, 9), c = rand(2, 9), a = rand(2, 15);
+          const num = a + b * c;
+          const divisores = [];
+          for (let k = 2; k <= 9; k++) { if (num % k === 0) { divisores.push(k); } }
+          const den = divisores.length ? pick(divisores) : 1;
+          const e = rand(1, 5), d = e + den;
+          const res = num / den;
+          const o = makeOpts(res, [num, Math.round(a + (b * c) / den), res + den]);
+          return {
+            cat: 'Signos', t: 75,
+            q: 'Calcula el valor de la expresi&oacute;n. Recuerda que la <strong>barra de fracci&oacute;n agrupa</strong>.',
+            data: caja('<span class="frac" role="math" aria-label="Fracci&oacute;n: numerador ' + a + ' m&aacute;s ' + b + ' por ' + c + '; denominador ' + d + ' menos ' + e + '.">' +
+              '<span class="num">' + a + P + b + X + c + '</span><span class="den">' + d + M + e + '</span></span>'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Numerador completo: ' + b + X + c + ' = ' + (b * c) + ', y ' + a + P + (b * c) + ' = ' + num + '. Denominador completo: ' + d + M + e + ' = ' + den + '. Reci&eacute;n entonces se divide: ' + num + D + den + ' = <strong>' + res + '</strong>.'
+          };
+        },
+
+        /* ── ERRORES 1: localizar el paso equivocado ── */
+        function () {
+          const a = rand(4, 12), b = rand(2, 6), c = rand(2, 5);
+          const filas = [
+            'Escribe la expresi&oacute;n: ' + a + P + b + X + c + '&sup2;',
+            'Multiplica: ' + b + X + c + ' = ' + (b * c) + ', y escribe ' + a + P + (b * c) + '&sup2;',
+            'Eleva al cuadrado: ' + (b * c) + '&sup2; = ' + (b * c) * (b * c),
+            'Suma: ' + a + P + (b * c) * (b * c) + ' = ' + (a + (b * c) * (b * c))
+          ];
+          const o = makeOptsText('Paso 2', ['Paso 1', 'Paso 3', 'Paso 4']);
+          return {
+            cat: 'Errores', t: 75,
+            q: 'Un estudiante resolvi&oacute; la expresi&oacute;n as&iacute;. &iquest;En qu&eacute; paso cometi&oacute; el <strong>error</strong>?',
+            data: tablaPasos(filas),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'En el <strong>paso 2</strong> multiplic&oacute; antes de aplicar el exponente. El exponente afecta solo al ' + c + ': primero ' + c + '&sup2; = ' + (c * c) + ', luego ' + b + X + (c * c) + ' = ' + (b * c * c) + ', y por &uacute;ltimo ' + a + P + (b * c * c) + ' = <strong>' + (a + b * c * c) + '</strong>.'
+          };
+        },
+
+        /* ── ERRORES 2: corregir el resultado obtenido de izquierda a derecha ── */
+        function () {
+          const a = rand(3, 12), b = rand(2, 9), c = rand(2, 9), d = rand(2, 10);
+          const mal = (a + b) * c - d, res = a + b * c - d;
+          const o = makeOpts(res, [mal, a + b * (c - d), (a + b) * (c - d)]);
+          return {
+            cat: 'Errores', t: 65,
+            q: 'Un estudiante obtuvo <strong>' + fmt(mal) + '</strong> porque resolvi&oacute; de izquierda a derecha. &iquest;Cu&aacute;l es el resultado <strong>correcto</strong>?',
+            data: caja(a + P + b + X + c + M + d),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Sum&oacute; ' + a + P + b + ' antes de multiplicar. Lo correcto es ' + b + X + c + ' = ' + (b * c) + ' primero; luego ' + a + P + (b * c) + M + d + ' = <strong>' + res + '</strong>.'
+          };
+        },
+
+        /* ── ERRORES 3: colocar los paréntesis ── */
+        function () {
+          let a, b, c, d, vals, ops;
+          do {
+            a = rand(2, 9); b = rand(2, 9); c = rand(2, 8); d = rand(2, 9);
+            ops = [
+              { t: '(' + a + P + b + ')' + X + c + M + d, v: (a + b) * c - d },
+              { t: a + P + b + X + '(' + c + M + d + ')', v: a + b * (c - d) },
+              { t: '(' + a + P + b + ')' + X + '(' + c + M + d + ')', v: (a + b) * (c - d) },
+              { t: a + P + '(' + b + X + c + M + d + ')', v: a + (b * c - d) }
+            ];
+            vals = ops.map(function (x) { return x.v; });
+          } while (new Set(vals).size < 4);
+          const k = rand(0, 3), obj = ops[k].v;
+          const o = makeOptsText(ops[k].t, shuffle(ops.filter(function (x, i) { return i !== k; }).map(function (x) { return x.t; })));
+          return {
+            cat: 'Errores', t: 80,
+            q: '&iquest;Cu&aacute;l colocaci&oacute;n de par&eacute;ntesis produce un resultado igual a <strong>' + fmt(obj) + '</strong>?',
+            data: caja(a + ' &nbsp;' + P + '&nbsp; ' + b + ' &nbsp;' + X + '&nbsp; ' + c + ' &nbsp;' + M + '&nbsp; ' + d),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Cada colocaci&oacute;n cambia el resultado: ' + ops.map(function (x) { return x.t + ' = ' + fmt(x.v); }).join('; ') + '. La que da ' + fmt(obj) + ' es <strong>' + ops[k].t + '</strong>.'
+          };
+        },
+
+        /* ── ERRORES 4: comparar expresiones ── */
+        function () {
+          let a, b, c, ops, vals;
+          do {
+            a = rand(2, 8); b = rand(2, 8); c = rand(2, 6);
+            ops = [
+              { t: a + P + b + X + c, v: a + b * c },
+              { t: '(' + a + P + b + ')' + X + c, v: (a + b) * c },
+              { t: a + X + b + P + c, v: a * b + c },
+              { t: a + X + '(' + b + P + c + ')', v: a * (b + c) }
+            ];
+            vals = ops.map(function (x) { return x.v; });
+          } while (new Set(vals).size < 4);
+          const mx = Math.max.apply(null, vals), k = vals.indexOf(mx);
+          const o = makeOptsText(ops[k].t, shuffle(ops.filter(function (x, i) { return i !== k; }).map(function (x) { return x.t; })));
+          return {
+            cat: 'Errores', t: 75,
+            q: '&iquest;Cu&aacute;l de las siguientes expresiones tiene el <strong>mayor valor</strong>?',
+            data: '<div class="expr-chica">Compara las cuatro expresiones aplicando el orden de las operaciones.</div>',
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Valores: ' + ops.map(function (x) { return x.t + ' = ' + fmt(x.v); }).join('; ') + '. El mayor es <strong>' + ops[k].t + '</strong> con ' + fmt(mx) + '.'
+          };
+        }
+
+      ]; /* fin GEN */
+
+      /* ══════════════════════════════════════
+         MOTOR DEL CUESTIONARIO
+      ══════════════════════════════════════ */
+      const preguntas = shuffle(GEN.map(function (g) { return g(); }));
+      const total = preguntas.length;
+      let actual = 0, puntos = 0, respondida = false, reloj = null, segs = 0;
+      const catPts = {}, catTot = {};
+      preguntas.forEach(function (p) {
+        catTot[p.cat] = (catTot[p.cat] || 0) + 1;
+        catPts[p.cat] = catPts[p.cat] || 0;
+      });
+
+      const qArea = document.getElementById('question-area');
+      const barP = document.getElementById('progress-bar');
+      const txtP = document.getElementById('progress-text');
+
+      function render(i) {
+        const p = preguntas[i];
+        const col = CC[p.cat] || '#5b21b6';
+        const icon = CI[p.cat] || '';
+        const tLbl = p.t <= 55 ? '&#9889; R&aacute;pida' : p.t <= 70 ? '&#128336; Media' : '&#9203; Compleja';
+        const opHtml = p.opciones.map(function (o) {
+          return '<div class="option-item" role="button" tabindex="0" data-val="' + o.valor + '" onclick="window.__opClick(this)" onkeydown="window.__opKey(this,event)">' + o.texto + '</div>';
+        }).join('');
+        const dH = p.data ? '<div class="data-box">' + p.data + '</div>' : '';
+        const btn = i === total - 1 ? 'Ver resultados' : 'Siguiente &rsaquo;';
+        qArea.innerHTML =
+          '<div class="question-meta">' +
+            '<span class="cat-badge" style="background:' + col + '"><span aria-hidden="true">' + icon + '</span> ' + p.cat + '</span>' +
+            '<span class="time-badge">' + tLbl + ' &middot; ' + p.t + 's</span>' +
+          '</div>' +
+          '<div class="question-header">' + p.q + '</div>' +
+          dH +
+          '<div class="options">' + opHtml + '</div>' +
+          '<div class="feedback-box hidden" id="feedback-box" role="status" aria-live="polite"></div>' +
+          '<div class="btn-container"><div class="primary-btn" role="button" tabindex="0" onclick="window.__opNext()" onkeydown="window.__opNextKey(event)">' + btn + '</div></div>';
+        if (barP) { barP.style.width = ((i + 1) / total) * 100 + '%'; }
+        if (txtP) { txtP.textContent = 'Pregunta ' + (i + 1) + ' de ' + total; }
+        iniciarReloj(p.t);
+      }
+
+      function bloquear() {
+        qArea.querySelectorAll('.option-item').forEach(function (o) {
+          if (o.className.indexOf('disabled') < 0) { o.className += ' disabled'; }
+          o.setAttribute('tabindex', '-1');
+        });
+      }
+
+      function mostrarExp(acierto) {
+        const p = preguntas[actual];
+        const fb = document.getElementById('feedback-box');
+        if (!fb) { return; }
+        fb.className = 'feedback-box' + (acierto ? '' : ' mal');
+        fb.innerHTML = (acierto ? '<strong>&#10004; Correcto.</strong> ' : '<strong>&#10008; Revisa el procedimiento.</strong> ') + (p.exp || '');
+      }
+
+      window.__opClick = function (el) {
+        if (respondida) { return; }
+        pararReloj();
+        respondida = true;
+        const p = preguntas[actual];
+        const elegida = el.getAttribute('data-val');
+        const acierto = elegida === p.correcta;
+        if (acierto) {
+          el.className = 'option-item correct disabled';
+          puntos++;
+          catPts[p.cat]++;
+        } else {
+          el.className = 'option-item incorrect disabled';
+          const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+          if (ok) { ok.className = 'option-item correct disabled'; }
+        }
+        bloquear();
+        mostrarExp(acierto);
+      };
+
+      window.__opKey = function (el, ev) {
+        if (!ev) { return; }
+        if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') {
+          ev.preventDefault();
+          window.__opClick(el);
+        }
+      };
+
+      window.__opNext = function () {
+        pararReloj();
+        actual++;
+        respondida = false;
+        if (actual < total) { render(actual); } else { mostrarRes(); }
+      };
+
+      window.__opNextKey = function (ev) {
+        if (!ev) { return; }
+        if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') {
+          ev.preventDefault();
+          window.__opNext();
+        }
+      };
+
+      function iniciarReloj(s) {
+        pararReloj();
+        segs = s;
+        updReloj();
+        reloj = setInterval(function () { segs--; updReloj(); if (segs <= 0) { tAgotado(); } }, 1000);
+      }
+      function pararReloj() { if (reloj) { clearInterval(reloj); reloj = null; } }
+      function updReloj() {
+        const p = preguntas[actual] || { t: 60 };
+        const tt = document.getElementById('timer-text');
+        const tb = document.getElementById('timer-bar');
+        const tc = document.getElementById('timer-container');
+        if (tt) { tt.textContent = '\u23F1 Tiempo: ' + segs + 's'; }
+        const pct = (segs / p.t) * 100;
+        if (tb) {
+          tb.style.width = pct + '%';
+          if (pct <= 25) {
+            tb.style.background = '#b3261e';
+            if (tc) { tc.className = 'timer-container timer-warning'; }
+          } else if (pct <= 50) {
+            tb.style.background = 'linear-gradient(90deg,#b06f00,#b3261e)';
+            if (tc) { tc.className = 'timer-container'; }
+          } else {
+            tb.style.background = 'linear-gradient(90deg,#1b5e20,#b06f00,#b3261e)';
+            if (tc) { tc.className = 'timer-container'; }
+          }
+        }
+      }
+      function tAgotado() {
+        pararReloj();
+        if (respondida) { return; }
+        respondida = true;
+        const p = preguntas[actual];
+        const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+        if (ok) { ok.className = 'option-item correct disabled'; }
+        bloquear();
+        mostrarExp(false);
+        const tt = document.getElementById('timer-text');
+        if (tt) { tt.textContent = '\u23F0 \u00a1Tiempo agotado!'; }
+        const tc = document.getElementById('timer-container');
+        if (tc) { tc.className = 'timer-container timer-warning'; }
+      }
+
+      function mostrarRes() {
+        pararReloj();
+        qArea.innerHTML = '';
+        document.getElementById('timer-container').style.display = 'none';
+        const pct = Math.round((puntos / total) * 100);
+        document.getElementById('final-score').textContent = puntos + ' / ' + total + '  (' + pct + '%)';
+        const msg = pct >= 85 ? '\u{1F3C6} \u00a1Excelente! Dominas la jerarqu\u00eda de las operaciones.'
+                  : pct >= 70 ? '\u{1F44D} \u00a1Muy bien! Repasa las categor\u00edas marcadas en rojo.'
+                  : pct >= 50 ? '\u{1F4AA} Buen intento. Reescribe la expresi\u00f3n completa en cada paso; evita atajos mentales.'
+                  : '\u{1F4DA} Empieza por memorizar el orden: agrupaciones, exponentes, multiplicaci\u00f3n y divisi\u00f3n, suma y resta.';
+        document.getElementById('final-msg').textContent = msg;
+        let html = '<h3>Resultados por categor\u00eda:</h3>';
+        for (const cat of Object.keys(catTot)) {
+          const s = catPts[cat] || 0, t2 = catTot[cat];
+          const p2 = Math.round((s / t2) * 100);
+          const col = CC[cat] || '#5b21b6';
+          html +=
+            '<div class="cat-row">' +
+              '<span class="cat-lbl"><span aria-hidden="true">' + CI[cat] + '</span> ' + cat + '</span>' +
+              '<div class="cat-bar-out"><div class="cat-bar-in" style="width:' + p2 + '%;background:' + col + '"></div></div>' +
+              '<span class="cat-sc">' + s + '/' + t2 + ' \u2713</span>' +
+            '</div>';
+        }
+        document.getElementById('cat-results').innerHTML = html;
+        let minCat = '', minPct = 999;
+        for (const cat of Object.keys(catTot)) {
+          const pp = (catPts[cat] || 0) / catTot[cat];
+          if (pp < minPct) { minPct = pp; minCat = cat; }
+        }
+        document.getElementById('tip-box').innerHTML = minPct < 1
+          ? '<strong>\u{1F4CC} Para mejorar en \u00ab' + minCat + '\u00bb:</strong><br>' + (TIPS[minCat] || '')
+          : '\u2705 \u00a1Sin categor\u00edas con errores! Ahora intenta mejorar tus tiempos.';
+        document.getElementById('result-screen').className = 'result-screen';
+        document.querySelector('.quiz-progress-header').style.display = 'none';
+        const rb = document.getElementById('restart-btn');
+        rb.onclick = function () { window.location.reload(); };
+        rb.onkeydown = function (ev) {
+          if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') { ev.preventDefault(); window.location.reload(); }
+        };
+      }
+
+      render(0);
+    })();
+    </script>
+  </body>
+</html>
