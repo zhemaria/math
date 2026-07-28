@@ -1,1 +1,1120 @@
+<!doctype html>
+<!--
+  Rapidez en graficas estadisticas - GED
+  Autor: Jose M. Fernandez, ABE/ASE Math Master Teacher, Harry S. Truman College - City Colleges of Chicago.
+  (c) 2026. Licencia: CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+  Resumen: cuestionario interactivo de rapidez para practicar la INTERPRETACION de graficas
+  estadisticas (barras, barras dobles, circulares, lineales, histogramas e inferencias validas),
+  con generacion aleatoria, SVG dinamico accesible, cronometro, explicacion paso a paso y
+  desglose por categoria.
+-->
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago" />
+    <meta name="license" content="CC BY-NC-SA 4.0" />
+    <link rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" />
+    <title>Rapidez en gr&aacute;ficas estad&iacute;sticas &mdash; GED</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+      :root {
+        --cp: #0f6e4f;  /* primario: 5.2:1 con blanco (DUA OK) */
+        --ch: #12855e;  /* hover */
+      }
+      body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 10px;
+        background: linear-gradient(135deg, #0b2f26, #14483a);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 90vh;
+        flex-direction: column;
+        gap: 10px;
+      }
+      #quiz-container {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 0 22px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        width: clamp(300px, 95%, 880px);
+        margin: 0 auto;
+      }
+      .quiz-progress-header {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 16px 22px;
+        border-bottom: 3px solid var(--cp);
+      }
+      .progress-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.95em, 2.5vw, 1.1em);
+        color: var(--cp);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      .progress-container {
+        background: #e0e0e0;
+        height: 12px;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+      }
+      .progress-bar {
+        height: 100%;
+        width: 5%;
+        background: linear-gradient(90deg, var(--cp), var(--ch));
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 6px;
+      }
+      .question-meta {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 20px 0;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .cat-badge {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 700;
+        color: #fff;
+      }
+      .time-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78em;
+        font-weight: 600;
+        background: #eaf5f0;
+        color: #444;
+        border: 1px solid #ccc;
+      }
+      .question-header {
+        padding: 16px 22px 10px;
+        font-size: clamp(0.95em, 2.4vw, 1.15em);
+        font-weight: 700;
+        text-align: center;
+        color: #1a1a2e;
+        line-height: 1.55;
+      }
+      .data-box {
+        background: #fff;
+        border: 2px solid var(--cp);
+        border-radius: 12px;
+        margin: 0 18px 12px;
+        padding: 12px 10px;
+        text-align: center;
+      }
+      .data-box svg { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+      .escenario {
+        font-size: clamp(0.92em, 2.3vw, 1.02em);
+        font-weight: 600;
+        color: #1a1a2e;
+        line-height: 1.6;
+        padding: 6px 10px;
+      }
+      .options { padding: 0 18px; }
+      .option-item {
+        display: block;
+        padding: 11px 16px;
+        margin-bottom: 10px;
+        background: #f0f6f3;
+        color: #333;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        font-size: clamp(0.95em, 2.4vw, 1.05em);
+        font-weight: 700;
+        line-height: 1.45;
+        user-select: none;
+      }
+      .option-item:hover:not(.disabled) {
+        background: #d7ece3;
+        border-color: var(--cp);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .option-item:focus-visible {
+        outline: 3px solid #0b3a66;
+        outline-offset: 2px;
+      }
+      .option-item.correct {
+        background: #1b5e20 !important;
+        color: #fff !important;
+        border-color: #1b5e20 !important;
+      }
+      .option-item.incorrect {
+        background: #b3261e !important;
+        color: #fff !important;
+        border-color: #b3261e !important;
+      }
+      .option-item.disabled { cursor: not-allowed; opacity: 0.95; }
+      .feedback-box {
+        margin: 4px 18px 10px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        border-left: 5px solid var(--cp);
+        background: #eef6f2;
+        color: #133a2c;
+        font-size: clamp(0.85em, 2.2vw, 0.95em);
+        line-height: 1.65;
+        text-align: left;
+      }
+      .feedback-box.mal { border-left-color: #b3261e; background: #fdeceb; color: #5c1310; }
+      .feedback-box.hidden { display: none; }
+      .btn-container { padding: 4px 18px 18px; }
+      .primary-btn {
+        display: block;
+        width: 100%;
+        padding: 13px;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.05em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: var(--cp);
+        text-align: center;
+        user-select: none;
+        box-sizing: border-box;
+      }
+      .primary-btn:hover {
+        background: var(--ch);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      .primary-btn:focus-visible { outline: 3px solid #0b3a66; outline-offset: 3px; }
+      .timer-container {
+        background: linear-gradient(135deg, #fff8e1, #ffecb3);
+        padding: 11px 18px;
+        border-top: 2px solid #b06f00;
+      }
+      .timer-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.88em, 2.2vw, 1em);
+        color: #5c3900;
+        margin-bottom: 7px;
+      }
+      .timer-bar-container {
+        background: #f0d0d0;
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .timer-bar {
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, #1b5e20, #b06f00, #b3261e);
+        transition: width 0.1s linear;
+        border-radius: 4px;
+      }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+      .timer-warning { animation: pulse 0.9s infinite; }
+      @media (prefers-reduced-motion: reduce) {
+        * { animation: none !important; transition: none !important; }
+      }
+      .result-screen { padding: 35px 28px; text-align: center; }
+      .result-screen.hidden { display: none; }
+      .result-screen h2 {
+        color: var(--cp);
+        font-size: clamp(1.4em, 4vw, 1.9em);
+        margin-bottom: 10px;
+      }
+      .result-score {
+        font-size: clamp(2em, 6vw, 2.8em) !important;
+        font-weight: 800;
+        color: var(--cp) !important;
+        margin: 12px 0 !important;
+      }
+      .result-msg {
+        font-size: clamp(1em, 2.8vw, 1.2em);
+        color: #333;
+        margin: 8px 0;
+      }
+      .cat-results { margin: 18px 0; text-align: left; }
+      .cat-results h3 { color: var(--cp); font-size: 0.95em; margin-bottom: 10px; }
+      .cat-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+      .cat-lbl { flex: 1.4; font-size: 0.78em; font-weight: 600; color: #333; }
+      .cat-bar-out { flex: 2; background: #eee; border-radius: 4px; height: 11px; }
+      .cat-bar-in { height: 100%; border-radius: 4px; transition: width 0.6s; }
+      .cat-sc { font-weight: 700; color: var(--cp); font-size: 0.82em; min-width: 55px; text-align: right; }
+      .tip-box {
+        background: #eef6f2;
+        border-left: 4px solid var(--cp);
+        border-radius: 6px;
+        padding: 10px 14px;
+        margin: 14px 0 4px;
+        font-size: 0.82em;
+        color: #133a2c;
+        text-align: left;
+        line-height: 1.6;
+      }
+      .creditos {
+        text-align: center; font-size: 0.78em; color: #555;
+        padding: 6px 14px 12px; line-height: 1.5;
+      }
+      .creditos a { color: var(--cp); text-decoration: underline; }
+      .sr-only {
+        position: absolute; width: 1px; height: 1px;
+        overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="quiz-container">
+      <h1 class="sr-only">Cuestionario de rapidez: interpretaci&oacute;n de gr&aacute;ficas estad&iacute;sticas</h1>
+      <div class="quiz-progress-header">
+        <div class="progress-text" id="progress-text">Pregunta 1 de 20</div>
+        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+      </div>
+      <div id="question-area"></div>
+      <div class="timer-container" id="timer-container">
+        <div class="timer-text" id="timer-text">&#9201; Tiempo: 60s</div>
+        <div class="timer-bar-container"><div class="timer-bar" id="timer-bar"></div></div>
+      </div>
+      <div class="result-screen hidden" id="result-screen">
+        <h2>&#128202; &iexcl;Cuestionario completado!</h2>
+        <p class="result-score" id="final-score"></p>
+        <p class="result-msg" id="final-msg"></p>
+        <div class="cat-results" id="cat-results"></div>
+        <div class="tip-box" id="tip-box"></div>
+        <div class="btn-container" style="padding-top:14px">
+          <div class="primary-btn" id="restart-btn" role="button" tabindex="0">&#128260; Nuevas preguntas (reiniciar)</div>
+        </div>
+      </div>
+      <p class="creditos">
+        Creado por Jos&eacute; M. Fern&aacute;ndez, ABE/ASE Math Master Teacher, Harry S. Truman College &mdash; City Colleges of Chicago.<br>
+        Licencia <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.
+      </p>
+    </div>
 
+    <script>
+    (function () {
+      if (window.quizGraficasIniciado) return;
+      window.quizGraficasIniciado = true;
+
+      /* ── UTILIDADES ── */
+      function rand(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      function suma(a) { return a.reduce(function (x, y) { return x + y; }, 0); }
+      function maxi(a) { return a.indexOf(Math.max.apply(null, a)); }
+      function mini(a) { return a.indexOf(Math.min.apply(null, a)); }
+      function pick(a) { return a[rand(0, a.length - 1)]; }
+
+      /* ── OPCIONES NUMÉRICAS ── */
+      function makeOpts(correct, dist) {
+        const cs = String(correct), seen = new Set([cs]), uniq = [];
+        for (const d of dist) {
+          const ds = String(d);
+          if (!seen.has(ds) && uniq.length < 3) { seen.add(ds); uniq.push(ds); }
+        }
+        let ex = (parseFloat(cs) || 0) + 7;
+        while (uniq.length < 3) {
+          const c2 = String(Math.round(ex * 100) / 100); ex += 5;
+          if (!seen.has(c2)) { seen.add(c2); uniq.push(c2); }
+        }
+        const all = shuffle([cs, ...uniq]);
+        const L = ['a', 'b', 'c', 'd'];
+        return { opciones: all.map(function (v, i) { return { valor: L[i], texto: L[i].toUpperCase() + '. ' + v }; }), correcta: L[all.indexOf(cs)] };
+      }
+
+      /* ── OPCIONES DE TEXTO ── */
+      function makeOptsText(ok, dist) {
+        const seen = new Set([ok]), uniq = [];
+        for (const d of dist) { if (!seen.has(d) && uniq.length < 3) { seen.add(d); uniq.push(d); } }
+        while (uniq.length < 3) { uniq.push('Ninguna de las anteriores ' + uniq.length); }
+        const all = shuffle([ok, ...uniq]);
+        const L = ['a', 'b', 'c', 'd'];
+        return { opciones: all.map(function (v, i) { return { valor: L[i], texto: L[i].toUpperCase() + '. ' + v }; }), correcta: L[all.indexOf(ok)] };
+      }
+
+      /* ══════════════════════════════════════
+         GENERADORES DE SVG ACCESIBLE
+      ══════════════════════════════════════ */
+      let UID = 0;
+      const PAL = ['#1565c0', '#b45309', '#166534', '#6d28d9', '#0e7490', '#9d174d'];
+
+      function escalaY(max) {
+        const pasos = [1, 2, 4, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000];
+        for (const s of pasos) { if (max / s <= 5) return { paso: s, tope: Math.max(s, Math.ceil(max / s) * s) }; }
+        return { paso: 5000, tope: Math.ceil(max / 5000) * 5000 };
+      }
+
+      function ejes(x0, x1, y0, y1, tope, paso, uni) {
+        let g = '';
+        for (let v = 0; v <= tope; v += paso) {
+          const y = y1 - (v / tope) * (y1 - y0);
+          g += '<line x1="' + x0 + '" y1="' + y + '" x2="' + x1 + '" y2="' + y + '" stroke="#d5dde5" stroke-width="1"/>';
+          g += '<text x="' + (x0 - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="11" fill="#333">' + v + '</text>';
+        }
+        g += '<line x1="' + x0 + '" y1="' + y1 + '" x2="' + x1 + '" y2="' + y1 + '" stroke="#333" stroke-width="2"/>';
+        g += '<line x1="' + x0 + '" y1="' + y0 + '" x2="' + x0 + '" y2="' + y1 + '" stroke="#333" stroke-width="2"/>';
+        const ym = (y0 + y1) / 2;
+        g += '<text x="16" y="' + ym + '" text-anchor="middle" font-size="11" fill="#333" transform="rotate(-90 16 ' + ym + ')">' + uni + '</text>';
+        return g;
+      }
+
+      function envolver(w, h, desc, cuerpo) {
+        return '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:min(' + w + 'px,100%)" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + desc + '">' + cuerpo + '</svg>';
+      }
+
+      /* ── Gráfica de barras simple ── */
+      function svgBarras(tit, cats, vals, uni, col) {
+        const W = 440, H = 272, x0 = 62, x1 = 424, y0 = 46, y1 = 216;
+        const e = escalaY(Math.max.apply(null, vals));
+        let s = '<text x="' + (W / 2) + '" y="22" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#1a1a2e">' + tit + '</text>';
+        s += ejes(x0, x1, y0, y1, e.tope, e.paso, uni);
+        const n = cats.length, slot = (x1 - x0) / n, bw = slot * 0.54;
+        for (let i = 0; i < n; i++) {
+          const cx = x0 + slot * i + slot / 2;
+          const y = y1 - (vals[i] / e.tope) * (y1 - y0);
+          s += '<rect x="' + (cx - bw / 2).toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + (y1 - y).toFixed(1) + '" fill="' + (col || '#1565c0') + '" stroke="#0b3a66" stroke-width="1"/>';
+          s += '<text x="' + cx.toFixed(1) + '" y="' + (y - 6).toFixed(1) + '" text-anchor="middle" font-size="12" font-weight="bold" fill="#1a1a2e">' + vals[i] + '</text>';
+          s += '<text x="' + cx.toFixed(1) + '" y="' + (y1 + 18) + '" text-anchor="middle" font-size="11.5" fill="#1a1a2e">' + cats[i] + '</text>';
+        }
+        const desc = tit + '. ' + cats.map(function (c, i) { return c + ': ' + vals[i]; }).join('; ') + '.';
+        return envolver(W, H, desc, s);
+      }
+
+      /* ── Gráfica de barras dobles (con trama para la segunda serie) ── */
+      function svgBarrasDobles(tit, cats, A, B, nomA, nomB, uni) {
+        const W = 440, H = 296, x0 = 62, x1 = 424, y0 = 46, y1 = 208;
+        const id = 'trama' + (++UID);
+        const e = escalaY(Math.max(Math.max.apply(null, A), Math.max.apply(null, B)));
+        let s = '<defs><pattern id="' + id + '" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">' +
+          '<rect width="6" height="6" fill="#b45309"/><line x1="0" y1="0" x2="0" y2="6" stroke="#fff" stroke-width="2.4"/></pattern></defs>';
+        s += '<text x="' + (W / 2) + '" y="22" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#1a1a2e">' + tit + '</text>';
+        s += ejes(x0, x1, y0, y1, e.tope, e.paso, uni);
+        const n = cats.length, slot = (x1 - x0) / n, bw = slot * 0.3;
+        for (let i = 0; i < n; i++) {
+          const cx = x0 + slot * i + slot / 2;
+          const ya = y1 - (A[i] / e.tope) * (y1 - y0);
+          const yb = y1 - (B[i] / e.tope) * (y1 - y0);
+          s += '<rect x="' + (cx - bw - 2).toFixed(1) + '" y="' + ya.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + (y1 - ya).toFixed(1) + '" fill="#1565c0" stroke="#0b3a66" stroke-width="1"/>';
+          s += '<rect x="' + (cx + 2).toFixed(1) + '" y="' + yb.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + (y1 - yb).toFixed(1) + '" fill="url(#' + id + ')" stroke="#7a4a06" stroke-width="1"/>';
+          s += '<text x="' + (cx - bw / 2 - 2).toFixed(1) + '" y="' + (ya - 5).toFixed(1) + '" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#1a1a2e">' + A[i] + '</text>';
+          s += '<text x="' + (cx + bw / 2 + 2).toFixed(1) + '" y="' + (yb - 5).toFixed(1) + '" text-anchor="middle" font-size="10.5" font-weight="bold" fill="#1a1a2e">' + B[i] + '</text>';
+          s += '<text x="' + cx.toFixed(1) + '" y="' + (y1 + 18) + '" text-anchor="middle" font-size="11.5" fill="#1a1a2e">' + cats[i] + '</text>';
+        }
+        s += '<rect x="' + (x0 + 10) + '" y="' + (y1 + 32) + '" width="14" height="12" fill="#1565c0" stroke="#0b3a66"/>';
+        s += '<text x="' + (x0 + 30) + '" y="' + (y1 + 42) + '" font-size="11.5" fill="#1a1a2e">' + nomA + '</text>';
+        s += '<rect x="' + (x0 + 150) + '" y="' + (y1 + 32) + '" width="14" height="12" fill="url(#' + id + ')" stroke="#7a4a06"/>';
+        s += '<text x="' + (x0 + 170) + '" y="' + (y1 + 42) + '" font-size="11.5" fill="#1a1a2e">' + nomB + '</text>';
+        const desc = tit + '. ' + cats.map(function (c, i) { return c + ': ' + nomA + ' ' + A[i] + ', ' + nomB + ' ' + B[i]; }).join('; ') + '.';
+        return envolver(W, H, desc, s);
+      }
+
+      /* ── Gráfica circular ── */
+      function svgCircular(tit, labels, pcts) {
+        const W = 440, H = 250, cx = 108, cy = 142, r = 84;
+        function pt(ang, rad) {
+          const a = (ang - 90) * Math.PI / 180;
+          return [(cx + rad * Math.cos(a)).toFixed(1), (cy + rad * Math.sin(a)).toFixed(1)];
+        }
+        let s = '<text x="' + (W / 2) + '" y="22" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#1a1a2e">' + tit + '</text>';
+        let ang = 0;
+        for (let i = 0; i < pcts.length; i++) {
+          const fin = ang + pcts[i] * 3.6;
+          const p1 = pt(ang, r), p2 = pt(fin, r);
+          const grande = pcts[i] * 3.6 > 180 ? 1 : 0;
+          s += '<path d="M ' + cx + ' ' + cy + ' L ' + p1[0] + ' ' + p1[1] + ' A ' + r + ' ' + r + ' 0 ' + grande + ' 1 ' + p2[0] + ' ' + p2[1] + ' Z" fill="' + PAL[i % PAL.length] + '" stroke="#fff" stroke-width="2"/>';
+          if (pcts[i] >= 11) {
+            const m = pt((ang + fin) / 2, r * 0.62);
+            s += '<text x="' + m[0] + '" y="' + m[1] + '" text-anchor="middle" font-size="12.5" font-weight="bold" fill="#fff">' + pcts[i] + '%</text>';
+          }
+          ang = fin;
+        }
+        for (let i = 0; i < labels.length; i++) {
+          const y = 78 + i * 26;
+          s += '<rect x="234" y="' + (y - 11) + '" width="15" height="15" fill="' + PAL[i % PAL.length] + '" stroke="#333" stroke-width="0.8"/>';
+          s += '<text x="257" y="' + y + '" font-size="12.5" fill="#1a1a2e">' + labels[i] + ' &#8212; ' + pcts[i] + '%</text>';
+        }
+        const desc = tit + '. ' + labels.map(function (l, i) { return l + ': ' + pcts[i] + ' por ciento'; }).join('; ') + '.';
+        return envolver(W, H, desc, s);
+      }
+
+      /* ── Gráfica lineal (una o dos series) ── */
+      function svgLinea(tit, labels, A, uni, B, nomA, nomB) {
+        const W = 440, H = B ? 296 : 272, x0 = 62, x1 = 424, y0 = 46, y1 = B ? 208 : 216;
+        const todos = B ? A.concat(B) : A;
+        const e = escalaY(Math.max.apply(null, todos));
+        let s = '<text x="' + (W / 2) + '" y="22" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#1a1a2e">' + tit + '</text>';
+        s += ejes(x0, x1, y0, y1, e.tope, e.paso, uni);
+        const n = labels.length, slot = (x1 - x0) / n;
+        function px(i) { return x0 + slot * i + slot / 2; }
+        function py(v) { return y1 - (v / e.tope) * (y1 - y0); }
+        let pl = '';
+        for (let i = 0; i < n; i++) { pl += px(i).toFixed(1) + ',' + py(A[i]).toFixed(1) + ' '; }
+        s += '<polyline points="' + pl.trim() + '" fill="none" stroke="#0e7490" stroke-width="3"/>';
+        for (let i = 0; i < n; i++) {
+          s += '<circle cx="' + px(i).toFixed(1) + '" cy="' + py(A[i]).toFixed(1) + '" r="5" fill="#0e7490" stroke="#fff" stroke-width="1.5"/>';
+          s += '<text x="' + px(i).toFixed(1) + '" y="' + (py(A[i]) - 11).toFixed(1) + '" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#0b4f5e">' + A[i] + '</text>';
+          s += '<text x="' + px(i).toFixed(1) + '" y="' + (y1 + 18) + '" text-anchor="middle" font-size="11.5" fill="#1a1a2e">' + labels[i] + '</text>';
+        }
+        if (B) {
+          let pb = '';
+          for (let i = 0; i < n; i++) { pb += px(i).toFixed(1) + ',' + py(B[i]).toFixed(1) + ' '; }
+          s += '<polyline points="' + pb.trim() + '" fill="none" stroke="#b45309" stroke-width="3" stroke-dasharray="8 5"/>';
+          for (let i = 0; i < n; i++) {
+            s += '<rect x="' + (px(i) - 5).toFixed(1) + '" y="' + (py(B[i]) - 5).toFixed(1) + '" width="10" height="10" fill="#b45309" stroke="#fff" stroke-width="1.5"/>';
+            s += '<text x="' + px(i).toFixed(1) + '" y="' + (py(B[i]) + 19).toFixed(1) + '" text-anchor="middle" font-size="11.5" font-weight="bold" fill="#7a4a06">' + B[i] + '</text>';
+          }
+          s += '<line x1="' + (x0 + 10) + '" y1="' + (y1 + 38) + '" x2="' + (x0 + 34) + '" y2="' + (y1 + 38) + '" stroke="#0e7490" stroke-width="3"/>';
+          s += '<circle cx="' + (x0 + 22) + '" cy="' + (y1 + 38) + '" r="4.5" fill="#0e7490"/>';
+          s += '<text x="' + (x0 + 42) + '" y="' + (y1 + 42) + '" font-size="11.5" fill="#1a1a2e">' + nomA + '</text>';
+          s += '<line x1="' + (x0 + 170) + '" y1="' + (y1 + 38) + '" x2="' + (x0 + 194) + '" y2="' + (y1 + 38) + '" stroke="#b45309" stroke-width="3" stroke-dasharray="6 4"/>';
+          s += '<rect x="' + (x0 + 178) + '" y="' + (y1 + 33) + '" width="9" height="9" fill="#b45309"/>';
+          s += '<text x="' + (x0 + 202) + '" y="' + (y1 + 42) + '" font-size="11.5" fill="#1a1a2e">' + nomB + '</text>';
+        }
+        let desc = tit + '. ' + (B ? nomA + ': ' : '') + labels.map(function (l, i) { return l + ' ' + A[i]; }).join(', ') + '.';
+        if (B) { desc += ' ' + nomB + ': ' + labels.map(function (l, i) { return l + ' ' + B[i]; }).join(', ') + '.'; }
+        return envolver(W, H, desc, s);
+      }
+
+      /* ── Histograma (barras contiguas) ── */
+      function svgHistograma(tit, intervalos, freqs, uni) {
+        const W = 440, H = 272, x0 = 62, x1 = 424, y0 = 46, y1 = 216;
+        const e = escalaY(Math.max.apply(null, freqs));
+        let s = '<text x="' + (W / 2) + '" y="22" text-anchor="middle" font-size="13.5" font-weight="bold" fill="#1a1a2e">' + tit + '</text>';
+        s += ejes(x0, x1, y0, y1, e.tope, e.paso, uni);
+        const n = intervalos.length, bw = (x1 - x0) / n;
+        for (let i = 0; i < n; i++) {
+          const x = x0 + bw * i;
+          const y = y1 - (freqs[i] / e.tope) * (y1 - y0);
+          s += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + (y1 - y).toFixed(1) + '" fill="#166534" stroke="#fff" stroke-width="1.5"/>';
+          s += '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (y - 6).toFixed(1) + '" text-anchor="middle" font-size="12" font-weight="bold" fill="#1a1a2e">' + freqs[i] + '</text>';
+          s += '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (y1 + 18) + '" text-anchor="middle" font-size="10.5" fill="#1a1a2e">' + intervalos[i] + '</text>';
+        }
+        const desc = tit + '. ' + intervalos.map(function (c, i) { return 'intervalo ' + c + ': ' + freqs[i]; }).join('; ') + '.';
+        return envolver(W, H, desc, s);
+      }
+
+      /* ── CATEGORÍAS ── */
+      const CC = {
+        'Barras': '#1565c0',
+        'Circular': '#6d28d9',
+        'Lineal': '#0e7490',
+        'Histograma': '#166534',
+        'Inferencia': '#8a4b00'
+      };
+      const CI = {
+        'Barras': '\u2588',
+        'Circular': '\u25d5',
+        'Lineal': '\u2197',
+        'Histograma': '\u2591',
+        'Inferencia': '\u2605'
+      };
+      const TIPS = {
+        'Barras':
+          'Lee siempre el t\u00edtulo y la escala del eje vertical antes de comparar. Para hallar "cu\u00e1ntos m\u00e1s", resta las dos barras; para hallar un porcentaje, divide la barra entre el TOTAL de todas las barras y multiplica por 100.',
+        'Circular':
+          'La gr\u00e1fica circular muestra PORCIONES de un total: los porcentajes siempre suman 100 %. Para pasar de porcentaje a cantidad, multiplica el total por el porcentaje y divide entre 100.',
+        'Lineal':
+          'La gr\u00e1fica lineal muestra el CAMBIO en el tiempo. El mayor aumento no es el punto m\u00e1s alto, sino el tramo con la subida m\u00e1s inclinada. Para el aumento porcentual: (diferencia \u00f7 valor inicial) \u00d7 100.',
+        'Histograma':
+          'El histograma agrupa los datos en intervalos y sus barras se tocan. La altura es la FRECUENCIA (cu\u00e1ntos datos hay), no el valor del dato. Para "cu\u00e1ntos por encima de", suma las frecuencias de los intervalos correspondientes.',
+        'Inferencia':
+          'Una conclusi\u00f3n v\u00e1lida solo puede usar lo que la gr\u00e1fica muestra. Las causas, las opiniones y los datos que no aparecen NO se pueden concluir. Verifica cada afirmaci\u00f3n contra los n\u00fameros antes de elegir.'
+      };
+
+      /* ══════════════════════════════════════
+         GENERADORES — 20 preguntas (4 por categoría)
+      ══════════════════════════════════════ */
+      const GEN = [
+
+        /* ── BARRAS 1: diferencia mayor / menor ── */
+        function () {
+          const cats = ['Norte', 'Sur', 'Este', 'Oeste'];
+          let v;
+          do { v = [rand(4, 19) * 5, rand(4, 19) * 5, rand(4, 19) * 5, rand(4, 19) * 5]; }
+          while (new Set(v).size < 4);
+          const mx = Math.max.apply(null, v), mn = Math.min.apply(null, v);
+          const res = mx - mn;
+          const o = makeOpts(res, [mx + mn, mx, Math.round((mx + mn) / 2)]);
+          return {
+            cat: 'Barras', t: 55,
+            q: '&iquest;Cu&aacute;ntas unidades <strong>m&aacute;s</strong> vendi&oacute; la sucursal de mayor venta que la de menor venta?',
+            data: svgBarras('Ventas del mes por sucursal', cats, v, 'Unidades', '#1565c0'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Mayor: ' + cats[maxi(v)] + ' con ' + mx + '. Menor: ' + cats[mini(v)] + ' con ' + mn + '. La diferencia es ' + mx + ' &minus; ' + mn + ' = <strong>' + res + ' unidades</strong>.'
+          };
+        },
+
+        /* ── BARRAS 2: porcentaje del total ── */
+        function () {
+          const cats = ['Vivienda', 'Comida', 'Transporte', 'Otros'];
+          let v;
+          do {
+            v = [rand(2, 7) * 10, rand(2, 7) * 10, rand(2, 6) * 10];
+            v.push(200 - (v[0] + v[1] + v[2]));
+          } while (v[3] < 20 || v[3] > 90);
+          v.sort(function (a, b) { return b - a; });
+          const i = rand(0, 3), pct = v[i] / 2;
+          const o = makeOpts(pct + ' %', [v[i] + ' %', (100 - pct) + ' %', (pct + 10) + ' %']);
+          return {
+            cat: 'Barras', t: 65,
+            q: '&iquest;Qu&eacute; <strong>porcentaje del gasto total</strong> representa el rubro <strong>' + cats[i] + '</strong>?',
+            data: svgBarras('Gasto mensual de una familia (en d&oacute;lares)', cats, v, 'D&oacute;lares', '#1565c0'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Total = ' + v.join(' + ') + ' = <strong>200</strong>. Luego ' + v[i] + ' &divide; 200 = ' + (v[i] / 200) + ', y ' + (v[i] / 200) + ' &times; 100 = <strong>' + pct + ' %</strong>.'
+          };
+        },
+
+        /* ── BARRAS 3: barras dobles, mayor aumento ── */
+        function () {
+          const cats = ['Ene', 'Feb', 'Mar', 'Abr'];
+          let A, B, inc;
+          do {
+            A = []; B = []; inc = [];
+            for (let i = 0; i < 4; i++) {
+              const a = rand(5, 16) * 5, d = rand(1, 8) * 5;
+              A.push(a); B.push(a + d); inc.push(d);
+            }
+          } while (new Set(inc).size < 4);
+          const mx = Math.max.apply(null, inc), gan = cats[inc.indexOf(mx)];
+          const o = makeOptsText(gan, cats.filter(function (c) { return c !== gan; }));
+          return {
+            cat: 'Barras', t: 65,
+            q: '&iquest;En qu&eacute; mes fue <strong>mayor el aumento</strong> de 2025 a 2026?',
+            data: svgBarrasDobles('Matr&iacute;cula por mes', cats, A, B, '2025', '2026', 'Estudiantes'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Aumentos: ' + cats.map(function (c, i) { return c + ' ' + inc[i]; }).join(', ') + '. El mayor es <strong>' + gan + '</strong> con ' + mx + '. Cuidado: la barra m&aacute;s alta no siempre tiene el mayor aumento.'
+          };
+        },
+
+        /* ── BARRAS 4: promedio ── */
+        function () {
+          const cats = ['Lun', 'Mar', 'Mi&eacute;', 'Jue', 'Vie'];
+          const v = [];
+          for (let i = 0; i < 5; i++) { v.push(rand(2, 16) * 5); }
+          const s = suma(v), prom = s / 5;
+          const ord = v.slice().sort(function (a, b) { return a - b; });
+          const o = makeOpts(prom, [ord[2], Math.max.apply(null, v) - Math.min.apply(null, v), Math.round(s / 4)]);
+          return {
+            cat: 'Barras', t: 65,
+            q: '&iquest;Cu&aacute;l es el <strong>promedio diario</strong> de asistentes durante los cinco d&iacute;as?',
+            data: svgBarras('Asistencia diaria al centro de estudio', cats, v, 'Personas', '#1565c0'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Suma = ' + v.join(' + ') + ' = ' + s + '. Como son 5 d&iacute;as: ' + s + ' &divide; 5 = <strong>' + prom + '</strong>.'
+          };
+        },
+
+        /* ── CIRCULAR 1: porcentaje a cantidad ── */
+        function () {
+          const juegos = [[40, 25, 20, 15], [35, 30, 20, 15], [50, 25, 15, 10], [45, 25, 20, 10], [30, 30, 25, 15]];
+          const pcts = shuffle(pick(juegos));
+          const labels = ['Autob&uacute;s', 'Autom&oacute;vil', 'A pie', 'Bicicleta'];
+          const N = pick([200, 300, 400, 500, 600]);
+          const i = rand(0, 3), res = N * pcts[i] / 100;
+          const o = makeOpts(res, [pcts[i], N - res, N * pcts[(i + 1) % 4] / 100]);
+          return {
+            cat: 'Circular', t: 60,
+            q: 'Se encuest&oacute; a <strong>' + N + ' estudiantes</strong>. &iquest;Cu&aacute;ntos usan <strong>' + labels[i].replace(/&uacute;/g, '&uacute;') + '</strong> para llegar al colegio?',
+            data: svgCircular('Medio de transporte de los estudiantes', labels, pcts),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'El sector marca ' + pcts[i] + ' %. Entonces ' + N + ' &times; ' + pcts[i] + ' &divide; 100 = <strong>' + res + ' estudiantes</strong>.'
+          };
+        },
+
+        /* ── CIRCULAR 2: diferencia entre dos sectores ── */
+        function () {
+          const juegos = [[40, 25, 20, 15], [35, 30, 20, 15], [45, 25, 20, 10], [30, 30, 25, 15]];
+          const pcts = shuffle(pick(juegos));
+          const labels = ['Deportes', 'M&uacute;sica', 'Lectura', 'Cine'];
+          const N = pick([200, 400, 500, 600, 800]);
+          let i = 0, j = 1;
+          if (pcts[i] === pcts[j]) { j = 2; }
+          const c1 = N * pcts[i] / 100, c2 = N * pcts[j] / 100, res = Math.abs(c1 - c2);
+          const o = makeOpts(res, [c1 + c2, Math.abs(pcts[i] - pcts[j]), Math.max(c1, c2)]);
+          return {
+            cat: 'Circular', t: 65,
+            q: 'La encuesta se aplic&oacute; a <strong>' + N + ' personas</strong>. &iquest;Cu&aacute;ntas personas <strong>m&aacute;s</strong> (o menos) eligieron <strong>' + labels[i] + '</strong> que <strong>' + labels[j] + '</strong>?',
+            data: svgCircular('Actividad preferida en el tiempo libre', labels, pcts),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: labels[i] + ': ' + N + ' &times; ' + pcts[i] + ' &divide; 100 = ' + c1 + '. ' + labels[j] + ': ' + c2 + '. Diferencia = <strong>' + res + ' personas</strong>.'
+          };
+        },
+
+        /* ── CIRCULAR 3: porcentaje a fracción ── */
+        function () {
+          const casos = [
+            { p: [50, 25, 15, 10], k: 0, f: '1/2' },
+            { p: [25, 35, 30, 10], k: 0, f: '1/4' },
+            { p: [40, 20, 30, 10], k: 1, f: '1/5' },
+            { p: [45, 25, 20, 10], k: 3, f: '1/10' },
+            { p: [50, 20, 20, 10], k: 1, f: '1/5' }
+          ];
+          const c = pick(casos);
+          const labels = ['Aprobado', 'En revisi&oacute;n', 'Pendiente', 'Rechazado'];
+          const o = makeOptsText(c.f, shuffle(['1/2', '1/3', '1/4', '1/5', '1/8', '1/10'].filter(function (x) { return x !== c.f; })));
+          return {
+            cat: 'Circular', t: 55,
+            q: 'El sector <strong>' + labels[c.k] + '</strong> equivale a &iquest;qu&eacute; <strong>fracci&oacute;n del total</strong>?',
+            data: svgCircular('Estado de las solicitudes recibidas', labels, c.p),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: c.p[c.k] + ' % significa ' + c.p[c.k] + ' de cada 100. Al simplificar ' + c.p[c.k] + '/100 se obtiene <strong>' + c.f + '</strong>.'
+          };
+        },
+
+        /* ── CIRCULAR 4: dos sectores combinados ── */
+        function () {
+          const juegos = [[40, 25, 20, 15], [35, 30, 20, 15], [45, 25, 20, 10], [30, 30, 25, 15]];
+          const pcts = shuffle(pick(juegos));
+          const labels = ['Vivienda', 'Alimentos', 'Transporte', 'Ahorro'];
+          const N = pick([1200, 1600, 2000, 2400, 3000]);
+          const i = 0, j = 1;
+          const pctSum = pcts[i] + pcts[j], res = N * pctSum / 100;
+          const o = makeOpts(res, [pctSum, N * pcts[i] / 100, N - res]);
+          return {
+            cat: 'Circular', t: 70,
+            q: 'El ingreso mensual de la familia es de <strong>$' + N + '</strong>. &iquest;Cu&aacute;ntos d&oacute;lares se destinan <strong>en conjunto</strong> a ' + labels[i] + ' y ' + labels[j] + '?',
+            data: svgCircular('Distribuci&oacute;n del presupuesto familiar', labels, pcts),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Suma los dos sectores: ' + pcts[i] + ' % + ' + pcts[j] + ' % = ' + pctSum + ' %. Luego ' + N + ' &times; ' + pctSum + ' &divide; 100 = <strong>$' + res + '</strong>.'
+          };
+        },
+
+        /* ── LINEAL 1: mayor aumento entre dos puntos ── */
+        function () {
+          const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May'];
+          let v, dif;
+          do {
+            v = [rand(4, 10) * 10];
+            dif = [];
+            for (let i = 1; i < 5; i++) { const d = rand(1, 9) * 10; dif.push(d); v.push(v[i - 1] + d); }
+          } while (new Set(dif).size < 4);
+          const mx = Math.max.apply(null, dif), k = dif.indexOf(mx);
+          const ok = 'De ' + meses[k] + ' a ' + meses[k + 1];
+          const dist = [];
+          for (let i = 0; i < 4; i++) { if (i !== k) { dist.push('De ' + meses[i] + ' a ' + meses[i + 1]); } }
+          const o = makeOptsText(ok, shuffle(dist));
+          return {
+            cat: 'Lineal', t: 60,
+            q: '&iquest;Entre qu&eacute; dos meses consecutivos ocurri&oacute; el <strong>mayor aumento</strong>?',
+            data: svgLinea('Ventas mensuales de la tienda (en unidades)', meses, v, 'Unidades'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Aumentos consecutivos: ' + dif.map(function (d, i) { return meses[i] + '&rarr;' + meses[i + 1] + ': ' + d; }).join(', ') + '. El mayor es <strong>' + mx + '</strong>, es decir, ' + ok.toLowerCase() + '. El punto m&aacute;s alto no indica el mayor aumento; lo indica el tramo m&aacute;s inclinado.'
+          };
+        },
+
+        /* ── LINEAL 2: aumento porcentual ── */
+        function () {
+          const meses = ['Ene', 'Feb', 'Mar', 'Abr'];
+          const casos = [{ p: 50, v: [120, 180, 240] }, { p: 25, v: [120, 240] }, { p: 20, v: [150, 300] }];
+          const c = pick(casos), pct = c.p, v0 = pick(c.v);
+          const vf = v0 + v0 * pct / 100, d = vf - v0;
+          const v = [v0, v0 + d / 3, v0 + 2 * d / 3, vf];
+          const o = makeOpts(pct + ' %', [(vf - v0) + ' %', (pct + 10) + ' %', Math.round(vf / v0 * 100) + ' %']);
+          return {
+            cat: 'Lineal', t: 70,
+            q: '&iquest;Cu&aacute;l fue el <strong>aumento porcentual</strong> de enero a abril?',
+            data: svgLinea('Inscripciones por mes', meses, v, 'Personas'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Aumento = ' + vf + ' &minus; ' + v0 + ' = ' + (vf - v0) + '. Luego se divide entre el valor INICIAL: ' + (vf - v0) + ' &divide; ' + v0 + ' = ' + ((vf - v0) / v0) + ', y &times; 100 = <strong>' + pct + ' %</strong>.'
+          };
+        },
+
+        /* ── LINEAL 3: predicción según la tendencia ── */
+        function () {
+          const meses = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
+          const v0 = rand(3, 9) * 10, d = rand(1, 5) * 10;
+          const v = [v0, v0 + d, v0 + 2 * d, v0 + 3 * d];
+          const res = v0 + 4 * d;
+          const o = makeOpts(res, [v[3], res + d, v[3] + Math.round(d / 2)]);
+          return {
+            cat: 'Lineal', t: 60,
+            q: 'Si la tendencia se mantiene igual, &iquest;qu&eacute; valor se espera en la <strong>semana 5</strong>?',
+            data: svgLinea('Horas de estudio acumuladas por semana', meses, v, 'Horas'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'El aumento es constante: ' + d + ' cada semana. Entonces ' + v[3] + ' + ' + d + ' = <strong>' + res + '</strong>.'
+          };
+        },
+
+        /* ── LINEAL 4: dos series, conteo comparativo ── */
+        function () {
+          const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May'];
+          let A, B, cuenta;
+          do {
+            A = []; B = []; cuenta = 0;
+            for (let i = 0; i < 5; i++) {
+              const a = rand(3, 12) * 10, b = rand(3, 12) * 10;
+              A.push(a); B.push(b);
+              if (a > b) { cuenta++; }
+            }
+          } while (cuenta < 1 || cuenta > 4 || A.some(function (a, i) { return a === B[i]; }));
+          const o = makeOpts(cuenta, [5 - cuenta, cuenta + 1, 5]);
+          return {
+            cat: 'Lineal', t: 70,
+            q: '&iquest;En cu&aacute;ntos meses la sucursal <strong>Centro</strong> super&oacute; a la sucursal <strong>Sur</strong>?',
+            data: svgLinea('Comparaci&oacute;n de ventas entre dos sucursales', meses, A, 'Unidades', B, 'Centro', 'Sur'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Se comparan mes a mes: ' + meses.map(function (m, i) { return m + ' (' + A[i] + ' vs ' + B[i] + ')'; }).join(', ') + '. Centro queda por encima en <strong>' + cuenta + '</strong> mes(es).'
+          };
+        },
+
+        /* ── HISTOGRAMA 1: acumular intervalos superiores ── */
+        function () {
+          const inter = ['60-69', '70-79', '80-89', '90-99'];
+          let f;
+          do { f = [rand(4, 18), rand(4, 18), rand(4, 18)]; f.push(50 - suma(f)); } while (f[3] < 4 || f[3] > 20);
+          const res = f[2] + f[3];
+          const o = makeOpts(res, [f[3], f[0] + f[1], 50 - f[3]]);
+          return {
+            cat: 'Histograma', t: 60,
+            q: 'El histograma muestra las calificaciones de 50 estudiantes. &iquest;Cu&aacute;ntos obtuvieron <strong>80 puntos o m&aacute;s</strong>?',
+            data: svgHistograma('Calificaciones del examen de pr&aacute;ctica', inter, f, 'Estudiantes'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Se suman los dos intervalos superiores: ' + f[2] + ' (80-89) + ' + f[3] + ' (90-99) = <strong>' + res + ' estudiantes</strong>.'
+          };
+        },
+
+        /* ── HISTOGRAMA 2: porcentaje de un intervalo ── */
+        function () {
+          const inter = ['0-9', '10-19', '20-29', '30-39'];
+          let f;
+          do { f = [rand(4, 18), rand(4, 18), rand(4, 18)]; f.push(50 - suma(f)); } while (f[3] < 4 || f[3] > 20);
+          const i = rand(0, 3), pct = f[i] * 2;
+          const o = makeOpts(pct + ' %', [f[i] + ' %', (100 - pct) + ' %', (pct + 8) + ' %']);
+          return {
+            cat: 'Histograma', t: 65,
+            q: 'Se registr&oacute; el tiempo de traslado de 50 trabajadores. &iquest;Qu&eacute; <strong>porcentaje</strong> tarda entre <strong>' + inter[i].replace('-', ' y ') + ' minutos</strong>?',
+            data: svgHistograma('Tiempo de traslado al trabajo (minutos)', inter, f, 'Trabajadores'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'La barra mide ' + f[i] + ' trabajadores de 50 en total: ' + f[i] + ' &divide; 50 = ' + (f[i] / 50) + ', y &times; 100 = <strong>' + pct + ' %</strong>.'
+          };
+        },
+
+        /* ── HISTOGRAMA 3: intervalo de la mediana ── */
+        function () {
+          const inter = ['1-2', '3-4', '5-6', '7-8'];
+          let f, acum, k;
+          do {
+            f = [rand(4, 16), rand(4, 16), rand(4, 16)];
+            f.push(40 - suma(f));
+            acum = []; let s = 0;
+            for (let i = 0; i < 4; i++) { s += f[i]; acum.push(s); }
+            k = -1;
+            for (let i = 0; i < 4; i++) { if (k < 0 && acum[i] >= 21) { k = i; } }
+          } while (f[3] < 4 || f[3] > 18 || acum.indexOf(20) >= 0);
+          const o = makeOptsText(inter[k], inter.filter(function (x) { return x !== inter[k]; }));
+          return {
+            cat: 'Histograma', t: 75,
+            q: 'Se encuest&oacute; a 40 familias. &iquest;En qu&eacute; <strong>intervalo se encuentra la mediana</strong> del n&uacute;mero de libros le&iacute;dos?',
+            data: svgHistograma('Libros le&iacute;dos por familia en el a&ntilde;o', inter, f, 'Familias'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Con 40 datos, la mediana est&aacute; entre el dato 20 y el 21. Frecuencias acumuladas: ' + acum.map(function (a, i) { return inter[i] + '&rarr;' + a; }).join(', ') + '. El primer intervalo que alcanza el dato 21 es <strong>' + inter[k] + '</strong>.'
+          };
+        },
+
+        /* ── HISTOGRAMA 4: comparación entre intervalos ── */
+        function () {
+          const inter = ['18-27', '28-37', '38-47', '48-57'];
+          let f;
+          do { f = [rand(5, 20), rand(5, 20), rand(5, 20), rand(5, 20)]; }
+          while (new Set(f).size < 4);
+          const a = maxi(f), b = mini(f), res = f[a] - f[b];
+          const o = makeOpts(res, [f[a] + f[b], f[a], suma(f)]);
+          return {
+            cat: 'Histograma', t: 60,
+            q: '&iquest;Cu&aacute;ntas personas <strong>m&aacute;s</strong> hay en el intervalo m&aacute;s numeroso que en el menos numeroso?',
+            data: svgHistograma('Edades de los participantes del taller', inter, f, 'Personas'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'M&aacute;s numeroso: ' + inter[a] + ' con ' + f[a] + '. Menos numeroso: ' + inter[b] + ' con ' + f[b] + '. Diferencia = <strong>' + res + ' personas</strong>.'
+          };
+        },
+
+        /* ── INFERENCIA 1: afirmación respaldada por la gráfica ── */
+        function () {
+          const cats = ['Norte', 'Sur', 'Este', 'Oeste'];
+          const mn = rand(3, 7) * 5;
+          const mx = mn * 2 + rand(1, 4) * 5;
+          const m1 = mn + rand(1, 3) * 5, m2 = mn + rand(4, 6) * 5;
+          const v = [mx, m2, m1, mn];
+          const idx = shuffle([0, 1, 2, 3]);
+          const vv = idx.map(function (i) { return v[i]; });
+          const iMax = maxi(vv), iMin = mini(vv);
+          const total = suma(vv);
+          const ok = cats[iMax] + ' vendi&oacute; m&aacute;s del doble que ' + cats[iMin] + '.';
+          const dist = [
+            'Las cuatro sucursales superaron las ' + (Math.min.apply(null, vv) + 10) + ' unidades.',
+            'El total de las cuatro sucursales fue menor que ' + (total - 20) + ' unidades.',
+            cats[iMin] + ' y ' + cats[(iMin + 1) % 4] + ' vendieron exactamente lo mismo.'
+          ];
+          const o = makeOptsText(ok, dist);
+          return {
+            cat: 'Inferencia', t: 75,
+            q: '&iquest;Cu&aacute;l afirmaci&oacute;n est&aacute; <strong>respaldada por la gr&aacute;fica</strong>?',
+            data: svgBarras('Ventas trimestrales por sucursal', cats, vv, 'Unidades', '#1565c0'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: cats[iMax] + ' tiene ' + Math.max.apply(null, vv) + ' y ' + cats[iMin] + ' tiene ' + Math.min.apply(null, vv) + '. El doble de ' + Math.min.apply(null, vv) + ' es ' + (Math.min.apply(null, vv) * 2) + ', y ' + Math.max.apply(null, vv) + ' lo supera. Las dem&aacute;s afirmaciones se contradicen con los valores de las barras.'
+          };
+        },
+
+        /* ── INFERENCIA 2: conclusión que NO se puede obtener ── */
+        function () {
+          const meses = ['Ene', 'Feb', 'Mar', 'Abr'];
+          const v0 = rand(4, 9) * 10;
+          const v = [v0, v0 + rand(1, 4) * 10, 0, 0];
+          v[2] = v[1] + rand(1, 4) * 10;
+          v[3] = v[2] + rand(1, 4) * 10;
+          const ok = 'El aumento se debi&oacute; a la nueva campa&ntilde;a publicitaria.';
+          const dist = [
+            'Las ventas aumentaron en todos los meses registrados.',
+            'En abril se registraron ' + v[3] + ' unidades.',
+            'El aumento total de enero a abril fue de ' + (v[3] - v[0]) + ' unidades.'
+          ];
+          const o = makeOptsText(ok, dist);
+          return {
+            cat: 'Inferencia', t: 75,
+            q: 'Seg&uacute;n la gr&aacute;fica, &iquest;cu&aacute;l conclusi&oacute;n <strong>NO se puede obtener</strong>?',
+            data: svgLinea('Ventas mensuales del producto', meses, v, 'Unidades'),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'La gr&aacute;fica muestra <em>qu&eacute;</em> ocurri&oacute;, no <em>por qu&eacute;</em> ocurri&oacute;. Atribuir el aumento a una campa&ntilde;a publicitaria es una <strong>causa</strong> que la gr&aacute;fica no registra. Las otras tres afirmaciones se leen directamente de los puntos.'
+          };
+        },
+
+        /* ── INFERENCIA 3: tipo de gráfica apropiado ── */
+        function () {
+          const casos = [
+            { e: 'Se desea mostrar c&oacute;mo se reparte, en porcentajes, el presupuesto anual de un hogar entre cuatro rubros.', ok: 'Gr&aacute;fica circular' },
+            { e: 'Se desea mostrar el cambio de la temperatura promedio de una ciudad durante los doce meses del a&ntilde;o.', ok: 'Gr&aacute;fica lineal' },
+            { e: 'Se desea mostrar cu&aacute;ntos estudiantes hay en cada intervalo de edad: 18-27, 28-37, 38-47 y 48-57.', ok: 'Histograma' },
+            { e: 'Se desea comparar el total de ventas de cinco sucursales distintas durante el mismo mes.', ok: 'Gr&aacute;fica de barras' }
+          ];
+          const c = pick(casos);
+          const todas = ['Gr&aacute;fica circular', 'Gr&aacute;fica lineal', 'Histograma', 'Gr&aacute;fica de barras'];
+          const o = makeOptsText(c.ok, todas.filter(function (x) { return x !== c.ok; }));
+          return {
+            cat: 'Inferencia', t: 55,
+            q: '&iquest;Cu&aacute;l tipo de gr&aacute;fica es <strong>m&aacute;s apropiado</strong> para esta situaci&oacute;n?',
+            data: '<div class="escenario">' + c.e + '</div>',
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Regla pr&aacute;ctica: partes de un total &rarr; circular; cambio a lo largo del tiempo &rarr; lineal; datos agrupados en intervalos &rarr; histograma; comparaci&oacute;n entre categor&iacute;as separadas &rarr; barras. Aqu&iacute; corresponde <strong>' + c.ok + '</strong>.'
+          };
+        },
+
+        /* ── INFERENCIA 4: dos pasos con gráfica circular ── */
+        function () {
+          const juegos = [[40, 30, 20, 10], [50, 20, 20, 10], [40, 25, 25, 10], [30, 30, 30, 10]];
+          const pcts = pick(juegos);
+          const labels = ['Turno ma&ntilde;ana', 'Turno tarde', 'Turno noche', 'Fin de semana'];
+          const N = pick([400, 600, 800, 1000]);
+          const i = 0;
+          const grupo = N * pcts[i] / 100, res = grupo / 2;
+          const o = makeOpts(res, [grupo, N / 2, grupo * 2]);
+          return {
+            cat: 'Inferencia', t: 80,
+            q: 'El centro atiende a <strong>' + N + ' estudiantes</strong>. De los del <strong>' + labels[i] + '</strong>, la <strong>mitad</strong> tiene m&aacute;s de 40 a&ntilde;os. &iquest;Cu&aacute;ntos estudiantes son?',
+            data: svgCircular('Distribuci&oacute;n de estudiantes por turno', labels, pcts),
+            opciones: o.opciones, correcta: o.correcta,
+            exp: 'Paso 1: ' + N + ' &times; ' + pcts[i] + ' &divide; 100 = ' + grupo + ' estudiantes en el ' + labels[i].toLowerCase() + '. Paso 2: la mitad de ' + grupo + ' es <strong>' + res + '</strong>. El error com&uacute;n es tomar la mitad del total general.'
+          };
+        }
+
+      ]; /* fin GEN */
+
+      /* ══════════════════════════════════════
+         MOTOR DEL CUESTIONARIO
+      ══════════════════════════════════════ */
+      const preguntas = shuffle(GEN.map(function (g) { return g(); }));
+      const total = preguntas.length;
+      let actual = 0, puntos = 0, respondida = false, reloj = null, segs = 0;
+      const catPts = {}, catTot = {};
+      preguntas.forEach(function (p) {
+        catTot[p.cat] = (catTot[p.cat] || 0) + 1;
+        catPts[p.cat] = catPts[p.cat] || 0;
+      });
+
+      const qArea = document.getElementById('question-area');
+      const barP = document.getElementById('progress-bar');
+      const txtP = document.getElementById('progress-text');
+
+      function render(i) {
+        const p = preguntas[i];
+        const col = CC[p.cat] || '#0f6e4f';
+        const icon = CI[p.cat] || '';
+        const tLbl = p.t <= 55 ? '&#9889; R&aacute;pida' : p.t <= 70 ? '&#128336; Media' : '&#9203; Compleja';
+        const opHtml = p.opciones.map(function (o) {
+          return '<div class="option-item" role="button" tabindex="0" data-val="' + o.valor + '" onclick="window.__grClick(this)" onkeydown="window.__grKey(this,event)">' + o.texto + '</div>';
+        }).join('');
+        const dH = p.data ? '<div class="data-box">' + p.data + '</div>' : '';
+        const btn = i === total - 1 ? 'Ver resultados' : 'Siguiente &rsaquo;';
+        qArea.innerHTML =
+          '<div class="question-meta">' +
+            '<span class="cat-badge" style="background:' + col + '"><span aria-hidden="true">' + icon + '</span> ' + p.cat + '</span>' +
+            '<span class="time-badge">' + tLbl + ' &middot; ' + p.t + 's</span>' +
+          '</div>' +
+          '<div class="question-header">' + p.q + '</div>' +
+          dH +
+          '<div class="options">' + opHtml + '</div>' +
+          '<div class="feedback-box hidden" id="feedback-box" role="status" aria-live="polite"></div>' +
+          '<div class="btn-container"><div class="primary-btn" role="button" tabindex="0" onclick="window.__grNext()" onkeydown="window.__grNextKey(event)">' + btn + '</div></div>';
+        if (barP) { barP.style.width = ((i + 1) / total) * 100 + '%'; }
+        if (txtP) { txtP.textContent = 'Pregunta ' + (i + 1) + ' de ' + total; }
+        iniciarReloj(p.t);
+      }
+
+      function bloquear() {
+        qArea.querySelectorAll('.option-item').forEach(function (o) {
+          if (o.className.indexOf('disabled') < 0) { o.className += ' disabled'; }
+          o.setAttribute('tabindex', '-1');
+        });
+      }
+
+      function mostrarExp(acierto) {
+        const p = preguntas[actual];
+        const fb = document.getElementById('feedback-box');
+        if (!fb) { return; }
+        fb.className = 'feedback-box' + (acierto ? '' : ' mal');
+        fb.innerHTML = (acierto ? '<strong>&#10004; Correcto.</strong> ' : '<strong>&#10008; Revisa el procedimiento.</strong> ') + (p.exp || '');
+      }
+
+      window.__grClick = function (el) {
+        if (respondida) { return; }
+        pararReloj();
+        respondida = true;
+        const p = preguntas[actual];
+        const elegida = el.getAttribute('data-val');
+        const acierto = elegida === p.correcta;
+        if (acierto) {
+          el.className = 'option-item correct disabled';
+          puntos++;
+          catPts[p.cat]++;
+        } else {
+          el.className = 'option-item incorrect disabled';
+          const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+          if (ok) { ok.className = 'option-item correct disabled'; }
+        }
+        bloquear();
+        mostrarExp(acierto);
+      };
+
+      window.__grKey = function (el, ev) {
+        if (!ev) { return; }
+        if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') {
+          ev.preventDefault();
+          window.__grClick(el);
+        }
+      };
+
+      window.__grNext = function () {
+        pararReloj();
+        actual++;
+        respondida = false;
+        if (actual < total) { render(actual); } else { mostrarRes(); }
+      };
+
+      window.__grNextKey = function (ev) {
+        if (!ev) { return; }
+        if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') {
+          ev.preventDefault();
+          window.__grNext();
+        }
+      };
+
+      function iniciarReloj(s) {
+        pararReloj();
+        segs = s;
+        updReloj();
+        reloj = setInterval(function () { segs--; updReloj(); if (segs <= 0) { tAgotado(); } }, 1000);
+      }
+      function pararReloj() { if (reloj) { clearInterval(reloj); reloj = null; } }
+      function updReloj() {
+        const p = preguntas[actual] || { t: 60 };
+        const tt = document.getElementById('timer-text');
+        const tb = document.getElementById('timer-bar');
+        const tc = document.getElementById('timer-container');
+        if (tt) { tt.textContent = '\u23F1 Tiempo: ' + segs + 's'; }
+        const pct = (segs / p.t) * 100;
+        if (tb) {
+          tb.style.width = pct + '%';
+          if (pct <= 25) {
+            tb.style.background = '#b3261e';
+            if (tc) { tc.className = 'timer-container timer-warning'; }
+          } else if (pct <= 50) {
+            tb.style.background = 'linear-gradient(90deg,#b06f00,#b3261e)';
+            if (tc) { tc.className = 'timer-container'; }
+          } else {
+            tb.style.background = 'linear-gradient(90deg,#1b5e20,#b06f00,#b3261e)';
+            if (tc) { tc.className = 'timer-container'; }
+          }
+        }
+      }
+      function tAgotado() {
+        pararReloj();
+        if (respondida) { return; }
+        respondida = true;
+        const p = preguntas[actual];
+        const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+        if (ok) { ok.className = 'option-item correct disabled'; }
+        bloquear();
+        mostrarExp(false);
+        const tt = document.getElementById('timer-text');
+        if (tt) { tt.textContent = '\u23F0 \u00a1Tiempo agotado!'; }
+        const tc = document.getElementById('timer-container');
+        if (tc) { tc.className = 'timer-container timer-warning'; }
+      }
+
+      function mostrarRes() {
+        pararReloj();
+        qArea.innerHTML = '';
+        document.getElementById('timer-container').style.display = 'none';
+        const pct = Math.round((puntos / total) * 100);
+        document.getElementById('final-score').textContent = puntos + ' / ' + total + '  (' + pct + '%)';
+        const msg = pct >= 85 ? '\u{1F3C6} \u00a1Excelente! Interpretas gr\u00e1ficas con la seguridad que exige el GED.'
+                  : pct >= 70 ? '\u{1F44D} \u00a1Muy bien! Repasa las categor\u00edas marcadas en rojo.'
+                  : pct >= 50 ? '\u{1F4AA} Buen intento. Practica la diferencia entre LEER un valor e INTERPRETAR la gr\u00e1fica.'
+                  : '\u{1F4DA} Empieza por lo b\u00e1sico: t\u00edtulo, ejes, escala y unidades antes de calcular.';
+        document.getElementById('final-msg').textContent = msg;
+        let html = '<h3>Resultados por categor\u00eda:</h3>';
+        for (const cat of Object.keys(catTot)) {
+          const s = catPts[cat] || 0, t2 = catTot[cat];
+          const p2 = Math.round((s / t2) * 100);
+          const col = CC[cat] || '#0f6e4f';
+          html +=
+            '<div class="cat-row">' +
+              '<span class="cat-lbl"><span aria-hidden="true">' + CI[cat] + '</span> ' + cat + '</span>' +
+              '<div class="cat-bar-out"><div class="cat-bar-in" style="width:' + p2 + '%;background:' + col + '"></div></div>' +
+              '<span class="cat-sc">' + s + '/' + t2 + ' \u2713</span>' +
+            '</div>';
+        }
+        document.getElementById('cat-results').innerHTML = html;
+        let minCat = '', minPct = 999;
+        for (const cat of Object.keys(catTot)) {
+          const pp = (catPts[cat] || 0) / catTot[cat];
+          if (pp < minPct) { minPct = pp; minCat = cat; }
+        }
+        document.getElementById('tip-box').innerHTML = minPct < 1
+          ? '<strong>\u{1F4CC} Para mejorar en \u00ab' + minCat + '\u00bb:</strong><br>' + (TIPS[minCat] || '')
+          : '\u2705 \u00a1Sin categor\u00edas con errores! Ahora intenta mejorar tus tiempos.';
+        document.getElementById('result-screen').className = 'result-screen';
+        document.querySelector('.quiz-progress-header').style.display = 'none';
+        const rb = document.getElementById('restart-btn');
+        rb.onclick = function () { window.location.reload(); };
+        rb.onkeydown = function (ev) {
+          if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') { ev.preventDefault(); window.location.reload(); }
+        };
+      }
+
+      render(0);
+    })();
+    </script>
+  </body>
+</html>
