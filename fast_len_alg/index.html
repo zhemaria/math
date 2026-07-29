@@ -5,8 +5,11 @@
   (c) 2026. Licencia: CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)
   Resumen: cuestionario interactivo de rapidez para practicar la traduccion entre el lenguaje
   verbal y el algebraico (sumas y restas, productos y cocientes, expresiones con parentesis,
-  de expresion a palabras y planteamiento de ecuaciones), con generacion aleatoria,
-  cronometro y desglose por categoria.
+  de expresion a palabras, planteamiento de ecuaciones y problemas en contexto), con
+  generacion aleatoria, cronometro y desglose por categoria.
+  v2 (2026): se anade la categoria "Problemas en contexto" (11 generadores de situaciones
+  cotidianas de los cuales se sortean 5 en cada intento) y mejoras de accesibilidad DUA
+  (navegacion por teclado en las opciones, region de estado con aria-live e indicador de foco).
 -->
 <html lang="es">
   <head>
@@ -149,6 +152,18 @@
         border-color: #c62828 !important;
       }
       .option-item.disabled { cursor: not-allowed; opacity: 0.9; }
+      .option-item:focus-visible {
+        outline: 3px solid #0f2a43;
+        outline-offset: 3px;
+        background: #dbeafe;
+      }
+      .primary-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+      /* texto solo para lectores de pantalla (DUA) */
+      .sr-only {
+        position: absolute; width: 1px; height: 1px;
+        padding: 0; margin: -1px; overflow: hidden;
+        clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+      }
       .btn-container { padding: 4px 18px 18px; }
       .primary-btn {
         display: block;
@@ -246,9 +261,10 @@
   <body>
     <div id="quiz-container">
       <div class="quiz-progress-header">
-        <div class="progress-text" id="progress-text">Pregunta 1 de 20</div>
+        <div class="progress-text" id="progress-text">Cargando preguntas&hellip;</div>
         <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
       </div>
+      <div class="sr-only" id="sr-status" role="status" aria-live="polite"></div>
       <div id="question-area"></div>
       <div class="timer-container" id="timer-container">
         <div class="timer-text" id="timer-text">&#9201; Tiempo: 40s</div>
@@ -261,7 +277,7 @@
         <div class="cat-results" id="cat-results"></div>
         <div class="tip-box" id="tip-box"></div>
         <div class="btn-container" style="padding-top:14px">
-          <div class="primary-btn" id="restart-btn">&#128260; Nuevas preguntas (reiniciar)</div>
+          <div class="primary-btn" id="restart-btn" role="button" tabindex="0">&#128260; Nuevas preguntas (reiniciar)</div>
         </div>
       </div>
       <p class="creditos">
@@ -315,14 +331,16 @@
         'Producto y cociente': '#0e7490',
         'Con par\u00e9ntesis': '#6d28d9',
         'De expresi\u00f3n a palabras': '#b45309',
-        'Ecuaciones':       '#166534'
+        'Ecuaciones':       '#166534',
+        'Problemas en contexto': '#9d174d'   /* 7.88:1 con blanco (DUA OK) */
       };
       const CI = {
         'Suma y resta':     '+',
         'Producto y cociente': '\u00d7',
         'Con par\u00e9ntesis': '( )',
         'De expresi\u00f3n a palabras': '\u201c\u201d',
-        'Ecuaciones':       '='
+        'Ecuaciones':       '=',
+        'Problemas en contexto': '\u{1F4DD}'
       };
       const TIPS = {
         'Suma y resta':
@@ -334,7 +352,9 @@
         'De expresi\u00f3n a palabras':
           'Lee la expresi\u00f3n de adentro hacia afuera y fíjate en los par\u00e9ntesis: 2(x + 3) es \u00abel doble de la suma\u00bb, mientras que 2x + 3 es \u00abel doble de un n\u00famero, m\u00e1s 3\u00bb.',
         'Ecuaciones':
-          'Las palabras \u00abes\u00bb, \u00abes igual a\u00bb, \u00abda\u00bb o \u00abresulta\u00bb marcan el signo =. Traduce por separado lo que va antes y despu\u00e9s del verbo y \u00fanelo con =.'
+          'Las palabras \u00abes\u00bb, \u00abes igual a\u00bb, \u00abda\u00bb o \u00abresulta\u00bb marcan el signo =. Traduce por separado lo que va antes y despu\u00e9s del verbo y \u00fanelo con =.',
+        'Problemas en contexto':
+          'Sigue tres pasos: (1) identifica qu\u00e9 representa la variable (\u00abla edad de Ana es ' + VARS[0] + '\u00bb); (2) traduce cada dato en el mismo orden en que aparece; (3) revisa si la operaci\u00f3n act\u00faa sobre TODO un grupo, porque entonces hacen falta par\u00e9ntesis. Cuidado con \u00abm\u00e1s que el doble\u00bb (2' + VARS[0] + ' + 5) frente a \u00abel doble de la suma\u00bb (2(' + VARS[0] + ' + 5)).'
       };
 
       /* ══════════════════════════════════════
@@ -540,8 +560,165 @@
 
       ]; // fin GEN
 
+      /* ══════════════════════════════════════
+         PROBLEMAS EN CONTEXTO — 11 generadores.
+         En cada intento se sortean SOLO 5, de modo que al reiniciar
+         el estudiante encuentre situaciones distintas.
+         ══════════════════════════════════════ */
+      const PERS = ['Ana', 'Luis', 'Marta', 'Carlos', 'Rosa', 'Diego', 'Elena', 'Javier', 'Sof\u00eda', 'Miguel'];
+      function per() { return PERS[rand(0, PERS.length - 1)]; }
+      function per2(a) { let b = per(); while (b === a) { b = per(); } return b; }
+
+      const GEN_CTX = [
+
+        /* C1: el doble de la edad (caso clasico) */
+        () => {
+          const a = per(), b = per2(a), x = vv();
+          const o = makeOptsText('2' + x,
+            [x + ' + 2', x + SQ, x + '/2', '2 + ' + x]);
+          return { cat: 'Problemas en contexto', t: 40,
+            q: '<strong>' + a + '</strong> tiene <strong>' + x + '</strong> a\u00f1os y <strong>' + b +
+               '</strong> tiene el <strong>doble</strong> de esa edad. \u00bfQu\u00e9 expresi\u00f3n representa la edad de ' + b + '?',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+
+        /* C2: edad dentro de N anos */
+        () => {
+          const a = per(), x = vv(), N = rand(3, 15);
+          const o = makeOptsText(x + ' + ' + N,
+            [x + ' ' + M2 + ' ' + N, '' + N + x, N + ' ' + M2 + ' ' + x]);
+          return { cat: 'Problemas en contexto', t: 35,
+            q: '<strong>' + a + '</strong> tiene <strong>' + x + '</strong> a\u00f1os. \u00bfQu\u00e9 expresi\u00f3n representa la edad que tendr\u00e1 <strong>dentro de ' +
+               N + ' a\u00f1os</strong>?',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+
+        /* C3: dinero que queda tras un gasto (orden de la resta) */
+        () => {
+          const a = per(), x = vv(), N = rand(5, 40);
+          const o = makeOptsText(x + ' ' + M2 + ' ' + N,
+            [N + ' ' + M2 + ' ' + x, x + ' + ' + N, x + '/' + N]);
+          return { cat: 'Problemas en contexto', t: 40,
+            q: '<strong>' + a + '</strong> ten\u00eda <strong>$' + x + '</strong> y gast\u00f3 <strong>$' + N +
+               '</strong> en la compra. \u00bfQu\u00e9 expresi\u00f3n representa el dinero que le <strong>queda</strong>?',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+
+        /* C4: precio unitario por cantidad */
+        () => {
+          const N = rand(3, 15), x = vv();
+          const o = makeOptsText('' + N + x,
+            [N + ' + ' + x, x + '/' + N, N + ' ' + M2 + ' ' + x, N + '/' + x]);
+          return { cat: 'Problemas en contexto', t: 40,
+            q: 'Cada boleto para el cine cuesta <strong>$' + N + '</strong>. \u00bfQu\u00e9 expresi\u00f3n representa el costo total de <strong>' +
+               x + ' boletos</strong>?',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+
+        /* C5: reparto en partes iguales (orden de la division) */
+        () => {
+          const x = vv(), N = rand(3, 9);
+          const o = makeOptsText(x + '/' + N,
+            [N + '/' + x, '' + N + x, x + ' ' + M2 + ' ' + N, x + ' + ' + N]);
+          return { cat: 'Problemas en contexto', t: 40,
+            q: 'En una fiesta se reparten <strong>' + x + ' galletas</strong> en partes iguales entre <strong>' + N +
+               ' ni\u00f1os</strong>. \u00bfQu\u00e9 expresi\u00f3n representa lo que recibe <strong>cada ni\u00f1o</strong>?',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+
+        /* C6: tarifa fija + tarifa variable (modelo lineal del GED) */
+        () => {
+          const F = rand(3, 8), V = rand(2, 5), x = vv();
+          const o = makeOptsText(F + ' + ' + V + x,
+            ['(' + F + ' + ' + V + ')' + x,
+             '' + F + x + ' + ' + V,
+             F + ' + ' + V + ' + ' + x,
+             '' + F + V + x]);
+          return { cat: 'Problemas en contexto', t: 55,
+            q: 'Un taxi cobra <strong>$' + F + ' fijos</strong> m\u00e1s <strong>$' + V +
+               ' por cada milla</strong> recorrida. \u00bfQu\u00e9 expresi\u00f3n representa el costo de un viaje de <strong>' +
+               x + ' millas</strong>?',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+
+        /* C7: perimetro de un rectangulo descrito con palabras */
+        () => {
+          const x = vv(), N = rand(2, 8);
+          const o = makeOptsText('2' + x + ' + 2(' + x + ' + ' + N + ')',
+            ['2' + x + ' + ' + N,
+             '2(' + x + ' + ' + N + ')',
+             '' + x + '(' + x + ' + ' + N + ')',
+             x + ' + ' + N]);
+          return { cat: 'Problemas en contexto', t: 60,
+            q: 'El <strong>ancho</strong> de un rect\u00e1ngulo mide <strong>' + x +
+               '</strong> pies y el <strong>largo</strong> mide <strong>' + N +
+               ' pies m\u00e1s</strong> que el ancho. \u00bfQu\u00e9 expresi\u00f3n representa el <strong>per\u00edmetro</strong>?',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+
+        /* C8: salario por hora mas bono */
+        () => {
+          const a = per(), P = rand(12, 22), B = rand(20, 60), x = vv();
+          const o = makeOptsText('' + P + x + ' + ' + B,
+            ['' + P + '(' + x + ' + ' + B + ')',
+             '' + P + x + ' ' + M2 + ' ' + B,
+             P + ' + ' + x + ' + ' + B,
+             '' + P + B + x]);
+          return { cat: 'Problemas en contexto', t: 55,
+            q: '<strong>' + a + '</strong> gana <strong>$' + P + ' por hora</strong> y esta semana recibi\u00f3 adem\u00e1s un bono de <strong>$' +
+               B + '</strong>. \u00bfQu\u00e9 expresi\u00f3n representa lo que gan\u00f3 si trabaj\u00f3 <strong>' + x + ' horas</strong>?',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+
+        /* C9: "N mas que el doble" (trampa frecuente en el GED) */
+        () => {
+          const a = per(), b = per2(a), x = vv(), N = rand(3, 20);
+          const o = makeOptsText('2' + x + ' + ' + N,
+            ['2(' + x + ' + ' + N + ')',
+             '2' + x + ' ' + M2 + ' ' + N,
+             x + ' + ' + N,
+             '' + N + x + ' + 2']);
+          return { cat: 'Problemas en contexto', t: 50,
+            q: '<strong>' + a + '</strong> tiene <strong>$' + x + '</strong>. <strong>' + b +
+               '</strong> tiene <strong>$' + N + ' m\u00e1s que el doble</strong> de lo que tiene ' + a +
+               '. \u00bfQu\u00e9 expresi\u00f3n representa el dinero de ' + b + '?',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+
+        /* C10: dos cambios sucesivos (suma y resta encadenadas) */
+        () => {
+          const x = vv(), N = rand(4, 12), Mn = rand(2, 9);
+          const o = makeOptsText(x + ' + ' + N + ' ' + M2 + ' ' + Mn,
+            [x + ' ' + M2 + ' ' + N + ' + ' + Mn,
+             x + ' + ' + N + ' + ' + Mn,
+             '' + x + '(' + N + ' ' + M2 + ' ' + Mn + ')',
+             x + ' ' + M2 + ' ' + N + ' ' + M2 + ' ' + Mn]);
+          return { cat: 'Problemas en contexto', t: 50,
+            q: 'En un curso hay <strong>' + x + ' estudiantes</strong>. Se inscriben <strong>' + N +
+               '</strong> m\u00e1s y despu\u00e9s se retiran <strong>' + Mn +
+               '</strong>. \u00bfQu\u00e9 expresi\u00f3n representa el n\u00famero final de estudiantes?',
+            opciones: o.opciones, correcta: o.correcta };
+        },
+
+        /* C11: del contexto a la ECUACION (suma de edades) */
+        () => {
+          const a = per(), b = per2(a), x = vv(), T = 3 * rand(9, 22);
+          const o = makeOptsText(x + ' + 2' + x + ' = ' + T,
+            ['2' + x + ' = ' + T,
+             x + ' + 2 = ' + T,
+             '' + x + '(2' + x + ') = ' + T,
+             '2(' + x + ' + ' + T + ')']);
+          return { cat: 'Problemas en contexto', t: 60,
+            q: '<strong>' + a + '</strong> tiene <strong>' + x + '</strong> a\u00f1os y <strong>' + b +
+               '</strong> tiene el <strong>doble</strong>. En total suman <strong>' + T +
+               ' a\u00f1os</strong>. \u00bfQu\u00e9 <strong>ecuaci\u00f3n</strong> plantea la situaci\u00f3n?',
+            opciones: o.opciones, correcta: o.correcta };
+        }
+
+      ]; // fin GEN_CTX
+
       /* ── MOTOR ── */
-      const preguntas = shuffle(GEN.map(g => g()));
+      const preguntas = shuffle(GEN.concat(shuffle(GEN_CTX).slice(0, 5)).map(g => g()));
       const total = preguntas.length;
       let actual = 0, puntos = 0, respondida = false, reloj = null, segs = 0;
       const catPts = {}, catTot = {};
@@ -560,7 +737,8 @@
         const icon = CI[p.cat] || '';
         const tLbl = p.t <= 40 ? '&#9889; R\u00e1pida' : p.t <= 48 ? '&#128336; Media' : '&#9203; Compleja';
         const opHtml = p.opciones.map(o =>
-          '<div class="option-item" data-val="' + o.valor + '" onclick="window.__lalgClick(this)">' + o.texto + '</div>'
+          '<div class="option-item" role="button" tabindex="0" data-val="' + o.valor + '"' +
+          ' onclick="window.__lalgClick(this)" onkeydown="window.__lalgKey(event, this)">' + o.texto + '</div>'
         ).join('');
         const dH = p.data ? p.data : '';
         const btn = i === total - 1 ? 'Ver resultados' : 'Siguiente &rsaquo;';
@@ -572,11 +750,27 @@
           '<div class="question-header">' + p.q + '</div>' +
           dH +
           '<div class="options">' + opHtml + '</div>' +
-          '<div class="btn-container"><div class="primary-btn" onclick="window.__lalgNext()">' + btn + '</div></div>';
+          '<div class="btn-container"><div class="primary-btn" role="button" tabindex="0"' +
+          ' onclick="window.__lalgNext()" onkeydown="window.__lalgKey(event, this, 1)">' + btn + '</div></div>';
         if (barP) barP.style.width = ((i + 1) / total) * 100 + '%';
         if (txtP) txtP.textContent = 'Pregunta ' + (i + 1) + ' de ' + total;
+        anunciar('Pregunta ' + (i + 1) + ' de ' + total + '. Categor\u00eda: ' + p.cat + '.');
         iniciarReloj(p.t);
       }
+
+      /* ── anuncio para lectores de pantalla (DUA) ── */
+      function anunciar(txt) {
+        const sr = document.getElementById('sr-status');
+        if (sr) sr.textContent = txt;
+      }
+
+      /* ── activacion por teclado: Enter o barra espaciadora ── */
+      window.__lalgKey = function (e, el, esBoton) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+          e.preventDefault();
+          if (esBoton) window.__lalgNext(); else window.__lalgClick(el);
+        }
+      };
 
       window.__lalgClick = function (el) {
         if (respondida) return;
@@ -584,17 +778,21 @@
         respondida = true;
         const p = preguntas[actual];
         const elegida = el.getAttribute('data-val');
+        const okEl = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+        const txtOk = okEl ? okEl.textContent : '';
         if (elegida === p.correcta) {
           el.className = 'option-item correct disabled';
           puntos++;
           catPts[p.cat]++;
+          anunciar('Respuesta correcta: ' + txtOk);
         } else {
           el.className = 'option-item incorrect disabled';
-          const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
-          if (ok) ok.className = 'option-item correct disabled';
+          if (okEl) okEl.className = 'option-item correct disabled';
+          anunciar('Respuesta incorrecta. La correcta es ' + txtOk);
         }
         qArea.querySelectorAll('.option-item').forEach(o => {
           if (!o.className.includes('disabled')) o.className += ' disabled';
+          o.setAttribute('tabindex', '-1');
         });
       };
 
@@ -642,7 +840,9 @@
         if (ok) ok.className = 'option-item correct disabled';
         qArea.querySelectorAll('.option-item').forEach(o => {
           if (!o.className.includes('disabled')) o.className += ' disabled';
+          o.setAttribute('tabindex', '-1');
         });
+        anunciar('Tiempo agotado. La respuesta correcta es ' + (ok ? ok.textContent : ''));
         const tt = document.getElementById('timer-text');
         if (tt) tt.textContent = '\u23F0 \u00a1Tiempo agotado!';
         const tc = document.getElementById('timer-container');
@@ -685,7 +885,12 @@
           : '\u2705 \u00a1Sin categor\u00edas con cero! Ahora intenta mejorar tus tiempos.';
         document.getElementById('result-screen').className = 'result-screen';
         document.querySelector('.quiz-progress-header').style.display = 'none';
-        document.getElementById('restart-btn').onclick = () => window.location.reload();
+        anunciar('Cuestionario completado. Puntuaci\u00f3n: ' + puntos + ' de ' + total + ', ' + pct + ' por ciento.');
+        const rb = document.getElementById('restart-btn');
+        rb.onclick = () => window.location.reload();
+        rb.onkeydown = (e) => {
+          if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); window.location.reload(); }
+        };
       }
 
       render(0);
