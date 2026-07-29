@@ -1,1 +1,925 @@
+<!doctype html>
+<!--
+  Rapidez en probabilidad y combinatoria - GED
+  Autor: Jose M. Fernandez, ABE/ASE Math Master Teacher, Harry S. Truman College - City Colleges of Chicago.
+  (c) 2026. Licencia: CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+  Resumen: cuestionario interactivo de rapidez sobre probabilidad y conteo (probabilidad simple,
+  complemento y union, eventos compuestos con y sin reemplazo, principio fundamental de conteo,
+  permutaciones y combinaciones). Banco de 25 generadores aleatorios: en cada intento se sortean
+  4 preguntas por categoria (20 en total), de modo que al reiniciar el estudiante encuentre
+  situaciones distintas. Incluye cronometro por pregunta, desglose por categoria y sugerencia
+  de estudio para la categoria mas debil.
+  Accesibilidad DUA: opciones operables con teclado (Enter / barra espaciadora), region de
+  estado con aria-live para lectores de pantalla, indicadores de foco visibles, contraste
+  verificado (todas las insignias de categoria superan 4.5:1 con texto blanco) y ningun
+  etiqueta "label" (filtrada por Brightspace).
+-->
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago" />
+    <meta name="license" content="CC BY-NC-SA 4.0" />
+    <link rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/" />
+    <title>Rapidez en probabilidad y combinatoria &mdash; GED</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+      :root {
+        --cp: #5b21b6;  /* primario: 8.9:1 con blanco (DUA OK) */
+        --ch: #6d28d9;  /* hover */
+      }
+      body {
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 10px;
+        background: linear-gradient(135deg, #2a1052, #3f1d70);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 90vh;
+        flex-direction: column;
+        gap: 10px;
+      }
+      #quiz-container {
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 0 22px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        width: clamp(300px, 95%, 860px);
+        margin: 0 auto;
+      }
+      .quiz-progress-header {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 16px 22px;
+        border-bottom: 3px solid var(--cp);
+      }
+      .progress-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.95em, 2.5vw, 1.1em);
+        color: var(--cp);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+      }
+      .progress-container {
+        background: #e0e0e0;
+        height: 12px;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+      }
+      .progress-bar {
+        height: 100%;
+        width: 5%;
+        background: linear-gradient(90deg, var(--cp), var(--ch));
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 6px;
+      }
+      .question-meta {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 20px 0;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .cat-badge {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 700;
+        color: #fff;
+      }
+      .time-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78em;
+        font-weight: 600;
+        background: #f3e8ff;
+        color: #444;
+        border: 1px solid #ccc;
+      }
+      .question-header {
+        padding: 16px 22px 10px;
+        font-size: clamp(0.95em, 2.4vw, 1.15em);
+        font-weight: 700;
+        text-align: center;
+        color: #1a1a2e;
+        line-height: 1.55;
+      }
+      .data-box {
+        background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+        border: 2px solid var(--cp);
+        border-radius: 12px;
+        margin: 0 22px 12px;
+        padding: 14px 18px;
+        text-align: center;
+      }
+      .expr-grande {
+        font-size: clamp(1.3em, 4.5vw, 1.8em);
+        font-weight: 800;
+        color: #2a1052;
+        letter-spacing: 1px;
+      }
+      .datos-lista {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px 20px;
+        font-weight: 700;
+        font-size: clamp(0.95em, 2.8vw, 1.15em);
+        color: #2a1052;
+      }
+      .dot {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        margin-right: 7px;
+        vertical-align: middle;
+        border: 1px solid #333;
+      }
+      .options { padding: 0 18px; }
+      .option-item {
+        display: block;
+        padding: 11px 16px;
+        margin-bottom: 10px;
+        background: #f5f3ff;
+        color: #333;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        font-size: clamp(0.95em, 2.4vw, 1.05em);
+        font-weight: 700;
+        line-height: 1.4;
+        user-select: none;
+      }
+      .option-item:hover:not(.disabled) {
+        background: #ede9fe;
+        border-color: var(--cp);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .option-item.correct {
+        background: #2e7d32 !important;
+        color: #fff !important;
+        border-color: #2e7d32 !important;
+      }
+      .option-item.incorrect {
+        background: #c62828 !important;
+        color: #fff !important;
+        border-color: #c62828 !important;
+      }
+      .option-item.disabled { cursor: not-allowed; opacity: 0.9; }
+      .option-item:focus-visible {
+        outline: 3px solid #2a1052;
+        outline-offset: 3px;
+        background: #ede9fe;
+      }
+      .primary-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+      /* texto solo para lectores de pantalla (DUA) */
+      .sr-only {
+        position: absolute; width: 1px; height: 1px;
+        padding: 0; margin: -1px; overflow: hidden;
+        clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+      }
+      .btn-container { padding: 4px 18px 18px; }
+      .primary-btn {
+        display: block;
+        width: 100%;
+        padding: 13px;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.05em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: var(--cp);
+        text-align: center;
+        user-select: none;
+        box-sizing: border-box;
+      }
+      .primary-btn:hover {
+        background: var(--ch);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      .timer-container {
+        background: linear-gradient(135deg, #fff8e1, #ffecb3);
+        padding: 11px 18px;
+        border-top: 2px solid #f39c12;
+      }
+      .timer-text {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(0.88em, 2.2vw, 1em);
+        color: #5C3900;
+        margin-bottom: 7px;
+      }
+      .timer-bar-container {
+        background: #f0d0d0;
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .timer-bar {
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+        transition: width 0.1s linear;
+        border-radius: 4px;
+      }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+      .timer-warning { animation: pulse 0.9s infinite; }
+      .result-screen { padding: 35px 28px; text-align: center; }
+      .result-screen.hidden { display: none; }
+      .result-screen h2 {
+        color: var(--cp);
+        font-size: clamp(1.4em, 4vw, 1.9em);
+        margin-bottom: 10px;
+      }
+      .result-score {
+        font-size: clamp(2em, 6vw, 2.8em) !important;
+        font-weight: 800;
+        color: var(--cp) !important;
+        margin: 12px 0 !important;
+      }
+      .result-msg {
+        font-size: clamp(1em, 2.8vw, 1.2em);
+        color: #333;
+        margin: 8px 0;
+      }
+      .cat-results { margin: 18px 0; text-align: left; }
+      .cat-results h3 { color: var(--cp); font-size: 0.95em; margin-bottom: 10px; }
+      .cat-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+      .cat-lbl { flex: 1.4; font-size: 0.78em; font-weight: 600; color: #333; }
+      .cat-bar-out { flex: 2; background: #eee; border-radius: 4px; height: 11px; }
+      .cat-bar-in { height: 100%; border-radius: 4px; transition: width 0.6s; }
+      .cat-sc { font-weight: 700; color: var(--cp); font-size: 0.82em; min-width: 55px; text-align: right; }
+      .tip-box {
+        background: #f5f3ff;
+        border-left: 4px solid var(--cp);
+        border-radius: 6px;
+        padding: 10px 14px;
+        margin: 14px 0 4px;
+        font-size: 0.82em;
+        color: #2a1052;
+        text-align: left;
+        line-height: 1.6;
+      }
+      .creditos {
+        text-align: center; font-size: 0.78em; color: #555;
+        padding: 6px 14px 12px; line-height: 1.5;
+      }
+      .creditos a { color: var(--cp); text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <div id="quiz-container">
+      <div class="quiz-progress-header">
+        <div class="progress-text" id="progress-text">Cargando preguntas&hellip;</div>
+        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+      </div>
+      <div class="sr-only" id="sr-status" role="status" aria-live="polite"></div>
+      <div id="question-area"></div>
+      <div class="timer-container" id="timer-container">
+        <div class="timer-text" id="timer-text">&#9201; Tiempo: 45s</div>
+        <div class="timer-bar-container"><div class="timer-bar" id="timer-bar"></div></div>
+      </div>
+      <div class="result-screen hidden" id="result-screen">
+        <h2>&#127919; &iexcl;Cuestionario completado!</h2>
+        <p class="result-score" id="final-score"></p>
+        <p class="result-msg" id="final-msg"></p>
+        <div class="cat-results" id="cat-results"></div>
+        <div class="tip-box" id="tip-box"></div>
+        <div class="btn-container" style="padding-top:14px">
+          <div class="primary-btn" id="restart-btn" role="button" tabindex="0">&#128260; Nuevas preguntas (reiniciar)</div>
+        </div>
+      </div>
+      <p class="creditos">
+        Creado por Jos&eacute; M. Fern&aacute;ndez, ABE/ASE Math Master Teacher, Harry S. Truman College &mdash; City Colleges of Chicago.<br>
+        Licencia <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>.
+      </p>
+    </div>
 
+    <script>
+    (function () {
+      if (window.quizProbCombIniciado) return;
+      window.quizProbCombIniciado = true;
+
+      /* ── UTILS ── */
+      function rand(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+      function shuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+      function pick(arr) { return arr[rand(0, arr.length - 1)]; }
+      function mcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { const t = b; b = a % b; a = t; } return a || 1; }
+      /* fraccion simplificada como texto */
+      function frac(n, d) {
+        if (n === 0) return '0';
+        const g = mcd(n, d), nn = n / g, dd = d / g;
+        return dd === 1 ? '' + nn : nn + '/' + dd;
+      }
+      function fact(n) { let r = 1; for (let i = 2; i <= n; i++) { r *= i; } return r; }
+      function perm(n, r) { let v = 1; for (let i = 0; i < r; i++) { v *= (n - i); } return v; }
+      function comb(n, r) { return perm(n, r) / fact(r); }
+
+      /* ── OPCIONES ──
+         Cada generador entrega al menos 3 distractores distintos de la respuesta
+         correcta (se recomienda entregar 4 o 5, porque al simplificar fracciones
+         algunos pueden coincidir y se descartan). */
+      function makeOptsText(ok, dist, relleno) {
+        const seen = new Set([ok]), uniq = [];
+        for (const d of dist) { if (!seen.has(d) && uniq.length < 3) { seen.add(d); uniq.push(d); } }
+        /* red de seguridad: al simplificar, dos distractores pueden coincidir.
+           Si faltan opciones, se completan con valores plausibles del relleno. */
+        if (relleno && uniq.length < 3) {
+          for (const d of shuffle(relleno)) {
+            if (uniq.length >= 3) { break; }
+            if (!seen.has(d)) { seen.add(d); uniq.push(d); }
+          }
+        }
+        const all = shuffle([ok, ...uniq]);
+        const L = ['a', 'b', 'c', 'd'];
+        return { opciones: all.map((v, i) => ({ valor: L[i], texto: L[i].toUpperCase() + '. ' + v })), correcta: L[all.indexOf(ok)] };
+      }
+      /* fracciones: relleno con valores de probabilidad plausibles */
+      const RELLENO_FRAC = ['1/2', '1/3', '2/3', '1/4', '3/4', '1/5', '2/5', '3/5', '4/5',
+                            '1/6', '5/6', '1/8', '3/8', '5/8', '1/9', '2/9', '1/10', '3/10', '7/10', '1/12'];
+      function makeOptsFrac(ok, dist) { return makeOptsText(ok, dist, RELLENO_FRAC); }
+      /* porcentajes */
+      const RELLENO_PCT = ['10 %', '25 %', '50 %', '75 %', '90 %', '60 %', '20 %'];
+      function makeOptsPct(ok, dist) { return makeOptsText(ok, dist, RELLENO_PCT); }
+      /* version numerica: el relleno se calcula a partir de la respuesta correcta */
+      function makeOptsNum(ok, dist) {
+        const rel = [ok + 1, ok - 1, ok * 2, Math.round(ok / 2), ok + 2, ok * 3, ok + 10]
+          .filter(v => v > 0 && v !== ok).map(String);
+        return makeOptsText(String(ok), dist.map(String), rel);
+      }
+
+      /* ── cajas de datos ── */
+      function cajaExpr(txt) {
+        return '<div class="data-box"><span class="expr-grande">' + txt + '</span></div>';
+      }
+      /* items = [{n: 4, t: 'rojas', c: '#c62828'}, ...]  — el punto de color es
+         decorativo (aria-hidden): el color SIEMPRE se nombra tambien en el texto. */
+      function cajaBolsa(items) {
+        return '<div class="data-box"><span class="datos-lista">' +
+          items.map(it => '<span><span class="dot" style="background:' + it.c + '" aria-hidden="true"></span>' +
+                          it.n + ' ' + it.t + '</span>').join('') +
+          '</span></div>';
+      }
+      const ROJO = '#c62828', AZUL = '#1565c0', VERDE = '#2e7d32';
+
+      /* ══════════════════════════════════════
+         CATEGORIAS
+         ══════════════════════════════════════ */
+      const CC = {
+        'Probabilidad simple':   '#1565c0',  /* 5.75:1 */
+        'Complemento y uni\u00f3n':   '#0e7490',  /* 5.36:1 */
+        'Eventos compuestos':    '#9d174d',  /* 7.88:1 */
+        'Principio de conteo':   '#b45309',  /* 5.02:1 */
+        'Permutaciones y combinaciones': '#166534'   /* 7.13:1 */
+      };
+      const CI = {
+        'Probabilidad simple':   '\u{1F3B2}',
+        'Complemento y uni\u00f3n':   '\u222A',
+        'Eventos compuestos':    '\u2229',
+        'Principio de conteo':   '\u00d7',
+        'Permutaciones y combinaciones': 'n!'
+      };
+      const TIPS = {
+        'Probabilidad simple':
+          'Probabilidad = casos favorables \u00f7 casos posibles. Cuenta primero el TOTAL de resultados (por ejemplo, todas las canicas de la bolsa, no solo las de un color) y simplifica la fracci\u00f3n al final. El resultado siempre queda entre 0 y 1.',
+        'Complemento y uni\u00f3n':
+          'El complemento se calcula con P(no A) = 1 \u2212 P(A); en porcentajes, 100 % \u2212 P(A). Con la palabra \u00abo\u00bb se SUMA: si los eventos no pueden ocurrir a la vez, P(A o B) = P(A) + P(B); si pueden ocurrir juntos, hay que restar lo contado dos veces: P(A o B) = P(A) + P(B) \u2212 P(A y B).',
+        'Eventos compuestos':
+          'Con la palabra \u00aby\u00bb se MULTIPLICA. La pregunta clave es: \u00bfse devuelve el objeto? CON reemplazo el total no cambia (r/T \u00d7 r/T). SIN reemplazo bajan en 1 tanto el caso favorable como el total: (r/T) \u00d7 ((r\u22121)/(T\u22121)).',
+        'Principio de conteo':
+          'Si una tarea se realiza por etapas independientes, multiplica el n\u00famero de opciones de cada etapa (regla del producto): 3 camisas \u00d7 4 pantalones = 12 conjuntos. Si se permite repetir, cada etapa conserva todas sus opciones; si no, va bajando de uno en uno.',
+        'Permutaciones y combinaciones':
+          'Preg\u00fantate si cambiar el ORDEN produce un resultado distinto. S\u00cd \u2192 permutaci\u00f3n: nPr = n(n\u22121)(n\u22122)\u2026 (podio, claves, cargos). NO \u2192 combinaci\u00f3n: nCr = nPr \u00f7 r! (comit\u00e9s, equipos, sabores). Ordenar n objetos distintos da n! maneras.'
+      };
+
+      /* ══════════════════════════════════════
+         BANCO DE GENERADORES — 5 por categoria.
+         En cada intento se sortean 4 de cada categoria (20 preguntas).
+         ══════════════════════════════════════ */
+      const BANCO = {
+
+        /* ─────────────────────────────────────
+           1) PROBABILIDAD SIMPLE
+           ───────────────────────────────────── */
+        'Probabilidad simple': [
+
+          /* P1: bolsa de canicas */
+          () => {
+            const r = rand(2, 6), a = rand(2, 6), v = rand(1, 5), T = r + a + v;
+            const o = makeOptsFrac(frac(r, T),
+              [frac(a, T), frac(v, T), frac(r, T - r), frac(T - r, T), frac(r + 1, T)]);
+            return { cat: 'Probabilidad simple', t: 45,
+              q: 'Una bolsa contiene las canicas que se indican. Si se extrae <strong>una canica al azar</strong>, \u00bfcu\u00e1l es la probabilidad de que sea <strong>roja</strong>?',
+              data: cajaBolsa([{ n: r, t: 'rojas', c: ROJO }, { n: a, t: 'azules', c: AZUL }, { n: v, t: 'verdes', c: VERDE }]),
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* P2: dado, mayor que k */
+          () => {
+            const k = pick([2, 4]);   /* con k = 3 la respuesta seria 1/2 y varios distractores colapsan */
+            const o = makeOptsFrac(frac(6 - k, 6),
+              [frac(k, 6), frac(6 - k + 1, 6), frac(1, 6), frac(k + 1, 6), frac(1, 2)]);
+            return { cat: 'Probabilidad simple', t: 40,
+              q: 'Se lanza un dado ordinario de seis caras. \u00bfCu\u00e1l es la probabilidad de obtener un n\u00famero <strong>mayor que ' + k + '</strong>?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* P3: tarjetas numeradas, numero par (total impar para evitar 1/2) */
+          () => {
+            const N = pick([7, 9, 11]), pares = Math.floor(N / 2);
+            const o = makeOptsFrac(frac(pares, N),
+              [frac(1, 2), frac(N - pares, N), frac(1, N), frac(2, N)]);
+            return { cat: 'Probabilidad simple', t: 45,
+              q: 'En una caja hay <strong>' + N + ' tarjetas</strong> numeradas del <strong>1 al ' + N +
+                 '</strong>. Se saca una al azar. \u00bfCu\u00e1l es la probabilidad de que el n\u00famero sea <strong>par</strong>?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* P4: frecuencia relativa a partir de datos */
+          () => {
+            const g = rand(5, 20), b = rand(5, 9), a = rand(1, b - 1);
+            const T = g * b, k = g * a;
+            const o = makeOptsFrac(frac(a, b),
+              [frac(b - a, b), frac(a, b - a), frac(1, b), frac(a + 1, b), frac(k, T + k)]);
+            return { cat: 'Probabilidad simple', t: 50,
+              q: 'En una encuesta a <strong>' + T + ' personas</strong>, <strong>' + k +
+                 '</strong> respondieron que caminan al trabajo. Si se elige una persona al azar, \u00bfcu\u00e1l es la probabilidad de que camine al trabajo?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* P5: baraja de 52 cartas */
+          () => {
+            const CASOS = [
+              { d: 'un as', n: 4 },
+              { d: 'una carta de corazones', n: 13 },
+              { d: 'una figura (J, Q o K)', n: 12 },
+              { d: 'una carta roja', n: 26 },
+              { d: 'un rey', n: 4 }
+            ];
+            const c = pick(CASOS);
+            const otros = CASOS.filter(z => z.n !== c.n).map(z => frac(z.n, 52));
+            const o = makeOptsFrac(frac(c.n, 52), otros.concat([frac(1, 52), frac(52 - c.n, 52)]));
+            return { cat: 'Probabilidad simple', t: 45,
+              q: 'De una baraja de <strong>52 cartas</strong> se saca una al azar. \u00bfCu\u00e1l es la probabilidad de que sea <strong>' + c.d + '</strong>?',
+              opciones: o.opciones, correcta: o.correcta };
+          }
+        ],
+
+        /* ─────────────────────────────────────
+           2) COMPLEMENTO Y UNION
+           ───────────────────────────────────── */
+        'Complemento y uni\u00f3n': [
+
+          /* C1: complemento de una fraccion */
+          () => {
+            const b = pick([5, 6, 7, 8, 9]), a = rand(1, b - 1);
+            const o = makeOptsFrac(frac(b - a, b),
+              [frac(a, b), frac(1, b), frac(b - a, a), frac(a + 1, b), frac(b - a, b + 1)]);
+            return { cat: 'Complemento y uni\u00f3n', t: 45,
+              q: 'La probabilidad de <strong>ganar</strong> un premio en un sorteo es <strong>' + frac(a, b) +
+                 '</strong>. \u00bfCu\u00e1l es la probabilidad de <strong>NO ganar</strong>?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* C2: complemento en porcentaje */
+          () => {
+            const p = pick([15, 20, 30, 35, 40, 45]);
+            const o = makeOptsPct((100 - p) + ' %', [p + ' %', (100 - 2 * p) + ' %', (2 * p) + ' %', '50 %']);
+            return { cat: 'Complemento y uni\u00f3n', t: 40,
+              q: 'El pron\u00f3stico indica que la probabilidad de que <strong>llueva</strong> ma\u00f1ana es del <strong>' + p +
+                 ' %</strong>. \u00bfCu\u00e1l es la probabilidad de que <strong>NO llueva</strong>?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* C3: union de eventos mutuamente excluyentes */
+          () => {
+            const r = rand(2, 5), a = rand(2, 5), v = rand(2, 5), T = r + a + v;
+            const o = makeOptsFrac(frac(r + v, T),
+              [frac(a, T), frac(r, T), frac(v, T), frac(r * v, T * T), frac(r + v, T + T)]);
+            return { cat: 'Complemento y uni\u00f3n', t: 50,
+              q: 'De la bolsa indicada se extrae <strong>una canica al azar</strong>. \u00bfCu\u00e1l es la probabilidad de que sea <strong>roja o verde</strong>?',
+              data: cajaBolsa([{ n: r, t: 'rojas', c: ROJO }, { n: a, t: 'azules', c: AZUL }, { n: v, t: 'verdes', c: VERDE }]),
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* C4: regla general (los eventos se solapan) */
+          () => {
+            const paridad = pick(['par', 'impar']);
+            const k = rand(2, 4);
+            const caras = [1, 2, 3, 4, 5, 6];
+            const A = caras.filter(f => (paridad === 'par' ? f % 2 === 0 : f % 2 === 1));
+            const B = caras.filter(f => f > k);
+            const union = caras.filter(f => A.indexOf(f) > -1 || B.indexOf(f) > -1);
+            const inter = A.filter(f => B.indexOf(f) > -1);
+            const o = makeOptsFrac(frac(union.length, 6),
+              [frac(A.length + B.length, 6), frac(inter.length, 6), frac(6 - union.length, 6),
+               frac(B.length, 6), frac(A.length, 6)]);
+            return { cat: 'Complemento y uni\u00f3n', t: 60,
+              q: 'Se lanza un dado de seis caras. \u00bfCu\u00e1l es la probabilidad de obtener un n\u00famero <strong>' +
+                 paridad + '</strong> <strong>o</strong> un n\u00famero <strong>mayor que ' + k + '</strong>?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* C5: suma de dos probabilidades excluyentes dadas como fracciones */
+          () => {
+            const b1 = pick([3, 4, 5, 6]);
+            let b2 = pick([3, 4, 5, 6]);
+            while (b2 === b1) { b2 = pick([3, 4, 5, 6]); }
+            const o = makeOptsFrac(frac(b1 + b2, b1 * b2),
+              [frac(1, b1 * b2), frac(2, b1 + b2), frac(1, b1 + b2),
+               frac(Math.abs(b2 - b1), b1 * b2), frac(b1 + b2, b1 + b2 + 1)]);
+            return { cat: 'Complemento y uni\u00f3n', t: 60,
+              q: 'En un instituto, la probabilidad de que un estudiante estudie <strong>franc\u00e9s</strong> es <strong>' +
+                 frac(1, b1) + '</strong> y la de que estudie <strong>alem\u00e1n</strong> es <strong>' + frac(1, b2) +
+                 '</strong>. Ning\u00fan estudiante cursa los dos idiomas. \u00bfCu\u00e1l es la probabilidad de que estudie <strong>franc\u00e9s o alem\u00e1n</strong>?',
+              opciones: o.opciones, correcta: o.correcta };
+          }
+        ],
+
+        /* ─────────────────────────────────────
+           3) EVENTOS COMPUESTOS
+           ───────────────────────────────────── */
+        'Eventos compuestos': [
+
+          /* E1: n monedas, todas caras */
+          () => {
+            const n = pick([2, 3]);
+            const ok = n === 2 ? '1/4' : '1/8';
+            const dist = n === 2 ? ['1/2', '1/8', '3/4', '2/3'] : ['1/2', '1/4', '3/8', '1/6'];
+            const o = makeOptsFrac(ok, dist);
+            return { cat: 'Eventos compuestos', t: 50,
+              q: 'Se lanza una moneda <strong>' + n + ' veces</strong>. \u00bfCu\u00e1l es la probabilidad de obtener <strong>cara en todos los lanzamientos</strong>?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* E2: dado y moneda (eventos independientes de distinto tipo) */
+          () => {
+            const k = rand(1, 6);
+            const o = makeOptsFrac('1/12', ['1/6', '1/2', '1/8', '7/12']);
+            return { cat: 'Eventos compuestos', t: 50,
+              q: 'Se lanza una moneda <strong>y</strong> un dado de seis caras. \u00bfCu\u00e1l es la probabilidad de obtener <strong>cara y el n\u00famero ' +
+                 k + '</strong>?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* E3: CON reemplazo */
+          () => {
+            const r = rand(2, 4), a = rand(r + 1, 6), T = r + a;
+            const o = makeOptsFrac(frac(r * r, T * T),
+              [frac(r * (r - 1), T * (T - 1)), frac(2 * r, T), frac(r, T), frac(r * a, T * T)]);
+            return { cat: 'Eventos compuestos', t: 60,
+              q: 'De la bolsa indicada se extrae una canica, <strong>se devuelve a la bolsa</strong> y se extrae otra. \u00bfCu\u00e1l es la probabilidad de que <strong>ambas sean rojas</strong>?',
+              data: cajaBolsa([{ n: r, t: 'rojas', c: ROJO }, { n: a, t: 'azules', c: AZUL }]),
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* E4: SIN reemplazo */
+          () => {
+            const r = rand(2, 4), a = rand(r + 1, 6), T = r + a;
+            const o = makeOptsFrac(frac(r * (r - 1), T * (T - 1)),
+              [frac(r * r, T * T), frac(r, T), frac(r - 1, T - 1), frac(r * (r - 1), T * T)]);
+            return { cat: 'Eventos compuestos', t: 60,
+              q: 'De la bolsa indicada se extrae una canica y, <strong>sin devolverla</strong>, se extrae otra. \u00bfCu\u00e1l es la probabilidad de que <strong>ambas sean rojas</strong>?',
+              data: cajaBolsa([{ n: r, t: 'rojas', c: ROJO }, { n: a, t: 'azules', c: AZUL }]),
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* E5: dos dados, el mismo numero en ambos */
+          () => {
+            const k = rand(1, 6);
+            const o = makeOptsFrac('1/36', ['1/6', '1/3', '1/12', '1/18']);
+            return { cat: 'Eventos compuestos', t: 55,
+              q: 'Se lanzan <strong>dos dados</strong> de seis caras. \u00bfCu\u00e1l es la probabilidad de obtener <strong>el n\u00famero ' +
+                 k + ' en ambos</strong>?',
+              opciones: o.opciones, correcta: o.correcta };
+          }
+        ],
+
+        /* ─────────────────────────────────────
+           4) PRINCIPIO DE CONTEO
+           ───────────────────────────────────── */
+        'Principio de conteo': [
+
+          /* K1: menu por etapas */
+          () => {
+            const e = rand(2, 4), p = rand(3, 5), d = rand(2, 4);
+            const o = makeOptsNum(e * p * d, [e + p + d, e * p, p * d, (e + p) * d, e * p * d + 1]);
+            return { cat: 'Principio de conteo', t: 45,
+              q: 'Un restaurante ofrece <strong>' + e + ' entradas</strong>, <strong>' + p +
+                 ' platos fuertes</strong> y <strong>' + d + ' postres</strong>. \u00bfCu\u00e1ntas comidas completas distintas se pueden formar?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* K2: numeros de 3 cifras SIN repetir */
+          () => {
+            const N = pick([5, 6, 7]);
+            const o = makeOptsNum(N * (N - 1) * (N - 2), [Math.pow(N, 3), 3 * N, N * (N - 1), N * N]);
+            return { cat: 'Principio de conteo', t: 60,
+              q: '\u00bfCu\u00e1ntos n\u00fameros de <strong>tres cifras distintas</strong> se pueden formar con los d\u00edgitos del <strong>1 al ' +
+                 N + '</strong>, si <strong>no</strong> se permite repetir d\u00edgitos?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* K3: claves CON repeticion */
+          () => {
+            const k = pick([3, 4]);
+            const o = makeOptsNum(Math.pow(10, k), [10 * k, Math.pow(10, k - 1), 9 * Math.pow(10, k - 1), 10 + k]);
+            return { cat: 'Principio de conteo', t: 50,
+              q: 'Una clave de seguridad tiene <strong>' + k + ' d\u00edgitos</strong> (del 0 al 9) y <strong>se permite repetir</strong>. \u00bfCu\u00e1ntas claves distintas existen?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* K4: placas con letras y digitos */
+          () => {
+            const L = pick([1, 2]), D = pick([2, 3]);
+            const ok = Math.pow(26, L) * Math.pow(10, D);
+            const o = makeOptsNum(ok,
+              [26 * L * 10 * D, Math.pow(26, L) + Math.pow(10, D), 26 * 10, Math.pow(10, L) * Math.pow(26, D), (26 + 10) * (L + D)]);
+            return { cat: 'Principio de conteo', t: 60,
+              q: 'Una placa de veh\u00edculo se forma con <strong>' + L + ' letra' + (L > 1 ? 's' : '') +
+                 '</strong> (26 posibles) seguida' + (L > 1 ? 's' : '') + ' de <strong>' + D +
+                 ' d\u00edgito' + (D > 1 ? 's' : '') + '</strong> (10 posibles), y <strong>se permite repetir</strong>. \u00bfCu\u00e1ntas placas distintas se pueden formar?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* K5: espacio muestral total de un experimento compuesto */
+          () => {
+            const nm = pick([1, 2]), nd = pick([1, 2]);
+            const ok = Math.pow(2, nm) * Math.pow(6, nd);
+            const o = makeOptsNum(ok,
+              [2 * nm + 6 * nd, Math.pow(2, nm) + Math.pow(6, nd), 2 * 6, Math.pow(6, nm) * Math.pow(2, nd), ok + 2]);
+            return { cat: 'Principio de conteo', t: 50,
+              q: 'Se lanza' + (nm > 1 ? 'n' : '') + ' <strong>' + nm + ' moneda' + (nm > 1 ? 's' : '') +
+                 '</strong> y <strong>' + nd + ' dado' + (nd > 1 ? 's' : '') +
+                 '</strong> de seis caras. \u00bfCu\u00e1ntos <strong>resultados posibles</strong> tiene el experimento?',
+              opciones: o.opciones, correcta: o.correcta };
+          }
+        ],
+
+        /* ─────────────────────────────────────
+           5) PERMUTACIONES Y COMBINACIONES
+           ───────────────────────────────────── */
+        'Permutaciones y combinaciones': [
+
+          /* R1: ordenar n objetos = n! */
+          () => {
+            const n = pick([4, 5, 6]);
+            const o = makeOptsNum(fact(n), [n * n, 2 * n, n * (n - 1), fact(n - 1), fact(n) / 2]);
+            return { cat: 'Permutaciones y combinaciones', t: 55,
+              q: '\u00bfDe cu\u00e1ntas maneras distintas se pueden <strong>ordenar ' + n +
+                 ' libros diferentes</strong> en un estante?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* R2: permutacion nP2 (los cargos son distintos: importa el orden) */
+          () => {
+            const n = pick([6, 8, 10, 12]);
+            const o = makeOptsNum(perm(n, 2), [comb(n, 2), n * n, 2 * n, n + 2, perm(n, 3)]);
+            return { cat: 'Permutaciones y combinaciones', t: 60,
+              q: 'Un club tiene <strong>' + n + ' miembros</strong>. \u00bfDe cu\u00e1ntas maneras se pueden elegir un <strong>presidente</strong> y un <strong>tesorero</strong> (una misma persona no puede ocupar los dos cargos)?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* R3: combinacion nC3 (un comite no tiene orden) */
+          () => {
+            const n = pick([5, 6, 7]);
+            const o = makeOptsNum(comb(n, 3), [perm(n, 3), Math.pow(n, 3), 3 * n, n * n]);
+            return { cat: 'Permutaciones y combinaciones', t: 60,
+              q: 'De un grupo de <strong>' + n + ' estudiantes</strong> se debe formar un <strong>comit\u00e9 de 3 personas</strong>. \u00bfCu\u00e1ntos comit\u00e9s distintos se pueden formar?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* R4: combinacion nC2 (apretones de manos) */
+          () => {
+            const n = pick([5, 6, 7, 8]);
+            const o = makeOptsNum(comb(n, 2), [perm(n, 2), n * n, 2 * n, n + 2, fact(n)]);
+            return { cat: 'Permutaciones y combinaciones', t: 55,
+              q: 'En una reuni\u00f3n hay <strong>' + n + ' personas</strong> y cada una saluda a todas las dem\u00e1s <strong>una sola vez</strong>. \u00bfCu\u00e1ntos <strong>saludos</strong> se producen en total?',
+              opciones: o.opciones, correcta: o.correcta };
+          },
+
+          /* R5: conceptual — distinguir cuando importa el orden */
+          () => {
+            const CON_ORDEN = [
+              'Formar una clave de 4 d\u00edgitos',
+              'Elegir presidente y secretario de un club',
+              'Colocar 5 libros distintos en un estante',
+              'Asignar el 1.er, 2.o y 3.er lugar de una carrera'
+            ];
+            const SIN_ORDEN = [
+              'Elegir 3 sabores de helado entre 10',
+              'Formar un comit\u00e9 de 4 personas',
+              'Escoger 2 pizzas de un men\u00fa de 8',
+              'Seleccionar 5 cartas de una baraja'
+            ];
+            const o = makeOptsText(pick(CON_ORDEN), shuffle(SIN_ORDEN));
+            return { cat: 'Permutaciones y combinaciones', t: 55,
+              q: '\u00bfEn cu\u00e1l de estas situaciones <strong>importa el orden</strong>, es decir, se trata de una <strong>permutaci\u00f3n</strong>?',
+              opciones: o.opciones, correcta: o.correcta };
+          }
+        ]
+
+      }; // fin BANCO
+
+      /* ── MOTOR ── */
+      const SORTEO = 4;   /* preguntas que se sortean por categoria */
+      let seleccion = [];
+      Object.keys(BANCO).forEach(c => { seleccion = seleccion.concat(shuffle(BANCO[c]).slice(0, SORTEO)); });
+      const preguntas = shuffle(seleccion.map(g => g()));
+      const total = preguntas.length;
+      let actual = 0, puntos = 0, respondida = false, reloj = null, segs = 0;
+      const catPts = {}, catTot = {};
+      preguntas.forEach(p => {
+        catTot[p.cat] = (catTot[p.cat] || 0) + 1;
+        catPts[p.cat] = catPts[p.cat] || 0;
+      });
+
+      const qArea = document.getElementById('question-area');
+      const barP = document.getElementById('progress-bar');
+      const txtP = document.getElementById('progress-text');
+
+      function anunciar(txt) {
+        const sr = document.getElementById('sr-status');
+        if (sr) sr.textContent = txt;
+      }
+
+      function render(i) {
+        const p = preguntas[i];
+        const col = CC[p.cat] || '#5b21b6';
+        const icon = CI[p.cat] || '';
+        const tLbl = p.t <= 45 ? '&#9889; R\u00e1pida' : p.t <= 55 ? '&#128336; Media' : '&#9203; Compleja';
+        const opHtml = p.opciones.map(o =>
+          '<div class="option-item" role="button" tabindex="0" data-val="' + o.valor + '"' +
+          ' onclick="window.__rprobClick(this)" onkeydown="window.__rprobKey(event, this)">' + o.texto + '</div>'
+        ).join('');
+        const dH = p.data ? p.data : '';
+        const btn = i === total - 1 ? 'Ver resultados' : 'Siguiente &rsaquo;';
+        qArea.innerHTML =
+          '<div class="question-meta">' +
+            '<span class="cat-badge" style="background:' + col + '"><span aria-hidden="true">' + icon + '</span> ' + p.cat + '</span>' +
+            '<span class="time-badge">' + tLbl + ' &middot; ' + p.t + 's</span>' +
+          '</div>' +
+          '<div class="question-header">' + p.q + '</div>' +
+          dH +
+          '<div class="options">' + opHtml + '</div>' +
+          '<div class="btn-container"><div class="primary-btn" role="button" tabindex="0"' +
+          ' onclick="window.__rprobNext()" onkeydown="window.__rprobKey(event, this, 1)">' + btn + '</div></div>';
+        if (barP) barP.style.width = ((i + 1) / total) * 100 + '%';
+        if (txtP) txtP.textContent = 'Pregunta ' + (i + 1) + ' de ' + total;
+        anunciar('Pregunta ' + (i + 1) + ' de ' + total + '. Categor\u00eda: ' + p.cat + '.');
+        iniciarReloj(p.t);
+      }
+
+      /* activacion por teclado: Enter o barra espaciadora */
+      window.__rprobKey = function (e, el, esBoton) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+          e.preventDefault();
+          if (esBoton) window.__rprobNext(); else window.__rprobClick(el);
+        }
+      };
+
+      window.__rprobClick = function (el) {
+        if (respondida) return;
+        pararReloj();
+        respondida = true;
+        const p = preguntas[actual];
+        const elegida = el.getAttribute('data-val');
+        const okEl = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+        const txtOk = okEl ? okEl.textContent : '';
+        if (elegida === p.correcta) {
+          el.className = 'option-item correct disabled';
+          puntos++;
+          catPts[p.cat]++;
+          anunciar('Respuesta correcta: ' + txtOk);
+        } else {
+          el.className = 'option-item incorrect disabled';
+          if (okEl) okEl.className = 'option-item correct disabled';
+          anunciar('Respuesta incorrecta. La correcta es ' + txtOk);
+        }
+        qArea.querySelectorAll('.option-item').forEach(o => {
+          if (!o.className.includes('disabled')) o.className += ' disabled';
+          o.setAttribute('tabindex', '-1');
+        });
+      };
+
+      window.__rprobNext = function () {
+        pararReloj();
+        actual++;
+        respondida = false;
+        if (actual < total) render(actual);
+        else mostrarRes();
+      };
+
+      function iniciarReloj(s) {
+        pararReloj();
+        segs = s;
+        updReloj();
+        reloj = setInterval(() => { segs--; updReloj(); if (segs <= 0) tAgotado(); }, 1000);
+      }
+      function pararReloj() { if (reloj) { clearInterval(reloj); reloj = null; } }
+      function updReloj() {
+        const p = preguntas[actual] || { t: 45 };
+        const tt = document.getElementById('timer-text');
+        const tb = document.getElementById('timer-bar');
+        const tc = document.getElementById('timer-container');
+        if (tt) tt.textContent = '\u23F1 Tiempo: ' + segs + 's';
+        const pct = (segs / p.t) * 100;
+        if (tb) {
+          tb.style.width = pct + '%';
+          if (pct <= 25) {
+            tb.style.background = '#dc3545';
+            if (tc) tc.className = 'timer-container timer-warning';
+          } else if (pct <= 50) {
+            tb.style.background = 'linear-gradient(90deg,#ffc107,#dc3545)';
+            if (tc) tc.className = 'timer-container';
+          } else {
+            tb.style.background = 'linear-gradient(90deg,#28a745,#ffc107,#dc3545)';
+            if (tc) tc.className = 'timer-container';
+          }
+        }
+      }
+      function tAgotado() {
+        pararReloj();
+        respondida = true;
+        const p = preguntas[actual];
+        const ok = qArea.querySelector('.option-item[data-val="' + p.correcta + '"]');
+        if (ok) ok.className = 'option-item correct disabled';
+        qArea.querySelectorAll('.option-item').forEach(o => {
+          if (!o.className.includes('disabled')) o.className += ' disabled';
+          o.setAttribute('tabindex', '-1');
+        });
+        anunciar('Tiempo agotado. La respuesta correcta es ' + (ok ? ok.textContent : ''));
+        const tt = document.getElementById('timer-text');
+        if (tt) tt.textContent = '\u23F0 \u00a1Tiempo agotado!';
+        const tc = document.getElementById('timer-container');
+        if (tc) tc.className = 'timer-container timer-warning';
+      }
+
+      function mostrarRes() {
+        pararReloj();
+        qArea.innerHTML = '';
+        document.getElementById('timer-container').style.display = 'none';
+        const pct = Math.round((puntos / total) * 100);
+        document.getElementById('final-score').textContent = puntos + ' / ' + total + '  (' + pct + '%)';
+        let msg = pct >= 85 ? '\u{1F3C6} \u00a1Excelente! Distingues con soltura cu\u00e1ndo sumar, cu\u00e1ndo multiplicar y cu\u00e1ndo importa el orden.'
+                : pct >= 70 ? '\u{1F44D} \u00a1Muy bien! Repasa las categor\u00edas marcadas en rojo antes del examen.'
+                : pct >= 50 ? '\u{1F4AA} Buen intento. Fija dos ideas: \u00abo\u00bb suma, \u00aby\u00bb multiplica; y pregunta siempre si hay reemplazo.'
+                : '\u{1F4DA} Sigue practicando: escribe primero cu\u00e1ntos casos favorables y cu\u00e1ntos casos posibles hay, y solo despu\u00e9s divide.';
+        document.getElementById('final-msg').textContent = msg;
+
+        let html = '<h3>Desglose por categor\u00eda</h3>';
+        for (const cat of Object.keys(catTot)) {
+          const s = catPts[cat] || 0;
+          const t2 = catTot[cat];
+          const p2 = Math.round((s / t2) * 100);
+          const col = CC[cat] || '#5b21b6';
+          html +=
+            '<div class="cat-row">' +
+              '<span class="cat-lbl"><span aria-hidden="true">' + CI[cat] + '</span> ' + cat + '</span>' +
+              '<div class="cat-bar-out"><div class="cat-bar-in" style="width:' + p2 + '%;background:' + col + '"></div></div>' +
+              '<span class="cat-sc">' + s + '/' + t2 + ' \u2713</span>' +
+            '</div>';
+        }
+        document.getElementById('cat-results').innerHTML = html;
+        let minCat = '', minPct = 999;
+        for (const cat of Object.keys(catTot)) {
+          const pp = (catPts[cat] || 0) / catTot[cat];
+          if (pp < minPct) { minPct = pp; minCat = cat; }
+        }
+        document.getElementById('tip-box').innerHTML = minPct < 1
+          ? '<strong>\u{1F4CC} Para mejorar en \u00ab' + minCat + '\u00bb:</strong><br>' + (TIPS[minCat] || '')
+          : '\u2705 \u00a1Sin categor\u00edas con cero! Ahora intenta mejorar tus tiempos.';
+        document.getElementById('result-screen').className = 'result-screen';
+        document.querySelector('.quiz-progress-header').style.display = 'none';
+        anunciar('Cuestionario completado. Puntuaci\u00f3n: ' + puntos + ' de ' + total + ', ' + pct + ' por ciento.');
+        const rb = document.getElementById('restart-btn');
+        rb.onclick = () => window.location.reload();
+        rb.onkeydown = (e) => {
+          if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); window.location.reload(); }
+        };
+      }
+
+      render(0);
+    })();
+    </script>
+  </body>
+</html>
