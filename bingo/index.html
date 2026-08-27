@@ -70,8 +70,8 @@
         border: 2px solid var(--borde);
         border-left: 6px solid var(--azul);
         border-radius: 10px;
-        padding: 14px 18px;
-        margin-bottom: 18px;
+        padding: 7px 9px;
+        margin-bottom: 9px;
       }
       .caja-objetivos h2 {
         margin-top: 0;
@@ -88,8 +88,8 @@
         background-color: var(--blanco);
         border: 2px solid var(--borde);
         border-radius: 10px;
-        padding: 4px 16px 12px;
-        margin-bottom: 12px;
+        padding: 4px 8px 6px;
+        margin-bottom: 6px;
       }
       details.instrucciones summary {
         cursor: pointer;
@@ -451,16 +451,8 @@
       <p class="subtitulo">Practica tus tablas y completa una línea para cantar ¡BINGO!</p>
 
       <details class="instrucciones">
-        <summary>Objetivos de la clase</summary>
-        <ul>
-          <li>Calcular productos de multiplicación de forma rápida y precisa.</li>
-          <li>Reconocer que un mismo producto puede obtenerse de distintos factores.</li>
-          <li>Reforzar la memorización de las tablas de multiplicar mediante el juego.</li>
-        </ul>
-      </details>
-
-      <details class="instrucciones">
-        <summary>¿Cómo se juega?</summary>
+        <summary>¿Cómo se juega y configura?</summary>
+        <p ><strong>Aprende a jugar</strong></p>
         <ol>
           <li>
             Pulsa
@@ -476,11 +468,8 @@
           </li>
           <li>Completa cinco casillas seguidas (en fila, columna o diagonal) para cantar ¡BINGO!</li>
         </ol>
-      </details>
-
-      <details class="instrucciones">
-        <summary>Configuración</summary>
-        <div class="grupo-opciones">
+        <p ><strong>Configura el juego</strong></p>
+          <div class="grupo-opciones">
           <div class="etiqueta-grupo">Nivel de dificultad</div>
           <div class="fila-botones" id="grupoDificultad">
             <button type="button" class="chip" data-dif="facil" aria-pressed="true">Tablas del 1 al 10</button>
@@ -546,7 +535,7 @@
         <div class="col-historial">
           <h3>Historial de problemas</h3>
           <details class="historial">
-            <summary>Ver problemas llamados</summary>
+            <summary>Lista de los problemas que han salido</summary>
             <div class="lista-historial" id="historial"><span class="vacio">Todavía no se ha llamado ningún problema.</span></div>
           </details>
         </div>
