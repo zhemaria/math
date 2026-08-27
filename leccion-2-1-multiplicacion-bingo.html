@@ -1,0 +1,984 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bingo de multiplicación</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --azul: #0089cd;
+        --azul-osc: #006a9e;
+        --azul-claro: #e8f5fc;
+        --borde: #cce7f5;
+        --fondo: #f4fbff;
+        --texto: #173a4d;
+        --verde: #2e7d32;
+        --verde-claro: #e6f4ea;
+        --rojo: #c62828;
+        --rojo-claro: #fdecea;
+        --oro: #f59e0b;
+        --oro-claro: #fff4e0;
+        --blanco: #ffffff;
+        --gris: #5b7888;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Poppins', sans-serif;
+        color: var(--texto);
+        background-color: var(--fondo);
+        margin: 0;
+        padding: 16px;
+        line-height: 1.55;
+      }
+      .contenedor {
+        max-width: 860px;
+        margin: 0 auto;
+      }
+      h1 {
+        color: var(--azul-osc);
+        font-size: 1.9rem;
+        font-weight: 700;
+        text-align: center;
+        margin: 0 0 4px;
+      }
+      .subtitulo {
+        text-align: center;
+        color: var(--gris);
+        margin: 0 0 20px;
+        font-weight: 500;
+      }
+      h2 {
+        color: var(--azul-osc);
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 24px 0 10px;
+      }
+      h3 {
+        color: var(--azul-osc);
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin: 0 0 8px;
+      }
+      /* Caja de objetivos */
+      .caja-objetivos {
+        background-color: var(--azul-claro);
+        border: 2px solid var(--borde);
+        border-left: 6px solid var(--azul);
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 18px;
+      }
+      .caja-objetivos h2 {
+        margin-top: 0;
+      }
+      .caja-objetivos ul {
+        margin: 6px 0 0;
+        padding-left: 22px;
+      }
+      .caja-objetivos li {
+        margin-bottom: 4px;
+      }
+      /* Instrucciones */
+      details.instrucciones {
+        background-color: var(--blanco);
+        border: 2px solid var(--borde);
+        border-radius: 10px;
+        padding: 4px 16px 12px;
+        margin-bottom: 12px;
+      }
+      details.instrucciones summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--azul-osc);
+        padding: 8px 0;
+        list-style: none;
+      }
+      details.instrucciones summary::before {
+        content: '▶ ';
+        font-size: 0.8rem;
+      }
+      details.instrucciones[open] summary::before {
+        content: '▼ ';
+      }
+      details.instrucciones ol {
+        margin: 4px 0 10px;
+        padding-left: 22px;
+      }
+      details.instrucciones li {
+        margin-bottom: 6px;
+      }
+      /* Controles */
+      .panel {
+        background-color: var(--blanco);
+        border: 2px solid var(--borde);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 18px;
+      }
+      .grupo-opciones {
+        margin-bottom: 12px;
+      }
+      .grupo-opciones:last-child {
+        margin-bottom: 0;
+      }
+      .etiqueta-grupo {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--gris);
+        margin-bottom: 6px;
+      }
+      .fila-botones {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .chip {
+        font-family: inherit;
+        font-size: 0.92rem;
+        font-weight: 500;
+        padding: 8px 14px;
+        border: 2px solid var(--borde);
+        background-color: var(--blanco);
+        color: var(--azul-osc);
+        border-radius: 24px;
+        cursor: pointer;
+        transition:
+          background-color 0.15s,
+          color 0.15s,
+          border-color 0.15s;
+      }
+      .chip:hover {
+        border-color: var(--azul);
+      }
+      .chip[aria-pressed='true'] {
+        background-color: var(--azul);
+        border-color: var(--azul);
+        color: var(--blanco);
+      }
+      .btn {
+        font-family: inherit;
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 11px 18px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background-color 0.15s;
+      }
+      .btn-primario {
+        background-color: var(--azul);
+        color: var(--blanco);
+      }
+      .btn-primario:hover {
+        background-color: var(--azul-osc);
+      }
+      .btn-sec {
+        background-color: var(--blanco);
+        color: var(--azul-osc);
+        border: 2px solid var(--azul);
+      }
+      .btn-sec:hover {
+        background-color: var(--azul-claro);
+      }
+      /* Problema actual */
+      .zona-problema {
+        background-color: var(--azul-claro);
+        border: 2px solid var(--borde);
+        border-radius: 12px;
+        padding: 12px;
+        text-align: center;
+        margin-bottom: 12px;
+      }
+      .problema {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--azul-osc);
+        letter-spacing: 1px;
+        min-height: 2.6rem;
+      }
+      .mensaje {
+        min-height: 1.4rem;
+        font-weight: 500;
+        margin-top: 4px;
+      }
+      .mensaje.ok {
+        color: var(--verde);
+      }
+      .mensaje.error {
+        color: var(--rojo);
+      }
+      .mensaje.info {
+        color: var(--gris);
+      }
+      .fila-juego {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        margin-bottom: 14px;
+      }
+      /* Disposición del juego en dos columnas */
+      .juego-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 340px;
+        grid-template-areas:
+          'problema  tarjeta'
+          'stats     tarjeta'
+          'historial tarjeta';
+        gap: 18px;
+        align-items: start;
+      }
+      .col-problema {
+        grid-area: problema;
+      }
+      .col-tarjeta {
+        grid-area: tarjeta;
+      }
+      .col-stats {
+        grid-area: stats;
+      }
+      .col-historial {
+        grid-area: historial;
+      }
+      @media (max-width: 720px) {
+        .juego-grid {
+          grid-template-columns: 1fr;
+          grid-template-areas:
+            'problema'
+            'tarjeta'
+            'stats'
+            'historial';
+        }
+      }
+      /* Tarjeta */
+      .tablero {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+        max-width: 330px;
+        margin: 0 auto 8px;
+      }
+      .casilla {
+        font-family: inherit;
+        aspect-ratio: 1/1;
+        border: 2px solid var(--borde);
+        border-radius: 10px;
+        background-color: var(--blanco);
+        color: var(--texto);
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+          background-color 0.15s,
+          transform 0.1s,
+          border-color 0.15s;
+      }
+      .casilla:hover:not([disabled]) {
+        border-color: var(--azul);
+      }
+      .casilla.marcada {
+        background-color: var(--verde);
+        border-color: var(--verde);
+        color: var(--blanco);
+      }
+      .casilla.libre {
+        background-color: var(--oro-claro);
+        border-color: var(--oro);
+        color: var(--oro);
+        font-size: 0.85rem;
+        cursor: default;
+      }
+      .casilla.linea {
+        border-color: var(--oro);
+        border-width: 4px;
+      }
+      .casilla.error-flash {
+        background-color: var(--rojo-claro);
+        border-color: var(--rojo);
+        color: var(--rojo);
+        animation: temblor 0.35s;
+      }
+      .casilla.pista {
+        border-color: var(--oro);
+        border-width: 4px;
+        animation: latido 0.6s ease-in-out 2;
+      }
+      @keyframes temblor {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-5px);
+        }
+        75% {
+          transform: translateX(5px);
+        }
+      }
+      @keyframes latido {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.07);
+        }
+      }
+      /* Estadísticas */
+      .stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-start;
+      }
+      .stat {
+        background-color: var(--blanco);
+        border: 2px solid var(--borde);
+        border-radius: 10px;
+        padding: 8px 10px;
+        text-align: center;
+        min-width: 70px;
+        flex: 1 1 70px;
+      }
+      .stat .num {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--azul-osc);
+      }
+      .stat .lbl {
+        font-size: 0.78rem;
+        color: var(--gris);
+        font-weight: 500;
+      }
+      /* Banner bingo */
+      .banner {
+        display: none;
+        background-color: var(--oro-claro);
+        border: 3px solid var(--oro);
+        border-radius: 12px;
+        padding: 14px;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--oro);
+        margin-bottom: 14px;
+      }
+      .banner.visible {
+        display: block;
+        animation: latido 0.5s;
+      }
+      /* Confeti */
+      .confeti {
+        position: fixed;
+        top: -12px;
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
+        pointer-events: none;
+        z-index: 50;
+        animation: caer linear forwards;
+      }
+      @keyframes caer {
+        0% {
+          transform: translateY(0) rotate(0);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(105vh) rotate(540deg);
+          opacity: 0.9;
+        }
+      }
+      /* Historial */
+      details.historial {
+        background-color: var(--blanco);
+        border: 2px solid var(--borde);
+        border-radius: 10px;
+        padding: 4px 16px;
+      }
+      details.historial summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--azul-osc);
+        padding: 8px 0;
+        list-style: none;
+      }
+      details.historial summary::before {
+        content: '▶ ';
+        font-size: 0.8rem;
+      }
+      details.historial[open] summary::before {
+        content: '▼ ';
+      }
+      .lista-historial {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 6px 0 12px;
+      }
+      .pildora {
+        background-color: var(--azul-claro);
+        border: 1px solid var(--borde);
+        border-radius: 14px;
+        padding: 3px 10px;
+        font-size: 0.85rem;
+        font-weight: 500;
+      }
+      .vacio {
+        color: var(--gris);
+        font-style: italic;
+      }
+      @media (max-width: 520px) {
+        .problema {
+          font-size: 2.1rem;
+        }
+        .casilla {
+          font-size: 1.1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="contenedor">
+      <h1>Bingo de multiplicación</h1>
+      <p class="subtitulo">Practica tus tablas y completa una línea para cantar ¡BINGO!</p>
+
+      <details class="instrucciones">
+        <summary>Objetivos de la clase</summary>
+        <ul>
+          <li>Calcular productos de multiplicación de forma rápida y precisa.</li>
+          <li>Reconocer que un mismo producto puede obtenerse de distintos factores.</li>
+          <li>Reforzar la memorización de las tablas de multiplicar mediante el juego.</li>
+        </ul>
+      </details>
+
+      <details class="instrucciones">
+        <summary>¿Cómo se juega?</summary>
+        <ol>
+          <li>
+            Pulsa
+            <strong>Mostrar problema</strong>
+            para que aparezca una multiplicación.
+          </li>
+          <li>Calcula el resultado y pulsa la casilla de tu tarjeta que contiene ese número.</li>
+          <li>Si aciertas, la casilla se marca de verde y se llama un nuevo problema.</li>
+          <li>
+            Si te equivocas, vuelve a intentarlo. Puedes usar el botón
+            <strong>Pista</strong>
+            si lo necesitas.
+          </li>
+          <li>Completa cinco casillas seguidas (en fila, columna o diagonal) para cantar ¡BINGO!</li>
+        </ol>
+      </details>
+
+      <details class="instrucciones">
+        <summary>Configuración</summary>
+        <div class="grupo-opciones">
+          <div class="etiqueta-grupo">Nivel de dificultad</div>
+          <div class="fila-botones" id="grupoDificultad">
+            <button type="button" class="chip" data-dif="facil" aria-pressed="true">Tablas del 1 al 10</button>
+            <button type="button" class="chip" data-dif="medio" aria-pressed="false">Tablas del 2 al 12</button>
+            <button type="button" class="chip" data-dif="dificil" aria-pressed="false">Tablas del 3 al 12</button>
+          </div>
+        </div>
+        <div class="grupo-opciones">
+          <div class="etiqueta-grupo">Casilla central</div>
+          <div class="fila-botones">
+            <button type="button" class="chip" id="btnLibre" aria-pressed="true">Centro libre activado</button>
+          </div>
+        </div>
+        <div class="grupo-opciones">
+          <button type="button" class="btn btn-sec" id="btnNueva">Nueva tarjeta</button>
+        </div>
+      </details>
+
+      <h2>A jugar</h2>
+
+      <div class="banner" id="banner" role="status">¡BINGO!</div>
+
+      <div class="juego-grid">
+        <div class="col-problema">
+          <h3>Problema actual</h3>
+          <div class="zona-problema">
+            <div class="problema" id="problema" aria-live="polite">—</div>
+            <div class="mensaje info" id="mensaje" aria-live="polite">Pulsa «Mostrar problema» para comenzar.</div>
+          </div>
+        </div>
+
+        <div class="col-tarjeta">
+          <div class="fila-juego">
+            <button type="button" class="btn btn-primario" id="btnLlamar">Mostrar problema</button>
+            <button type="button" class="btn btn-sec" id="btnPista">Pista</button>
+          </div>
+          <h3>Tu tarjeta</h3>
+          <div class="tablero" id="tablero" role="grid" aria-label="Tarjeta de bingo de cinco por cinco"></div>
+        </div>
+
+        <div class="col-stats">
+          <h3>Estadísticas</h3>
+          <div class="stats">
+            <div class="stat">
+              <div class="num" id="stLlamados">0</div>
+              <div class="lbl">Problemas</div>
+            </div>
+            <div class="stat">
+              <div class="num" id="stAciertos">0</div>
+              <div class="lbl">Aciertos</div>
+            </div>
+            <div class="stat">
+              <div class="num" id="stErrores">0</div>
+              <div class="lbl">Errores</div>
+            </div>
+            <div class="stat">
+              <div class="num" id="stBingos">0</div>
+              <div class="lbl">Bingos</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-historial">
+          <h3>Historial de problemas</h3>
+          <details class="historial">
+            <summary>Ver problemas llamados</summary>
+            <div class="lista-historial" id="historial"><span class="vacio">Todavía no se ha llamado ningún problema.</span></div>
+          </details>
+        </div>
+      </div>
+      <div style="text-align: center">Creado por José M. Fernández con Claude Opus 4.8</div>
+    </div>
+
+    <script>
+      (function () {
+        'use strict';
+
+        // ----- Configuración de dificultad: rango de factores -----
+        var RANGOS = {
+          facil: {min: 1, max: 10},
+          medio: {min: 2, max: 12},
+          dificil: {min: 3, max: 12}
+        };
+
+        // ----- Estado del juego -----
+        var estado = {
+          dificultad: 'facil',
+          centroLibre: true,
+          valores: [], // valor de cada casilla (0..24); null = casilla libre
+          marcadas: [], // boolean por casilla
+          restantes: [], // índices de casillas con producto aún no marcado
+          problema: null, // {a, b, p, indice}
+          fallosProblema: 0,
+          llamados: 0,
+          aciertos: 0,
+          errores: 0,
+          bingos: 0,
+          lineasGanadas: {}
+        };
+
+        // ----- Referencias DOM -----
+        var elTablero = document.getElementById('tablero');
+        var elProblema = document.getElementById('problema');
+        var elMensaje = document.getElementById('mensaje');
+        var elBanner = document.getElementById('banner');
+        var elHistorial = document.getElementById('historial');
+        var btnLibre = document.getElementById('btnLibre');
+        var celdas = [];
+
+        var CENTRO = 12;
+
+        // ----- Audio (Web Audio API) -----
+        var audioCtx = null;
+        function ctx() {
+          if (!audioCtx) {
+            try {
+              audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+              audioCtx = null;
+            }
+          }
+          return audioCtx;
+        }
+        function tono(freq, dur, tipo, retraso) {
+          var c = ctx();
+          if (!c) return;
+          var t0 = c.currentTime + (retraso || 0);
+          var osc = c.createOscillator();
+          var gan = c.createGain();
+          osc.type = tipo || 'sine';
+          osc.frequency.value = freq;
+          gan.gain.setValueAtTime(0.0001, t0);
+          gan.gain.exponentialRampToValueAtTime(0.18, t0 + 0.02);
+          gan.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+          osc.connect(gan);
+          gan.connect(c.destination);
+          osc.start(t0);
+          osc.stop(t0 + dur + 0.02);
+        }
+        function sonidoAcierto() {
+          tono(660, 0.12, 'sine', 0);
+          tono(880, 0.16, 'sine', 0.1);
+        }
+        function sonidoError() {
+          tono(180, 0.22, 'sawtooth', 0);
+        }
+        function sonidoBingo() {
+          var notas = [523, 659, 784, 1047];
+          for (var i = 0; i < notas.length; i++) {
+            tono(notas[i], 0.22, 'triangle', i * 0.12);
+          }
+        }
+
+        // ----- Utilidades -----
+        function aleatorio(n) {
+          return Math.floor(Math.random() * n);
+        }
+        function mezclar(arr) {
+          for (var i = arr.length - 1; i > 0; i--) {
+            var j = aleatorio(i + 1);
+            var tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+          }
+          return arr;
+        }
+
+        // Productos distintos disponibles en el rango actual
+        function productosDisponibles() {
+          var r = RANGOS[estado.dificultad];
+          var set = {};
+          for (var a = r.min; a <= r.max; a++) {
+            for (var b = r.min; b <= r.max; b++) {
+              set[a * b] = true;
+            }
+          }
+          var lista = [];
+          for (var k in set) {
+            if (set.hasOwnProperty(k)) {
+              lista.push(parseInt(k, 10));
+            }
+          }
+          return lista;
+        }
+
+        // Una pareja de factores (dentro del rango) que da el producto p
+        function factoresDe(p) {
+          var r = RANGOS[estado.dificultad];
+          var parejas = [];
+          for (var a = r.min; a <= r.max; a++) {
+            if (p % a === 0) {
+              var b = p / a;
+              if (b >= r.min && b <= r.max) {
+                parejas.push([a, b]);
+              }
+            }
+          }
+          return parejas[aleatorio(parejas.length)];
+        }
+
+        // ----- Generar tarjeta -----
+        function generarTarjeta() {
+          var necesarios = estado.centroLibre ? 24 : 25;
+          var disponibles = mezclar(productosDisponibles());
+          var elegidos = disponibles.slice(0, necesarios);
+
+          estado.valores = [];
+          estado.marcadas = [];
+          estado.restantes = [];
+          estado.problema = null;
+          estado.fallosProblema = 0;
+          estado.lineasGanadas = {};
+
+          var idx = 0;
+          for (var i = 0; i < 25; i++) {
+            if (estado.centroLibre && i === CENTRO) {
+              estado.valores[i] = null;
+              estado.marcadas[i] = true;
+            } else {
+              estado.valores[i] = elegidos[idx++];
+              estado.marcadas[i] = false;
+              estado.restantes.push(i);
+            }
+          }
+          renderTablero();
+          ocultarBanner();
+          elProblema.textContent = '—';
+          fijarMensaje('Pulsa «Mostrar problema» para comenzar.', 'info');
+        }
+
+        function renderTablero() {
+          elTablero.innerHTML = '';
+          celdas = [];
+          for (var i = 0; i < 25; i++) {
+            var c = document.createElement('button');
+            c.type = 'button';
+            c.className = 'casilla';
+            c.setAttribute('role', 'gridcell');
+            (function (indice) {
+              c.addEventListener('click', function () {
+                clicCasilla(indice);
+              });
+            })(i);
+            if (estado.valores[i] === null) {
+              c.classList.add('libre', 'marcada');
+              c.textContent = 'LIBRE';
+              c.setAttribute('aria-label', 'Casilla libre, ya marcada');
+              c.disabled = true;
+            } else {
+              c.textContent = estado.valores[i];
+              c.setAttribute('aria-label', 'Casilla con el número ' + estado.valores[i]);
+            }
+            celdas.push(c);
+            elTablero.appendChild(c);
+          }
+        }
+
+        // ----- Llamar problema -----
+        function llamarProblema() {
+          if (ctx() && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+          }
+          if (estado.restantes.length === 0) {
+            fijarMensaje('¡Has marcado toda la tarjeta!', 'ok');
+            return;
+          }
+          var indice = estado.restantes[aleatorio(estado.restantes.length)];
+          var p = estado.valores[indice];
+          var par = factoresDe(p);
+          estado.problema = {a: par[0], b: par[1], p: p, indice: indice};
+          estado.fallosProblema = 0;
+          estado.llamados++;
+          document.getElementById('stLlamados').textContent = estado.llamados;
+          elProblema.textContent = par[0] + ' × ' + par[1] + ' = ?';
+          fijarMensaje('Busca el resultado en tu tarjeta y púlsalo.', 'info');
+          agregarHistorial(par[0] + ' × ' + par[1]);
+        }
+
+        // ----- Clic en casilla -----
+        function clicCasilla(i) {
+          if (estado.valores[i] === null) return;
+          if (estado.marcadas[i]) {
+            fijarMensaje('Esa casilla ya está marcada.', 'info');
+            return;
+          }
+          if (!estado.problema) {
+            fijarMensaje('Primero pulsa «Mostrar problema».', 'info');
+            return;
+          }
+          if (estado.valores[i] === estado.problema.p) {
+            marcar(i);
+          } else {
+            estado.errores++;
+            estado.fallosProblema++;
+            document.getElementById('stErrores').textContent = estado.errores;
+            sonidoError();
+            flashError(celdas[i]);
+            var ayuda = estado.fallosProblema >= 2 ? ' Pulsa «Pista» si lo necesitas.' : '';
+            fijarMensaje('Ese no es el resultado. Inténtalo otra vez.' + ayuda, 'error');
+          }
+        }
+
+        function marcar(i) {
+          estado.marcadas[i] = true;
+          celdas[i].classList.add('marcada');
+          celdas[i].setAttribute('aria-label', 'Casilla con el número ' + estado.valores[i] + ', marcada');
+          var pos = estado.restantes.indexOf(i);
+          if (pos !== -1) {
+            estado.restantes.splice(pos, 1);
+          }
+          estado.aciertos++;
+          document.getElementById('stAciertos').textContent = estado.aciertos;
+          estado.problema = null;
+          sonidoAcierto();
+          fijarMensaje('¡Correcto!', 'ok');
+          revisarBingo();
+          // Llamar el siguiente problema automáticamente tras una breve pausa
+          if (estado.restantes.length > 0) {
+            window.setTimeout(llamarProblema, 950);
+          } else {
+            window.setTimeout(function () {
+              fijarMensaje('¡Tarjeta completa! Excelente trabajo.', 'ok');
+            }, 950);
+          }
+        }
+
+        function flashError(celda) {
+          celda.classList.add('error-flash');
+          window.setTimeout(function () {
+            celda.classList.remove('error-flash');
+          }, 360);
+        }
+
+        // ----- Pista -----
+        function darPista() {
+          if (!estado.problema) {
+            fijarMensaje('Primero pulsa «Mostrar problema».', 'info');
+            return;
+          }
+          var i = estado.problema.indice;
+          celdas[i].classList.add('pista');
+          window.setTimeout(function () {
+            celdas[i].classList.remove('pista');
+          }, 1300);
+          fijarMensaje('Fíjate bien en la casilla resaltada.', 'info');
+        }
+
+        // ----- Detección de bingo -----
+        function lineas() {
+          var ls = [],
+            i,
+            j;
+          for (i = 0; i < 5; i++) {
+            // filas
+            var fila = [];
+            for (j = 0; j < 5; j++) {
+              fila.push(i * 5 + j);
+            }
+            ls.push({clave: 'f' + i, celdas: fila});
+          }
+          for (i = 0; i < 5; i++) {
+            // columnas
+            var col = [];
+            for (j = 0; j < 5; j++) {
+              col.push(j * 5 + i);
+            }
+            ls.push({clave: 'c' + i, celdas: col});
+          }
+          ls.push({clave: 'd1', celdas: [0, 6, 12, 18, 24]});
+          ls.push({clave: 'd2', celdas: [4, 8, 12, 16, 20]});
+          return ls;
+        }
+
+        function revisarBingo() {
+          var ls = lineas();
+          var nuevas = 0;
+          for (var k = 0; k < ls.length; k++) {
+            var l = ls[k];
+            if (estado.lineasGanadas[l.clave]) continue;
+            var completa = true;
+            for (var m = 0; m < l.celdas.length; m++) {
+              if (!estado.marcadas[l.celdas[m]]) {
+                completa = false;
+                break;
+              }
+            }
+            if (completa) {
+              estado.lineasGanadas[l.clave] = true;
+              for (var n = 0; n < l.celdas.length; n++) {
+                celdas[l.celdas[n]].classList.add('linea');
+              }
+              nuevas++;
+            }
+          }
+          if (nuevas > 0) {
+            estado.bingos += nuevas;
+            document.getElementById('stBingos').textContent = estado.bingos;
+            mostrarBanner();
+            sonidoBingo();
+            lanzarConfeti();
+          }
+        }
+
+        function mostrarBanner() {
+          elBanner.classList.add('visible');
+          window.setTimeout(ocultarBanner, 2600);
+        }
+        function ocultarBanner() {
+          elBanner.classList.remove('visible');
+        }
+
+        function lanzarConfeti() {
+          var colores = ['#0089cd', '#f59e0b', '#2e7d32', '#c62828', '#006a9e'];
+          for (var i = 0; i < 28; i++) {
+            var d = document.createElement('div');
+            d.className = 'confeti';
+            d.style.left = aleatorio(100) + 'vw';
+            d.style.backgroundColor = colores[aleatorio(colores.length)];
+            d.style.animationDuration = 1.4 + Math.random() * 1.2 + 's';
+            document.body.appendChild(d);
+            (function (nodo) {
+              window.setTimeout(function () {
+                if (nodo.parentNode) {
+                  nodo.parentNode.removeChild(nodo);
+                }
+              }, 2800);
+            })(d);
+          }
+        }
+
+        // ----- Mensajes e historial -----
+        function fijarMensaje(txt, tipo) {
+          elMensaje.textContent = txt;
+          elMensaje.className = 'mensaje ' + tipo;
+        }
+
+        function agregarHistorial(txt) {
+          var vacio = elHistorial.querySelector('.vacio');
+          if (vacio) {
+            elHistorial.innerHTML = '';
+          }
+          var p = document.createElement('span');
+          p.className = 'pildora';
+          p.textContent = txt;
+          elHistorial.appendChild(p);
+        }
+        function reiniciarHistorial() {
+          elHistorial.innerHTML = '<span class="vacio">Todavía no se ha llamado ningún problema.</span>';
+        }
+
+        function reiniciarStats() {
+          estado.llamados = 0;
+          estado.aciertos = 0;
+          estado.errores = 0;
+          estado.bingos = 0;
+          document.getElementById('stLlamados').textContent = '0';
+          document.getElementById('stAciertos').textContent = '0';
+          document.getElementById('stErrores').textContent = '0';
+          document.getElementById('stBingos').textContent = '0';
+        }
+
+        // ----- Eventos de configuración -----
+        var chips = document.querySelectorAll('#grupoDificultad .chip');
+        for (var c = 0; c < chips.length; c++) {
+          (function (chip) {
+            chip.addEventListener('click', function () {
+              for (var d = 0; d < chips.length; d++) {
+                chips[d].setAttribute('aria-pressed', 'false');
+              }
+              chip.setAttribute('aria-pressed', 'true');
+              estado.dificultad = chip.getAttribute('data-dif');
+              reiniciarStats();
+              reiniciarHistorial();
+              generarTarjeta();
+            });
+          })(chips[c]);
+        }
+
+        btnLibre.addEventListener('click', function () {
+          estado.centroLibre = !estado.centroLibre;
+          btnLibre.setAttribute('aria-pressed', estado.centroLibre ? 'true' : 'false');
+          btnLibre.textContent = estado.centroLibre ? 'Centro libre activado' : 'Centro libre desactivado';
+          reiniciarStats();
+          reiniciarHistorial();
+          generarTarjeta();
+        });
+
+        document.getElementById('btnNueva').addEventListener('click', function () {
+          reiniciarStats();
+          reiniciarHistorial();
+          generarTarjeta();
+        });
+        document.getElementById('btnLlamar').addEventListener('click', llamarProblema);
+        document.getElementById('btnPista').addEventListener('click', darPista);
+
+        // ----- Inicio -----
+        generarTarjeta();
+      })();
+    </script>
+  </body>
+</html>
