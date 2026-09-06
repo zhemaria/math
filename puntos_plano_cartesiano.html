@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactivo - Plano Cartesiano</title>
+    <style>
+      :root {
+        --primary-color: #4caf50;
+        --secondary-color: #2196f3;
+        --accent-color: #ff9800;
+        --bg-color: #f5f5f5;
+        --text-color: #333;
+        --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        padding: 20px;
+      }
+
+      .container {
+        width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: white;
+        box-shadow: var(--box-shadow);
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #265828;
+      }
+
+      .header h1 {
+        font-size: 32px;
+      }
+
+      .instructions {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 18px;
+      }
+
+      .canvas-container {
+        position: relative;
+        margin-bottom: 30px;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        /* Fondo blanco para el canvas */
+        background-color: white;
+      }
+
+      canvas {
+        display: block;
+      }
+
+      .inputs-container {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        gap: 15px;
+        margin-bottom: 25px;
+      }
+
+      .point-card {
+        flex: 1;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        background-color: #fcfcfc;
+      }
+
+      .point-header {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: var(--secondary-color);
+      }
+
+      .input-group {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 8px;
+      }
+
+      .input-group label {
+        font-size: 18px;
+        font-weight: bold;
+        margin-right: 10px;
+        width: 20px;
+      }
+
+      .input-group input {
+        width: 60px;
+        padding: 8px;
+        font-size: 16px;
+        text-align: center;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+      }
+
+      .feedback-icon {
+        font-size: 20px;
+        font-weight: bold;
+        height: 25px;
+        margin-top: 10px;
+      }
+
+      .correct {
+        color: var(--primary-color);
+      }
+
+      .incorrect {
+        color: crimson;
+      }
+
+      .controls {
+        display: flex;
+        gap: 20px;
+      }
+
+      .btn {
+        padding: 12px 25px;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        transition:
+          transform 0.2s,
+          background-color 0.2s;
+      }
+
+      .btn:hover {
+        transform: scale(1.05);
+      }
+
+      .btn-check {
+        background-color: var(--primary-color);
+      }
+
+      .btn-check:hover {
+        background-color: #3d8c40;
+      }
+
+      .btn-new {
+        background-color: var(--secondary-color);
+      }
+
+      .btn-new:hover {
+        background-color: #1976d2;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Ubicación en el Plano Cartesiano</h1>
+      </div>
+
+      <p class="instructions">
+        Observa el plano cartesiano y escribe las coordenadas
+        <strong>(x, y)</strong>
+        de cada punto marcado.
+      </p>
+
+      <div class="canvas-container">
+        <!-- Lienzo ligeramente más grande (440x440) para dar margen -->
+        <canvas id="plano" width="440" height="440"></canvas>
+      </div>
+
+      <div class="inputs-container">
+        <!-- Punto A -->
+        <div class="point-card">
+          <div class="point-header">Punto A</div>
+          <div class="input-group">
+            <label style="color: crimson">x:</label>
+            <input type="number" id="ax" />
+          </div>
+          <div class="input-group">
+            <label style="color: #2196f3">y:</label>
+            <input type="number" id="ay" />
+          </div>
+          <div class="feedback-icon" id="feedback-a"></div>
+        </div>
+        <!-- Punto B -->
+        <div class="point-card">
+          <div class="point-header">Punto B</div>
+          <div class="input-group">
+            <label style="color: crimson">x:</label>
+            <input type="number" id="bx" />
+          </div>
+          <div class="input-group">
+            <label style="color: #2196f3">y:</label>
+            <input type="number" id="by" />
+          </div>
+          <div class="feedback-icon" id="feedback-b"></div>
+        </div>
+        <!-- Punto C -->
+        <div class="point-card">
+          <div class="point-header">Punto C</div>
+          <div class="input-group">
+            <label style="color: crimson">x:</label>
+            <input type="number" id="cx" />
+          </div>
+          <div class="input-group">
+            <label style="color: #2196f3">y:</label>
+            <input type="number" id="cy" />
+          </div>
+          <div class="feedback-icon" id="feedback-c"></div>
+        </div>
+        <!-- Punto D -->
+        <div class="point-card">
+          <div class="point-header">Punto D</div>
+          <div class="input-group">
+            <label style="color: crimson">x:</label>
+            <input type="number" id="dx" />
+          </div>
+          <div class="input-group">
+            <label style="color: #2196f3">y:</label>
+            <input type="number" id="dy" />
+          </div>
+          <div class="feedback-icon" id="feedback-d"></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-check" onclick="verificarRespuestas()">Comprobar</button>
+        <button class="btn btn-new" onclick="iniciar()">Nuevos Puntos</button>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById('plano');
+      const ctx = canvas.getContext('2d');
+      const unit = 40; // Pixeles por unidad
+      const center = canvas.width / 2; // Centro desplazado a 220px
+
+      let puntos = {
+        A: {x: 0, y: 0},
+        B: {x: 0, y: 0},
+        C: {x: 0, y: 0},
+        D: {x: 0, y: 0}
+      };
+
+      function dibujarPlano() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Dibujar cuadrícula acotada (-5 a 5)
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#e0e0e0';
+        for (let i = -5; i <= 5; i++) {
+          const pos = center + i * unit;
+
+          // Linea vertical
+          ctx.beginPath();
+          ctx.moveTo(pos, center - 5 * unit);
+          ctx.lineTo(pos, center + 5 * unit);
+          ctx.stroke();
+
+          // Linea horizontal
+          ctx.beginPath();
+          ctx.moveTo(center - 5 * unit, pos);
+          ctx.lineTo(center + 5 * unit, pos);
+          ctx.stroke();
+        }
+
+        // Dibujar Ejes X e Y
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#000';
+
+        // Eje Y
+        ctx.beginPath();
+        ctx.moveTo(center, center - 5 * unit);
+        ctx.lineTo(center, center + 5 * unit);
+        ctx.stroke();
+
+        // Eje X
+        ctx.beginPath();
+        ctx.moveTo(center - 5 * unit, center);
+        ctx.lineTo(center + 5 * unit, center);
+        ctx.stroke();
+
+        // Etiquetas de los ejes (dentro del nuevo margen)
+        ctx.font = '16px Arial';
+        ctx.fillStyle = 'crimson';
+        ctx.fillText('X', center + 5 * unit + 5, center - 10);
+        ctx.fillStyle = '#2196f3';
+        ctx.fillText('Y', center + 10, center - 5 * unit - 5);
+
+        // Números en los ejes
+        ctx.fillStyle = '#666';
+        ctx.font = '12px Arial';
+        for (let i = -5; i <= 5; i++) {
+          if (i !== 0) {
+            // Números X
+            ctx.fillText(i, center + i * unit - 5, center + 15);
+            // Números Y (invertimos el signo porque el canvas Y crece hacia abajo)
+            ctx.fillText(-i, center + 5, center + i * unit + 4);
+          }
+        }
+      }
+
+      function numeroAleatorio(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function generarPuntos() {
+        const generados = [];
+        const nombres = ['A', 'B', 'C', 'D'];
+
+        nombres.forEach(nombre => {
+          let x, y, unico;
+          do {
+            unico = true;
+            x = numeroAleatorio(-5, 5);
+            y = numeroAleatorio(-5, 5);
+            // Evitar que dos puntos caigan exactamente en la misma coordenada
+            for (let p of generados) {
+              if (p.x === x && p.y === y) unico = false;
+            }
+          } while (!unico);
+
+          puntos[nombre] = {x, y};
+          generados.push({x, y});
+        });
+      }
+
+      function dibujarPuntos() {
+        const colores = {A: '#e91e63', B: '#9c27b0', C: '#ff9800', D: '#009688'};
+
+        for (let nombre in puntos) {
+          const px = center + puntos[nombre].x * unit;
+          const py = center - puntos[nombre].y * unit;
+
+          // Dibujar círculo
+          ctx.beginPath();
+          ctx.arc(px, py, 6, 0, 2 * Math.PI);
+          ctx.fillStyle = colores[nombre];
+          ctx.fill();
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Dibujar letra
+          ctx.fillStyle = '#000';
+          ctx.font = 'bold 16px Arial';
+
+          // Posición base de la letra
+          let textX = px + 8;
+          let textY = py - 8;
+
+          // Ajustes inteligentes para que las letras no se salgan del marco
+          if (puntos[nombre].x >= 4) {
+            textX = px - 20;
+          } // Si está muy a la derecha, mover a la izquierda
+          if (puntos[nombre].y >= 4) {
+            textY = py + 18;
+          } // Si está muy arriba, bajarla
+          if (puntos[nombre].x <= -5) {
+            textX = px + 8;
+          }
+
+          ctx.fillText(nombre, textX, textY);
+        }
+      }
+
+      function limpiarInputs() {
+        const ids = ['ax', 'ay', 'bx', 'by', 'cx', 'cy', 'dx', 'dy'];
+        ids.forEach(id => {
+          document.getElementById(id).value = '';
+          document.getElementById(id).style.borderColor = '#ccc';
+        });
+
+        ['a', 'b', 'c', 'd'].forEach(id => {
+          document.getElementById(`feedback-${id}`).innerHTML = '';
+        });
+      }
+
+      function verificarPunto(nombre, idX, idY, idFeedback) {
+        const inputX = document.getElementById(idX).value;
+        const inputY = document.getElementById(idY).value;
+        const feedback = document.getElementById(idFeedback);
+
+        if (inputX === '' || inputY === '') {
+          feedback.innerHTML = 'Faltan datos';
+          feedback.className = 'feedback-icon incorrect';
+          return;
+        }
+
+        if (parseInt(inputX) === puntos[nombre].x && parseInt(inputY) === puntos[nombre].y) {
+          feedback.innerHTML = '¡Correcto! ✔️';
+          feedback.className = 'feedback-icon correct';
+          document.getElementById(idX).style.borderColor = 'var(--primary-color)';
+          document.getElementById(idY).style.borderColor = 'var(--primary-color)';
+        } else {
+          feedback.innerHTML = 'Incorrecto ❌';
+          feedback.className = 'feedback-icon incorrect';
+          document.getElementById(idX).style.borderColor = 'crimson';
+          document.getElementById(idY).style.borderColor = 'crimson';
+        }
+      }
+
+      function verificarRespuestas() {
+        verificarPunto('A', 'ax', 'ay', 'feedback-a');
+        verificarPunto('B', 'bx', 'by', 'feedback-b');
+        verificarPunto('C', 'cx', 'cy', 'feedback-c');
+        verificarPunto('D', 'dx', 'dy', 'feedback-d');
+      }
+
+      function iniciar() {
+        limpiarInputs();
+        generarPuntos();
+        dibujarPlano();
+        dibujarPuntos();
+      }
+
+      // Iniciar el interactivo al cargar la página
+      window.onload = iniciar;
+    </script>
+  </body>
+</html>
