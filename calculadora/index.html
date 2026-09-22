@@ -1,729 +1,677 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manual Calculadora TI-30XS Multiview</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TI-30XS MultiView</title>
+<style>
+  /* ── Fondo de página (solo cuando se abre sola) ── */
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #e8edf2;
+    font-family: Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+  /* ── Calculadora flotante y arrastrable ── */
+  #calc-wrapper {
+    position: fixed;
+    top: 60px;
+    right: 30px;
+    z-index: 9999;
+    user-select: none;
+    touch-action: none;
+  }
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            overflow: hidden;
-        }
+  /* ── Barra de arrastre ── */
+  #drag-bar {
+    background: #2c4a6e;
+    color: #fff;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 8px 8px 0 0;
+    cursor: grab;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    letter-spacing: 0.5px;
+  }
+  #drag-bar:active { cursor: grabbing; }
 
-        .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
+  #btn-close {
+    background: #c0392b;
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+    cursor: pointer;
+    line-height: 16px;
+    text-align: center;
+    padding: 0;
+  }
+  #btn-close:hover { background: #e74c3c; }
 
-        .header h1 {
-            font-size: 2.2em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
+  /* ── Cuerpo de la calculadora ── */
+  .calc {
+    background: linear-gradient(160deg, #5c8aae 0%, #4a7a9b 40%, #3d6b8a 100%);
+    border: 2px solid #2c4a6e;
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+    padding: 12px 14px 18px;
+    width: 270px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
 
-        .important-note {
-            background: #fff3cd;
-            border: 2px solid #ffeaa7;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px;
-            border-left: 5px solid #f39c12;
-        }
+  /* ── Cabecera ── */
+  .calc-header {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .calc-brand {
+    font-size: 9px;
+    color: #c8dde8;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .calc-model {
+    font-size: 15px;
+    color: #fff;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+  }
+  .calc-sub {
+    font-size: 8px;
+    color: #a8c4d4;
+    letter-spacing: 2px;
+  }
+  .ti-logo {
+    font-size: 8px;
+    color: #a8c4d4;
+    margin-top: 2px;
+  }
 
-        .important-note h2 {
-            color: #856404;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
+  /* ── Pantalla solar ── */
+  .solar-panel {
+    background: linear-gradient(90deg, #1a1a1a, #333, #1a1a1a);
+    height: 8px;
+    border-radius: 3px;
+    margin-bottom: 6px;
+    border: 1px solid #222;
+  }
 
-        .important-note h2::before {
-            content: "⚠️";
-            margin-right: 10px;
-            font-size: 1.2em;
-        }
+  /* ── Display LCD ── */
+  .display {
+    background: #b8c8a0;
+    border: 3px solid #4a5a38;
+    border-radius: 4px;
+    padding: 6px 8px;
+    margin-bottom: 10px;
+    font-family: 'Courier New', monospace;
+    min-height: 56px;
+    position: relative;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.3);
+  }
+  .display-status {
+    font-size: 8px;
+    color: #3a4a28;
+    text-align: right;
+    height: 10px;
+    margin-bottom: 2px;
+  }
+  .display-input {
+    font-size: 13px;
+    color: #1a2a0a;
+    min-height: 18px;
+    word-break: break-all;
+    text-align: right;
+  }
+  .display-result {
+    font-size: 16px;
+    font-weight: bold;
+    color: #1a2a0a;
+    text-align: right;
+    min-height: 20px;
+  }
 
-        .important-note p {
-            margin-bottom: 12px;
-            line-height: 1.6;
-        }
+  /* ── Teclado ── */
+  .keyboard {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+  }
 
-        .key-combo {
-            background: #2c3e50;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            margin: 0 2px;
-            display: inline-block;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
+  /* Separadores visuales entre grupos de filas */
+  .row-gap { margin-top: 6px; }
 
-        .mode-highlight {
-            background: #a31621;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-weight: bold;
-        }
+  /* ── Estilos base de botones ── */
+  .btn {
+    height: 30px;
+    border: none;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: filter 0.08s, transform 0.08s;
+    position: relative;
+    line-height: 1.1;
+    padding: 0 2px;
+  }
+  .btn:active {
+    transform: scale(0.93);
+    filter: brightness(0.85);
+  }
 
-        .accordion {
-            margin: 20px;
-        }
+  /* Etiqueta secundaria (función 2nd) */
+  .sec {
+    font-size: 6.5px;
+    color: #7dc67e;
+    position: absolute;
+    top: 1px;
+    left: 2px;
+    font-weight: bold;
+    pointer-events: none;
+  }
 
-        /* Estilos para details/summary nativos */
-        details {
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
+  /* ── Tipos de botones ── */
 
-        details:hover {
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        }
+  /* 2nd — verde manzana */
+  .btn-2nd {
+    background: linear-gradient(180deg, #8fd68f, #6ab86a);
+    color: #1a3a1a;
+    border: 1px solid #4a9a4a;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    font-size: 11px;
+  }
+  .btn-2nd.active-2nd {
+    background: linear-gradient(180deg, #ffe55c, #f0c800);
+    color: #1a1a00;
+    border-color: #c09000;
+  }
 
-        details summary {
-            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-            color: white;
-            padding: 20px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s ease;
-            font-size: 1.3em;
-            font-weight: bold;
-            list-style: none;
-        }
+  /* Función azul oscuro */
+  .btn-func {
+    background: linear-gradient(180deg, #4a6a8a, #3a5a7a);
+    color: #e8f4ff;
+    border: 1px solid #2a4a6a;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
 
-        details summary::-webkit-details-marker {
-            display: none;
-        }
+  /* Números — blanco */
+  .btn-num {
+    background: linear-gradient(180deg, #f5f5f5, #e0e0e0);
+    color: #1a1a1a;
+    border: 1px solid #aaa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.35);
+    font-size: 12px;
+  }
 
-        details summary::after {
-            content: "▼";
-            font-size: 1em;
-            transition: transform 0.3s ease;
-        }
+  /* Operaciones — azul muy oscuro / negro */
+  .btn-op {
+    background: linear-gradient(180deg, #2a3a5a, #1a2a4a);
+    color: #e8f0ff;
+    border: 1px solid #0a1a3a;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    font-size: 13px;
+  }
 
-        details[open] summary::after {
-            transform: rotate(180deg);
-        }
+  /* Enter — destacado */
+  .btn-enter {
+    background: linear-gradient(180deg, #2a3a5a, #1a2a4a);
+    color: #e8f0ff;
+    border: 1px solid #0a1a3a;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    font-size: 10px;
+  }
 
-        details summary:hover {
-            background: linear-gradient(135deg, #0984e3 0%, #2d3436 100%);
-        }
+  /* Inactivos */
+  .btn-off {
+    background: linear-gradient(180deg, #3d6080, #2d5070);
+    color: #8ab0c8;
+    border: 1px solid #1d3050;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    cursor: default;
+    opacity: 0.75;
+  }
 
-        details .accordion-body {
-            padding: 25px;
-            background: #f8f9fa;
-        }
+  /* D-pad (navegación) */
+  .btn-nav {
+    background: linear-gradient(180deg, #555, #333);
+    color: #ccc;
+    border: 1px solid #222;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    font-size: 11px;
+  }
 
-        .when-to-use {
-            background: #e8f5e8;
-            border-left: 4px solid #27ae60;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 5px;
-        }
+  /* Clear */
+  .btn-clear {
+    background: linear-gradient(180deg, #b04040, #903030);
+    color: #fff;
+    border: 1px solid #702020;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
 
-        .when-to-use h4 {
-            color: #27ae60;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-        }
-
-        .when-to-use h4::before {
-            content: "💡";
-            margin-right: 8px;
-        }
-
-        .example-section {
-            background: #f0f0f0;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 15px 0;
-        }
-
-        .example-title {
-            color: #2c3e50;
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
-
-        .example-title::before {
-            content: "📝";
-            margin-right: 8px;
-        }
-
-        .calculation {
-            background: white;
-            border: 2px solid #3498db;
-            border-radius: 5px;
-            padding: 15px;
-            margin: 10px 0;
-            font-family: 'Courier New', monospace;
-        }
-
-        .input-sequence {
-            background: #ecf0f1;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 8px 0;
-            font-family: 'Courier New', monospace;
-            border-left: 4px solid #3498db;
-        }
-
-        .result {
-            background: #d5f4e6;
-            border: 2px solid #27ae60;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 10px 0;
-            text-align: center;
-            font-weight: bold;
-            color: #27ae60;
-        }
-
-        .fraction {
-            display: inline-block;
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        .fraction .numerator {
-            display: block;
-            border-bottom: 1px solid #333;
-            padding-bottom: 2px;
-        }
-
-        .fraction .denominator {
-            display: block;
-            padding-top: 2px;
-        }
-
-        .mixed-number {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .warning {
-            background: #ffe6e6;
-            border: 1px solid #ff9999;
-            border-radius: 5px;
-            padding: 10px;
-            margin: 10px 0;
-            color: #cc0000;
-        }
-
-        .tips {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 5px;
-        }
-
-        .tips h4 {
-            color: #1976d2;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-        }
-
-        .tips h4::before {
-            content: "💡";
-            margin-right: 8px;
-        }
-
-        /* Estilos especiales para la sección de fórmula cuadrática */
-        .formula-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin: 15px 0;
-            font-size: 1.3em;
-        }
-
-        .formula-box .formula {
-            font-family: 'Times New Roman', serif;
-            font-size: 1.4em;
-            margin: 10px 0;
-        }
-
-        .step-box {
-            background: #fff;
-            border: 2px solid #9b59b6;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-        }
-
-        .step-number {
-            background: #9b59b6;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        .discriminant-positive {
-            background: #d5f4e6;
-            border-left: 4px solid #27ae60;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 0 5px 5px 0;
-        }
-
-        .discriminant-zero {
-            background: #fff3cd;
-            border-left: 4px solid #f39c12;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 0 5px 5px 0;
-        }
-
-        .discriminant-negative {
-            background: #ffe6e6;
-            border-left: 4px solid #e74c3c;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 0 5px 5px 0;
-        }
-
-        footer {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            padding: 15px;
-            margin-top: 20px;
-        }
-
-        footer p {
-            color: #fafafa;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                margin: 10px;
-                border-radius: 10px;
-            }
-
-            .header {
-                padding: 20px 15px;
-            }
-
-            .header h1 {
-                font-size: 1.8em;
-            }
-
-            .accordion {
-                margin: 15px;
-            }
-
-            details summary {
-                padding: 15px;
-                font-size: 1.1em;
-            }
-
-            details .accordion-body {
-                padding: 20px 15px;
-            }
-        }
-    </style>
+  /* ── Menú flotante ── */
+  .prob-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 10000;
+    display: none;
+  }
+  .prob-menu {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    background: #b8c8a0;
+    border: 3px solid #4a5a38;
+    border-radius: 6px;
+    padding: 16px;
+    z-index: 10001;
+    display: none;
+    min-width: 200px;
+  }
+  .prob-menu h4 {
+    margin: 0 0 10px;
+    color: #1a2a0a;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    text-align: center;
+    border-bottom: 1px solid #4a5a38;
+    padding-bottom: 6px;
+  }
+  .prob-opt {
+    display: block; width: 100%;
+    margin: 6px 0;
+    padding: 8px;
+    background: linear-gradient(180deg, #4a6a8a, #3a5a7a);
+    color: #e8f4ff;
+    border: 1px solid #2a4a6a;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  .prob-opt:hover { background: linear-gradient(180deg, #5a7a9a, #4a6a8a); }
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Manual TI-30XS MultiView™</h1>
-            <p>Guía completa de referencia rápida</p>
-        </div>
 
-        <div class="important-note">
-            <h2>Información Importante</h2>
-            <p>Los símbolos <span class="key-combo">◄</span> <span class="key-combo">►</span> <span class="key-combo">▲</span> <span class="key-combo">▼</span> se refieren al teclado de navegación de la calculadora.</p>
-            <p><strong>Configuración recomendada:</strong> <span class="mode-highlight">DEG</span>, <span class="mode-highlight">NORM</span>, <span class="mode-highlight">FLOAT</span>, <span class="mode-highlight">MATHPRINT</span></p>
-            <p>• Usa <span class="key-combo">mode</span> para acceder a configuraciones</p>
-            <p>• Usa <span class="key-combo">◄►▲▼</span> para navegar y <span class="key-combo">enter</span> para seleccionar</p>
-            <p>• Para regresar a pantalla principal: <span class="key-combo">clear</span> o <span class="key-combo">2nd</span> + <span class="key-combo">mode</span></p>
-        </div>
+<!-- ── Calculadora flotante ── -->
+<div id="calc-wrapper">
 
-        <div class="accordion">
+  <!-- Barra de arrastre -->
+  <div id="drag-bar">
+    <span>⠿ TI-30XS MultiView</span>
+    <button id="btn-close" title="Cerrar">✕</button>
+  </div>
 
-            <!-- Cálculos con Decimales -->
-            <details>
-                <summary>Cálculos con Decimales</summary>
-                <div class="accordion-body">
-                    <div class="when-to-use">
-                        <h4>¿Cuándo usar?</h4>
-                        <p>Para operaciones básicas con números decimales como precios, medidas, porcentajes convertidos, etc.</p>
-                    </div>
-                    <div class="example-section">
-                        <div class="example-title">Ejemplo: Operación Mixta</div>
-                        <div class="calculation">
-                            <strong>Problema:</strong> 15.246 − 6.82 + 0.05 = ?
-                        </div>
-                        <div class="input-sequence">
-                            <strong>Secuencia:</strong> <span class="key-combo">1</span> <span class="key-combo">5</span> <span class="key-combo">.</span> <span class="key-combo">2</span> <span class="key-combo">4</span> <span class="key-combo">6</span> <span class="key-combo">−</span> <span class="key-combo">6</span> <span class="key-combo">.</span> <span class="key-combo">8</span> <span class="key-combo">2</span> <span class="key-combo">+</span> <span class="key-combo">0</span> <span class="key-combo">.</span> <span class="key-combo">0</span> <span class="key-combo">5</span> <span class="key-combo">enter</span>
-                        </div>
-                        <div class="result">Resultado: 8.476</div>
-                    </div>
-                    <div class="tips">
-                        <h4>Consejos</h4>
-                        <p>• La calculadora respeta automáticamente el orden de operaciones</p>
-                        <p>• Usa paréntesis para cambiar el orden de evaluación</p>
-                        <p>• El punto decimal es obligatorio, no uses coma</p>
-                    </div>
-                </div>
-            </details>
-
-            <!-- Cálculos con Fracciones -->
-            <details>
-                <summary>Cálculos con Fracciones</summary>
-                <div class="accordion-body">
-                    <div class="when-to-use">
-                        <h4>¿Cuándo usar?</h4>
-                        <p>Para operaciones donde necesitas mantener la precisión exacta o cuando trabajas con recetas, medidas fraccionarias, etc.</p>
-                    </div>
-                    <div class="example-section">
-                        <div class="example-title">Ejemplo: Suma de Fracciones</div>
-                        <div class="calculation">
-                            <strong>Problema:</strong> <span class="fraction"><span class="numerator">3</span><span class="denominator">4</span></span> + <span class="fraction"><span class="numerator">1</span><span class="denominator">9</span></span> = ?
-                        </div>
-                        <div class="input-sequence">
-                            <strong>Secuencia:</strong> <span class="key-combo">3</span> <span class="key-combo">a b/c</span> <span class="key-combo">4</span> <span class="key-combo">+</span> <span class="key-combo">1</span> <span class="key-combo">a b/c</span> <span class="key-combo">9</span> <span class="key-combo">enter</span>
-                        </div>
-                        <div class="result">Resultado: <span class="fraction"><span class="numerator">31</span><span class="denominator">36</span></span></div>
-                    </div>
-                    <div class="tips">
-                        <h4>Consejos</h4>
-                        <p>• La calculadora simplifica automáticamente las fracciones</p>
-                        <p>• Usa <span class="key-combo">◄►</span> para navegar entre numerador y denominador</p>
-                        <p>• El resultado siempre aparece en su forma más simple</p>
-                    </div>
-                </div>
-            </details>
-
-            <!-- Números Mixtos -->
-            <details>
-                <summary>Números Mixtos</summary>
-                <div class="accordion-body">
-                    <div class="when-to-use">
-                        <h4>¿Cuándo usar?</h4>
-                        <p>Para trabajar con medidas como 2½ pulgadas, recetas de cocina, o cualquier situación donde combines enteros con fracciones.</p>
-                    </div>
-                    <div class="warning">
-                        <strong>⚠️ Requisito:</strong> La calculadora debe estar en modo <span class="mode-highlight">MATHPRINT</span>
-                    </div>
-                    <div class="example-section">
-                        <div class="example-title">Ejemplo: División de Números Mixtos</div>
-                        <div class="calculation">
-                            <strong>Problema:</strong> <span class="mixed-number">3<span class="fraction"><span class="numerator">1</span><span class="denominator">4</span></span></span> ÷ <span class="mixed-number">2<span class="fraction"><span class="numerator">1</span><span class="denominator">6</span></span></span> = ?
-                        </div>
-                        <div class="input-sequence">
-                            <strong>Secuencia:</strong> <span class="key-combo">3</span> <span class="key-combo">2nd</span> <span class="key-combo">a b/c</span> <span class="key-combo">1</span> <span class="key-combo">a b/c</span> <span class="key-combo">4</span> <span class="key-combo">÷</span> <span class="key-combo">2</span> <span class="key-combo">2nd</span> <span class="key-combo">a b/c</span> <span class="key-combo">1</span> <span class="key-combo">a b/c</span> <span class="key-combo">6</span> <span class="key-combo">enter</span>
-                        </div>
-                        <div class="result">
-                            Sin conversión: <span class="fraction"><span class="numerator">3</span><span class="denominator">2</span></span><br>
-                            Con <span class="key-combo">2nd</span> <span class="key-combo">d/c</span>: <span class="mixed-number">1<span class="fraction"><span class="numerator">1</span><span class="denominator">2</span></span></span>
-                        </div>
-                    </div>
-                    <div class="tips">
-                        <h4>Consejos</h4>
-                        <p>• Usa <span class="key-combo">2nd</span> + <span class="key-combo">d/c</span> para convertir entre fracción impropia y número mixto</p>
-                        <p>• El resultado inicial siempre aparece como fracción impropia</p>
-                    </div>
-                </div>
-            </details>
-
-            <!-- Orden de Operaciones -->
-            <details>
-                <summary>Orden de Operaciones</summary>
-                <div class="accordion-body">
-                    <div class="when-to-use">
-                        <h4>¿Cuándo es importante?</h4>
-                        <p>En expresiones complejas con múltiples operaciones. La calculadora sigue automáticamente PEMDAS (Paréntesis, Exponentes, Multiplicación/División, Adición/Sustracción).</p>
-                    </div>
-                    <div class="example-section">
-                        <div class="example-title">Ejemplo: Expresión Compleja</div>
-                        <div class="calculation">
-                            <strong>Problema:</strong> 21 ÷ 4 × 3 − 3 × 2 + 6 ÷ 5 = ?
-                        </div>
-                        <div class="input-sequence">
-                            <strong>Secuencia:</strong> <span class="key-combo">2</span> <span class="key-combo">1</span> <span class="key-combo">÷</span> <span class="key-combo">4</span> <span class="key-combo">×</span> <span class="key-combo">3</span> <span class="key-combo">−</span> <span class="key-combo">3</span> <span class="key-combo">×</span> <span class="key-combo">2</span> <span class="key-combo">+</span> <span class="key-combo">6</span> <span class="key-combo">÷</span> <span class="key-combo">5</span> <span class="key-combo">enter</span>
-                        </div>
-                        <div class="result">Resultado: 10.95</div>
-                    </div>
-                    <div class="warning">
-                        <strong>Nota importante:</strong> El 3 NO se multiplica por 2 antes de que ocurra la división. La calculadora respeta el orden correcto.
-                    </div>
-                    <div class="tips">
-                        <h4>Consejos</h4>
-                        <p>• Usa paréntesis para forzar un orden específico: (21 ÷ 4) × 3</p>
-                        <p>• La calculadora muestra el proceso paso a paso en modo MATHPRINT</p>
-                    </div>
-                </div>
-            </details>
-
-            <!-- Porcentajes -->
-            <details>
-                <summary>Cálculos con Porcentajes</summary>
-                <div class="accordion-body">
-                    <div class="when-to-use">
-                        <h4>¿Cuándo usar?</h4>
-                        <p>Para calcular descuentos, impuestos, propinas, intereses, o cualquier cálculo que involucre porcentajes.</p>
-                    </div>
-                    <div class="example-section">
-                        <div class="example-title">Ejemplo: Porcentaje de un Número</div>
-                        <div class="calculation">
-                            <strong>Problema:</strong> ¿Cuánto es el 68% de 375?
-                        </div>
-                        <div class="input-sequence">
-                            <strong>Secuencia:</strong> <span class="key-combo">6</span> <span class="key-combo">8</span> <span class="key-combo">2nd</span> <span class="key-combo">%</span> <span class="key-combo">×</span> <span class="key-combo">3</span> <span class="key-combo">7</span> <span class="key-combo">5</span> <span class="key-combo">enter</span>
-                        </div>
-                        <div class="result">Resultado: 255</div>
-                    </div>
-                    <div class="tips">
-                        <h4>Consejos</h4>
-                        <p>• El símbolo % está en <span class="key-combo">2nd</span> + tecla correspondiente</p>
-                        <p>• Para calcular "precio + impuesto": precio × (100 + %impuesto)%</p>
-                        <p>• Para descuentos: precio × (100 − %descuento)%</p>
-                    </div>
-                </div>
-            </details>
-
-            <!-- Potencias y Raíces -->
-            <details>
-                <summary>Potencias y Raíces</summary>
-                <div class="accordion-body">
-                    <div class="when-to-use">
-                        <h4>¿Cuándo usar?</h4>
-                        <p>Para cálculos científicos, ingeniería, geometría (áreas, volúmenes), finanzas (interés compuesto), etc.</p>
-                    </div>
-                    <div class="example-section">
-                        <div class="example-title">Ejemplos de Potencias</div>
-                        <div class="calculation">
-                            <strong>17²:</strong> <span class="key-combo">1</span> <span class="key-combo">7</span> <span class="key-combo">x²</span> <span class="key-combo">enter</span>
-                            <div class="result">Resultado: 289</div>
-                        </div>
-                        <div class="calculation">
-                            <strong>3⁵:</strong> <span class="key-combo">3</span> <span class="key-combo">^</span> <span class="key-combo">5</span> <span class="key-combo">enter</span>
-                            <div class="result">Resultado: 243</div>
-                        </div>
-                    </div>
-                    <div class="example-section">
-                        <div class="example-title">Ejemplos de Raíces</div>
-                        <div class="calculation">
-                            <strong>√961:</strong> <span class="key-combo">2nd</span> <span class="key-combo">√</span> <span class="key-combo">9</span> <span class="key-combo">6</span> <span class="key-combo">1</span> <span class="key-combo">enter</span>
-                            <div class="result">Resultado: 31</div>
-                        </div>
-                        <div class="calculation">
-                            <strong>∜4096:</strong> <span class="key-combo">4</span> <span class="key-combo">2nd</span> <span class="key-combo">^</span> <span class="key-combo">4</span> <span class="key-combo">0</span> <span class="key-combo">9</span> <span class="key-combo">6</span> <span class="key-combo">enter</span>
-                            <div class="result">Resultado: 8</div>
-                        </div>
-                    </div>
-                    <div class="tips">
-                        <h4>Consejos</h4>
-                        <p>• <span class="key-combo">x²</span> para cuadrados rápidos</p>
-                        <p>• <span class="key-combo">^</span> para cualquier potencia</p>
-                        <p>• <span class="key-combo">2nd</span> + <span class="key-combo">√</span> para raíz cuadrada</p>
-                        <p>• <span class="key-combo">2nd</span> + <span class="key-combo">^</span> para raíces de cualquier índice</p>
-                    </div>
-                </div>
-            </details>
-
-            <!-- Notación Científica -->
-            <details>
-                <summary>Notación Científica</summary>
-                <div class="accordion-body">
-                    <div class="when-to-use">
-                        <h4>¿Cuándo usar?</h4>
-                        <p>Para números muy grandes o muy pequeños: distancias astronómicas, masa de partículas, constantes físicas, etc.</p>
-                    </div>
-                    <div class="warning">
-                        <strong>⚠️ Configuración:</strong> Asegúrate de que la calculadora esté en modo <span class="mode-highlight">SCI</span> (notación científica) en el menú <span class="key-combo">mode</span>.
-                    </div>
-                    <div class="example-section">
-                        <div class="example-title">Ejemplo: División en Notación Científica</div>
-                        <div class="calculation">
-                            <strong>Problema:</strong> (3.6 × 10⁸) ÷ (2.4 × 10³) = ?
-                        </div>
-                        <div class="input-sequence">
-                            <strong>Secuencia:</strong> <span class="key-combo">3</span> <span class="key-combo">.</span> <span class="key-combo">6</span> <span class="key-combo">EE</span> <span class="key-combo">8</span> <span class="key-combo">÷</span> <span class="key-combo">2</span> <span class="key-combo">.</span> <span class="key-combo">4</span> <span class="key-combo">EE</span> <span class="key-combo">3</span> <span class="key-combo">enter</span>
-                        </div>
-                        <div class="result">Resultado: 1.5 × 10⁵</div>
-                    </div>
-                    <div class="tips">
-                        <h4>Consejos</h4>
-                        <p>• <span class="key-combo">EE</span> representa "× 10^"</p>
-                        <p>• No escribas "× 10", solo usa <span class="key-combo">EE</span></p>
-                        <p>• Regresa a modo <span class="mode-highlight">NORM</span> cuando termines</p>
-                        <p>• La calculadora puede mostrar automáticamente en notación científica números muy grandes o pequeños</p>
-                    </div>
-                </div>
-            </details>
-
-            <!-- Función Toggle -->
-            <details>
-                <summary>Función Toggle (Alternar)</summary>
-                <div class="accordion-body">
-                    <div class="when-to-use">
-                        <h4>¿Cuándo usar?</h4>
-                        <p>Para alternar entre respuestas exactas (fracciones, raíces, π) y aproximaciones decimales sin recalcular.</p>
-                    </div>
-                    <div class="warning">
-                        <strong>⚠️ Requisito:</strong> Funciona solo en modo <span class="mode-highlight">MATHPRINT</span>
-                    </div>
-                    <div class="example-section">
-                        <div class="example-title">Ejemplo: Alternando entre Formas</div>
-                        <div class="calculation">
-                            <strong>Problema:</strong> 2 ÷ 7 = ?
-                        </div>
-                        <div class="input-sequence">
-                            <strong>Secuencia:</strong> <span class="key-combo">2</span> <span class="key-combo">÷</span> <span class="key-combo">7</span> <span class="key-combo">enter</span>
-                        </div>
-                        <div class="result">
-                            Forma exacta: <span class="fraction"><span class="numerator">2</span><span class="denominator">7</span></span><br>
-                            Después de <span class="key-combo">enter</span>: 0.285714286
-                        </div>
-                    </div>
-                    <div class="tips">
-                        <h4>Consejos</h4>
-                        <p>• Presiona <span class="key-combo">enter</span> inmediatamente después del resultado para alternar</p>
-                        <p>• Útil para verificar aproximaciones de fracciones complejas</p>
-                        <p>• También funciona con raíces y expresiones con π</p>
-                        <p>• No necesitas volver a escribir la expresión</p>
-                    </div>
-                </div>
-            </details>
-
-            <!-- NUEVA SECCIÓN: Fórmula Cuadrática -->
-            <details>
-                <summary>⭐ Fórmula Cuadrática</summary>
-                <div class="accordion-body">
-                    <div class="formula-box">
-                        <p><strong>Ecuación cuadrática:</strong> ax² + bx + c = 0</p>
-                        <div class="formula">
-                            x = <span class="fraction"><span class="numerator">−b ± √(b² − 4ac)</span><span class="denominator">2a</span></span>
-                        </div>
-                    </div>
-
-                    <div class="when-to-use">
-                        <h4>¿Cuándo usar?</h4>
-                        <p>Para resolver ecuaciones cuadráticas y encontrar las raíces (valores de x donde la parábola cruza el eje x).</p>
-                    </div>
-
-                    <div class="example-section">
-                        <div class="example-title">Ejemplo Completo: 2x² + 5x − 3 = 0</div>
-                        <p style="margin-bottom: 15px;"><strong>Identificar coeficientes:</strong> a = 2, b = 5, c = −3</p>
-
-                        <div class="step-box">
-                            <p><span class="step-number">1</span><strong>Calcular el discriminante: b² − 4ac</strong></p>
-                            <div class="input-sequence">
-                                <span class="key-combo">5</span> <span class="key-combo">x²</span> <span class="key-combo">−</span> <span class="key-combo">4</span> <span class="key-combo">×</span> <span class="key-combo">2</span> <span class="key-combo">×</span> <span class="key-combo">(−)</span> <span class="key-combo">3</span> <span class="key-combo">enter</span>
-                            </div>
-                            <div class="result">Discriminante = 49</div>
-                        </div>
-
-                        <div class="step-box">
-                            <p><span class="step-number">2</span><strong>Primera solución: x₁ = (−b + √discriminante) ÷ 2a</strong></p>
-                            <div class="input-sequence">
-                                <span class="key-combo">(</span> <span class="key-combo">(−)</span> <span class="key-combo">5</span> <span class="key-combo">+</span> <span class="key-combo">2nd</span> <span class="key-combo">√</span> <span class="key-combo">4</span> <span class="key-combo">9</span> <span class="key-combo">)</span> <span class="key-combo">÷</span> <span class="key-combo">(</span> <span class="key-combo">2</span> <span class="key-combo">×</span> <span class="key-combo">2</span> <span class="key-combo">)</span> <span class="key-combo">enter</span>
-                            </div>
-                            <div class="result">x₁ = 0.5 (o sea ½)</div>
-                        </div>
-
-                        <div class="step-box">
-                            <p><span class="step-number">3</span><strong>Segunda solución: x₂ = (−b − √discriminante) ÷ 2a</strong></p>
-                            <div class="input-sequence">
-                                <span class="key-combo">(</span> <span class="key-combo">(−)</span> <span class="key-combo">5</span> <span class="key-combo">−</span> <span class="key-combo">2nd</span> <span class="key-combo">√</span> <span class="key-combo">4</span> <span class="key-combo">9</span> <span class="key-combo">)</span> <span class="key-combo">÷</span> <span class="key-combo">(</span> <span class="key-combo">2</span> <span class="key-combo">×</span> <span class="key-combo">2</span> <span class="key-combo">)</span> <span class="key-combo">enter</span>
-                            </div>
-                            <div class="result">x₂ = −3</div>
-                        </div>
-
-                        <div class="result" style="background: #e8f5e8; font-size: 1.1em;">
-                            <strong>Soluciones finales:</strong> x = ½ y x = −3
-                        </div>
-                    </div>
-
-                    <div class="example-section">
-                        <div class="example-title">Interpretación del Discriminante (b² − 4ac)</div>
-                        <div class="discriminant-positive">
-                            <strong>Si discriminante &gt; 0:</strong> Dos soluciones reales diferentes (la parábola cruza el eje x en dos puntos)
-                        </div>
-                        <div class="discriminant-zero">
-                            <strong>Si discriminante = 0:</strong> Una solución real (doble) (la parábola toca el eje x en un punto)
-                        </div>
-                        <div class="discriminant-negative">
-                            <strong>Si discriminante &lt; 0:</strong> No hay soluciones reales (la parábola no cruza el eje x)
-                        </div>
-                    </div>
-
-                    <div class="example-section">
-                        <div class="example-title">Método Rápido: Todo en Una Línea</div>
-                        <p style="margin-bottom: 10px;">Para x₁ de 2x² + 5x − 3 = 0:</p>
-                        <div class="input-sequence">
-                            <span class="key-combo">(</span> <span class="key-combo">(−)</span> <span class="key-combo">5</span> <span class="key-combo">+</span> <span class="key-combo">2nd</span> <span class="key-combo">√</span> <span class="key-combo">(</span> <span class="key-combo">5</span> <span class="key-combo">x²</span> <span class="key-combo">−</span> <span class="key-combo">4</span> <span class="key-combo">×</span> <span class="key-combo">2</span> <span class="key-combo">×</span> <span class="key-combo">(−)</span> <span class="key-combo">3</span> <span class="key-combo">)</span> <span class="key-combo">)</span> <span class="key-combo">÷</span> <span class="key-combo">(</span> <span class="key-combo">2</span> <span class="key-combo">×</span> <span class="key-combo">2</span> <span class="key-combo">)</span> <span class="key-combo">enter</span>
-                        </div>
-                        <div class="result">x₁ = 0.5</div>
-                        <p style="margin-top: 10px;"><em>Cambia el + por − antes de la raíz para obtener x₂</em></p>
-                    </div>
-
-                    <div class="tips">
-                        <h4>Consejos Importantes</h4>
-                        <p>• <strong>Usa <span class="key-combo">(−)</span></strong> para números negativos, NO la tecla de resta <span class="key-combo">−</span></p>
-                        <p>• <strong>Los paréntesis son cruciales</strong> para que la calculadora respete el orden</p>
-                        <p>• <strong>Siempre calcula primero el discriminante</strong> para saber qué tipo de soluciones esperar</p>
-                        <p>• <strong>En modo MATHPRINT</strong> puedes ver las fracciones y raíces de forma más clara</p>
-                        <p>• <strong>Verifica tu respuesta</strong> sustituyendo los valores de x en la ecuación original</p>
-                    </div>
-
-                    <div class="warning">
-                        <strong>⚠️ Error común:</strong> Confundir la tecla de negativo <span class="key-combo">(−)</span> con la tecla de resta <span class="key-combo">−</span>. Para coeficientes negativos, siempre usa <span class="key-combo">(−)</span>.
-                    </div>
-                </div>
-            </details>
-
-        </div>
-
-        <footer>
-            <p>Creado por José M. Fernández con Claude</p>
-        </footer>
+  <!-- Cuerpo -->
+  <div class="calc">
+    <div class="calc-header">
+      <div class="calc-brand">Texas Instruments</div>
+      <div class="calc-model">TI-30XS <span style="font-size:11px;font-weight:normal">MultiView™</span></div>
+      <div class="calc-sub">Simulador · GEDparaHispanos.com</div>
     </div>
+
+    <!-- Panel solar decorativo -->
+    <div class="solar-panel"></div>
+
+    <!-- Pantalla -->
+    <div class="display">
+      <div class="display-status" id="status-bar">RAD</div>
+      <div class="display-input" id="disp-input">0</div>
+      <div class="display-result" id="disp-result"></div>
+    </div>
+
+    <!-- Teclado -->
+    <div class="keyboard">
+
+      <!-- Fila 1: 2nd mode delete ◄ ► -->
+      <button class="btn btn-2nd" id="btn2nd" onclick="toggle2nd()">2nd</button>
+      <button class="btn btn-off">mode</button>
+      <button class="btn btn-off">delete</button>
+      <button class="btn btn-nav">◄</button>
+      <button class="btn btn-nav">►</button>
+
+      <!-- Fila 2: log prb data ▲ ▼ -->
+      <button class="btn btn-off row-gap">log</button>
+      <button class="btn btn-func row-gap" onclick="openProbMenu()">prb</button>
+      <button class="btn btn-off row-gap">data</button>
+      <button class="btn btn-nav row-gap">▲</button>
+      <button class="btn btn-nav row-gap">▼</button>
+
+      <!-- Fila 3: ln  n/d  ×10^n  table  clear -->
+      <button class="btn btn-off row-gap">ln</button>
+      <button class="btn btn-func row-gap" onclick="handleFraction()">
+        <span class="sec">U n/d</span>n/d
+      </button>
+      <button class="btn btn-func row-gap" onclick="scientificNotation()">×10ⁿ</button>
+      <button class="btn btn-off row-gap">table</button>
+      <button class="btn btn-clear row-gap" onclick="clearDisplay()">clear</button>
+
+      <!-- Fila 4: π  sin  cos  tan  ÷ -->
+      <button class="btn btn-off row-gap">π</button>
+      <button class="btn btn-off row-gap">sin</button>
+      <button class="btn btn-off row-gap">cos</button>
+      <button class="btn btn-off row-gap">tan</button>
+      <button class="btn btn-op row-gap" onclick="appendOp('/')">÷</button>
+
+      <!-- Fila 5: ^  x⁻¹  (  )  × -->
+      <button class="btn btn-func row-gap" onclick="handlePower()">
+        <span class="sec">x√</span>^
+      </button>
+      <button class="btn btn-func row-gap" onclick="reciprocal()">x⁻¹</button>
+      <button class="btn btn-func row-gap" onclick="appendOp('(')">(</button>
+      <button class="btn btn-func row-gap" onclick="appendOp(')')">)</button>
+      <button class="btn btn-op row-gap" onclick="appendOp('*')">×</button>
+
+      <!-- Fila 6: x²  7  8  9  − -->
+      <button class="btn btn-func row-gap" onclick="handleSquare()">
+        <span class="sec">√</span>x²
+      </button>
+      <button class="btn btn-num row-gap" onclick="appendNum('7')">7</button>
+      <button class="btn btn-num row-gap" onclick="appendNum('8')">8</button>
+      <button class="btn btn-num row-gap" onclick="appendNum('9')">9</button>
+      <button class="btn btn-op row-gap" onclick="appendOp('-')">−</button>
+
+      <!-- Fila 7: x√abc  4  5  6  + -->
+      <button class="btn btn-off row-gap">x√abc</button>
+      <button class="btn btn-num row-gap" onclick="appendNum('4')">4</button>
+      <button class="btn btn-num row-gap" onclick="appendNum('5')">5</button>
+      <button class="btn btn-num row-gap" onclick="appendNum('6')">6</button>
+      <button class="btn btn-op row-gap" onclick="appendOp('+')">+</button>
+
+      <!-- Fila 8: sto→  1  2  3  ⟷ -->
+      <button class="btn btn-off row-gap">sto→</button>
+      <button class="btn btn-num row-gap" onclick="appendNum('1')">1</button>
+      <button class="btn btn-num row-gap" onclick="appendNum('2')">2</button>
+      <button class="btn btn-num row-gap" onclick="appendNum('3')">3</button>
+      <button class="btn btn-off row-gap">⟷</button>
+
+      <!-- Fila 9: on  0  .  (−)  enter -->
+      <button class="btn btn-off row-gap">on</button>
+      <button class="btn btn-num row-gap" onclick="appendNum('0')">0</button>
+      <button class="btn btn-num row-gap" onclick="appendNum('.')">.</button>
+      <button class="btn btn-num row-gap" onclick="negative()">(−)</button>
+      <button class="btn btn-enter row-gap" onclick="calculate()">enter</button>
+
+    </div><!-- /keyboard -->
+  </div><!-- /calc -->
+</div><!-- /calc-wrapper -->
+
+<!-- Menú probabilidad -->
+<div class="prob-overlay" id="overlay" onclick="closeProbMenu()"></div>
+<div class="prob-menu" id="probMenu">
+  <h4>PRB — Probabilidad</h4>
+  <button class="prob-opt" onclick="selectProb('nPr')">1: nPr  (Permutación)</button>
+  <button class="prob-opt" onclick="selectProb('nCr')">2: nCr  (Combinación)</button>
+  <button class="prob-opt" onclick="selectProb('!')">3:  !   (Factorial)</button>
+  <button class="prob-opt" style="background:linear-gradient(180deg,#903030,#702020)" onclick="closeProbMenu()">Cancelar</button>
+</div>
+
+<script>
+// ── Estado ──
+let expr   = '';
+let result = '';
+let is2nd  = false;
+
+const dispInput  = document.getElementById('disp-input');
+const dispResult = document.getElementById('disp-result');
+const statusBar  = document.getElementById('status-bar');
+
+function updateDisplay() {
+  dispInput.textContent  = expr || '0';
+  dispResult.textContent = result;
+}
+
+// ── 2nd ──
+function toggle2nd() {
+  is2nd = !is2nd;
+  document.getElementById('btn2nd').classList.toggle('active-2nd', is2nd);
+  statusBar.textContent = is2nd ? 'RAD  2nd' : 'RAD';
+}
+
+// ── Entrada ──
+function appendNum(n) {
+  if (result) { expr = ''; result = ''; }
+  expr += n;
+  updateDisplay();
+}
+
+function appendOp(op) {
+  result = '';
+  // Evitar doble signo negativo
+  if (op === '-' && expr.slice(-1) === '-') return;
+  expr += op;
+  updateDisplay();
+}
+
+function negative() {
+  if (expr === '' || expr === '0') { expr = '-'; }
+  else if (expr.slice(-1) === '-') { expr = expr.slice(0,-1); }
+  else { expr += '(-'; }
+  updateDisplay();
+}
+
+function scientificNotation() {
+  expr += 'E';
+  updateDisplay();
+}
+
+function handleFraction() {
+  if (is2nd) {
+    // Número mixto
+    expr += ' U ';
+    toggle2nd();
+  } else {
+    expr += '/';
+  }
+  updateDisplay();
+}
+
+function handleSquare() {
+  if (is2nd) {
+    // √ raíz cuadrada
+    expr = 'sqrt(' + expr + ')';
+    toggle2nd();
+  } else {
+    // x²
+    expr += '^2';
+  }
+  updateDisplay();
+}
+
+function handlePower() {
+  if (is2nd) {
+    // Raíz enésima: n√x  →  expr ^ (1/n) → lo maneja el parser
+    expr += '^(1/';
+    toggle2nd();
+  } else {
+    expr += '^';
+  }
+  updateDisplay();
+}
+
+function reciprocal() {
+  if (!expr) return;
+  try {
+    let v = parseExpr(expr);
+    result = fmtNum(1 / v);
+    expr   = result;
+    updateDisplay();
+  } catch { showError(); }
+}
+
+function clearDisplay() {
+  expr = ''; result = '';
+  is2nd = false;
+  document.getElementById('btn2nd').classList.remove('active-2nd');
+  statusBar.textContent = 'RAD';
+  updateDisplay();
+}
+
+// ── Probabilidad ──
+function openProbMenu() {
+  document.getElementById('overlay').style.display  = 'block';
+  document.getElementById('probMenu').style.display = 'block';
+}
+function closeProbMenu() {
+  document.getElementById('overlay').style.display  = 'none';
+  document.getElementById('probMenu').style.display = 'none';
+}
+function selectProb(t) {
+  if (t === '!') expr += '!';
+  else            expr += t;
+  closeProbMenu();
+  updateDisplay();
+}
+
+// ── Evaluación ──
+function factorial(n) {
+  n = Math.round(n);
+  if (n < 0 || n > 170) throw 'rango';
+  if (n <= 1) return 1;
+  let r = 1;
+  for (let i = 2; i <= n; i++) r *= i;
+  return r;
+}
+function comb(n, r) { return factorial(n) / (factorial(r) * factorial(n-r)); }
+function perm(n, r) { return factorial(n) / factorial(n-r); }
+
+function parseExpr(s) {
+  // Normalizar
+  s = s.replace(/−/g, '-')
+       .replace(/×/g, '*')
+       .replace(/÷/g, '/')
+       .replace(/\^/g, '**')
+       .replace(/sqrt\(/g, 'Math.sqrt(')
+       .replace(/E/g, 'e');
+
+  // Factoriales
+  s = s.replace(/(\d+\.?\d*)!/g, (_, n) => factorial(parseFloat(n)));
+
+  // nCr / nPr
+  s = s.replace(/(\d+)nCr(\d+)/g, (_, n, r) => comb(+n, +r));
+  s = s.replace(/(\d+)nPr(\d+)/g, (_, n, r) => perm(+n, +r));
+
+  // Cerrar paréntesis faltantes
+  let open = (s.match(/\(/g)||[]).length - (s.match(/\)/g)||[]).length;
+  s += ')'.repeat(Math.max(0, open));
+
+  // eslint-disable-next-line no-eval
+  return Function('"use strict"; return (' + s + ')')();
+}
+
+function fmtNum(n) {
+  if (!isFinite(n)) return 'Error';
+  if (Number.isInteger(n) && Math.abs(n) < 1e13) return String(n);
+  if (Math.abs(n) >= 1e10 || (Math.abs(n) < 1e-4 && n !== 0))
+    return n.toExponential(6).replace(/e\+?(-?)0*(\d+)/, 'E$1$2');
+  // Hasta 10 decimales significativos
+  let s = parseFloat(n.toPrecision(10)).toString();
+  return s;
+}
+
+function calculate() {
+  try {
+    if (!expr || expr === '0') return;
+    let val = parseExpr(expr);
+    result  = fmtNum(val);
+    updateDisplay();
+  } catch(e) { showError(); }
+}
+
+function showError() {
+  result = 'Error';
+  updateDisplay();
+  setTimeout(() => { expr = ''; result = ''; updateDisplay(); }, 1800);
+}
+
+// ── Teclado físico ──
+document.addEventListener('keydown', e => {
+  if (e.key >= '0' && e.key <= '9') { appendNum(e.key); return; }
+  if (e.key === '.')  { appendNum('.'); return; }
+  if (e.key === '+')  { appendOp('+'); return; }
+  if (e.key === '-')  { appendOp('-'); return; }
+  if (e.key === '*')  { appendOp('*'); return; }
+  if (e.key === '/') { e.preventDefault(); appendOp('/'); return; }
+  if (e.key === '(') { appendOp('('); return; }
+  if (e.key === ')') { appendOp(')'); return; }
+  if (e.key === '^') { appendOp('^'); return; }
+  if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); calculate(); return; }
+  if (e.key === 'Escape' || e.key === 'Delete' || e.key === 'Backspace') {
+    if (e.key === 'Backspace' && expr.length) {
+      expr = expr.slice(0, -1); updateDisplay();
+    } else { clearDisplay(); }
+  }
+});
+
+// ── Arrastre (mouse + touch) ──
+const wrapper  = document.getElementById('calc-wrapper');
+const dragBar  = document.getElementById('drag-bar');
+let dragging   = false;
+let dragOffX   = 0, dragOffY = 0;
+
+dragBar.addEventListener('mousedown', e => {
+  if (e.target.id === 'btn-close') return;
+  dragging = true;
+  const r = wrapper.getBoundingClientRect();
+  dragOffX = e.clientX - r.left;
+  dragOffY = e.clientY - r.top;
+  dragBar.style.cursor = 'grabbing';
+  e.preventDefault();
+});
+
+document.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  wrapper.style.left  = (e.clientX - dragOffX) + 'px';
+  wrapper.style.top   = (e.clientY - dragOffY) + 'px';
+  wrapper.style.right = 'auto';
+});
+
+document.addEventListener('mouseup', () => {
+  dragging = false;
+  dragBar.style.cursor = 'grab';
+});
+
+// Touch
+dragBar.addEventListener('touchstart', e => {
+  if (e.target.id === 'btn-close') return;
+  dragging = true;
+  const t = e.touches[0];
+  const r = wrapper.getBoundingClientRect();
+  dragOffX = t.clientX - r.left;
+  dragOffY = t.clientY - r.top;
+  e.preventDefault();
+}, { passive: false });
+
+document.addEventListener('touchmove', e => {
+  if (!dragging) return;
+  const t = e.touches[0];
+  wrapper.style.left  = (t.clientX - dragOffX) + 'px';
+  wrapper.style.top   = (t.clientY - dragOffY) + 'px';
+  wrapper.style.right = 'auto';
+  e.preventDefault();
+}, { passive: false });
+
+document.addEventListener('touchend', () => { dragging = false; });
+
+// ── Botón cerrar ──
+document.getElementById('btn-close').addEventListener('click', () => {
+  wrapper.style.display = 'none';
+});
+
+// Inicializar
+updateDisplay();
+</script>
 </body>
 </html>
-
