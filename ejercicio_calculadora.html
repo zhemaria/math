@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ejercicio GED — Con Calculadora TI-30XS</title>
+<style>
+/* ═══════════════════════════════════════════════
+   PÁGINA DE EJERCICIO  (tu CSS DUA va aquí)
+═══════════════════════════════════════════════ */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f9;
+  color: #222;
+}
+
+.page-header {
+  background: linear-gradient(135deg, #1a4a7a, #2d6ea8);
+  color: white;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.page-header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+.page-header .site-name {
+  font-size: 11px;
+  color: #a8d0f0;
+  margin-top: 2px;
+}
+
+/* ── Botón "Abrir calculadora" ── */
+#btn-abrir-calc {
+  background: linear-gradient(180deg, #8fd68f, #5ab85a);
+  color: #0a2a0a;
+  border: 2px solid #3a9a3a;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+  transition: filter 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#btn-abrir-calc:hover  { filter: brightness(1.1); }
+#btn-abrir-calc:active { filter: brightness(0.9); transform: scale(0.97); }
+#btn-abrir-calc .calc-icon { font-size: 18px; }
+
+.content {
+  max-width: 800px;
+  margin: 24px auto;
+  padding: 0 20px;
+}
+
+/* ── Tarjeta de ejercicio ── */
+.ejercicio {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.ejercicio-header {
+  background: #1a4a7a;
+  color: white;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nivel-badge {
+  background: #f0a030;
+  color: #1a0a00;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: bold;
+}
+.ejercicio-body {
+  padding: 18px 20px;
+}
+.enunciado {
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  background: #f0f4f8;
+  border-left: 4px solid #2d6ea8;
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+}
+.opciones {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.opciones li {
+  margin: 8px 0;
+}
+.opciones label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 2px solid #dde4ee;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.12s, border-color 0.12s;
+}
+.opciones label:hover {
+  background: #e8f0f8;
+  border-color: #2d6ea8;
+}
+.opciones input[type="radio"] { accent-color: #2d6ea8; width: 16px; height: 16px; }
+
+.btn-verificar {
+  margin-top: 14px;
+  background: linear-gradient(180deg, #2d6ea8, #1a4a7a);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+.btn-verificar:hover { filter: brightness(1.15); }
+
+.retroalimentacion {
+  display: none;
+  margin-top: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+}
+.correcto   { background: #d4edda; color: #1a5a2a; border: 2px solid #4aaa5a; }
+.incorrecto { background: #f8d7da; color: #5a1a1a; border: 2px solid #cc4444; }
+
+/* Indicador flotante de calculadora disponible */
+.calc-hint {
+  background: #fff8e0;
+  border: 1px solid #e0c050;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 11px;
+  color: #7a5a10;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     CABECERA DE PÁGINA  (con botón calculadora)
+═══════════════════════════════════════════ -->
+<div class="page-header">
+  <div>
+    <div class="page-header h1" style="font-size:18px;font-weight:bold">
+      📐 Matemáticas GED — Razones y Porcentajes
+    </div>
+    <div class="site-name">GEDparaHispanos.com · Nivel NRS 4</div>
+  </div>
+
+  <!-- ★ BOTÓN QUE ABRE/CIERRA LA CALCULADORA ★ -->
+  <button id="btn-abrir-calc" onclick="toggleCalc()">
+    <span class="calc-icon">🧮</span>
+    <span id="lbl-calc">Abrir calculadora</span>
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CONTENIDO DEL EJERCICIO
+═══════════════════════════════════════════ -->
+<div class="content">
+
+  <div class="calc-hint">
+    💡 Puedes abrir la calculadora TI-30XS con el botón verde de arriba.
+    Arrástrala donde no tape el problema.
+  </div>
+
+  <!-- Ejercicio 1 -->
+  <div class="ejercicio">
+    <div class="ejercicio-header">
+      Ejercicio 1 — Porcentaje
+      <span class="nivel-badge">NRS 4</span>
+    </div>
+    <div class="ejercicio-body">
+      <div class="enunciado">
+        Un artículo cuesta <strong>$245.00</strong>. Está en oferta con un
+        descuento del <strong>15%</strong>. ¿Cuál es el precio final después
+        del descuento?
+      </div>
+      <ul class="opciones">
+        <li><label><input type="radio" name="q1" value="a"> A) $36.75</label></li>
+        <li><label><input type="radio" name="q1" value="b"> B) $208.25</label></li>
+        <li><label><input type="radio" name="q1" value="c"> C) $213.00</label></li>
+        <li><label><input type="radio" name="q1" value="d"> D) $230.00</label></li>
+      </ul>
+      <button class="btn-verificar" onclick="verificar('q1','b','retro1')">
+        Verificar respuesta
+      </button>
+      <div class="retroalimentacion" id="retro1"></div>
+    </div>
+  </div>
+
+  <!-- Ejercicio 2 -->
+  <div class="ejercicio">
+    <div class="ejercicio-header">
+      Ejercicio 2 — Raíz cuadrada
+      <span class="nivel-badge">NRS 4</span>
+    </div>
+    <div class="ejercicio-body">
+      <div class="enunciado">
+        Un jardín cuadrado tiene un área de <strong>529 m²</strong>.
+        ¿Cuánto mide cada lado del jardín?
+      </div>
+      <ul class="opciones">
+        <li><label><input type="radio" name="q2" value="a"> A) 21 m</label></li>
+        <li><label><input type="radio" name="q2" value="b"> B) 23 m</label></li>
+        <li><label><input type="radio" name="q2" value="c"> C) 25 m</label></li>
+        <li><label><input type="radio" name="q2" value="d"> D) 27 m</label></li>
+      </ul>
+      <button class="btn-verificar" onclick="verificar('q2','b','retro2')">
+        Verificar respuesta
+      </button>
+      <div class="retroalimentacion" id="retro2"></div>
+    </div>
+  </div>
+
+  <!-- Ejercicio 3 -->
+  <div class="ejercicio">
+    <div class="ejercicio-header">
+      Ejercicio 3 — Combinaciones (Probabilidad)
+      <span class="nivel-badge">NRS 5</span>
+    </div>
+    <div class="ejercicio-body">
+      <div class="enunciado">
+        Un comité de <strong>3 personas</strong> se selecciona de un grupo de
+        <strong>8 voluntarios</strong>. ¿De cuántas maneras diferentes se puede
+        formar el comité? <em>(Usa la función nCr de la calculadora)</em>
+      </div>
+      <ul class="opciones">
+        <li><label><input type="radio" name="q3" value="a"> A) 24</label></li>
+        <li><label><input type="radio" name="q3" value="b"> B) 56</label></li>
+        <li><label><input type="radio" name="q3" value="c"> C) 336</label></li>
+        <li><label><input type="radio" name="q3" value="d"> D) 512</label></li>
+      </ul>
+      <button class="btn-verificar" onclick="verificar('q3','b','retro3')">
+        Verificar respuesta
+      </button>
+      <div class="retroalimentacion" id="retro3"></div>
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+
+<!-- ════════════════════════════════════════════════════════════
+     CALCULADORA TI-30XS — FLOTANTE Y ARRASTRABLE
+     (pega este bloque completo en cualquier página que lo necesite)
+═══════════════════════════════════════════════════════════════ -->
+
+<style>
+/* ── Wrapper flotante ── */
+#calc-wrapper {
+  position: fixed;
+  top: 70px;
+  right: 28px;
+  z-index: 9999;
+  user-select: none;
+  touch-action: none;
+  display: none;          /* empieza oculta */
+}
+
+/* ── Barra de arrastre ── */
+#drag-bar {
+  background: linear-gradient(90deg, #1e3a5a, #2c5080);
+  color: #c8dff0;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 9px 9px 0 0;
+  cursor: grab;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  letter-spacing: 0.4px;
+  border: 2px solid #12284a;
+  border-bottom: none;
+}
+#drag-bar:active { cursor: grabbing; }
+
+#btn-close-calc {
+  background: #c0392b;
+  border: none;
+  color: white;
+  border-radius: 50%;
+  width: 17px; height: 17px;
+  font-size: 10px;
+  cursor: pointer;
+  line-height: 17px;
+  text-align: center;
+  padding: 0;
+  flex-shrink: 0;
+}
+#btn-close-calc:hover { background: #e74c3c; }
+
+/* ── Cuerpo calculadora ── */
+.calc {
+  background: linear-gradient(160deg, #5c8aae 0%, #4a7a9b 40%, #3d6b8a 100%);
+  border: 2px solid #12284a;
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  padding: 12px 13px 18px;
+  width: 272px;
+  box-shadow: 0 10px 36px rgba(0,0,0,0.5),
+              inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* Cabecera */
+.calc-header { text-align: center; margin-bottom: 7px; }
+.calc-brand  { font-size: 8px;  color: #b0cee0; letter-spacing: 1.5px; text-transform:uppercase; }
+.calc-model  { font-size: 15px; color: #fff; font-weight: bold; letter-spacing: .4px; }
+.calc-sub    { font-size: 7.5px; color: #90b8d0; letter-spacing: 1.5px; }
+
+/* Panel solar */
+.solar {
+  background: repeating-linear-gradient(90deg,#111 0px,#111 3px,#2a2a2a 3px,#2a2a2a 6px);
+  height: 9px; border-radius: 3px;
+  margin-bottom: 7px;
+  border: 1px solid #222;
+}
+
+/* Display LCD */
+.lcd {
+  background: #b8c8a0;
+  border: 3px solid #4a5a38;
+  border-radius: 4px;
+  padding: 5px 8px;
+  margin-bottom: 9px;
+  min-height: 58px;
+  box-shadow: inset 0 2px 7px rgba(0,0,0,0.28);
+}
+.lcd-status { font-size: 8px; color: #3a4a28; text-align: right; height: 10px; margin-bottom: 1px; font-family:'Courier New',monospace; }
+.lcd-input  { font-size: 13px; color: #1a2a0a; text-align: right; word-break:break-all; min-height:16px; font-family:'Courier New',monospace; }
+.lcd-result { font-size: 17px; font-weight: bold; color: #1a2a0a; text-align: right; min-height: 20px; font-family:'Courier New',monospace; }
+
+/* Teclado */
+.kbd { display: grid; grid-template-columns: repeat(5,1fr); gap: 4px; }
+.rg  { margin-top: 5px; }
+
+/* Botones base */
+.b {
+  height: 30px;
+  border: none; border-radius: 4px;
+  font-size: 9px; font-weight: bold;
+  cursor: pointer;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  transition: filter .08s, transform .08s;
+  position: relative; line-height: 1.1; padding: 0 1px;
+}
+.b:active { transform: scale(0.92); filter: brightness(.82); }
+
+/* Etiqueta 2nd (verde) */
+.s { font-size: 6px; color: #7dc67e; position: absolute; top: 1px; left: 2px; font-weight: bold; pointer-events:none; }
+
+/* Tipos */
+.b2  { background: linear-gradient(180deg,#8fd68f,#5cb85c); color:#0a2a0a; border:1px solid #3a9a3a; box-shadow:0 2px 4px rgba(0,0,0,.4); font-size:11px; }
+.b2.on { background: linear-gradient(180deg,#ffe85a,#f0c800); color:#1a1a00; border-color:#b09000; }
+.bf  { background: linear-gradient(180deg,#4a6a8a,#3a5a7a); color:#ddeeff; border:1px solid #2a4a6a; box-shadow:0 2px 4px rgba(0,0,0,.4); }
+.bn  { background: linear-gradient(180deg,#f5f5f5,#dedede); color:#1a1a1a; border:1px solid #aaa; box-shadow:0 2px 4px rgba(0,0,0,.35); font-size:12px; }
+.bo  { background: linear-gradient(180deg,#22334e,#131e30); color:#d0ddee; border:1px solid #080e1e; box-shadow:0 2px 5px rgba(0,0,0,.55); font-size:13px; }
+.bc  { background: linear-gradient(180deg,#b03030,#882020); color:#fff; border:1px solid #6a1818; box-shadow:0 2px 4px rgba(0,0,0,.4); }
+.bx  { background: linear-gradient(180deg,#3a5570,#2a4560); color:#80a0c0; border:1px solid #1a3050; box-shadow:0 2px 4px rgba(0,0,0,.3); cursor:default; opacity:.75; }
+.bv  { background: linear-gradient(180deg,#444,#2a2a2a); color:#bbb; border:1px solid #1a1a1a; box-shadow:0 2px 4px rgba(0,0,0,.5); font-size:11px; }
+.be  { background: linear-gradient(180deg,#22334e,#131e30); color:#d0ddee; border:1px solid #080e1e; box-shadow:0 2px 5px rgba(0,0,0,.55); font-size:10px; }
+
+/* Menú PRB */
+.prb-ov  { position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;display:none; }
+.prb-box {
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:#b8c8a0;border:3px solid #4a5a38;border-radius:7px;
+  padding:16px;z-index:10001;display:none;min-width:200px;
+}
+.prb-box h4 { margin:0 0 10px;color:#1a2a0a;font-family:'Courier New',monospace;font-size:13px;text-align:center;border-bottom:1px solid #4a5a38;padding-bottom:6px; }
+.prb-opt { display:block;width:100%;margin:6px 0;padding:8px;background:linear-gradient(180deg,#4a6a8a,#3a5a7a);color:#ddeeff;border:1px solid #2a4a6a;border-radius:4px;cursor:pointer;font-size:12px;font-weight:bold; }
+.prb-opt:hover { filter:brightness(1.15); }
+.prb-cancel { background:linear-gradient(180deg,#882020,#661818)!important; }
+</style>
+
+<!-- Calculadora DOM -->
+<div id="calc-wrapper">
+  <div id="drag-bar">
+    <span>⠿ TI-30XS MultiView™</span>
+    <button id="btn-close-calc" title="Cerrar">✕</button>
+  </div>
+  <div class="calc">
+    <div class="calc-header">
+      <div class="calc-brand">Texas Instruments</div>
+      <div class="calc-model">TI-30XS <span style="font-size:11px;font-weight:normal">MultiView™</span></div>
+      <div class="calc-sub">GEDparaHispanos.com</div>
+    </div>
+    <div class="solar"></div>
+    <div class="lcd">
+      <div class="lcd-status" id="c-stat">RAD</div>
+      <div class="lcd-input"  id="c-in">0</div>
+      <div class="lcd-result" id="c-res"></div>
+    </div>
+    <div class="kbd">
+      <!-- F1 -->
+      <button class="b b2" id="cbtn2nd" onclick="C.t2nd()">2nd</button>
+      <button class="b bx">mode</button>
+      <button class="b bx">delete</button>
+      <button class="b bv">◄</button>
+      <button class="b bv">►</button>
+      <!-- F2 -->
+      <button class="b bx rg">log</button>
+      <button class="b bf rg" onclick="C.openPrb()">prb</button>
+      <button class="b bx rg">data</button>
+      <button class="b bv rg">▲</button>
+      <button class="b bv rg">▼</button>
+      <!-- F3 -->
+      <button class="b bx rg">ln</button>
+      <button class="b bf rg" onclick="C.frac()"><span class="s">U n/d</span>n/d</button>
+      <button class="b bf rg" onclick="C.sci()">×10ⁿ</button>
+      <button class="b bx rg">table</button>
+      <button class="b bc rg" onclick="C.clr()">clear</button>
+      <!-- F4 -->
+      <button class="b bx rg">π</button>
+      <button class="b bx rg">sin</button>
+      <button class="b bx rg">cos</button>
+      <button class="b bx rg">tan</button>
+      <button class="b bo rg" onclick="C.op('/')">÷</button>
+      <!-- F5 -->
+      <button class="b bf rg" onclick="C.pow()"><span class="s">x√</span>^</button>
+      <button class="b bf rg" onclick="C.recip()">x⁻¹</button>
+      <button class="b bf rg" onclick="C.op('(')">(</button>
+      <button class="b bf rg" onclick="C.op(')')">)</button>
+      <button class="b bo rg" onclick="C.op('*')">×</button>
+      <!-- F6 -->
+      <button class="b bf rg" onclick="C.sq()"><span class="s">√</span>x²</button>
+      <button class="b bn rg" onclick="C.num('7')">7</button>
+      <button class="b bn rg" onclick="C.num('8')">8</button>
+      <button class="b bn rg" onclick="C.num('9')">9</button>
+      <button class="b bo rg" onclick="C.op('-')">−</button>
+      <!-- F7 -->
+      <button class="b bx rg">x√abc</button>
+      <button class="b bn rg" onclick="C.num('4')">4</button>
+      <button class="b bn rg" onclick="C.num('5')">5</button>
+      <button class="b bn rg" onclick="C.num('6')">6</button>
+      <button class="b bo rg" onclick="C.op('+')">+</button>
+      <!-- F8 -->
+      <button class="b bx rg">sto→</button>
+      <button class="b bn rg" onclick="C.num('1')">1</button>
+      <button class="b bn rg" onclick="C.num('2')">2</button>
+      <button class="b bn rg" onclick="C.num('3')">3</button>
+      <button class="b bx rg">⟷</button>
+      <!-- F9 -->
+      <button class="b bx rg">on</button>
+      <button class="b bn rg" onclick="C.num('0')">0</button>
+      <button class="b bn rg" onclick="C.num('.')">.</button>
+      <button class="b bn rg" onclick="C.neg()">(−)</button>
+      <button class="b be rg" onclick="C.calc()">enter</button>
+    </div>
+  </div>
+</div>
+
+<!-- Menú PRB -->
+<div class="prb-ov" id="c-ov" onclick="C.closePrb()"></div>
+<div class="prb-box" id="c-prb">
+  <h4>PRB — Probabilidad</h4>
+  <button class="prb-opt" onclick="C.selPrb('nPr')">1: nPr  (Permutación)</button>
+  <button class="prb-opt" onclick="C.selPrb('nCr')">2: nCr  (Combinación)</button>
+  <button class="prb-opt" onclick="C.selPrb('!')">3:  !   (Factorial)</button>
+  <button class="prb-opt prb-cancel" onclick="C.closePrb()">Cancelar</button>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   CALCULADORA — lógica
+══════════════════════════════════════════════ */
+const C = (() => {
+  let expr = '', res = '', nd = false;
+  const DI = () => document.getElementById('c-in');
+  const DR = () => document.getElementById('c-res');
+  const DS = () => document.getElementById('c-stat');
+  const B2 = () => document.getElementById('cbtn2nd');
+
+  function upd() {
+    DI().textContent = expr || '0';
+    DR().textContent = res;
+  }
+
+  function fact(n) {
+    n = Math.round(n);
+    if (n < 0 || n > 170) throw 'rng';
+    let r = 1; for (let i = 2; i <= n; i++) r *= i; return r;
+  }
+  function comb(n,r){ return fact(n)/(fact(r)*fact(n-r)); }
+  function perm(n,r){ return fact(n)/fact(n-r); }
+
+  function parse(s) {
+    s = s.replace(/−/g,'-').replace(/×/g,'*').replace(/÷/g,'/')
+         .replace(/\^/g,'**').replace(/sqrt\(/g,'Math.sqrt(')
+         .replace(/E/g,'e');
+    s = s.replace(/(\d+\.?\d*)!/g,(_,n)=>fact(parseFloat(n)));
+    s = s.replace(/(\d+)nCr(\d+)/g,(_,n,r)=>comb(+n,+r));
+    s = s.replace(/(\d+)nPr(\d+)/g,(_,n,r)=>perm(+n,+r));
+    let op = (s.match(/\(/g)||[]).length - (s.match(/\)/g)||[]).length;
+    s += ')'.repeat(Math.max(0,op));
+    return Function('"use strict";return ('+s+')')();
+  }
+
+  function fmt(n) {
+    if (!isFinite(n)) return 'Error';
+    if (Number.isInteger(n) && Math.abs(n)<1e13) return String(n);
+    if (Math.abs(n)>=1e10||(Math.abs(n)<1e-4&&n!==0))
+      return n.toExponential(6).replace(/e\+?(-?)0*(\d+)/,'E$1$2');
+    return parseFloat(n.toPrecision(10)).toString();
+  }
+
+  function err() {
+    res = 'Error'; upd();
+    setTimeout(()=>{ expr=''; res=''; upd(); }, 1800);
+  }
+
+  return {
+    t2nd() {
+      nd = !nd;
+      B2().classList.toggle('on', nd);
+      DS().textContent = nd ? 'RAD  2nd' : 'RAD';
+    },
+    num(v) { if (res) { expr=''; res=''; } expr += v; upd(); },
+    op(v)  { res=''; if(v==='-'&&expr.slice(-1)==='-') return; expr+=v; upd(); },
+    neg()  {
+      if (!expr||expr==='0') expr='-';
+      else if (expr.slice(-1)==='-') expr=expr.slice(0,-1);
+      else expr+='(-';
+      upd();
+    },
+    sci()  { expr+='E'; upd(); },
+    frac() {
+      if (nd) { expr+=' U '; this.t2nd(); }
+      else    { expr+='/'; }
+      upd();
+    },
+    sq() {
+      if (nd) { expr='sqrt('+expr+')'; this.t2nd(); }
+      else    { expr+='^2'; }
+      upd();
+    },
+    pow() {
+      if (nd) { expr+='^(1/'; this.t2nd(); }
+      else    { expr+='^'; }
+      upd();
+    },
+    recip() {
+      if (!expr) return;
+      try { let v=parse(expr); res=fmt(1/v); expr=res; upd(); } catch { err(); }
+    },
+    clr() { expr=''; res=''; nd=false; B2().classList.remove('on'); DS().textContent='RAD'; upd(); },
+    calc() {
+      try { if(!expr||expr==='0') return; res=fmt(parse(expr)); upd(); } catch { err(); }
+    },
+    openPrb()  { document.getElementById('c-ov').style.display='block'; document.getElementById('c-prb').style.display='block'; },
+    closePrb() { document.getElementById('c-ov').style.display='none';  document.getElementById('c-prb').style.display='none'; },
+    selPrb(t)  { expr += t==='!'?'!':t; this.closePrb(); upd(); },
+  };
+})();
+
+/* ── Teclado físico ── */
+document.addEventListener('keydown', e => {
+  const w = document.getElementById('calc-wrapper');
+  if (w.style.display === 'none') return;
+  if (e.key>='0'&&e.key<='9') { C.num(e.key); return; }
+  if (e.key==='.') { C.num('.'); return; }
+  if (e.key==='+') { C.op('+'); return; }
+  if (e.key==='-') { C.op('-'); return; }
+  if (e.key==='*') { C.op('*'); return; }
+  if (e.key==='/') { e.preventDefault(); C.op('/'); return; }
+  if (e.key==='(') { C.op('('); return; }
+  if (e.key===')') { C.op(')'); return; }
+  if (e.key==='^') { C.op('^'); return; }
+  if (e.key==='Enter'||e.key==='=') { e.preventDefault(); C.calc(); return; }
+  if (e.key==='Escape') { C.clr(); return; }
+  if (e.key==='Backspace') { /* borrar último carácter */
+    const di = document.getElementById('c-in');
+    const s  = di.textContent;
+    if (s && s !== '0') { /* accede a expr via closure — usamos clr para simplificar */ }
+  }
+});
+
+/* ── Arrastre (mouse) ── */
+const CW = document.getElementById('calc-wrapper');
+const DB = document.getElementById('drag-bar');
+let drag=false, dx=0, dy=0;
+DB.addEventListener('mousedown', e => {
+  if (e.target.id==='btn-close-calc') return;
+  drag=true; const r=CW.getBoundingClientRect();
+  dx=e.clientX-r.left; dy=e.clientY-r.top; DB.style.cursor='grabbing'; e.preventDefault();
+});
+document.addEventListener('mousemove', e => {
+  if (!drag) return;
+  CW.style.left  = (e.clientX-dx)+'px';
+  CW.style.top   = (e.clientY-dy)+'px';
+  CW.style.right = 'auto';
+});
+document.addEventListener('mouseup', ()=>{ drag=false; DB.style.cursor='grab'; });
+
+/* ── Arrastre (touch) ── */
+DB.addEventListener('touchstart', e => {
+  if (e.target.id==='btn-close-calc') return;
+  drag=true; const t=e.touches[0]; const r=CW.getBoundingClientRect();
+  dx=t.clientX-r.left; dy=t.clientY-r.top; e.preventDefault();
+},{passive:false});
+document.addEventListener('touchmove', e => {
+  if (!drag) return;
+  const t=e.touches[0];
+  CW.style.left  = (t.clientX-dx)+'px';
+  CW.style.top   = (t.clientY-dy)+'px';
+  CW.style.right = 'auto'; e.preventDefault();
+},{passive:false});
+document.addEventListener('touchend',()=>{ drag=false; });
+
+/* ── Botón cerrar ── */
+document.getElementById('btn-close-calc').addEventListener('click', ()=>{
+  CW.style.display='none';
+  document.getElementById('lbl-calc').textContent='Abrir calculadora';
+});
+
+/* ── Toggle abrir/cerrar ── */
+function toggleCalc() {
+  const vis = CW.style.display !== 'none' && CW.style.display !== '';
+  CW.style.display = vis ? 'none' : 'block';
+  document.getElementById('lbl-calc').textContent =
+    vis ? 'Abrir calculadora' : 'Cerrar calculadora';
+}
+
+/* ════════════════════════════════════════════
+   LÓGICA DE EJERCICIOS (verificar respuestas)
+═══════════════════════════════════════════ */
+const EXPLICACIONES = {
+  q1: {
+    b: '✅ ¡Correcto! 245 × 0.15 = 36.75 de descuento. 245 − 36.75 = <strong>$208.25</strong>',
+    wrong: '❌ Incorrecto. Calcula: 245 × 0.15 = 36.75 (descuento). Luego: 245 − 36.75 = $208.25'
+  },
+  q2: {
+    b: '✅ ¡Correcto! √529 = <strong>23 m</strong>. Usa x² → 2nd → √ en la calculadora.',
+    wrong: '❌ Incorrecto. Necesitas √529. Escribe 529 en la calculadora, presiona 2nd, luego x².'
+  },
+  q3: {
+    b: '✅ ¡Correcto! C(8,3) = 8! ÷ (3! × 5!) = <strong>56</strong> combinaciones.',
+    wrong: '❌ Incorrecto. Usa nCr: escribe 8, presiona PRB → nCr, luego 3 y Enter.'
+  }
+};
+
+function verificar(name, correct, retroId) {
+  const sel = document.querySelector(`input[name="${name}"]:checked`);
+  const div = document.getElementById(retroId);
+  if (!sel) { div.style.display='block'; div.className='retroalimentacion incorrecto'; div.innerHTML='⚠️ Selecciona una respuesta primero.'; return; }
+  const ok = sel.value === correct;
+  div.style.display = 'block';
+  div.className = 'retroalimentacion ' + (ok ? 'correcto' : 'incorrecto');
+  const info = EXPLICACIONES[name];
+  div.innerHTML = ok ? info[correct] : info.wrong;
+}
+</script>
+
+</body>
+</html>
