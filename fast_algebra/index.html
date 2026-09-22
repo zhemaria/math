@@ -1,21 +1,30 @@
-<!doctype html>
+  <!doctype html>
+<!-- Rapidez en álgebra: ecuaciones de primer grado · José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago · Licencia CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/) -->
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rapidez en álgebra — GED</title>
+  <title>Rapidez en álgebra: ecuaciones de primer grado — GED</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Crect%20width%3D%22100%22%20height%3D%22100%22%20fill%3D%22%23ffffff%22%2F%3E%3Crect%20x%3D%223%22%20y%3D%223%22%20width%3D%2294%22%20height%3D%2294%22%20fill%3D%22none%22%20stroke%3D%22%23002060%22%20stroke-width%3D%226%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%2250%22%20fill%3D%22%23002060%22%20font-family%3D%22Georgia%2Cserif%22%20font-weight%3D%22700%22%20font-size%3D%2278%22%20text-anchor%3D%22middle%22%20dominant-baseline%3D%22central%22%3E%26%23209%3B%3C%2Ftext%3E%3C%2Fsvg%3E">
+  <meta name="author" content="José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago"/>
+  <meta name="license" content="CC BY-NC-SA 4.0"/>
+  <meta name="copyright" content="CC BY-NC-SA 4.0 — https://creativecommons.org/licenses/by-nc-sa/4.0/"/>
+  <link rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"/>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
     :root {
-      --cp: #0089cd; --cs: #005f8f; --ch: #00a8fc;
+      --cp: #0089cd; --cs: #005f8f; --ch: #00a8fc; --cd: #004a70;
     }
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Poppins', system-ui, sans-serif;
       margin: 0; padding: 10px;
       background: linear-gradient(135deg, #0089cd, #002d4d);
       display: flex; justify-content: center; align-items: flex-start;
       min-height: 90vh; flex-direction: column; gap: 10px;
+    }
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
     }
     #quiz-container {
       background: #fff; border-radius: 15px;
@@ -23,6 +32,12 @@
       overflow: hidden; width: clamp(300px, 95%, 820px);
       margin: 0 auto;
     }
+    .quiz-title {
+      margin: 0; padding: 14px 22px 12px;
+      background: var(--cs); color: #fff; text-align: center;
+      font-size: clamp(1.05em, 3vw, 1.3em); font-weight: 700; line-height: 1.35;
+    }
+    .quiz-title small { display: block; font-size: 0.72em; font-weight: 400; margin-top: 2px; }
     .quiz-progress-header {
       background: linear-gradient(135deg, #f8f9fa, #e9ecef);
       padding: 16px 22px; border-bottom: 3px solid var(--cp);
@@ -30,7 +45,7 @@
     .progress-text {
       text-align: center; font-weight: 700;
       font-size: clamp(0.95em, 2.5vw, 1.1em);
-      color: var(--cp); margin-bottom: 10px;
+      color: var(--cs); margin-bottom: 10px;
       text-transform: uppercase; letter-spacing: 0.8px;
     }
     .progress-container {
@@ -63,6 +78,7 @@
       font-weight: 700; text-align: center;
       color: #1a1a2e; line-height: 1.55;
     }
+    .question-header:focus { outline: none; }
     .math-box {
       background: linear-gradient(135deg, #f0f7ff, #e4effc);
       border: 2px solid var(--cp); border-radius: 10px;
@@ -86,20 +102,27 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    .option-item.correct  { background: #4caf50!important; color:#fff!important; border-color:#4caf50!important; }
-    .option-item.incorrect{ background: #f44336!important; color:#fff!important; border-color:#f44336!important; }
-    .option-item.disabled { cursor: not-allowed; opacity: 0.85; }
+    .option-item:focus-visible, .primary-btn:focus-visible {
+      outline: 3px solid #1a1a2e; outline-offset: 2px;
+    }
+    /* Colores con contraste AA y símbolo para no depender solo del color */
+    .option-item.correct  { background: #2e7d32!important; color:#fff!important; border-color:#2e7d32!important; }
+    .option-item.incorrect{ background: #c62828!important; color:#fff!important; border-color:#c62828!important; }
+    .option-item.correct::after  { content: "  ✓ Correcta"; }
+    .option-item.incorrect::after{ content: "  ✗ Tu respuesta"; }
+    .option-item.disabled { cursor: not-allowed; opacity: 0.9; }
+    .option-item.correct.disabled, .option-item.incorrect.disabled { opacity: 1; }
     .btn-container { padding: 4px 18px 18px; }
     .primary-btn {
       display: block; width: 100%; padding: 13px;
       color: #fff; border: none; border-radius: 8px;
       font-size: 1.05em; font-weight: 700; cursor: pointer;
       transition: all 0.25s ease; text-transform: uppercase;
-      letter-spacing: 1px; background: var(--cp);
+      letter-spacing: 1px; background: var(--cs);
       text-align: center; user-select: none; box-sizing: border-box;
     }
     .primary-btn:hover {
-      background: var(--ch); transform: translateY(-2px);
+      background: var(--cd); transform: translateY(-2px);
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
     .timer-container {
@@ -109,7 +132,7 @@
     .timer-text {
       text-align: center; font-weight: 700;
       font-size: clamp(0.88em, 2.2vw, 1em);
-      color: #c77a00; margin-bottom: 7px;
+      color: #5C3900; margin-bottom: 7px;
     }
     .timer-bar-container {
       background: #f0d0d0; height: 8px; border-radius: 4px; overflow: hidden;
@@ -121,43 +144,60 @@
     }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.65} }
     .timer-warning { animation: pulse 0.9s infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      .timer-warning { animation: none; }
+      .option-item, .primary-btn, .progress-bar, .cat-bar-in { transition: none; }
+    }
     .result-screen { padding: 35px 28px; text-align: center; }
     .result-screen.hidden { display: none; }
-    .result-screen h2 { color: var(--cp); font-size: clamp(1.4em,4vw,1.9em); margin-bottom: 10px; }
+    .result-screen h2 { color: var(--cs); font-size: clamp(1.4em,4vw,1.9em); margin-bottom: 10px; }
     .result-score {
       font-size: clamp(2em,6vw,2.8em)!important;
-      font-weight: 800; color: var(--cp)!important; margin: 12px 0!important;
+      font-weight: 800; color: var(--cs)!important; margin: 12px 0!important;
     }
     .result-msg { font-size: clamp(1em,2.8vw,1.2em); color:#333; margin:8px 0; }
     .cat-results { margin: 18px 0; text-align: left; }
-    .cat-results h3 { color: var(--cp); font-size: 0.95em; margin-bottom: 10px; }
+    .cat-results h3 { color: var(--cs); font-size: 0.95em; margin-bottom: 10px; }
     .cat-row { display:flex; align-items:center; gap:8px; margin:7px 0; }
-    .cat-lbl { flex:1.3; font-size:0.78em; font-weight:600; }
+    .cat-lbl { flex:1.3; font-size:0.78em; font-weight:600; color:#333; }
     .cat-bar-out { flex:2; background:#eee; border-radius:4px; height:10px; }
     .cat-bar-in { height:100%; border-radius:4px; background:var(--cp); transition:width 0.6s; }
-    .cat-sc { font-weight:700; color:var(--cp); font-size:0.82em; min-width:38px; text-align:right; }
+    .cat-sc { font-weight:700; color:var(--cs); font-size:0.82em; min-width:38px; text-align:right; }
     .tip-box {
       background:#e8f5e9; border-left:4px solid #43a047;
       border-radius:6px; padding:10px 14px; margin:14px 0 4px;
-      font-size:0.82em; color:#2e7d32; text-align:left; line-height:1.5;
+      font-size:0.82em; color:#1b5e20; text-align:left; line-height:1.5;
+    }
+    .next-box {
+      background:#f0f7ff; border:2px solid var(--cp); border-radius:8px;
+      padding:12px 14px; margin:14px 0 0; font-size:0.9em; color:#1a1a2e;
+    }
+    .next-box a, .quiz-footer a { color: var(--cs); font-weight: 700; }
+    .quiz-footer {
+      border-top: 1px solid #ddd; background: #f8f9fa;
+      padding: 10px 18px; font-size: 0.74em; color: #555;
+      text-align: center; line-height: 1.5;
     }
   </style>
 </head>
 <body>
-<div id="quiz-container">
+<main id="quiz-container">
+
+  <h1 class="quiz-title">Rapidez en álgebra: ecuaciones de primer grado<small>Funciones lineales, ecuaciones, desigualdades y sistemas</small></h1>
 
   <div class="quiz-progress-header">
     <div class="progress-text" id="progress-text">Pregunta 1 de 20</div>
-    <div class="progress-container">
+    <div class="progress-container" aria-hidden="true">
       <div class="progress-bar" id="progress-bar"></div>
     </div>
   </div>
 
   <div id="question-area"></div>
+  <div id="sr-status" class="sr-only" aria-live="polite"></div>
 
   <div class="timer-container" id="timer-container">
     <div class="timer-text" id="timer-text">⏱ Tiempo: 60s</div>
-    <div class="timer-bar-container">
+    <div class="timer-bar-container" aria-hidden="true">
       <div class="timer-bar" id="timer-bar"></div>
     </div>
   </div>
@@ -168,12 +208,18 @@
     <p class="result-msg" id="final-msg"></p>
     <div class="cat-results" id="cat-results"></div>
     <div class="tip-box" id="tip-box"></div>
+    <div class="next-box">➡️ Siguiente paso: <a href="fast_cuadraticas.html" target="_blank" rel="noopener noreferrer">Rapidez en álgebra: ecuaciones de segundo grado</a></div>
     <div class="btn-container" style="padding-top:14px">
-      <div class="primary-btn" id="restart-btn">🔄 Nuevas preguntas (reiniciar)</div>
+      <div class="primary-btn" id="restart-btn" role="button" tabindex="0">🔄 Nuevas preguntas (reiniciar)</div>
     </div>
   </div>
- <p style="text-align: center">Creado Por José M. Fernández con Claude Sonnet 4.6</p>
-</div>
+
+  <footer class="quiz-footer">
+    José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago ·
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer license">CC BY-NC-SA 4.0</a>
+  </footer>
+
+</main>
 
 <script>
 (function(){
@@ -211,7 +257,7 @@
     let s= a===1?'x\u00B2': a===-1?(M+'x\u00B2'): (a<0?(M+Math.abs(a)+'x\u00B2'):(a+'x\u00B2'));
     if(b!==0) s+=(b>0?' + '+b:' '+M+' '+Math.abs(b))+'x';
     if(c!==0) s+=(c>0?' + '+c:' '+M+' '+Math.abs(c));
-    return s;
+    return s.replace(/([+\u2212] )1x/,'$1x');
   }
 
   function makeOpts(correct, distractors){
@@ -228,7 +274,8 @@
     const all=shuffle([cs,...uniq]);
     const L=['a','b','c','d'];
     return {
-      opciones: all.map((v,i)=>({valor:L[i], texto:L[i].toUpperCase()+'. '+v})),
+      // el guion se muestra como signo menos tipográfico
+      opciones: all.map((v,i)=>({valor:L[i], texto:L[i].toUpperCase()+'. '+v.replace(/-/g,M)})),
       correcta: L[all.indexOf(cs)]
     };
   }
@@ -239,25 +286,26 @@
     'Funciones lineales':'#1a6ba0',
     'Comparación de funciones':'#0e7a60',
     'Solución de ecuaciones':'#c0522a',
-    'Sistemas de ecuaciones':'#a01c1c',
-    'Funciones cuadráticas':'#2a7a40'
+    'Desigualdades lineales':'#6d4c00',
+    'Sistemas de ecuaciones':'#a01c1c'
   };
   const CI={
     'Evaluación de funciones':'🔢',
     'Funciones lineales':'📈',
     'Comparación de funciones':'⚖️',
     'Solución de ecuaciones':'🔍',
-    'Sistemas de ecuaciones':'🔗',
-    'Funciones cuadráticas':'📐'
+    'Desigualdades lineales':'↔️',
+    'Sistemas de ecuaciones':'🔗'
   };
   const TIPS={
     'Evaluación de funciones':'Consejo: sustituye el valor de x directamente en la función y simplifica paso a paso.',
-    'Funciones lineales':'Consejo: en f(x) = mx + b, m es la pendiente y b es el intercepto en y.',
+    'Funciones lineales':'Consejo: en f(x) = mx + b, m es la pendiente y b es el intercepto en y. Si la ecuación es ax + by = c, despeja y para ver la pendiente.',
     'Comparación de funciones':'Consejo: calcula la pendiente de cada función antes de comparar.',
-    'Solución de ecuaciones':'Consejo: despeja x sumando o restando términos iguales en ambos lados.',
-    'Sistemas de ecuaciones':'Consejo: con sustitución, reemplaza una variable en la segunda ecuación.',
-    'Funciones cuadráticas':'Consejo: el vértice está en x = \u2212b\u00F7(2a). Las raíces anulan la función.'
+    'Solución de ecuaciones':'Consejo: despeja x sumando o restando términos iguales en ambos lados. Si hay paréntesis, distribuye primero o divide ambos lados entre el factor.',
+    'Desigualdades lineales':'Consejo: resuelve como si fuera una ecuación, pero si multiplicas o divides ambos lados por un número negativo, invierte el signo de la desigualdad.',
+    'Sistemas de ecuaciones':'Consejo: con sustitución, reemplaza una variable en la segunda ecuación.'
   };
+  const MSG_TOP='¡Excelente! Dominas las ecuaciones de primer grado del GED. ¡Estás listo!';
 
   /* ─── GENERADORES DE PREGUNTAS (20) ─── */
   const GEN=[
@@ -272,27 +320,7 @@
         opciones, correcta };
     },
 
-    /* 2 · Evaluar f(x)=x²+c en x=n  ·  45 s */
-    ()=>{
-      const c=rand(-8,8), n=rand(-4,4), r=n*n+c;
-      const cs=c>0?(' + '+c):c<0?(' '+M+' '+Math.abs(c)):'';
-      const {opciones,correcta}=makeOpts(r,[r+1,r-1,n+c,n*n]);
-      return{ cat:'Evaluación de funciones', t:45,
-        q:`Si <strong>f(x) = x\u00B2${cs}</strong>, ¿cuál es el valor de <strong>f(${mn(n)})</strong>?`,
-        opciones, correcta };
-    },
-
-    /* 3 · Evaluar f(x)=ax²+bx+c en x=n  ·  75 s */
-    ()=>{
-      const a=randNZ(1,3), b=rand(-4,4), c=rand(-5,5), n=rand(-3,3);
-      const r=a*n*n+b*n+c;
-      const {opciones,correcta}=makeOpts(r,[r+a,r-b,a*n*n+c,r+2]);
-      return{ cat:'Evaluación de funciones', t:75,
-        q:`Si <strong>f(x) = ${quad(a,b,c)}</strong>, ¿cuál es el valor de <strong>f(${mn(n)})</strong>?`,
-        opciones, correcta };
-    },
-
-    /* 4 · Dado f(x)=ax+b=k, encontrar x  ·  60 s */
+    /* 2 · Dado f(x)=ax+b=k, encontrar x  ·  60 s */
     ()=>{
       const a=randNZ(-4,4), b=rand(-8,8), x=rand(-5,5), k=a*x+b;
       const {opciones,correcta}=makeOpts(x,[x+1,x-1,x+2,k-b]);
@@ -301,7 +329,7 @@
         opciones, correcta };
     },
 
-    /* 5 · Pendiente de f(x)=mx+b  ·  45 s */
+    /* 3 · Pendiente de f(x)=mx+b  ·  45 s */
     ()=>{
       const m=randNZ(-6,6), b=rand(-8,8);
       const {opciones,correcta}=makeOpts(m,[m+1,m-1,-m,b]);
@@ -310,7 +338,7 @@
         opciones, correcta };
     },
 
-    /* 6 · Intercepto en y de f(x)=mx+b  ·  45 s */
+    /* 4 · Intercepto en y de f(x)=mx+b  ·  45 s */
     ()=>{
       const m=randNZ(-5,5), b=randNZ(-9,9);
       const {opciones,correcta}=makeOpts(b,[b+2,b-2,-b,m]);
@@ -319,7 +347,7 @@
         opciones, correcta };
     },
 
-    /* 7 · Cero (intercepto en x) de f(x)=ax+b  ·  60 s */
+    /* 5 · Cero (intercepto en x) de f(x)=ax+b  ·  60 s */
     ()=>{
       const a=randNZ(-5,5), z=rand(-6,6), b=-a*z;
       const {opciones,correcta}=makeOpts(z,[z+1,z-1,-z,b]);
@@ -328,7 +356,7 @@
         opciones, correcta };
     },
 
-    /* 8 · Pendiente entre dos puntos  ·  75 s */
+    /* 6 · Pendiente entre dos puntos  ·  75 s */
     ()=>{
       const m=randNZ(-5,5), b=rand(-5,5);
       const x1=rand(-4,0), x2=rand(1,5);
@@ -336,6 +364,29 @@
       const {opciones,correcta}=makeOpts(m,[m+1,m-1,-m,y2-y1]);
       return{ cat:'Funciones lineales', t:75,
         q:`¿Cuál es la <strong>pendiente</strong> de la recta que pasa por <strong>(${mn(x1)}, ${mn(y1)})</strong> y <strong>(${mn(x2)}, ${mn(y2)})</strong>?`,
+        opciones, correcta };
+    },
+
+    /* 7 · NUEVA · Ecuación de la recta con pendiente y un punto  ·  90 s */
+    ()=>{
+      const m=randNZ(-4,4), b=rand(-6,6), x1=randNZ(-4,4), y1=m*x1+b;
+      const ans='y = '+lin(m,b);
+      const {opciones,correcta}=makeOpts(ans,[
+        'y = '+lin(m,y1), 'y = '+lin(-m,b), 'y = '+lin(m,-b),
+        'y = '+lin(m,b+x1), 'y = '+lin(m,b+1), 'y = '+lin(m,b-1)]);
+      return{ cat:'Funciones lineales', t:90,
+        q:`Una recta tiene <strong>pendiente ${mn(m)}</strong> y pasa por el punto <strong>(${mn(x1)}, ${mn(y1)})</strong>. ¿Cuál es su <strong>ecuación</strong>?`,
+        opciones, correcta };
+    },
+
+    /* 8 · NUEVA · Pendiente de ax + by = c (forma estándar)  ·  75 s */
+    ()=>{
+      const m=randNZ(-4,4), bb=rand(1,4), a=-m*bb, c=randNZ(-12,12);
+      const xT= a===1?'x': a===-1?(M+'x'): mn(a)+'x';
+      const yT= bb===1?'y': bb+'y';
+      const {opciones,correcta}=makeOpts(m,[-m,a,bb,m+1,m-1]);
+      return{ cat:'Funciones lineales', t:75,
+        q:`¿Cuál es la <strong>pendiente</strong> de la recta <strong>${xT} + ${yT} = ${mn(c)}</strong>?`,
         opciones, correcta };
     },
 
@@ -348,7 +399,7 @@
       const winner=m1>m2?'f(x)':'g(x)';
       const {opciones,correcta}=makeOpts(winner,
         ['f(x)','g(x)','Ambas iguales','No se puede determinar'].filter(v=>v!==winner));
-      const tbl=rows.map(r=>`(${r.x},${r.y})`).join(' | ');
+      const tbl=rows.map(r=>`(${r.x}, ${mn(r.y)})`).join(' | ');
       return{ cat:'Comparación de funciones', t:75,
         q:`<strong>f(x) = ${lin(m1,b1)}</strong>. La función <strong>g(x)</strong> pasa por los puntos: ${tbl}. ¿Cuál tiene <strong>mayor tasa de cambio</strong>?`,
         opciones, correcta };
@@ -397,7 +448,17 @@
         opciones, correcta };
     },
 
-    /* 14 · Problema de palabras → ecuación lineal  ·  90 s */
+    /* 14 · NUEVA · Resolver a(x + b) = c  ·  75 s */
+    ()=>{
+      const a=rand(2,5), b=randNZ(-6,6), x=rand(-6,6), c=a*(x+b);
+      const {opciones,correcta}=makeOpts(x,[x+b, x-2*b, c-b, x+1, x-1]);
+      return{ cat:'Solución de ecuaciones', t:75,
+        q:`Resuelve para <strong>x</strong>:`,
+        math:`${a}(x ${pm(b)}) = ${mn(c)}`,
+        opciones, correcta };
+    },
+
+    /* 15 · Problema de palabras → ecuación lineal  ·  90 s */
     ()=>{
       const rate=rand(3,10), fixed=rand(5,25), h=rand(2,8), total=rate*h+fixed;
       const {opciones,correcta}=makeOpts(h,[h+1,h-1,h+2,Math.round(total/rate)].filter(v=>v!==h));
@@ -406,30 +467,59 @@
         opciones, correcta };
     },
 
-    /* 15 · Sistema por sustitución (y=mx+b, ax+cy=d)  ·  120 s */
+    /* 16 · NUEVA · Desigualdad con coeficiente positivo  ·  60 s */
     ()=>{
-      const m=rand(-3,3), b=rand(-5,5), x=rand(-4,4), y=m*x+b;
-      const a2=rand(1,4), c2=rand(1,3), d2=a2*x+c2*y;
-      const mS=m===0?String(b):lin(m,b);
-      const {opciones,correcta}=makeOpts(x,[x+1,x-1,x+2,y]);
-      return{ cat:'Sistemas de ecuaciones', t:120,
-        q:`Sistema: <strong>y = ${mS}</strong>  y  <strong>${a2}x + ${c2}y = ${mn(d2)}</strong>. ¿Cuál es el valor de <strong>x</strong>?`,
+      const S=['<','>','\u2264','\u2265'], INV={'<':'>','>':'<','\u2264':'\u2265','\u2265':'\u2264'};
+      const s=S[rand(0,3)], a=rand(2,6), x0=rand(-6,6), b=randNZ(-9,9), c=a*x0+b;
+      const ans=`x ${s} ${mn(x0)}`;
+      const {opciones,correcta}=makeOpts(ans,[
+        `x ${INV[s]} ${mn(x0)}`, `x ${s} ${mn(-x0)}`, `x ${s} ${mn(x0+1)}`,
+        `x ${s} ${mn(x0-1)}`, `x ${INV[s]} ${mn(-x0)}`]);
+      return{ cat:'Desigualdades lineales', t:60,
+        q:`Resuelve la <strong>desigualdad</strong>:`,
+        math:`${lin(a,b)} ${s} ${mn(c)}`,
         opciones, correcta };
     },
 
-    /* 16 · Sistema por eliminación  ·  120 s */
+    /* 17 · NUEVA · Desigualdad con coeficiente negativo (se invierte el signo)  ·  75 s */
+    ()=>{
+      const S=['<','>','\u2264','\u2265'], INV={'<':'>','>':'<','\u2264':'\u2265','\u2265':'\u2264'};
+      const s=S[rand(0,3)], a=rand(-6,-2), x0=rand(-6,6), b=randNZ(-9,9), c=a*x0+b;
+      const ans=`x ${INV[s]} ${mn(x0)}`;
+      const {opciones,correcta}=makeOpts(ans,[
+        `x ${s} ${mn(x0)}`, `x ${INV[s]} ${mn(-x0)}`, `x ${s} ${mn(-x0)}`,
+        `x ${INV[s]} ${mn(x0+1)}`, `x ${INV[s]} ${mn(x0-1)}`]);
+      return{ cat:'Desigualdades lineales', t:75,
+        q:`Resuelve la <strong>desigualdad</strong>:`,
+        math:`${lin(a,b)} ${s} ${mn(c)}`,
+        opciones, correcta };
+    },
+
+    /* 18 · Sistema por sustitución (y=mx+b, ax+cy=d)  ·  120 s */
+    ()=>{
+      const m=rand(-3,3), b=rand(-5,5), x=rand(-4,4), y=m*x+b;
+      const a2=rand(1,4), c2=rand(1,3), d2=a2*x+c2*y;
+      const mS=m===0?mn(b):lin(m,b);
+      const {opciones,correcta}=makeOpts(x,[x+1,x-1,x+2,y]);
+      return{ cat:'Sistemas de ecuaciones', t:120,
+        q:`Sistema: <strong>y = ${mS}</strong>  y  <strong>${a2===1?'':a2}x + ${c2===1?'':c2}y = ${mn(d2)}</strong>. ¿Cuál es el valor de <strong>x</strong>?`,
+        opciones, correcta };
+    },
+
+    /* 19 · Sistema por eliminación  ·  120 s */
     ()=>{
       const x=rand(-4,4), y=rand(-4,4);
       let a1,b1,a2,b2;
       do{ a1=rand(1,4);b1=rand(1,3);a2=rand(1,4);b2=rand(1,3); }while(a1*b2===a2*b1);
       const c1=a1*x+b1*y, c2=a2*x+b2*y;
+      const k=n=>n===1?'':n;
       const {opciones,correcta}=makeOpts(y,[y+1,y-1,y+2,x]);
       return{ cat:'Sistemas de ecuaciones', t:120,
-        q:`Sistema: <strong>${a1}x + ${b1}y = ${mn(c1)}</strong>  y  <strong>${a2}x + ${b2}y = ${mn(c2)}</strong>. ¿Cuál es el valor de <strong>y</strong>?`,
+        q:`Sistema: <strong>${k(a1)}x + ${k(b1)}y = ${mn(c1)}</strong>  y  <strong>${k(a2)}x + ${k(b2)}y = ${mn(c2)}</strong>. ¿Cuál es el valor de <strong>y</strong>?`,
         opciones, correcta };
     },
 
-    /* 17 · Sistema — problema de palabras  ·  120 s */
+    /* 20 · Sistema — problema de palabras  ·  120 s */
     ()=>{
       let p1,p2; do{ p1=rand(2,8);p2=rand(2,8); }while(p1===p2);
       const q1=rand(2,8), q2=rand(2,8);
@@ -438,47 +528,10 @@
       return{ cat:'Sistemas de ecuaciones', t:120,
         q:`Se compraron <strong>${tq} artículos</strong>: unos a <strong>$${p1}</strong> y otros a <strong>$${p2}</strong>. El total pagado fue <strong>$${tp}</strong>. ¿Cuántos artículos del primer tipo se compraron?`,
         opciones, correcta };
-    },
-
-    /* 18 · Vértice de parábola (x = −b/2a)  ·  90 s */
-    ()=>{
-      const a=rand(1,3), h=rand(-4,4), k=rand(-5,5);
-      const bC=-2*a*h, cC=a*h*h+k;
-      const {opciones,correcta}=makeOpts(h,[h+1,h-1,-h,k]);
-      return{ cat:'Funciones cuadráticas', t:90,
-        q:`¿Cuál es la coordenada <strong>x del vértice</strong> de <strong>f(x) = ${quad(a,bC,cC)}</strong>?`,
-        opciones, correcta };
-    },
-
-    /* 19 · Raíces de cuadrática factorizable  ·  90 s */
-    ()=>{
-      const r1=rand(-5,-1), r2=rand(1,5);
-      const bC=-(r1+r2), cC=r1*r2;
-      const ans=`x = ${r1}  y  x = ${r2}`;
-      const w1=`x = ${r1+1}  y  x = ${r2-1}`;
-      const w2=`x = ${-r1}  y  x = ${-r2}`;
-      const w3=`x = ${r1-1}  y  x = ${r2+1}`;
-      const {opciones,correcta}=makeOpts(ans,[w1,w2,w3]);
-      return{ cat:'Funciones cuadráticas', t:90,
-        q:`¿Cuáles son las <strong>raíces</strong> de <strong>f(x) = ${quad(1,bC,cC)}</strong>?`,
-        opciones, correcta };
-    },
-
-    /* 20 · Comparar f(x) cuadrática vs g(x) lineal en x dado  ·  75 s */
-    ()=>{
-      const a=rand(1,2), b=rand(-3,3), c=rand(-4,4);
-      const m=rand(2,5), d=rand(-5,5);
-      const xt=rand(3,6);
-      const fv=a*xt*xt+b*xt+c, gv=m*xt+d;
-      const winner=fv>gv?'f(x)':fv<gv?'g(x)':'Son iguales';
-      const allO=['f(x)','g(x)','Son iguales','No se puede determinar'];
-      const {opciones,correcta}=makeOpts(winner,allO.filter(v=>v!==winner));
-      return{ cat:'Comparación de funciones', t:75,
-        q:`<strong>f(x) = ${quad(a,b,c)}</strong> y <strong>g(x) = ${lin(m,d)}</strong>. Para <strong>x = ${xt}</strong>, ¿cuál función tiene <strong>mayor valor</strong>?`,
-        opciones, correcta };
     }
 
   ]; // fin GEN
+
 
   /* ─── GENERAR Y MEZCLAR PREGUNTAS ─── */
   const preguntas=shuffle(GEN.map(g=>g()));
@@ -490,31 +543,42 @@
   const qArea=document.getElementById('question-area');
   const barP=document.getElementById('progress-bar');
   const txtP=document.getElementById('progress-text');
+  const sr=document.getElementById('sr-status');
+  function anunciar(t){ if(sr){ sr.textContent=''; setTimeout(()=>{ sr.textContent=t; },50); } }
+
+  // Activar con teclado (Enter / Espacio) los elementos con role="button"
+  document.addEventListener('keydown',e=>{
+    const el=e.target;
+    if(el && el.getAttribute && el.getAttribute('role')==='button' && (e.key==='Enter'||e.key===' ')){
+      e.preventDefault(); el.click();
+    }
+  });
 
   /* ─── RENDERIZAR PREGUNTA ─── */
   function render(i){
     const p=preguntas[i];
-    const col=CC[p.cat]||'#0089cd';
+    const col=CC[p.cat]||'#005f8f';
     const icon=CI[p.cat]||'📝';
     const tLabel= p.t<=45?'⚡ Rápida': p.t<=75?'🕐 Media':'⏳ Difícil';
     const opHtml=p.opciones.map(o=>
-      `<div class="option-item" data-val="${o.valor}" onclick="window.__qClick(this)">${o.texto}</div>`
+      `<div class="option-item" role="button" tabindex="0" data-val="${o.valor}" onclick="window.__qClick(this)">${o.texto}</div>`
     ).join('');
     const mathBlock=p.math?`<div class="math-box">${p.math}</div>`:'';
     const btnLbl=i===total-1?'Ver resultados':'Siguiente ›';
     qArea.innerHTML=`
       <div class="question-meta">
-        <span class="cat-badge" style="background:${col}">${icon} ${p.cat}</span>
+        <span class="cat-badge" style="background:${col}"><span aria-hidden="true">${icon}</span> ${p.cat}</span>
         <span class="time-badge">${tLabel} · ${p.t}s</span>
       </div>
-      <div class="question-header">${p.q}</div>
+      <div class="question-header" id="q-header" tabindex="-1">${p.q}</div>
       ${mathBlock}
       <div class="options">${opHtml}</div>
       <div class="btn-container">
-        <div class="primary-btn" onclick="window.__qNext()">${btnLbl}</div>
+        <div class="primary-btn" role="button" tabindex="0" onclick="window.__qNext()">${btnLbl}</div>
       </div>`;
     if(barP) barP.style.width=((i+1)/total*100)+'%';
     if(txtP) txtP.textContent=`Pregunta ${i+1} de ${total}`;
+    if(i>0){ const h=document.getElementById('q-header'); if(h) h.focus(); }
     iniciarReloj(p.t);
   }
 
@@ -527,13 +591,16 @@
     if(elegida===p.correcta){
       el.className='option-item correct disabled';
       puntos++; catPts[p.cat]++;
+      anunciar('Respuesta correcta.');
     } else {
       el.className='option-item incorrect disabled';
       const ok=qArea.querySelector(`.option-item[data-val="${p.correcta}"]`);
       if(ok) ok.className='option-item correct disabled';
+      anunciar('Respuesta incorrecta. La correcta es la '+p.correcta.toUpperCase()+'.');
     }
     qArea.querySelectorAll('.option-item').forEach(o=>{
       if(!o.className.includes('disabled')) o.className+=' disabled';
+      o.setAttribute('aria-disabled','true');
     });
   };
 
@@ -569,11 +636,12 @@
     const p=preguntas[actual];
     const ok=qArea.querySelector(`.option-item[data-val="${p.correcta}"]`);
     if(ok) ok.className='option-item correct disabled';
-    qArea.querySelectorAll('.option-item').forEach(o=>{ if(!o.className.includes('disabled')) o.className+=' disabled'; });
+    qArea.querySelectorAll('.option-item').forEach(o=>{ if(!o.className.includes('disabled')) o.className+=' disabled'; o.setAttribute('aria-disabled','true'); });
     const tt=document.getElementById('timer-text');
     if(tt) tt.textContent='⏰ ¡Tiempo agotado!';
     const tc=document.getElementById('timer-container');
     if(tc) tc.className='timer-container timer-warning';
+    anunciar('Tiempo agotado. La respuesta correcta es la '+p.correcta.toUpperCase()+'.');
   }
 
   /* ─── RESULTADOS ─── */
@@ -584,7 +652,7 @@
     const pct=Math.round(puntos/total*100);
     document.getElementById('final-score').textContent=`${puntos} / ${total}  (${pct}%)`;
     let msg='', emoji='';
-    if(pct>=85){ emoji='🏆'; msg='¡Excelente! Dominas el álgebra GED. ¡Estás listo!'; }
+    if(pct>=85){ emoji='🏆'; msg=MSG_TOP; }
     else if(pct>=70){ emoji='👍'; msg='¡Muy bien! Un poco más de práctica y lo logras.'; }
     else if(pct>=50){ emoji='💪'; msg='Buen intento. Repasa las categorías en rojo y vuelve a intentarlo.'; }
     else { emoji='📚'; msg='Sigue practicando. Identifica las categorías débiles y trabaja en ellas primero.'; }
@@ -595,11 +663,11 @@
     for(const cat of Object.keys(catTot)){
       const s=catPts[cat]||0, t2=catTot[cat];
       const p2=Math.round(s/t2*100);
-      const col=CC[cat]||'#0089cd';
+      const col=CC[cat]||'#005f8f';
       const barCol=p2>=70?col:'#e53935';
       html+=`<div class="cat-row">
-        <span class="cat-lbl">${CI[cat]} ${cat}</span>
-        <div class="cat-bar-out"><div class="cat-bar-in" style="width:${p2}%;background:${barCol}"></div></div>
+        <span class="cat-lbl"><span aria-hidden="true">${CI[cat]}</span> ${cat}</span>
+        <div class="cat-bar-out" aria-hidden="true"><div class="cat-bar-in" style="width:${p2}%;background:${barCol}"></div></div>
         <span class="cat-sc">${s}/${t2}</span>
       </div>`;
     }
@@ -612,11 +680,14 @@
       if(pp<minPct){ minPct=pp; minCat=cat; }
     }
     document.getElementById('tip-box').textContent=
-      minPct<1 ? (TIPS[minCat]||'') : '✅ ¡Sin categorías con puntuación 0! Sigue practicando para mejorar los tiempos.';
+      minPct<1 ? (TIPS[minCat]||'') : '✅ ¡Todas las categorías perfectas! Sigue practicando para mejorar los tiempos.';
 
     document.getElementById('result-screen').className='result-screen';
     document.querySelector('.quiz-progress-header').style.display='none';
     document.getElementById('restart-btn').onclick=()=>window.location.reload();
+    const h2=document.querySelector('#result-screen h2');
+    if(h2){ h2.setAttribute('tabindex','-1'); h2.focus(); }
+    anunciar(`Cuestionario completado. Obtuviste ${puntos} de ${total}.`);
   }
 
   /* ─── ARRANQUE ─── */
@@ -626,4 +697,3 @@
 </script>
 </body>
 </html>
-
