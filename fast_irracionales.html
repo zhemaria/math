@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<!-- Ejercicios de rapidez · Números irracionales · GEDparaHispanos
+     José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago
+     Licencia: CC BY-NC-SA 4.0 · https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rapidez · Números irracionales</title>
+<meta name="license" content="CC BY-NC-SA 4.0">
+<meta name="author" content="José M. Fernández">
+<link rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es">
+<style>
+  :root{
+    --tema:#004d40; --tema-d:#00352c; --tema-m:#00695c;
+    --tema-bg:#e0f2f1; --tema-bg2:#cce8e4;
+    --txt:#1f2933; --suave:#4a5560; --linea:#d5dde3; --bg:#f5f7fa;
+    --ok:#1b5e20; --ok-bg:#e8f5e9; --no:#b71c1c; --no-bg:#ffebee;
+    --foco:#b05e00;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;font-size:17px;line-height:1.55;}
+  .contenedor{max-width:860px;margin:0 auto;padding:20px 16px 40px;}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+  a{color:var(--tema-d);}
+  a:focus-visible,button:focus-visible{outline:3px solid var(--foco);outline-offset:2px;}
+
+  header.principal{background:var(--tema);color:#fff;border-radius:14px;padding:26px 26px 22px;margin-bottom:20px;}
+  header.principal .ruta{font-size:13px;letter-spacing:.4px;text-transform:uppercase;}
+  header.principal h1{margin:6px 0 6px;font-size:27px;line-height:1.25;}
+  header.principal p{margin:0;font-size:15px;}
+
+  .tarjeta{background:#fff;border:1px solid var(--linea);border-radius:12px;padding:20px 22px;margin-bottom:18px;}
+  .tarjeta h2{margin:0 0 10px;font-size:21px;color:var(--tema-d);}
+  .oculto{display:none !important;}
+
+  /* Menú de modos */
+  .modos{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:12px 0 4px;padding:0;list-style:none;}
+  .modo{display:block;text-decoration:none;color:var(--txt);border:2px solid var(--linea);border-left:7px solid var(--c,#004d40);border-radius:10px;padding:11px 14px;background:#fff;min-height:44px;}
+  .modo strong{display:block;color:var(--tema-d);font-size:16px;}
+  .modo span{font-size:14px;color:var(--suave);}
+  .modo:hover{background:#f7fbfa;}
+  .modo[aria-current="true"]{border-color:var(--tema);background:var(--tema-bg);}
+  .elegido{margin:12px 0 0;font-size:15px;color:var(--suave);}
+  .elegido strong{color:var(--tema-d);}
+
+  .fila-ajustes{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 4px;}
+  .fila-ajustes .rot{font-weight:600;margin-right:4px;}
+  .conmutador{border:2px solid var(--tema);background:#fff;color:var(--tema-d);border-radius:999px;padding:8px 16px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;min-height:44px;}
+  .conmutador[aria-pressed="true"]{background:var(--tema);color:#fff;}
+
+  .btn{background:var(--tema);color:#fff;border:none;border-radius:10px;padding:12px 24px;font:inherit;font-size:17px;font-weight:700;cursor:pointer;min-height:48px;}
+  .btn:hover{background:var(--tema-d);}
+  .btn.sec{background:#455a64;}
+  .btn.sec:hover{background:#37474f;}
+  .botones{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;}
+
+  ul.instr{margin:6px 0 0;padding-left:22px;}
+  ul.instr li{margin:4px 0;}
+
+  /* Juego */
+  .barra-sup{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .contador{font-weight:700;color:var(--tema-d);}
+  .puntos{font-weight:700;color:var(--ok);}
+  .insignia{display:inline-block;color:#fff;font-size:13px;font-weight:700;letter-spacing:.3px;border-radius:999px;padding:4px 12px;}
+  .progreso{height:10px;background:#e3e8ec;border-radius:999px;overflow:hidden;margin-bottom:14px;}
+  .progreso div{height:100%;width:0;background:var(--tema-m);transition:width .3s;}
+  .reloj{display:flex;align-items:center;gap:10px;margin:0 0 14px;}
+  .reloj .num{font-variant-numeric:tabular-nums;font-weight:700;min-width:58px;color:var(--tema-d);}
+  .reloj .num.urgente{color:var(--no);}
+  .reloj .pista{flex:1;height:8px;background:#e3e8ec;border-radius:999px;overflow:hidden;}
+  .reloj .pista div{height:100%;width:100%;background:#2e7d32;}
+  .reloj .pista div.urgente{background:var(--no);}
+
+  .pregunta-txt{font-size:18px;font-weight:600;margin:4px 0 8px;}
+  .expresion{font-size:34px;font-weight:700;text-align:center;color:var(--tema-d);background:var(--tema-bg);border-radius:10px;padding:14px 10px;margin:6px 0 16px;word-break:break-word;}
+  .opciones{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+  .opcion{display:flex;align-items:center;gap:10px;text-align:left;background:#fff;border:2px solid var(--linea);border-radius:10px;padding:12px 14px;font:inherit;font-size:19px;color:var(--txt);cursor:pointer;min-height:56px;}
+  .opcion .tecla{flex:0 0 auto;width:28px;height:28px;border-radius:50%;background:var(--tema-bg);color:var(--tema-d);font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;}
+  .opcion:hover:not([disabled]){border-color:var(--tema);}
+  .opcion[disabled]{cursor:default;}
+  .opcion.correcta{border-color:#2e7d32;background:var(--ok-bg);font-weight:700;}
+  .opcion.incorrecta{border-color:#c62828;background:var(--no-bg);}
+  .retro{margin-top:14px;border-radius:10px;padding:12px 16px;font-size:16px;}
+  .retro.ok{background:var(--ok-bg);border-left:6px solid #2e7d32;}
+  .retro.no{background:var(--no-bg);border-left:6px solid #c62828;}
+  .retro .titulo{font-weight:700;margin:0 0 4px;}
+  .retro.ok .titulo{color:var(--ok);}
+  .retro.no .titulo{color:var(--no);}
+  .retro p{margin:4px 0;}
+
+  /* Resultados */
+  .marcador{text-align:center;font-size:44px;font-weight:800;color:var(--tema-d);margin:4px 0;}
+  .mensaje{text-align:center;font-size:18px;margin:0 0 12px;}
+  table.desglose{width:100%;border-collapse:collapse;margin:10px 0;font-size:16px;}
+  table.desglose th,table.desglose td{border:1px solid var(--linea);padding:9px 12px;text-align:left;}
+  table.desglose th{background:var(--tema);color:#fff;}
+  table.desglose td.n{text-align:center;}
+  .consejo{background:#fff8e1;border-left:6px solid #f9a825;border-radius:0 10px 10px 0;padding:12px 16px;color:#5C3900;margin:14px 0;}
+  .consejo strong{color:#5C3900;}
+  .consejo a{color:#5C3900;font-weight:700;}
+  details.fallos{border:1px solid var(--linea);border-radius:10px;margin-top:12px;background:#fff;}
+  details.fallos > summary{cursor:pointer;padding:12px 16px;font-weight:700;color:var(--tema-d);}
+  .fallo{border-top:1px solid var(--linea);padding:12px 16px;font-size:16px;}
+  .fallo .q{font-weight:700;}
+  .fallo p{margin:4px 0;}
+  .fallo .mal{color:var(--no);}
+  .fallo .bien{color:var(--ok);}
+
+  footer{text-align:center;color:#555;font-size:13px;border-top:1px solid #ddd;margin-top:24px;padding-top:16px;}
+  footer p{margin:4px 0;}
+  footer a{color:inherit;}
+
+  @media (max-width:560px){
+    .opciones{grid-template-columns:1fr;}
+    .expresion{font-size:28px;}
+    header.principal h1{font-size:23px;}
+  }
+  @media (prefers-reduced-motion:reduce){ .progreso div{transition:none;} }
+</style>
+</head>
+<body>
+<div class="contenedor">
+
+<header class="principal">
+  <div class="ruta">GEDparaHispanos · Matemáticas · Ejercicios de rapidez</div>
+  <h1>Números irracionales</h1>
+  <p>Clasificar, ubicar, aproximar, convertir y comparar números reales · Nivel 3, Tema 3</p>
+</header>
+
+<main>
+<!-- ═════════ INICIO ═════════ -->
+<section id="pantalla-inicio" aria-labelledby="t-inicio">
+  <div class="tarjeta">
+    <h2 id="t-inicio">Cómo funciona</h2>
+    <ul class="instr">
+      <li>Cada pregunta tiene un tiempo límite. Si se acaba, la pregunta cuenta como no contestada y se muestra la explicación.</li>
+      <li>Después de cada respuesta aparece la explicación del procedimiento. Lea con calma antes de pasar a la siguiente.</li>
+      <li>Trabaje <strong>sin calculadora</strong>: la meta es reconocer los números con rapidez, como en la parte del GED donde no se permite.</li>
+      <li>Puede responder con el ratón o con las teclas <strong>1</strong>, <strong>2</strong>, <strong>3</strong> y <strong>4</strong>; la tecla <strong>Intro</strong> pasa a la siguiente pregunta.</li>
+    </ul>
+  </div>
+
+  <div class="tarjeta">
+    <h2 id="t-modos">Elija qué practicar</h2>
+    <p style="margin:0;">Cada opción tiene su propio enlace: puede guardarlo o compartirlo para ir directamente a esa categoría.</p>
+    <nav aria-labelledby="t-modos">
+      <ul class="modos" id="lista-modos"></ul>
+    </nav>
+    <p class="elegido" id="elegido" aria-live="polite"></p>
+
+    <div class="fila-ajustes" role="group" aria-labelledby="rot-tiempo">
+      <span class="rot" id="rot-tiempo">Tiempo:</span>
+      <button type="button" class="conmutador" id="con-tiempo" aria-pressed="true">Con reloj</button>
+      <button type="button" class="conmutador" id="sin-tiempo" aria-pressed="false">Sin reloj (a mi ritmo)</button>
+    </div>
+
+    <div class="botones">
+      <button type="button" class="btn" id="btn-comenzar">Comenzar</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ JUEGO ═════════ -->
+<section id="pantalla-juego" class="oculto" aria-labelledby="t-juego">
+  <h2 id="t-juego" class="sr-only">Pregunta en curso</h2>
+  <div class="tarjeta">
+    <div class="barra-sup">
+      <span class="contador" id="contador">Pregunta 1 de 20</span>
+      <span class="insignia" id="insignia">Categoría</span>
+      <span class="puntos" id="puntos">Aciertos: 0</span>
+    </div>
+    <div class="progreso" aria-hidden="true"><div id="barra-progreso"></div></div>
+
+    <div class="reloj" id="reloj">
+      <span class="num" id="reloj-num" aria-hidden="true">30 s</span>
+      <div class="pista" aria-hidden="true"><div id="reloj-barra"></div></div>
+    </div>
+    <p class="sr-only" id="aviso-reloj" aria-live="assertive"></p>
+
+    <p class="pregunta-txt" id="pregunta-txt"></p>
+    <div class="expresion" id="expresion"></div>
+    <div class="opciones" id="opciones" role="group" aria-labelledby="pregunta-txt"></div>
+
+    <div id="retro" class="retro oculto" aria-live="polite"></div>
+    <div class="botones">
+      <button type="button" class="btn oculto" id="btn-siguiente">Siguiente</button>
+      <button type="button" class="btn sec" id="btn-salir">Terminar ahora</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ RESULTADOS ═════════ -->
+<section id="pantalla-resultados" class="oculto" aria-labelledby="t-res">
+  <div class="tarjeta">
+    <h2 id="t-res" tabindex="-1">Resultados</h2>
+    <p class="marcador" id="marcador"></p>
+    <p class="mensaje" id="mensaje"></p>
+    <table class="desglose">
+      <caption class="sr-only">Aciertos obtenidos en cada categoría del ejercicio.</caption>
+      <thead><tr><th scope="col">Categoría</th><th scope="col">Correctas</th><th scope="col">Porcentaje</th></tr></thead>
+      <tbody id="tabla-desglose"></tbody>
+    </table>
+    <div id="consejo"></div>
+    <div id="zona-fallos"></div>
+    <div class="botones">
+      <button type="button" class="btn" id="btn-repetir">Repetir con otros números</button>
+      <button type="button" class="btn sec" id="btn-inicio">Volver al inicio</button>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <p>GEDparaHispanos · Matemáticas · Ejercicios de rapidez · Números irracionales</p>
+  <p>José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago</p>
+  <p>© 2026. Esta obra está licenciada bajo <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" rel="license noopener noreferrer" target="_blank">Creative Commons Reconocimiento-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0)</a>.</p>
+</footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var W = (typeof window !== 'undefined') ? window : {};
+  if (W.__rapidezIrracionales) return;
+  W.__rapidezIrracionales = true;
+
+  /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 Utilidades \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+  function pick(arr) { return arr[rnd(0, arr.length - 1)]; }
+  function mezclar(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function esCuadrado(n) { var r = Math.round(Math.sqrt(n)); return r * r === n; }
+  function mcd(a, b) { while (b) { var t = b; b = a % b; a = t; } return a; }
+  function frac(n, d) { var g = mcd(n, d); return d / g === 1 ? String(n / g) : (n / g) + '/' + (d / g); }
+  function noCuadrado(min, max) { var n; do { n = rnd(min, max); } while (esCuadrado(n)); return n; }
+  function f1(x) { return x.toFixed(1); }
+  function f2(x) { return x.toFixed(2); }
+  function aprox(v) { return Math.abs(v * 100 - Math.round(v * 100)) < 1e-9 ? '= ' + f2(v) : '\u2248 ' + f2(v); }
+
+  /* Arma la pregunta: la opci\u00f3n correcta va primero en "lista" y luego se mezcla */
+  function armar(cat, texto, expr, correcta, distractores, explica, fijo) {
+    var lista = [correcta].concat(distractores);
+    var vistos = {};
+    lista.forEach(function (o) { if (vistos[o]) throw new Error('Opci\u00f3n repetida: ' + o); vistos[o] = 1; });
+    var ops = fijo ? lista.slice() : mezclar(lista);
+    if (fijo) ops = fijo;
+    return { cat: cat, texto: texto, expr: expr, ops: ops, correcta: ops.indexOf(correcta), explica: explica };
+  }
+
+  /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 1. Clasificar \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function genClasificar() {
+    var OPS = ['Natural', 'Entero', 'Racional', 'Irracional'];
+    var texto = '\u00bfCu\u00e1l es el conjunto m\u00e1s espec\u00edfico al que pertenece este n\u00famero?';
+    var tipo = rnd(0, 3), expr, c, exp, k, v;
+    if (tipo === 0) {
+      k = rnd(2, 12);
+      expr = '\u221a' + (k * k); c = 'Natural';
+      exp = ['\u221a' + (k * k) + ' = ' + k + ', porque ' + k + '\u00b2 = ' + (k * k) + '.',
+             'La ra\u00edz es exacta y da un n\u00famero de contar: es natural (y tambi\u00e9n entero, racional y real).'];
+    } else if (tipo === 1) {
+      v = rnd(0, 3); c = 'Entero';
+      if (v <= 1) { k = rnd(2, 15); expr = '\u2212' + k; exp = ['\u2212' + k + ' es negativo y no tiene parte decimal.', 'Pertenece a los enteros, pero no a los naturales, que empiezan en 1.']; }
+      else if (v === 2) { k = rnd(2, 9); expr = '\u2212\u221a' + (k * k); exp = ['\u2212\u221a' + (k * k) + ' = \u2212' + k + ': la ra\u00edz es exacta y el signo es negativo.', 'Su conjunto m\u00e1s espec\u00edfico es el de los enteros.']; }
+      else { expr = '0'; exp = ['El 0 es entero, pero no natural: los naturales empiezan en 1.']; }
+    } else if (tipo === 2) {
+      v = rnd(0, 3); c = 'Racional';
+      if (v === 0) {
+        var b = pick([2, 3, 4, 5, 7, 8]), a; do { a = rnd(1, 15); } while (a % b === 0);
+        expr = a + '/' + b; exp = [expr + ' es una fracci\u00f3n de dos enteros que no da un n\u00famero entero.', 'Toda fracci\u00f3n de enteros es un n\u00famero racional.'];
+      } else if (v === 1) {
+        var w = rnd(0, 9), cen; do { cen = rnd(1, 99); } while (cen % 10 === 0);
+        expr = w + '.' + (cen < 10 ? '0' + cen : cen);
+        exp = ['El decimal ' + expr + ' termina, as\u00ed que se puede escribir como fracci\u00f3n: ' + (w * 100 + cen) + '/100' + (frac(w * 100 + cen, 100) !== (w * 100 + cen) + '/100' ? ' = ' + frac(w * 100 + cen, 100) : '') + '.', 'Por eso es racional.'];
+      } else if (v === 2) {
+        var d = pick([1, 2, 4, 5, 7, 8]);
+        expr = '0.' + d + d + d + '\u2026';
+        exp = ['El decimal ' + expr + ' se repite sin fin con el mismo patr\u00f3n.', 'Todo decimal peri\u00f3dico es racional: ' + expr + ' = ' + frac(d, 9) + '.'];
+      } else {
+        var bb = pick([3, 4, 5, 7]), aa; do { aa = rnd(1, 9); } while (aa % bb === 0);
+        expr = '\u2212' + aa + '/' + bb; exp = [expr + ' es una fracci\u00f3n negativa de dos enteros y no da un n\u00famero entero.', 'Es racional (no es entero ni natural).'];
+      }
+    } else {
+      v = rnd(0, 3); c = 'Irracional';
+      if (v <= 1) {
+        var n = noCuadrado(2, 99), r = Math.floor(Math.sqrt(n));
+        expr = '\u221a' + n;
+        exp = [n + ' no es cuadrado perfecto: est\u00e1 entre ' + (r * r) + ' y ' + ((r + 1) * (r + 1)) + '.', 'Su ra\u00edz no es exacta; su decimal (\u2248 ' + f2(Math.sqrt(n)) + '\u2026) no termina ni se repite. Es irracional.'];
+      } else if (v === 2) {
+        expr = '\u03c0'; exp = ['\u03c0 \u2248 3.14159\u2026 tiene infinitos decimales que no se repiten.', 'No se puede escribir como fracci\u00f3n exacta: es irracional. (22/7 y 3.14 son solo aproximaciones.)'];
+      } else {
+        var kk = rnd(2, 5), m = pick([2, 3, 5, 6, 7]);
+        expr = kk + '\u221a' + m; exp = ['\u221a' + m + ' es irracional, porque ' + m + ' no es cuadrado perfecto.', 'Un entero por un irracional sigue siendo irracional: ' + expr + ' es irracional.'];
+      }
+    }
+    return armar('clasificar', texto, expr, c, OPS.filter(function (o) { return o !== c; }), exp, OPS);
+  }
+
+  /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 2. Ubicar en la recta \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function par(a) { return 'Entre ' + a + ' y ' + (a + 1); }
+  function genRecta() {
+    var expr, a, exp, mitad = null;
+    if (Math.random() < 0.2) {
+      var o = pick([{ e: '\u03c0', v: Math.PI }, { e: '2\u03c0', v: 2 * Math.PI }, { e: '3\u03c0', v: 3 * Math.PI }, { e: '\u03c0/2', v: Math.PI / 2 }]);
+      expr = o.e; a = Math.floor(o.v);
+      exp = ['\u03c0 \u2248 3.14, as\u00ed que ' + o.e + ' \u2248 ' + f2(o.v) + '.', 'Ese valor queda entre ' + a + ' y ' + (a + 1) + '.'];
+    } else {
+      var n = noCuadrado(5, 150);
+      a = Math.floor(Math.sqrt(n)); expr = '\u221a' + n; mitad = Math.floor(n / 2);
+      exp = [(a * a) + ' < ' + n + ' < ' + ((a + 1) * (a + 1)) + ', es decir, ' + a + '\u00b2 < ' + n + ' < ' + (a + 1) + '\u00b2.',
+             'Por lo tanto ' + a + ' < \u221a' + n + ' < ' + (a + 1) + '.',
+             'Error frecuente: dividir el n\u00famero entre 2. La ra\u00edz cuadrada no es la mitad del n\u00famero.'];
+    }
+    var cands = [];
+    if (mitad !== null && Math.abs(mitad - a) > 1) cands.push(mitad);
+    if (a - 1 >= 0) cands.push(a - 1);
+    cands.push(a + 1);
+    var extra = a + 2;
+    while (cands.length < 3) { if (cands.indexOf(extra) < 0 && extra !== a) cands.push(extra); extra++; }
+    cands = cands.slice(0, 3);
+    return armar('recta', '\u00bfEntre qu\u00e9 dos enteros consecutivos se ubica este n\u00famero?', expr, par(a), cands.map(par), exp);
+  }
+
+  /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 3. Aproximar a la d\u00e9cima \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function genAproximar() {
+    var n, L, c, a, cL, cH, dL, dH;
+    for (;;) {
+      n = noCuadrado(2, 99);
+      var r = Math.sqrt(n);
+      L = Math.floor(r * 10);
+      c = Math.round(r * 10);
+      cL = L * L / 100; cH = (L + 1) * (L + 1) / 100;
+      dL = n - cL; dH = cH - n;
+      var metodo = dL < dH ? L : L + 1;
+      if (metodo === c && Math.abs(dL - dH) > 0.02) break;
+    }
+    a = Math.floor(Math.sqrt(n));
+    var lin = Math.round((a + (n - a * a) / (2 * a + 1)) * 10);
+    var dist = [c - 1, c + 1];
+    if (lin !== c && dist.indexOf(lin) < 0) dist.push(lin);
+    else dist.push(c + 2 <= (a + 1) * 10 ? c + 2 : c - 2);
+    var cerca = dL < dH ? cL : cH;
+    var exp = ['\u221a' + n + ' est\u00e1 entre ' + a + ' y ' + (a + 1) + ', porque ' + a + '\u00b2 = ' + (a * a) + ' y ' + (a + 1) + '\u00b2 = ' + ((a + 1) * (a + 1)) + '.',
+               'Se prueban las d\u00e9cimas vecinas: (' + f1(L / 10) + ')\u00b2 = ' + f2(cL) + ' y (' + f1((L + 1) / 10) + ')\u00b2 = ' + f2(cH) + '.',
+               n + ' est\u00e1 m\u00e1s cerca de ' + f2(cerca) + ', as\u00ed que \u221a' + n + ' \u2248 ' + f1(c / 10) + '.'];
+    if (lin !== c) exp.push('Cuidado: repartir la distancia en partes iguales entre ' + (a * a) + ' y ' + ((a + 1) * (a + 1)) + ' da ' + f1(lin / 10) + ', que no es correcto. Las ra\u00edces no crecen de forma pareja; por eso se elevan las d\u00e9cimas al cuadrado.');
+    return armar('aproximar', 'Aproxime a la d\u00e9cima m\u00e1s cercana:', '\u221a' + n, f1(c / 10), dist.map(function (x) { return f1(x / 10); }), exp);
+  }
+
+  /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 4. Decimales y fracciones \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function genDecimales() {
+    var v = rnd(0, 2), d, expr, exp;
+    if (v === 0) {
+      d = rnd(1, 8);
+      expr = '0.' + d + d + d + '\u2026';
+      exp = ['Sea x = ' + expr + ' Al multiplicar por 10: 10x = ' + d + '.' + d + d + d + '\u2026',
+             'Se resta: 10x \u2212 x = ' + d + ', es decir, 9x = ' + d + '.',
+             'x = ' + d + '/9' + (frac(d, 9) !== d + '/9' ? ' = ' + frac(d, 9) : '') + '. Una cifra que se repite va sobre 9, no sobre 10.'];
+      return armar('decimales', '\u00bfQu\u00e9 fracci\u00f3n es igual a este decimal peri\u00f3dico?', expr, frac(d, 9), [d + '/10', d + '/90', d + '/100'], exp);
+    }
+    if (v === 1) {
+      var ab; do { ab = rnd(10, 98); } while (ab % 11 === 0);
+      expr = '0.' + ab + ab + ab + '\u2026';
+      exp = ['Sea x = ' + expr + ' Se repiten dos cifras, as\u00ed que se multiplica por 100: 100x = ' + ab + '.' + ab + ab + '\u2026',
+             'Se resta: 100x \u2212 x = ' + ab + ', es decir, 99x = ' + ab + '.',
+             'x = ' + ab + '/99' + (frac(ab, 99) !== ab + '/99' ? ' = ' + frac(ab, 99) : '') + '. Dos cifras que se repiten van sobre 99.'];
+      return armar('decimales', '\u00bfQu\u00e9 fracci\u00f3n es igual a este decimal peri\u00f3dico?', expr, frac(ab, 99), [ab + '/100', ab + '/90', ab + '/999'], exp);
+    }
+    d = rnd(1, 9);
+    var irr = '0.' + d + '0' + d + '00' + d + '000' + d + '\u2026';
+    var x = rnd(1, 9), y; do { y = rnd(1, 9); } while (y === x);
+    var per2 = '0.' + x + y + x + y + x + y + '\u2026';
+    var z = rnd(1, 9), term = '0.' + z + rnd(1, 9) + rnd(1, 9) + pick([1, 2, 4, 5, 6, 8]);
+    var w = rnd(1, 9), per1 = '0.' + w + w + w + w + w + '\u2026';
+    if (per1 === per2) per1 = '0.' + ((w % 9) + 1) + ((w % 9) + 1) + ((w % 9) + 1) + ((w % 9) + 1) + ((w % 9) + 1) + '\u2026';
+    exp = ['En ' + irr + ' la cantidad de ceros aumenta cada vez: el patr\u00f3n nunca se repite igual y el decimal no termina. Es irracional.',
+           per2 + ' y ' + per1 + ' se repiten siempre igual: son peri\u00f3dicos y, por lo tanto, racionales.',
+           term + ' termina: tambi\u00e9n es racional.'];
+    return armar('decimales', '\u00bfCu\u00e1l de estos decimales es irracional?', '?', irr, [per2, term, per1], exp);
+  }
+
+  /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 5. Comparar y ordenar \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function itemRaiz() { var n = noCuadrado(2, 50); return { t: '\u221a' + n, v: Math.sqrt(n) }; }
+  function itemPi() { return { t: '\u03c0', v: Math.PI }; }
+  function itemFrac() { var b = pick([2, 3, 4, 5, 6, 8]), a; do { a = rnd(b + 1, 7 * b); } while (a % b === 0); return { t: a + '/' + b, v: a / b }; }
+  function itemDec() { var x; do { x = rnd(11, 69); } while (x % 10 === 0); return { t: f1(x / 10), v: x / 10 }; }
+  function itemEnt() { var k = rnd(1, 7); return { t: String(k), v: k }; }
+  function genComparar() {
+    if (Math.random() < 0.45) {
+      var n, k, rel, exp;
+      if (Math.random() < 0.15) { k = rnd(2, 10); n = k * k; }
+      else { n = noCuadrado(3, 120); var a = Math.floor(Math.sqrt(n)); k = pick([a, a + 1]); }
+      rel = n < k * k ? '<' : (n > k * k ? '>' : '=');
+      exp = ['Se comparan los cuadrados: (\u221a' + n + ')\u00b2 = ' + n + ' y ' + k + '\u00b2 = ' + (k * k) + '.',
+             n + (rel === '<' ? ' < ' : rel === '>' ? ' > ' : ' = ') + (k * k) + ', por lo tanto \u221a' + n + ' ' + rel + ' ' + k + '.'];
+      return armar('comparar', '\u00bfQu\u00e9 s\u00edmbolo completa la comparaci\u00f3n?', '\u221a' + n + '  \u25a2  ' + k, rel, ['<', '>', '='].filter(function (s) { return s !== rel; }), exp, ['<', '>', '=']);
+    }
+    var fabricas = [itemRaiz, itemPi, itemFrac, itemDec, itemEnt];
+    var items, ok;
+    do {
+      items = [itemRaiz()];
+      var tipos = mezclar([1, 2, 3, 4, 0]).slice(0, 3);
+      tipos.forEach(function (t) { items.push(fabricas[t]()); });
+      var orden = items.slice().sort(function (p, q) { return p.v - q.v; });
+      ok = true;
+      for (var i = 1; i < orden.length; i++) if (orden[i].v - orden[i - 1].v < 0.08) ok = false;
+      var txt = {}; items.forEach(function (it) { if (txt[it.t]) ok = false; txt[it.t] = 1; });
+    } while (!ok);
+    var mayor = Math.random() < 0.5;
+    var ord = items.slice().sort(function (p, q) { return mayor ? q.v - p.v : p.v - q.v; });
+    var exp2 = ['Se aproxima cada n\u00famero: ' + ord.map(function (it) { return it.t + ' ' + aprox(it.v); }).join(' \u00b7 ') + '.',
+                (mayor ? 'De mayor a menor: ' : 'De menor a mayor: ') + ord.map(function (it) { return it.t; }).join(', ') + '.'];
+    return armar('comparar', mayor ? '\u00bfCu\u00e1l de estos n\u00fameros es el mayor?' : '\u00bfCu\u00e1l de estos n\u00fameros es el menor?', ord.map(function (it) { return it.t; }).sort().join('   \u00b7   '),
+      ord[0].t, ord.slice(1).map(function (it) { return it.t; }), exp2);
+  }
+
+  /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 Categor\u00edas \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  var BASE_LEC = 'https://zhemaria.github.io/clase_mate3/';
+  var BASE_INT = 'https://zhemaria.github.io/algebra/';
+  var CATS = {
+    clasificar: { nombre: 'Clasificar n\u00fameros', desc: 'Natural, entero, racional o irracional', color: '#00695c', gen: genClasificar, tiempo: 25,
+      consejo: 'Repase el diagrama de los conjuntos: cada n\u00famero va en el conjunto m\u00e1s peque\u00f1o que lo contiene. Las ra\u00edces exactas (\u221a9, \u221a49) no son irracionales.',
+      lec: BASE_LEC + 'leccion_3-3.html#s-1-el-sistema-de-los-numeros-reales', inter: BASE_INT + 'n3-l3-3.html#clasificar' },
+    recta: { nombre: 'Ubicar en la recta', desc: 'Entre qu\u00e9 dos enteros cae \u221an o \u03c0', color: '#1565c0', gen: genRecta, tiempo: 30,
+      consejo: 'Busque los dos cuadrados perfectos que encierran al n\u00famero. Conviene tener en la memoria los cuadrados del 1 al 15.',
+      lec: BASE_LEC + 'leccion_3-3.html#s-4-ubicar-irracionales-en-la-recta-numerica', inter: BASE_INT + 'n3-l3-3.html#recta' },
+    aproximar: { nombre: 'Aproximar a la d\u00e9cima', desc: 'El valor de \u221an con un decimal', color: '#6a1b9a', gen: genAproximar, tiempo: 45,
+      consejo: 'Primero acorrale la ra\u00edz entre dos enteros; despu\u00e9s eleve al cuadrado las dos d\u00e9cimas vecinas y elija la que queda m\u00e1s cerca del n\u00famero.',
+      lec: BASE_LEC + 'leccion_3-2.html#s-4-aproximar-radicales', inter: BASE_INT + 'n3-l3-2.html#aproximar' },
+    decimales: { nombre: 'Decimales y fracciones', desc: 'Peri\u00f3dicos a fracci\u00f3n; cu\u00e1l decimal es irracional', color: '#5C3900', gen: genDecimales, tiempo: 40,
+      consejo: 'Una cifra que se repite va sobre 9 y dos cifras sobre 99. Un decimal es irracional solo si no termina y no repite un patr\u00f3n.',
+      lec: BASE_LEC + 'leccion_3-3.html#s-5-decimales-periodicos-a-fracciones', inter: BASE_INT + 'n3-l3-3.html#periodicos' },
+    comparar: { nombre: 'Comparar y ordenar', desc: 'Mayor, menor o s\u00edmbolo entre n\u00fameros reales', color: '#ad1457', gen: genComparar, tiempo: 40,
+      consejo: 'Para comparar una ra\u00edz con un entero, compare sus cuadrados. Para ordenar varios n\u00fameros, aproxime cada uno a dos decimales.',
+      lec: BASE_LEC + 'leccion_3-3.html#s-4-ubicar-irracionales-en-la-recta-numerica', inter: BASE_INT + 'n3-l3-3.html#racional-irracional' }
+  };
+  var ORDEN = ['clasificar', 'recta', 'aproximar', 'decimales', 'comparar'];
+
+  function construirLista(modo) {
+    var lista = [], vistos = {};
+    function agregar(cat) {
+      for (var t = 0; t < 40; t++) {
+        var q = CATS[cat].gen(), clave = q.texto + '|' + q.expr + '|' + q.ops.join(',');
+        if (!vistos[clave]) { vistos[clave] = 1; lista.push(q); return; }
+      }
+      lista.push(CATS[cat].gen());
+    }
+    if (modo === 'todo') { ORDEN.forEach(function (c) { for (var i = 0; i < 4; i++) agregar(c); }); return mezclar(lista); }
+    for (var i = 0; i < 10; i++) agregar(modo);
+    return lista;
+  }
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = { CATS: CATS, construirLista: construirLista };
+  if (typeof document === 'undefined') return;
+
+  /* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 Interfaz \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+  function $(id) { return document.getElementById(id); }
+  var MODOS = [{ id: 'todo', nombre: 'Las cinco categor\u00edas', desc: '20 preguntas mezcladas', color: '#004d40' }]
+    .concat(ORDEN.map(function (c) { return { id: c, nombre: CATS[c].nombre, desc: CATS[c].desc + ' \u00b7 10 preguntas', color: CATS[c].color }; }));
+
+  var estado = { modo: 'todo', reloj: true, lista: [], i: 0, aciertos: 0, respuestas: [], restante: 0, temporizador: null, respondida: false, inicio: 0 };
+
+  var ul = $('lista-modos');
+  MODOS.forEach(function (m) {
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.className = 'modo'; a.href = '#' + m.id; a.id = 'modo-' + m.id;
+    a.style.setProperty('--c', m.color);
+    var s = document.createElement('strong'); s.textContent = m.nombre;
+    var sp = document.createElement('span'); sp.textContent = m.desc;
+    a.appendChild(s); a.appendChild(sp); li.appendChild(a); ul.appendChild(li);
+  });
+
+  function elegirModo(id, enfocar) {
+    if (!MODOS.some(function (m) { return m.id === id; })) id = 'todo';
+    estado.modo = id;
+    MODOS.forEach(function (m) { $('modo-' + m.id).setAttribute('aria-current', m.id === id ? 'true' : 'false'); });
+    var m = MODOS.filter(function (x) { return x.id === id; })[0];
+    $('elegido').innerHTML = '';
+    $('elegido').appendChild(document.createTextNode('Ha elegido: '));
+    var st = document.createElement('strong'); st.textContent = m.nombre + ' (' + m.desc + ')'; $('elegido').appendChild(st);
+    $('elegido').appendChild(document.createTextNode('. Pulse \u00abComenzar\u00bb cuando est\u00e9 listo.'));
+    if (enfocar) $('btn-comenzar').focus();
+  }
+  function leerAncla(enfocar) { var h = (location.hash || '').replace('#', ''); if (h) { mostrar('inicio'); elegirModo(h, enfocar); } else elegirModo(estado.modo, false); }
+  window.addEventListener('hashchange', function () { detenerReloj(); leerAncla(true); });
+
+  function fijarReloj(conReloj) { estado.reloj = conReloj; $('con-tiempo').setAttribute('aria-pressed', conReloj ? 'true' : 'false'); $('sin-tiempo').setAttribute('aria-pressed', conReloj ? 'false' : 'true'); }
+  $('con-tiempo').addEventListener('click', function () { fijarReloj(true); });
+  $('sin-tiempo').addEventListener('click', function () { fijarReloj(false); });
+
+  function mostrar(cual) {
+    ['inicio', 'juego', 'resultados'].forEach(function (p) { $('pantalla-' + p).classList.toggle('oculto', p !== cual); });
+  }
+
+  function comenzar() {
+    estado.lista = construirLista(estado.modo);
+    estado.i = 0; estado.aciertos = 0; estado.respuestas = []; estado.inicio = Date.now();
+    mostrar('juego'); $('reloj').classList.toggle('oculto', !estado.reloj);
+    window.scrollTo(0, 0);
+    presentar();
+  }
+  $('btn-comenzar').addEventListener('click', comenzar);
+
+  function presentar() {
+    var q = estado.lista[estado.i], cat = CATS[q.cat], n = estado.lista.length;
+    estado.respondida = false;
+    $('contador').textContent = 'Pregunta ' + (estado.i + 1) + ' de ' + n;
+    $('puntos').textContent = 'Aciertos: ' + estado.aciertos;
+    $('insignia').textContent = cat.nombre; $('insignia').style.background = cat.color;
+    $('barra-progreso').style.width = (estado.i / n * 100) + '%';
+    $('pregunta-txt').textContent = q.texto;
+    var ex = $('expresion');
+    if (q.expr === '?') { ex.classList.add('oculto'); } else { ex.classList.remove('oculto'); ex.textContent = q.expr; }
+    var cont = $('opciones'); cont.innerHTML = '';
+    q.ops.forEach(function (o, j) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'opcion';
+      var t = document.createElement('span'); t.className = 'tecla'; t.setAttribute('aria-hidden', 'true'); t.textContent = j + 1;
+      var tx = document.createElement('span'); tx.textContent = o;
+      b.appendChild(t); b.appendChild(tx);
+      b.setAttribute('aria-label', 'Opci\u00f3n ' + (j + 1) + ': ' + o);
+      b.addEventListener('click', function () { responder(j); });
+      cont.appendChild(b);
+    });
+    $('retro').className = 'retro oculto'; $('retro').innerHTML = '';
+    $('btn-siguiente').classList.add('oculto');
+    $('aviso-reloj').textContent = '';
+    cont.firstChild.focus();
+    if (estado.reloj) iniciarReloj(cat.tiempo);
+  }
+
+  function iniciarReloj(seg) {
+    detenerReloj();
+    estado.restante = seg; var total = seg;
+    pintarReloj(total);
+    estado.temporizador = setInterval(function () {
+      estado.restante--;
+      pintarReloj(total);
+      if (estado.restante === 10) $('aviso-reloj').textContent = 'Quedan 10 segundos.';
+      if (estado.restante <= 0) { detenerReloj(); responder(-1); }
+    }, 1000);
+  }
+  function pintarReloj(total) {
+    var urg = estado.restante <= 10;
+    $('reloj-num').textContent = estado.restante + ' s';
+    $('reloj-num').classList.toggle('urgente', urg);
+    $('reloj-barra').style.width = Math.max(0, estado.restante / total * 100) + '%';
+    $('reloj-barra').classList.toggle('urgente', urg);
+  }
+  function detenerReloj() { if (estado.temporizador) { clearInterval(estado.temporizador); estado.temporizador = null; } }
+
+  function responder(j) {
+    if (estado.respondida) return;
+    estado.respondida = true; detenerReloj();
+    var q = estado.lista[estado.i], bien = j === q.correcta;
+    if (bien) estado.aciertos++;
+    estado.respuestas.push({ q: q, elegida: j, bien: bien });
+    var botones = $('opciones').querySelectorAll('.opcion');
+    Array.prototype.forEach.call(botones, function (b, k) {
+      b.disabled = true;
+      if (k === q.correcta) b.classList.add('correcta');
+      else if (k === j) b.classList.add('incorrecta');
+    });
+    var r = $('retro'); r.className = 'retro ' + (bien ? 'ok' : 'no'); r.innerHTML = '';
+    var tit = document.createElement('p'); tit.className = 'titulo';
+    tit.textContent = bien ? '\u00a1Correcto!' : (j < 0 ? 'Se acab\u00f3 el tiempo. La respuesta correcta es: ' + q.ops[q.correcta] : 'Incorrecto. La respuesta correcta es: ' + q.ops[q.correcta]);
+    r.appendChild(tit);
+    q.explica.forEach(function (l) { var p = document.createElement('p'); p.textContent = l; r.appendChild(p); });
+    $('puntos').textContent = 'Aciertos: ' + estado.aciertos;
+    var sig = $('btn-siguiente');
+    sig.textContent = estado.i + 1 < estado.lista.length ? 'Siguiente' : 'Ver resultados';
+    sig.classList.remove('oculto'); sig.focus();
+  }
+
+  function siguiente() {
+    if (!estado.respondida) return;
+    estado.i++;
+    if (estado.i < estado.lista.length) presentar(); else resultados();
+  }
+  $('btn-siguiente').addEventListener('click', siguiente);
+  $('btn-salir').addEventListener('click', function () { detenerReloj(); if (estado.respuestas.length) resultados(); else mostrar('inicio'); });
+
+  document.addEventListener('keydown', function (e) {
+    if ($('pantalla-juego').classList.contains('oculto')) return;
+    if (!estado.respondida && /^[1-4]$/.test(e.key)) {
+      var j = parseInt(e.key, 10) - 1;
+      if (j < estado.lista[estado.i].ops.length) { e.preventDefault(); responder(j); }
+    } else if (estado.respondida && e.key === 'Enter' && document.activeElement !== $('btn-siguiente') && document.activeElement !== $('btn-salir')) {
+      e.preventDefault(); siguiente();
+    }
+  });
+
+  function resultados() {
+    detenerReloj(); mostrar('resultados'); window.scrollTo(0, 0);
+    var n = estado.respuestas.length, ac = estado.aciertos, pct = n ? Math.round(ac / n * 100) : 0;
+    var min = Math.floor((Date.now() - estado.inicio) / 60000), seg = Math.round((Date.now() - estado.inicio) / 1000) % 60;
+    $('marcador').textContent = ac + ' de ' + n + ' (' + pct + ' %)';
+    $('mensaje').textContent = (pct >= 90 ? 'Excelente dominio. ' : pct >= 70 ? 'Buen trabajo; queda poco por pulir. ' : 'Vale la pena repasar y volver a intentarlo. ') + 'Tiempo total: ' + min + ' min ' + seg + ' s.';
+    var por = {};
+    estado.respuestas.forEach(function (r) { var c = r.q.cat; por[c] = por[c] || { b: 0, t: 0 }; por[c].t++; if (r.bien) por[c].b++; });
+    var tb = $('tabla-desglose'); tb.innerHTML = '';
+    var peor = null;
+    ORDEN.forEach(function (c) {
+      if (!por[c]) return;
+      var p = Math.round(por[c].b / por[c].t * 100);
+      var tr = document.createElement('tr');
+      [CATS[c].nombre, por[c].b + ' de ' + por[c].t, p + ' %'].forEach(function (v, k) { var td = document.createElement('td'); td.textContent = v; if (k) td.className = 'n'; tr.appendChild(td); });
+      tb.appendChild(tr);
+      if (p < 100 && (peor === null || p < peor.p)) peor = { c: c, p: p };
+    });
+    var cz = $('consejo'); cz.innerHTML = '';
+    if (peor) {
+      var d = document.createElement('div'); d.className = 'consejo';
+      var p1 = document.createElement('p'); p1.style.margin = '0 0 6px';
+      var s = document.createElement('strong'); s.textContent = 'Para repasar: ' + CATS[peor.c].nombre + '. ';
+      p1.appendChild(s); p1.appendChild(document.createTextNode(CATS[peor.c].consejo)); d.appendChild(p1);
+      var p2 = document.createElement('p'); p2.style.margin = '0';
+      function enlace(href, txt) { var a = document.createElement('a'); a.href = href; a.target = '_blank'; a.rel = 'noopener noreferrer'; a.textContent = txt; return a; }
+      p2.appendChild(enlace(CATS[peor.c].lec, 'Ver la explicaci\u00f3n en la lecci\u00f3n'));
+      p2.appendChild(document.createTextNode(' \u00b7 '));
+      p2.appendChild(enlace(CATS[peor.c].inter, 'Practicar sin reloj en el interactivo'));
+      d.appendChild(p2); cz.appendChild(d);
+    }
+    var zf = $('zona-fallos'); zf.innerHTML = '';
+    var fallos = estado.respuestas.filter(function (r) { return !r.bien; });
+    if (fallos.length) {
+      var det = document.createElement('details'); det.className = 'fallos';
+      var sm = document.createElement('summary'); sm.textContent = 'Revisar las preguntas falladas (' + fallos.length + ')';
+      det.appendChild(sm);
+      fallos.forEach(function (r) {
+        var f = document.createElement('div'); f.className = 'fallo';
+        var q1 = document.createElement('p'); q1.className = 'q'; q1.textContent = r.q.texto + (r.q.expr !== '?' ? ' ' + r.q.expr : ''); f.appendChild(q1);
+        var m = document.createElement('p'); m.className = 'mal'; m.textContent = 'Su respuesta: ' + (r.elegida < 0 ? 'sin responder (se acab\u00f3 el tiempo)' : r.q.ops[r.elegida]); f.appendChild(m);
+        var b = document.createElement('p'); b.className = 'bien'; b.textContent = 'Respuesta correcta: ' + r.q.ops[r.q.correcta]; f.appendChild(b);
+        r.q.explica.forEach(function (l) { var p = document.createElement('p'); p.textContent = l; f.appendChild(p); });
+        det.appendChild(f);
+      });
+      zf.appendChild(det);
+    }
+    $('t-res').focus();
+  }
+  $('btn-repetir').addEventListener('click', comenzar);
+  $('btn-inicio').addEventListener('click', function () { mostrar('inicio'); window.scrollTo(0, 0); $('btn-comenzar').focus(); });
+
+  fijarReloj(true);
+  leerAncla(false);
+})();
+</script>
+</body>
+</html>
