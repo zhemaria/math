@@ -52,13 +52,27 @@
     };
     document.body.appendChild(s);
 
-    var MEDIDAS = { calculadora: 'width=330,height=760', hoja: 'width=500,height=720' };
+    var MEDIDAS = { calculadora: { w: 330, h: 760 }, hoja: { w: 500, h: 720 } };
+
+    // La ventanita se abre arriba a la derecha de la ventana donde está la página
+    // (la de MyOpenMath), en el monitor que sea; la hoja, a la izquierda de la calculadora.
+    function posicion(cual) {
+      var m = MEDIDAS[cual];
+      var x0 = window.screenX !== undefined ? window.screenX : window.screenLeft;
+      var y0 = window.screenY !== undefined ? window.screenY : window.screenTop;
+      var ancho = window.outerWidth || screen.availWidth, alto = window.outerHeight || screen.availHeight;
+      var izq = x0 + ancho - m.w - 24;
+      if (cual === 'hoja') izq -= MEDIDAS.calculadora.w + 12;
+      var arriba = y0 + 110;
+      var h = Math.min(m.h, Math.max(400, alto - 130));
+      return 'width=' + m.w + ',height=' + h + ',left=' + Math.max(x0, izq) + ',top=' + arriba;
+    }
     document.querySelectorAll('#botones button').forEach(function (b) {
       b.addEventListener('click', function () {
         var cual = b.getAttribute('data-abrir');
         var url = location.origin + location.pathname + '?abrir=' + cual;
         var w = null;
-        try { w = window.open(url, 'gph_' + cual, 'popup,' + MEDIDAS[cual] + ',resizable=yes,scrollbars=yes'); } catch (e) { w = null; }
+        try { w = window.open(url, 'gph_' + cual, 'popup,' + posicion(cual) + ',resizable=yes,scrollbars=yes'); } catch (e) { w = null; }
         if (w) { w.focus(); return; }
         // Si la plataforma no deja abrir ventanas, la herramienta se abre aquí mismo
         if (cual === 'calculadora') CalculadoraGPH.alternar(); else CalculadoraGPH.alternarHoja('formulas');
