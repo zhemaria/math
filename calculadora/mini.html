@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!-- Calculadora TI-30XS MultiView (simulador) para insertar en MyOpenMath u otras plataformas · GEDparaHispanos · José M. Fernández · CC BY-NC-SA 4.0 -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora TI-30XS</title>
+<meta name="author" content="José M. Fernández, ABE/ASE Math Master Teacher, Harry S. Truman College — City Colleges of Chicago">
+<meta name="license" content="CC BY-NC-SA 4.0">
+<link rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es">
+<!--
+  Modos (se eligen en la dirección):
+    mini.html               los botones abren la calculadora dentro del mismo recuadro
+    mini.html?ventana=si    los botones abren la calculadora en una ventanita aparte
+    mini.html?abrir=calculadora | ?abrir=hoja   abre esa herramienta al cargar (lo usa la ventanita)
+-->
+<style>
+  html, body { margin: 0; background: transparent; font-family: "Segoe UI", Tahoma, Arial, sans-serif; }
+  #botones { display: none; gap: 6px; padding: 4px; }
+  #botones button { background: #1e3a5f; color: #fff; border: 2px solid #fff; border-radius: 8px; padding: 7px 12px; font-size: 14px; font-weight: 700;
+    cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,.3); font-family: inherit; line-height: 1.2; }
+  #botones button:hover { filter: brightness(1.15); }
+  #botones button:focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
+  .ventana #botones { display: flex; }
+  .gti-lector { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  /* Dentro del recuadro: la barra arriba a la izquierda y las ventanas debajo */
+  .dentro #gti-barra { left: 4px !important; right: auto !important; top: 4px !important; }
+</style>
+</head>
+<body>
+<div id="botones" role="toolbar" aria-label="Herramientas de matemáticas">
+  <button type="button" data-abrir="calculadora"><span aria-hidden="true">🧮</span> Calculadora</button>
+  <button type="button" data-abrir="hoja"><span aria-hidden="true">📐</span> Hoja de referencia</button>
+</div>
+<p class="gti-lector">Calculadora TI-30XS MultiView y hoja de referencia del GED. GEDparaHispanos, licencia CC BY-NC-SA 4.0.</p>
+<script>
+  (function () {
+    var q = new URLSearchParams(location.search);
+    var ventana = q.get('ventana') === 'si';
+    var abrir = q.get('abrir');
+    document.documentElement.className = ventana ? 'ventana' : 'dentro';
+
+    // Carga la calculadora. En modo ventana no lleva barra propia: usa los botones de esta página.
+    var s = document.createElement('script');
+    s.src = 'https://zhemaria.github.io/algebra/calculadora-gph.js';
+    if (ventana) { s.setAttribute('data-boton', 'no'); s.setAttribute('data-hoja', 'no'); }
+    s.setAttribute('data-lado', 'izquierda');
+    s.setAttribute('data-recordar', 'no');
+    s.onload = function () {
+      if (abrir === 'calculadora') CalculadoraGPH.abrir();
+      if (abrir === 'hoja') CalculadoraGPH.abrirHoja('formulas');
+    };
+    document.body.appendChild(s);
+
+    var MEDIDAS = { calculadora: 'width=330,height=760', hoja: 'width=500,height=720' };
+    document.querySelectorAll('#botones button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var cual = b.getAttribute('data-abrir');
+        var url = location.origin + location.pathname + '?abrir=' + cual;
+        var w = null;
+        try { w = window.open(url, 'gph_' + cual, 'popup,' + MEDIDAS[cual] + ',resizable=yes,scrollbars=yes'); } catch (e) { w = null; }
+        if (w) { w.focus(); return; }
+        // Si la plataforma no deja abrir ventanas, la herramienta se abre aquí mismo
+        if (cual === 'calculadora') CalculadoraGPH.alternar(); else CalculadoraGPH.alternarHoja('formulas');
+      });
+    });
+  })();
+</script>
+</body>
+</html>
